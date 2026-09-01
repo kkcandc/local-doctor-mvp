@@ -735,3 +735,562 @@ function ReferPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
     </>
   )
 }
+
+function FaqPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  const [openItem, setOpenItem] = useState('getting-started-0')
+
+  return (
+    <>
+      <PageHero eyebrow="FAQ" title="Answers to what patients and families ask us most." copy="Straight, specific answers about eligibility, diagnosis, treatment, safety, and cost." icon={<FileText size={38} />} onPrimary={() => onNavigate('start')} primaryLabel="Check eligibility" />
+      <section className="section white faq-section">
+        <div className="faq-jump-list">
+          {faqCategories.map((category) => (
+            <a key={category.id} href={`#${category.id}`}>{category.title}</a>
+          ))}
+        </div>
+        {faqCategories.map((category) => (
+          <section className="faq-category" id={category.id} key={category.id}>
+            <p className="eyebrow">{category.title}</p>
+            <div className="faq-accordion">
+              {category.items.map(([question, answer], index) => {
+                const itemId = `${category.id}-${index}`
+                const isOpen = openItem === itemId
+                return (
+                  <article className={isOpen ? 'open' : ''} key={question}>
+                    <button type="button" onClick={() => setOpenItem(isOpen ? '' : itemId)} aria-expanded={isOpen}>
+                      <span>{question}</span>
+                      <ChevronDown size={18} />
+                    </button>
+                    {isOpen && <p>{answer}</p>}
+                  </article>
+                )
+              })}
+            </div>
+          </section>
+        ))}
+      </section>
+      <section className="question-band">
+        <div>
+          <h2>Did not find your answer?</h2>
+          <p>Our care team can respond with a next step, not an automated loop.</p>
+        </div>
+        <a className="primary" href="mailto:hello@trylocaldoctor.com">Email our team</a>
+      </section>
+      <ConversionPanel onNavigate={onNavigate} />
+    </>
+  )
+}
+
+function ResourcesPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  return (
+    <>
+      <PageHero eyebrow="Resources" title="Guides for treatment eligibility, records, and next steps." copy="SEO and patient education should start light during the pilot, then expand once search and intake data show what people actually need." icon={<FileText size={38} />} onPrimary={() => onNavigate('blog')} primaryLabel="Read articles" />
+      <section className="section white">
+        <div className="resource-grid">
+          {resources.map((resource) => (
+            <article className="resource-card" key={resource.title}>
+              <span>{resource.label}</span>
+              <h2>{resource.title}</h2>
+              <p>{resource.copy}</p>
+              <button type="button" onClick={() => onNavigate('blog')}>Open guide <ArrowRight size={14} /></button>
+            </article>
+          ))}
+        </div>
+      </section>
+    </>
+  )
+}
+
+function BlogPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  return (
+    <>
+      <PageHero eyebrow="Blog" title="Straight answers on diagnosis, eligibility, and treatment." copy="A lightweight content layer for launch, built around the questions paid-search visitors and referral patients are already asking." icon={<Sparkles size={38} />} onPrimary={() => onNavigate('start')} primaryLabel="Take the check" />
+      <section className="section white">
+        <div className="blog-grid">
+          {blogPosts.map((post) => (
+            <article className="blog-card" key={post.title}>
+              <span>{post.label}</span>
+              <h2>{post.title}</h2>
+              <p>{post.copy}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    </>
+  )
+}
+
+function PilotPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  return (
+    <>
+      <PageHero eyebrow="Pilot plan" title="A narrow test to acquire the first 10 qualified patients." copy="This page is for internal review only: one condition, one licensure-driven market, Google Search first, and clinical/legal review before spend." icon={<MapPin size={38} />} onPrimary={() => onNavigate('start')} primaryLabel="Open patient flow" />
+      <section className="section white">
+        <SectionIntro eyebrow="Keyword map" title="Separate search intent before budget goes live." />
+        <div className="keyword-grid">
+          {keywordGroups.map((group) => (
+            <article className="keyword-card" key={group.title}>
+              <span>{group.intent}</span>
+              <h2>{group.title}</h2>
+              <div>
+                {group.terms.map((term) => <small key={term}>{term}</small>)}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    </>
+  )
+}
+
+function LeqembiLocalPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  const market = getMarketFromPath()
+
+  return (
+    <>
+      <section className="local-seo-hero">
+        <div>
+          <p className="eyebrow">Leqembi eligibility review</p>
+          <h1>Leqembi treatment-readiness review near {market}.</h1>
+          <p>
+            If you are researching Leqembi for early Alzheimer&apos;s, Local Doctor helps you understand what records, testing, safety review, and local follow-through may be needed before a licensed clinician can make a treatment decision.
+          </p>
+          <button className="primary" type="button" onClick={() => onNavigate('start')}>Start eligibility check <ArrowRight size={15} /></button>
+        </div>
+        <aside>
+          <BadgeCheck size={26} />
+          <strong>Not a prescription from a webpage.</strong>
+          <span>Leqembi requires clinical evaluation, amyloid confirmation, MRI review, safety monitoring, and payer-specific requirements.</span>
+        </aside>
+      </section>
+      <section className="section white">
+        <SectionIntro eyebrow="What this page answers" title="A search landing page should help the patient decide if the next step is worth taking." />
+        <div className="seo-answer-grid">
+          {[
+            ['Who may be considered', 'People in earlier symptomatic stages, such as mild cognitive impairment or mild dementia due to Alzheimer\'s, after clinician review.'],
+            ['What testing may be needed', 'Cognitive assessment, records, amyloid confirmation, MRI safety review, labs, medication review, and risk discussion.'],
+            ['What Local Doctor does', 'Routes patients toward specialist review, testing coordination, insurance readiness, and local treatment planning when appropriate.'],
+            ['What happens locally', 'If treatment is clinically appropriate, the care path can connect into local infusion follow-through and monitoring logistics.'],
+          ].map(([title, copy]) => (
+            <article key={title}>
+              <h3>{title}</h3>
+              <p>{copy}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+      <section className="section mist fit-section">
+        <SectionIntro eyebrow="Before treatment" title="What to gather before a Leqembi second opinion." copy="This mirrors what high-intent search visitors need: not a generic article, but a checklist that moves them toward a qualified next step." />
+        <CheckList items={[
+          'Current diagnosis or reason Alzheimer\'s disease is suspected',
+          'Prior cognitive testing, neurology notes, MRI reports, or memory-clinic records',
+          'Medication list, especially blood thinners or drugs that may affect risk review',
+          'Insurance information and a local testing or infusion geography',
+          'A care partner who can join visits and help with monitoring logistics',
+        ]} />
+      </section>
+      <ConversionPanel onNavigate={onNavigate} />
+    </>
+  )
+}
+
+function getMarketFromPath() {
+  const [, state = '', city = ''] = window.location.pathname.replace(/^\/+|\/+$/g, '').split('/')
+  const pieces = [city, state].filter(Boolean).map((piece) => piece.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' '))
+  return pieces.length ? pieces.join(', ') : 'your area'
+}
+
+function StartExperience() {
+  return (
+    <div className="start-experience">
+      <EligibilityLeadForm />
+      <ScheduleCallWidget />
+      <section className="before-call">
+        {[
+          ['What if I do not qualify?', 'You will still get a clear explanation of why and what a sensible next step may be.'],
+          ['Will this replace my current doctor?', 'No. This is a focused specialist pathway that can work alongside the clinicians you already trust.'],
+          ['Can a caregiver be part of this?', 'Yes. Care partners are welcome and often helpful for history, logistics, and next-step planning.'],
+        ].map(([title, copy]) => (
+          <article key={title}>
+            <h3>{title}</h3>
+            <p>{copy}</p>
+          </article>
+        ))}
+      </section>
+    </div>
+  )
+}
+
+function EligibilityLeadForm() {
+  useEffect(() => {
+    const previousScript = document.querySelector('script[data-local-doctor-typeform]')
+    previousScript?.remove()
+
+    const script = document.createElement('script')
+    script.src = typeformEmbedScript
+    script.async = true
+    script.dataset.localDoctorTypeform = 'true'
+    document.body.appendChild(script)
+  }, [])
+
+  return (
+    <section className="lead-card intake-embed-card" id="intake">
+      <div className="intake-copy">
+        <p className="eyebrow">Eligibility intake</p>
+        <h2>Complete the secure intake.</h2>
+        <p>This secure intake collects the information the team needs to understand your situation and decide whether clinical review may make sense.</p>
+      </div>
+      <div className="intake-frame-wrap">
+        <div className="typeform-live-embed" data-tf-live={typeformLiveId} />
+      </div>
+    </section>
+  )
+}
+
+function ScheduleCallWidget() {
+  const days = useMemo(() => getNextWeekdays(), [])
+  const [day, setDay] = useState('')
+  const [time, setTime] = useState('')
+  const [booked, setBooked] = useState(false)
+  const slots = ['9:00 AM', '10:30 AM', '1:00 PM', '2:30 PM', '4:00 PM']
+  const selectedDay = days.find((item) => item.value === day)
+
+  return (
+    <section className="consult-card" id="consult">
+      <div>
+        <p className="eyebrow">Schedule a call</p>
+        <h2>Speak with a member of our team.</h2>
+        <p>A 30-minute call to understand your needs, verify insurance directionally, and decide whether clinical review makes sense. No obligation.</p>
+        {booked ? (
+          <div className="booking-success">
+            <CheckCircle2 size={24} />
+            <strong>You are booked for {selectedDay?.label} at {time}.</strong>
+            <span>We will call you then. No forms to fill out first.</span>
+            <button type="button" onClick={() => {
+              setBooked(false)
+              setTime('')
+            }}>Choose a different time</button>
+          </div>
+        ) : (
+          <>
+            <div className="day-picker">
+              {days.map((item) => (
+                <button className={day === item.value ? 'selected' : ''} type="button" key={item.value} onClick={() => {
+                  setDay(item.value)
+                  setTime('')
+                }}>
+                  <span>{item.weekday}</span>
+                  <strong>{item.monthDay}</strong>
+                </button>
+              ))}
+            </div>
+            {day && (
+              <div className="time-picker">
+                {slots.map((slot) => (
+                  <button className={time === slot ? 'selected' : ''} type="button" key={slot} onClick={() => setTime(slot)}>{slot}</button>
+                ))}
+              </div>
+            )}
+            <button className="primary" type="button" disabled={!day || !time} onClick={() => setBooked(true)}>Confirm call <ArrowRight size={15} /></button>
+          </>
+        )}
+      </div>
+      <aside>
+        <h3>What to expect</h3>
+        <ol>
+          <li>Enrollment team calls at the selected time.</li>
+          <li>You talk through symptoms, goals, and coverage basics.</li>
+          <li>If appropriate, the team helps schedule clinical review.</li>
+        </ol>
+        <h3>What to have handy</h3>
+        <ul>
+          <li>Insurance card</li>
+          <li>Medication list</li>
+          <li>Recent testing or imaging</li>
+        </ul>
+      </aside>
+    </section>
+  )
+}
+
+function getNextWeekdays() {
+  const formatter = new Intl.DateTimeFormat('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+  const days: Array<{ value: string; label: string; weekday: string; monthDay: string }> = []
+  const current = new Date()
+
+  while (days.length < 6) {
+    current.setDate(current.getDate() + 1)
+    const weekdayIndex = current.getDay()
+    if (weekdayIndex === 0 || weekdayIndex === 6) continue
+    const [weekday, monthDay] = formatter.format(current).split(', ')
+    const value = current.toISOString().slice(0, 10)
+    days.push({ value, label: `${weekday}, ${monthDay}`, weekday, monthDay })
+  }
+
+  return days
+}
+
+function InsuranceStrip() {
+  const payerLoop = [...payerNames, ...payerNames]
+
+  return (
+    <section className="insurance-strip">
+      <div>
+        <h2>Local Doctor accepts most major health insurance</h2>
+        <p>We are committed to financial transparency. No surprise bills or hidden costs, and financial assistance support for every eligible patient. We do what it takes to minimize your costs.</p>
+        <div className="payer-marquee" aria-label="Representative payer names">
+          <div>
+            {payerLoop.map((payer, index) => <span key={`${payer}-${index}`}>{payer}</span>)}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function ProcessGrid() {
+  return (
+    <div className="process-grid">
+      {simpleProcess.map(([title, copy], index) => (
+        <article key={title}>
+          <div>
+            <b>{index + 1}</b>
+            {index < simpleProcess.length - 1 && <span />}
+          </div>
+          <h3>{title}</h3>
+          <p>{copy}</p>
+        </article>
+      ))}
+    </div>
+  )
+}
+
+function TreatmentPreview({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  return (
+    <>
+      <SectionIntro eyebrow="Treatments" title="Two FDA-approved treatments for early Alzheimer's." copy="Leqembi and Kisunla are IV anti-amyloid treatments for certain people with early Alzheimer&apos;s. Local Doctor helps families understand the requirements, risks, testing, and next step." />
+      <div className="treatment-card-grid">
+        <article>
+          <h3>Leqembi</h3>
+          <span>lecanemab-irmb</span>
+          <p>An IV anti-amyloid treatment for certain patients with early Alzheimer&apos;s, requiring careful eligibility review and monitoring.</p>
+        </article>
+        <article>
+          <h3>Kisunla</h3>
+          <span>donanemab-azbt</span>
+          <p>An IV anti-amyloid treatment for certain patients with early Alzheimer&apos;s, with treatment planning tied to label, safety, and response.</p>
+        </article>
+      </div>
+      <button className="text-link treatment-link" type="button" onClick={() => onNavigate('treatments')}>See treatment details <ArrowRight size={15} /></button>
+    </>
+  )
+}
+
+function AudienceSplit({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  return (
+    <section className="audience-split">
+      <article>
+        <div>
+          <h3>For caregivers</h3>
+          <p>You are part of the decision, not just the person who found the website. The flow speaks to patients and families together.</p>
+          <button type="button" onClick={() => onNavigate('how')}>See how it works <ArrowRight size={15} /></button>
+        </div>
+      </article>
+      <article>
+        <div>
+          <h3>For referring physicians</h3>
+          <p>Send patients for treatment-readiness review, records support, safety screening, and local follow-through without replacing the referring relationship.</p>
+          <button type="button" onClick={() => onNavigate('refer')}>Refer a patient <ArrowRight size={15} /></button>
+        </div>
+      </article>
+    </section>
+  )
+}
+
+function TreatmentComparison() {
+  return (
+    <div className="compare-wrap">
+      <div className="compare-head">
+        <span />
+        <MedicineHeading color="purple" name="Leqembi" generic="lecanemab-irmb" />
+        <MedicineHeading color="green" name="Kisunla" generic="donanemab-azbt" />
+      </div>
+      <div className="compare-table" role="table" aria-label="Treatment comparison">
+        {treatmentRows.map(([label, leqembi, kisunla]) => (
+          <div className="compare-row" role="row" key={label}>
+            <span>{label}</span>
+            <p>{leqembi}</p>
+            <p>{kisunla}</p>
+          </div>
+        ))}
+        <div className="compare-row visual-row" role="row">
+          <span>Risk discussion</span>
+          <RiskBars tone="purple" labels={['Genotype', 'MRI', 'Medication']} />
+          <RiskBars tone="green" labels={['ARIA', 'Infusion', 'Monitoring']} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MedicineHeading({ color, name, generic }: { color: 'purple' | 'green'; name: string; generic: string }) {
+  return (
+    <div className="medicine-heading">
+      <span className={color} />
+      <div>
+        <strong>{name}</strong>
+        <small>{generic}</small>
+      </div>
+    </div>
+  )
+}
+
+function RiskBars({ tone, labels }: { tone: 'purple' | 'green'; labels: string[] }) {
+  const widths = tone === 'purple' ? ['82%', '64%', '46%'] : ['72%', '54%', '38%']
+
+  return (
+    <div className="risk-bars">
+      {labels.map((label, index) => (
+        <div key={label}>
+          <div><span>{label}</span><small>review</small></div>
+          <b><i className={tone} style={{ width: widths[index] }} /></b>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function CheckList({ items }: { items: string[] }) {
+  return (
+    <div className="check-list">
+      {items.map((item) => (
+        <div key={item}>
+          <CheckCircle2 size={14} />
+          <span>{item}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function PageHero({
+  eyebrow,
+  title,
+  copy,
+  icon,
+  primaryLabel,
+  onPrimary,
+  href,
+}: {
+  eyebrow: string
+  title: string
+  copy: string
+  icon: ReactNode
+  primaryLabel: string
+  onPrimary?: () => void
+  href?: string
+}) {
+  return (
+    <section className="page-hero">
+      <div>
+        <p className="eyebrow">{eyebrow}</p>
+        <h1>{title}</h1>
+        <p>{copy}</p>
+        {href ? (
+          <a className="primary" href={href} target="_blank" rel="noreferrer">{primaryLabel} <ArrowRight size={15} /></a>
+        ) : (
+          <button className="primary" type="button" onClick={onPrimary}>{primaryLabel} <ArrowRight size={15} /></button>
+        )}
+      </div>
+      <aside>
+        {icon}
+        <strong>Clinical decisions require licensed review.</strong>
+        <span>The website is a front door, not a diagnosis or treatment promise.</span>
+      </aside>
+    </section>
+  )
+}
+
+function ConversionPanel({
+  onNavigate,
+  title = 'Start with a short check, then move to full intake only when it makes sense.',
+  copy = 'The pilot should measure qualified starts, not raw leads.',
+  secondaryLabel,
+  secondaryRoute,
+}: {
+  onNavigate: (route: Route) => void
+  title?: string
+  copy?: string
+  secondaryLabel?: string
+  secondaryRoute?: Route
+}) {
+  return (
+    <section className="conversion-panel">
+      <div>
+        <p className="eyebrow light">Ready to find out where you stand?</p>
+        <h2>{title}</h2>
+        <p>{copy}</p>
+      </div>
+      <div className="conversion-actions">
+        <button className="primary light-primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={15} /></button>
+        {secondaryLabel && secondaryRoute && (
+          <button className="secondary light-secondary" type="button" onClick={() => onNavigate(secondaryRoute)}>{secondaryLabel}</button>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function SectionIntro({ eyebrow, title, copy }: { eyebrow: string; title: string; copy?: string }) {
+  return (
+    <div className="section-intro">
+      <p className="eyebrow">{eyebrow}</p>
+      <h2>{title}</h2>
+      {copy && <p>{copy}</p>}
+    </div>
+  )
+}
+
+function Metric({ value, label }: { value: string; label: string }) {
+  return (
+    <article>
+      <strong>{value}</strong>
+      <span>{label}</span>
+    </article>
+  )
+}
+
+function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  return (
+    <footer className="footer">
+      <div>
+        <button className="brand-button footer-brand" type="button" onClick={() => onNavigate('home')}>
+          <img src="/assets/mark-color.svg" alt="" />
+          <span>Local Doctor</span>
+        </button>
+        <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation, care coordination, and treatment-readiness review.</p>
+      </div>
+      <div>
+        <strong>Explore</strong>
+        <button type="button" onClick={() => onNavigate('home')}>Home</button>
+        <button type="button" onClick={() => onNavigate('how')}>How it works</button>
+        <button type="button" onClick={() => onNavigate('treatments')}>Treatments</button>
+        <button type="button" onClick={() => onNavigate('about')}>Meet the Team</button>
+      </div>
+      <div>
+        <strong>Get started</strong>
+        <button type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
+        <button type="button" onClick={() => onNavigate('how')}>How it works</button>
+        <button type="button" onClick={() => onNavigate('refer')}>For physicians</button>
+        <a href="mailto:hello@trylocaldoctor.com">Talk to our team</a>
+      </div>
+      <div>
+        <strong>Legal</strong>
+        <a href="mailto:hello@trylocaldoctor.com">Contact</a>
+          <button type="button" onClick={() => onNavigate('start')}>Intake form</button>
+        <small>Individual results vary. Local Doctor does not replace emergency care. Call 911 for a medical emergency.</small>
+      </div>
+    </footer>
+  )
+}
+
+export default App
