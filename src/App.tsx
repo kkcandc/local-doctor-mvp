@@ -390,3 +390,152 @@ function App() {
     </main>
   )
 }
+
+function Header({
+  route,
+  menuOpen,
+  onToggleMenu,
+  onNavigate,
+}: {
+  route: Route
+  menuOpen: boolean
+  onToggleMenu: () => void
+  onNavigate: (route: Route) => void
+}) {
+  const navItems: Array<[Route, string]> = [
+    ['how', 'How it works'],
+    ['treatments', 'Treatments'],
+    ['about', 'Meet the Team'],
+  ]
+  const resourcesActive = route === 'resources' || route === 'blog' || route === 'faq'
+
+  return (
+    <header className="site-header">
+      <div className="header-inner">
+        <button className="brand-button" type="button" onClick={() => onNavigate('home')}>
+          <img src="/assets/mark-color.svg" alt="" />
+          <span>Local Doctor</span>
+        </button>
+        <nav className="desktop-nav" aria-label="Main navigation">
+          {navItems.map(([itemRoute, label]) => (
+            <button className={route === itemRoute ? 'active' : ''} key={itemRoute} type="button" onClick={() => onNavigate(itemRoute)}>
+              {label}
+            </button>
+          ))}
+          <div className="nav-dropdown">
+            <button className={resourcesActive ? 'active' : ''} type="button" onClick={() => onNavigate('resources')}>
+              Resources
+            </button>
+            <div>
+              <button type="button" onClick={() => onNavigate('resources')}>Guides</button>
+              <button type="button" onClick={() => onNavigate('blog')}>Blog</button>
+              <button type="button" onClick={() => onNavigate('faq')}>FAQ</button>
+            </div>
+          </div>
+        </nav>
+        <button className="header-cta" type="button" onClick={() => onNavigate('start')}>
+          Check eligibility
+        </button>
+        <button className="menu-button" type="button" aria-label="Menu" onClick={onToggleMenu}>
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+      </div>
+      {menuOpen && (
+        <nav className="mobile-nav" aria-label="Mobile navigation">
+          {navItems.map(([itemRoute, label]) => (
+            <button key={itemRoute} type="button" onClick={() => onNavigate(itemRoute)}>
+              {label}
+            </button>
+          ))}
+          <button type="button" onClick={() => onNavigate('resources')}>Guides</button>
+          <button type="button" onClick={() => onNavigate('blog')}>Blog</button>
+          <button type="button" onClick={() => onNavigate('faq')}>FAQ</button>
+          <button type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
+        </nav>
+      )}
+    </header>
+  )
+}
+
+function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  return (
+    <>
+      <section className="hero">
+        <img className="hero-image" src="/assets/hero-patient-caregiver.webp" alt="Older adults walking together outdoors" />
+        <div className="hero-overlay" />
+        <div className="hero-content">
+          <div className="hero-copy">
+            <p className="eyebrow light">Virtual Alzheimer's specialty clinic</p>
+            <h1>Treatment that goes after Alzheimer's directly. <em>Fast.</em></h1>
+            <p>
+              New FDA-approved treatments can slow early Alzheimer&apos;s progression. Get a second opinion from clinicians who specialize in disease-modifying treatment and cognitive impairment to see if you may be eligible.
+            </p>
+            <div className="hero-actions">
+              <button className="primary light-primary" type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
+              <button className="secondary light-secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>
+            </div>
+            <div className="trust-note"><span /> Backed by a national infusion network and a focused treatment-readiness pathway.</div>
+          </div>
+        </div>
+      </section>
+
+      <section className="stat-band">
+        <Metric value="3.5 years" label="average gap between first symptoms and diagnosis, nationally" />
+        <Metric value="6-9 months" label="typical wait for a first specialist visit elsewhere" />
+        <Metric value="~300" label="referring physicians already in the network" />
+        <Metric value="97%+" label="patient satisfaction across the network" />
+      </section>
+
+      <section className="section white">
+        <SectionIntro eyebrow="Why Local Doctor" title="Built around one job: a fast, clear answer on treatment readiness." />
+        <div className="value-grid">
+          {valueProps.map((prop) => {
+            const Icon = prop.icon
+            return (
+              <article className="value-card" key={prop.title}>
+                <span><Icon size={24} /></span>
+                <h3>{prop.title}</h3>
+                <p>{prop.copy}</p>
+              </article>
+            )
+          })}
+        </div>
+      </section>
+
+      <InsuranceStrip />
+
+      <section className="section mist">
+        <div className="section-row">
+          <SectionIntro eyebrow="How it works" title="From first concern to treatment readiness, in 4 steps." />
+          <button className="text-link" type="button" onClick={() => onNavigate('how')}>See the full process <ArrowRight size={15} /></button>
+        </div>
+        <ProcessGrid />
+      </section>
+
+      <section className="section white">
+        <TreatmentPreview onNavigate={onNavigate} />
+      </section>
+
+      <AudienceSplit onNavigate={onNavigate} />
+
+      <section className="section mist">
+        <SectionIntro eyebrow="Start in the right place" title="Different visitors need different first steps." copy="A symptom search, a drug-name search, a caregiver visit, and a physician referral should not all land on the same generic form." />
+        <div className="path-grid">
+          {discoveryPaths.map((path) => {
+            const Icon = path.icon
+            return (
+              <button className="path-card" type="button" key={path.title} onClick={() => onNavigate(path.route)}>
+                <Icon size={24} />
+                <strong>{path.title}</strong>
+                <span>{path.copy}</span>
+                <small>{path.action} <ArrowRight size={14} /></small>
+              </button>
+            )
+          })}
+        </div>
+      </section>
+
+      <ConversionPanel onNavigate={onNavigate} />
+    </>
+  )
+}
