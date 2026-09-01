@@ -539,3 +539,199 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
     </>
   )
 }
+
+function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  return (
+    <>
+      <section className="treatment-hero">
+        <div>
+          <p className="eyebrow">Treatments</p>
+          <h1>FDA-approved to go after Alzheimer's directly.</h1>
+          <p>Leqembi and Kisunla are the first FDA-approved therapies shown to act on the underlying disease, not just its symptoms. Here is what they do and who they may be for.</p>
+          <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={15} /></button>
+        </div>
+        <img src="/assets/hero-memory-care.webp" alt="Patient and caregiver speaking with a clinician" />
+      </section>
+      <section className="section white">
+        <div className="honest-card">
+          <ShieldAlert size={24} />
+          <div>
+            <h2>What to expect, honestly</h2>
+            <p>
+              In clinical trials, both treatments showed a real, moderate slowing of cognitive decline. Neither is a cure, and neither reverses symptoms already present. The point is to weigh the potential benefit clearly, without overstating it.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section className="section mist">
+        <SectionIntro eyebrow="Compare" title="Leqembi and Kisunla, side by side." />
+        <TreatmentComparison />
+        <div className="disclaimer">
+          Treatment information must be reviewed against current prescribing information and payer requirements before launch.
+        </div>
+      </section>
+      <section className="section white fit-section">
+        <SectionIntro eyebrow="What we look for" title="Who these treatments may be for." copy="This pathway is for a specific group of patients who want to understand whether treatment targeting amyloid may be an option." />
+        <CheckList items={fitChecks} />
+      </section>
+      <section className="section mist fit-section">
+        <SectionIntro eyebrow="Safety" title="The safety screen is part of the product, not an afterthought." copy="The clinical model should make risks and monitoring visible early, then route people to licensed review before any treatment decision." />
+        <div className="safety-grid">
+          {safetyChecks.map((item) => (
+            <article key={item}>
+              <ShieldAlert size={20} />
+              <span>{item}</span>
+            </article>
+          ))}
+        </div>
+      </section>
+      <ConversionPanel onNavigate={onNavigate} />
+    </>
+  )
+}
+
+function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  return (
+    <>
+      <PageHero
+        eyebrow="How it works"
+        title="A clear path from first concern to treatment."
+        copy="Every step is virtual where it can be, and in-person only where it has to be."
+        icon={<CalendarClock size={38} />}
+        onPrimary={() => onNavigate('start')}
+        primaryLabel="Start the check"
+      />
+      <section className="section white">
+        <div className="journey-list">
+          {journeySteps.map((step, index) => (
+            <article key={step.title} className="journey-step">
+              <b>{index + 1}</b>
+              <div>
+                <div className="journey-heading">
+                  <h3>{step.title}</h3>
+                  <span>{step.meta}</span>
+                </div>
+                <div className="journey-points">
+                  {step.points.map((point) => (
+                    <p key={point}>
+                      <CheckCircle2 size={18} />
+                      <span>{point}</span>
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+      <section className="section cost-band">
+        <div>
+          <p className="eyebrow">Insurance & Cost</p>
+          <h2>What this costs you, honestly.</h2>
+          <p>Most patients access care through commercial insurance or Medicare. Coverage for diagnosis and treatment depends on your specific plan and, for traditional Medicare, participation in a national treatment registry. We will walk through your specific coverage before you commit to anything. There is no blanket promise here, because there is not a blanket policy.</p>
+        </div>
+      </section>
+      <InsuranceStrip />
+      <section className="section mist mini-faq-section">
+        <SectionIntro eyebrow="FAQ" title="Questions people actually ask." />
+        <div className="mini-faq-list">
+          {howFaqItems.map(([question, answer]) => (
+            <article key={question}>
+              <h3>{question}</h3>
+              <p>{answer}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+      <ConversionPanel onNavigate={onNavigate} title="Ready to find out where you stand?" copy="A short intake is all it takes to get started." secondaryLabel="See treatments" secondaryRoute="treatments" />
+    </>
+  )
+}
+
+function AboutPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  return (
+    <>
+      <PageHero
+        eyebrow="Care model"
+        title="A specialist evaluation built around getting you an answer."
+        copy="Local Doctor is designed as a focused virtual Alzheimer's specialty clinic, supported by navigators, diagnostic partners, prescribing clinicians, and Local Infusion's local treatment network."
+        icon={<UsersRound size={38} />}
+        onPrimary={() => onNavigate('start')}
+        primaryLabel="Check eligibility"
+      />
+      <section className="section white">
+        <SectionIntro eyebrow="Care team roles" title="The model is coordinated, not a directory of disconnected appointments." />
+        <div className="team-grid">
+          {[
+            ['Navigator', 'Coordinates benefits, records, diagnostic orders, scheduling, prior authorization, and handoff.'],
+            ['Intake coordinator', 'Follows up on missing information, caregiver context, MRI compatibility, and scheduling constraints.'],
+            ['Virtual clinician', 'Reviews history, orders and interprets workup, discusses risks, and determines next clinical steps.'],
+            ['Central reader', 'Supports consistent MRI review for ARIA and microhemorrhage interpretation.'],
+          ].map(([role, copy]) => (
+            <article className="team-card" key={role}>
+              <UserRound size={24} />
+              <h3>{role}</h3>
+              <p>{copy}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+      <ConversionPanel onNavigate={onNavigate} />
+    </>
+  )
+}
+
+function StartPage() {
+  return (
+    <>
+      <PageHero
+        eyebrow="Get started"
+        title="Let's find out if treatment is right for you."
+        copy="Most people leave with a clear next step, including what to do if the honest answer is not yet."
+        icon={<ClipboardCheck size={38} />}
+        primaryLabel="Start eligibility check"
+        onPrimary={() => document.getElementById('intake')?.scrollIntoView({ behavior: 'smooth' })}
+      />
+      <section className="section white">
+        <StartExperience />
+      </section>
+    </>
+  )
+}
+
+function ReferPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  return (
+    <>
+      <PageHero
+        eyebrow="For referring clinicians"
+        title="Refer patients for Alzheimer's treatment-readiness review without ending your relationship."
+        copy="Local Doctor is a focused pathway for patients who may need anti-amyloid treatment eligibility review, diagnostic workup coordination, payer support, and local infusion follow-through."
+        icon={<Stethoscope size={38} />}
+        onPrimary={() => onNavigate('start')}
+        primaryLabel="Prepare a referral"
+      />
+      <section className="section white">
+        <div className="provider-grid">
+          <article>
+            <h2>Good-fit referrals</h2>
+            <ul>
+              <li>Suspected or diagnosed early Alzheimer's or mild cognitive impairment</li>
+              <li>Patient needs a specialist-level second opinion on treatment eligibility</li>
+              <li>Records, biomarker confirmation, MRI, or payer requirements are blocking action</li>
+              <li>Patient may need local infusion follow-through if they qualify</li>
+            </ul>
+          </article>
+          <article>
+            <h2>Not a fit for this pilot</h2>
+            <ul>
+              <li>Moderate or severe dementia as the primary need</li>
+              <li>Emergency neurologic symptoms or rapid decline</li>
+              <li>Patient already actively receiving Leqembi or Kisunla elsewhere</li>
+              <li>Known hard exclusion that rules out MRI or anti-amyloid therapy</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </>
+  )
+}
