@@ -12,18 +12,15 @@ Production-ready rebuild of the Claude Design export for the Local Infusion / AI
 
 - `main` is the durable source of truth for production code.
 - Contributors (including Eric) work on feature/fix branches and open PRs into `main`.
-- Only merged changes to `main` should deploy production.
+- Vercel should build a **preview** deployment for each pushed branch/PR.
+- Only Kenny / Chief of Staff merges to `main` should deploy production.
 - Do not run manual or direct Vercel production deploys outside the GitHub `main` flow.
 
-### Vercel Ignored Build Step (current project setting)
+### Vercel Ignored Build Step
 
-The Vercel project currently uses this Ignored Build Step command:
+`vercel.json` sets `"ignoreCommand": "exit 1"` so Git-connected builds **do not skip** (exit `1` = continue the build). Preview branches should get a READY preview.
 
-```bash
-[ "$VERCEL_GIT_COMMIT_REF" = "main" ] || exit 0
-```
-
-That command **skips every non-`main` git ref**, so branch/PR pushes are `CANCELED` and there is no READY preview until the ignore command is relaxed for preview branches. Do not merge a PR just to force a production build. When ignore is relaxed, keep production skipped except for `main`.
+If a branch/PR deploy is still `CANCELED` with `errorLink = Ignored Build Step`, a Project Settings Ignored Build Step override is still winning in the Vercel UI and needs a human to clear it. Do not merge a PR just to force a production build.
 
 ## Source Material
 
