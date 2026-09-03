@@ -8,6 +8,14 @@ Production-ready rebuild of the Claude Design export for the Local Infusion / AI
 - Local: http://127.0.0.1:5175
 - Vercel project: `kenny-klines-projects/local-doctor-mvp`
 
+## GitHub Workflow and Deployment Policy
+
+- `main` is the durable source of truth for production code.
+- Contributors (including Eric) work on feature/fix branches and open PRs into `main`.
+- Vercel should build a preview deployment for each pushed branch/PR.
+- Only merged changes to `main` deploy production.
+- Do not run manual or direct Vercel production deploys outside the GitHub `main` flow.
+
 ## Source Material
 
 - Claude export: `../local-doctor-mvp-export/Local Doctor MVP Website Files/`
