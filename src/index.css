@@ -22,6 +22,16 @@ body {
   margin: 0;
 }
 
+body.menu-open {
+  overflow: hidden;
+}
+
+img,
+iframe,
+video {
+  max-width: 100%;
+}
+
 button,
 input,
 select,
