@@ -14,12 +14,12 @@ import {
   MapPin,
   Menu,
   ShieldAlert,
-  Sparkles,
   Stethoscope,
   UserRound,
   UsersRound,
   X,
 } from 'lucide-react'
+import { BlogArticle, BlogIndex } from './blog/BlogViews'
 import './App.css'
 
 type Route =
@@ -313,47 +313,22 @@ const resources = [
   },
 ]
 
-const blogPosts = [
-  {
-    title: 'Leqembi and Kisunla: what they are, and what they are not',
-    label: 'Treatment-stage',
-    copy: 'A claim-safe overview of anti-amyloid treatment, eligibility review, safety monitoring, and why these drugs are not cures.',
-  },
-  {
-    title: 'What to gather before an Alzheimer\'s second opinion',
-    label: 'Records',
-    copy: 'Diagnosis notes, medication lists, cognitive testing, imaging, lab work, insurance cards, and caregiver observations.',
-  },
-  {
-    title: 'What amyloid testing can and cannot answer',
-    label: 'Testing',
-    copy: 'How biomarker testing may fit into a complete evaluation, and why it should not be treated as a standalone diagnosis.',
-  },
-  {
-    title: 'When memory changes deserve a doctor conversation',
-    label: 'Symptoms',
-    copy: 'A plain-language distinction between occasional forgetfulness and changes that become more frequent or disruptive.',
-  },
-  {
-    title: 'Why the care partner matters in treatment planning',
-    label: 'Care partner',
-    copy: 'Advanced Alzheimer\'s therapy decisions involve logistics, monitoring, consent, transportation, and shared understanding.',
-  },
-  {
-    title: 'Brain health basics while you wait for answers',
-    label: 'Brain health',
-    copy: 'Educational prompts around activity, diet, sleep, social connection, and staying engaged, with clinician guidance.',
-  },
-]
-
 function App() {
   const [route, setRoute] = useState<Route>('home')
+  const [blogSlug, setBlogSlug] = useState<string | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     function applyPath() {
       const path = window.location.pathname.replace(/^\/+|\/+$/g, '')
-      setRoute(path.startsWith('leqembi/') ? 'leqembiLocal' : pathRoutes[path] ?? 'home')
+      if (path === 'blog' || path.startsWith('blog/')) {
+        const slug = path.startsWith('blog/') ? decodeURIComponent(path.slice('blog/'.length).split('/')[0] ?? '') : ''
+        setRoute('blog')
+        setBlogSlug(slug || null)
+      } else {
+        setBlogSlug(null)
+        setRoute(path.startsWith('leqembi/') ? 'leqembiLocal' : pathRoutes[path] ?? 'home')
+      }
       setMenuOpen(false)
     }
 
@@ -362,14 +337,19 @@ function App() {
     return () => window.removeEventListener('popstate', applyPath)
   }, [])
 
-  function navigate(next: Route) {
+  function navigate(next: Route, slug?: string) {
     setRoute(next)
+    setBlogSlug(next === 'blog' && slug ? slug : null)
     setMenuOpen(false)
-    const path = routePaths[next]
+    const path = next === 'blog' && slug ? `/blog/${slug}` : routePaths[next]
     if (window.location.pathname !== path) {
       window.history.pushState({}, '', path)
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function openPost(slug: string) {
+    navigate('blog', slug || undefined)
   }
 
   return (
@@ -382,7 +362,8 @@ function App() {
       {route === 'start' && <StartPage />}
       {route === 'faq' && <FaqPage onNavigate={navigate} />}
       {route === 'resources' && <ResourcesPage onNavigate={navigate} />}
-      {route === 'blog' && <BlogPage onNavigate={navigate} />}
+      {route === 'blog' && !blogSlug && <BlogIndex onOpenPost={openPost} />}
+      {route === 'blog' && blogSlug && <BlogArticle slug={blogSlug} onOpenPost={openPost} onGetStarted={() => navigate('start')} />}
       {route === 'refer' && <ReferPage onNavigate={navigate} />}
       {route === 'pilot' && <PilotPage onNavigate={navigate} />}
       {route === 'leqembiLocal' && <LeqembiLocalPage onNavigate={navigate} />}
@@ -793,25 +774,6 @@ function ResourcesPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
               <h2>{resource.title}</h2>
               <p>{resource.copy}</p>
               <button type="button" onClick={() => onNavigate('blog')}>Open guide <ArrowRight size={14} /></button>
-            </article>
-          ))}
-        </div>
-      </section>
-    </>
-  )
-}
-
-function BlogPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
-  return (
-    <>
-      <PageHero eyebrow="Blog" title="Straight answers on diagnosis, eligibility, and treatment." copy="A lightweight content layer for launch, built around the questions paid-search visitors and referral patients are already asking." icon={<Sparkles size={38} />} onPrimary={() => onNavigate('start')} primaryLabel="Take the check" />
-      <section className="section white">
-        <div className="blog-grid">
-          {blogPosts.map((post) => (
-            <article className="blog-card" key={post.title}>
-              <span>{post.label}</span>
-              <h2>{post.title}</h2>
-              <p>{post.copy}</p>
             </article>
           ))}
         </div>
@@ -1275,6 +1237,7 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <button type="button" onClick={() => onNavigate('how')}>How it works</button>
         <button type="button" onClick={() => onNavigate('treatments')}>Treatments</button>
         <button type="button" onClick={() => onNavigate('about')}>Meet the Team</button>
+        <button type="button" onClick={() => onNavigate('blog')}>Blog</button>
       </div>
       <div>
         <strong>Get started</strong>
