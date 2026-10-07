@@ -32,6 +32,20 @@ function parseInline(value: string): Inline[] {
   return parts
 }
 
+function LinkedUrl({ href }: { href: string }) {
+  const pieces = href.split(/(?<=\/)/)
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer">
+      {pieces.map((piece, index) => (
+        <span key={`${piece}-${index}`}>
+          {piece}
+          {index < pieces.length - 1 ? <wbr /> : null}
+        </span>
+      ))}
+    </a>
+  )
+}
+
 function formatDate(isoDate: string) {
   return new Intl.DateTimeFormat('en-US', {
     month: 'long',
@@ -212,7 +226,7 @@ export function BlogIndex({
               <p>{post.excerpt}</p>
               <p className="blog-attribution">
                 Originally published by Local Infusion.{' '}
-                <a href={post.canonicalUrl} target="_blank" rel="noopener noreferrer">{post.canonicalUrl}</a>
+                <LinkedUrl href={post.canonicalUrl} />
               </p>
             </article>
           ))}
@@ -308,7 +322,7 @@ export function BlogArticle({
           </p>
           <p>
             Original article:{' '}
-            <a href={post.canonicalUrl} target="_blank" rel="noopener noreferrer">{post.canonicalUrl}</a>
+            <LinkedUrl href={post.canonicalUrl} />
           </p>
         </aside>
         <p className="blog-note">
