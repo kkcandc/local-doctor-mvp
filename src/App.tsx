@@ -879,6 +879,11 @@ function BlogPostPage({ slug, onNavigate }: { slug: string; onNavigate: (route: 
           <span>Published {formatBlogDate(post.published)}</span>
           <span>Updated on the source {formatBlogDate(post.updated)}</span>
         </p>
+        <div className="article-body">
+          {post.blocks.map((block, index) => (
+            <BlogBlockView block={block} key={`${block.type}-${index}`} />
+          ))}
+        </div>
         <aside className="republication-credit">
           <p>
             Originally published by <a href="https://mylocalinfusion.com/">Local Infusion</a>. Written by {post.author}.
@@ -889,11 +894,6 @@ function BlogPostPage({ slug, onNavigate }: { slug: string; onNavigate: (route: 
           </p>
           <p>This is a republication for Local Doctor readers, not an original Local Doctor article.</p>
         </aside>
-        <div className="article-body">
-          {post.blocks.map((block, index) => (
-            <BlogBlockView block={block} key={`${block.type}-${index}`} />
-          ))}
-        </div>
         <p className="medical-disclaimer">{medicalDisclaimer}</p>
         <aside className="article-cta">
           <h2>Want a treatment-readiness review?</h2>
