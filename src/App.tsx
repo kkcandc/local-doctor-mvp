@@ -20,6 +20,13 @@ import {
   UsersRound,
   X,
 } from 'lucide-react'
+import {
+  blogPosts,
+  formatBlogDate,
+  getBlogPost,
+  medicalDisclaimer,
+  type BlogBlock,
+} from './blogPosts'
 import './App.css'
 
 type Route =
@@ -31,6 +38,7 @@ type Route =
   | 'faq'
   | 'resources'
   | 'blog'
+  | 'blogPost'
   | 'refer'
   | 'pilot'
   | 'leqembiLocal'
@@ -38,7 +46,11 @@ type Route =
 const typeformLiveId = '01M49714FSNRJ3YKS1V0XVG66M'
 const typeformEmbedScript = 'https://embed.typeform.com/next/embed.js'
 
-const routePaths: Record<Route, string> = {
+const defaultTitle = "Local Doctor | Alzheimer's Treatment Eligibility Review"
+const defaultDescription =
+  "Local Doctor is a virtual Alzheimer's specialty-care pilot for treatment eligibility review, records, testing, insurance preparation, and local follow-through for people who qualify."
+
+const routePaths: Record<Exclude<Route, 'blogPost'>, string> = {
   home: '/',
   treatments: '/treatments',
   how: '/how-it-works',
@@ -313,47 +325,27 @@ const resources = [
   },
 ]
 
-const blogPosts = [
-  {
-    title: 'Leqembi and Kisunla: what they are, and what they are not',
-    label: 'Treatment-stage',
-    copy: 'A claim-safe overview of anti-amyloid treatment, eligibility review, safety monitoring, and why these drugs are not cures.',
-  },
-  {
-    title: 'What to gather before an Alzheimer\'s second opinion',
-    label: 'Records',
-    copy: 'Diagnosis notes, medication lists, cognitive testing, imaging, lab work, insurance cards, and caregiver observations.',
-  },
-  {
-    title: 'What amyloid testing can and cannot answer',
-    label: 'Testing',
-    copy: 'How biomarker testing may fit into a complete evaluation, and why it should not be treated as a standalone diagnosis.',
-  },
-  {
-    title: 'When memory changes deserve a doctor conversation',
-    label: 'Symptoms',
-    copy: 'A plain-language distinction between occasional forgetfulness and changes that become more frequent or disruptive.',
-  },
-  {
-    title: 'Why the care partner matters in treatment planning',
-    label: 'Care partner',
-    copy: 'Advanced Alzheimer\'s therapy decisions involve logistics, monitoring, consent, transportation, and shared understanding.',
-  },
-  {
-    title: 'Brain health basics while you wait for answers',
-    label: 'Brain health',
-    copy: 'Educational prompts around activity, diet, sleep, social connection, and staying engaged, with clinician guidance.',
-  },
-]
+function readLocation(): { route: Route; slug: string } {
+  const path = window.location.pathname.replace(/^\/+|\/+$/g, '')
+  if (path.startsWith('leqembi/')) return { route: 'leqembiLocal', slug: '' }
+  if (path === 'blog') return { route: 'blog', slug: '' }
+  if (path.startsWith('blog/')) {
+    const slug = decodeURIComponent(path.slice('blog/'.length).split('/')[0] ?? '')
+    return { route: slug ? 'blogPost' : 'blog', slug }
+  }
+  return { route: pathRoutes[path as keyof typeof routePaths] ?? 'home', slug: '' }
+}
 
 function App() {
   const [route, setRoute] = useState<Route>('home')
+  const [blogSlug, setBlogSlug] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     function applyPath() {
-      const path = window.location.pathname.replace(/^\/+|\/+$/g, '')
-      setRoute(path.startsWith('leqembi/') ? 'leqembiLocal' : pathRoutes[path] ?? 'home')
+      const next = readLocation()
+      setRoute(next.route)
+      setBlogSlug(next.slug)
       setMenuOpen(false)
     }
 
@@ -362,10 +354,18 @@ function App() {
     return () => window.removeEventListener('popstate', applyPath)
   }, [])
 
-  function navigate(next: Route) {
+  useEffect(() => {
+    document.body.classList.toggle('menu-open', menuOpen)
+    return () => document.body.classList.remove('menu-open')
+  }, [menuOpen])
+
+  usePageMeta(route, blogSlug)
+
+  function navigate(next: Route, slug = '') {
+    const path = next === 'blogPost' ? `/blog/${slug}` : routePaths[next]
     setRoute(next)
+    setBlogSlug(next === 'blogPost' ? slug : '')
     setMenuOpen(false)
-    const path = routePaths[next]
     if (window.location.pathname !== path) {
       window.history.pushState({}, '', path)
     }
@@ -383,6 +383,7 @@ function App() {
       {route === 'faq' && <FaqPage onNavigate={navigate} />}
       {route === 'resources' && <ResourcesPage onNavigate={navigate} />}
       {route === 'blog' && <BlogPage onNavigate={navigate} />}
+      {route === 'blogPost' && <BlogPostPage slug={blogSlug} onNavigate={navigate} />}
       {route === 'refer' && <ReferPage onNavigate={navigate} />}
       {route === 'pilot' && <PilotPage onNavigate={navigate} />}
       {route === 'leqembiLocal' && <LeqembiLocalPage onNavigate={navigate} />}
@@ -407,7 +408,7 @@ function Header({
     ['treatments', 'Treatments'],
     ['about', 'Meet the Team'],
   ]
-  const resourcesActive = route === 'resources' || route === 'blog' || route === 'faq'
+  const resourcesActive = route === 'resources' || route === 'blog' || route === 'blogPost' || route === 'faq'
 
   return (
     <header className="site-header">
@@ -436,7 +437,13 @@ function Header({
         <button className="header-cta" type="button" onClick={() => onNavigate('start')}>
           Check eligibility
         </button>
-        <button className="menu-button" type="button" aria-label="Menu" onClick={onToggleMenu}>
+        <button
+          className="menu-button"
+          type="button"
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
+          onClick={onToggleMenu}
+        >
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
@@ -801,23 +808,209 @@ function ResourcesPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
   )
 }
 
-function BlogPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+function BlogPage({ onNavigate }: { onNavigate: (route: Route, slug?: string) => void }) {
   return (
     <>
-      <PageHero eyebrow="Blog" title="Straight answers on diagnosis, eligibility, and treatment." copy="A lightweight content layer for launch, built around the questions paid-search visitors and referral patients are already asking." icon={<Sparkles size={38} />} onPrimary={() => onNavigate('start')} primaryLabel="Take the check" />
+      <PageHero
+        eyebrow="Blog"
+        title="Alzheimer’s articles, with credit to the original publisher."
+        copy="These pieces were originally published by Local Infusion. Local Doctor republishes them so patients and caregivers can read them here, with a link back to the source."
+        icon={<Sparkles size={38} />}
+        onPrimary={() => onNavigate('start')}
+        primaryLabel="Check eligibility"
+      />
       <section className="section white">
         <div className="blog-grid">
           {blogPosts.map((post) => (
-            <article className="blog-card" key={post.title}>
+            <a
+              className="blog-card"
+              href={`/blog/${post.slug}`}
+              key={post.slug}
+              onClick={(event) => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+                event.preventDefault()
+                onNavigate('blogPost', post.slug)
+              }}
+            >
               <span>{post.label}</span>
               <h2>{post.title}</h2>
-              <p>{post.copy}</p>
-            </article>
+              <p>{post.excerpt}</p>
+              <small className="blog-card-meta">
+                {formatBlogDate(post.published)}
+                <span>Updated {formatBlogDate(post.updated)}</span>
+              </small>
+              <small className="blog-card-credit">Originally published by Local Infusion · {post.author}</small>
+            </a>
           ))}
         </div>
       </section>
     </>
   )
+}
+
+function BlogPostPage({ slug, onNavigate }: { slug: string; onNavigate: (route: Route, slug?: string) => void }) {
+  const post = getBlogPost(slug)
+
+  if (!post) {
+    return (
+      <section className="section white blog-article-section">
+        <div className="blog-article">
+          <p className="eyebrow">Blog</p>
+          <h1>This article is not on Local Doctor.</h1>
+          <p>The address does not match one of the republished Local Infusion articles.</p>
+          <button className="primary" type="button" onClick={() => onNavigate('blog')}>Back to the blog</button>
+        </div>
+      </section>
+    )
+  }
+
+  const related = blogPosts.filter((item) => item.slug !== post.slug).slice(0, 3)
+
+  return (
+    <section className="section white blog-article-section">
+      <article className="blog-article">
+        <button className="text-link blog-back" type="button" onClick={() => onNavigate('blog')}>
+          All articles
+        </button>
+        <p className="eyebrow">{post.label}</p>
+        <h1>{post.title}</h1>
+        <p className="blog-byline">
+          By {post.author}
+          <span>Published {formatBlogDate(post.published)}</span>
+          <span>Updated on the source {formatBlogDate(post.updated)}</span>
+        </p>
+        <aside className="republication-credit">
+          <p>
+            Originally published by <a href="https://mylocalinfusion.com/">Local Infusion</a>. Written by {post.author}.
+          </p>
+          <p>
+            Original article:{' '}
+            <a href={post.originalUrl} rel="noopener noreferrer">{post.originalUrl}</a>
+          </p>
+          <p>This is a republication for Local Doctor readers, not an original Local Doctor article.</p>
+        </aside>
+        <div className="article-body">
+          {post.blocks.map((block, index) => (
+            <BlogBlockView block={block} key={`${block.type}-${index}`} />
+          ))}
+        </div>
+        <p className="medical-disclaimer">{medicalDisclaimer}</p>
+        <aside className="article-cta">
+          <h2>Want a treatment-readiness review?</h2>
+          <p>
+            Local Doctor is a virtual front door for specialist evaluation. It does not operate infusion centers, set drug prices, or replace the clinician who would prescribe treatment.
+          </p>
+          <button className="primary" type="button" onClick={() => onNavigate('start')}>
+            Check eligibility <ArrowRight size={15} />
+          </button>
+        </aside>
+        <div className="related-posts">
+          <h2>More republished articles</h2>
+          <div>
+            {related.map((item) => (
+              <a
+                href={`/blog/${item.slug}`}
+                key={item.slug}
+                onClick={(event) => {
+                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+                  event.preventDefault()
+                  onNavigate('blogPost', item.slug)
+                }}
+              >
+                {item.title}
+              </a>
+            ))}
+          </div>
+        </div>
+      </article>
+    </section>
+  )
+}
+
+function BlogBlockView({ block }: { block: BlogBlock }) {
+  if (block.type === 'h2') return <h2>{block.text}</h2>
+  if (block.type === 'h3') return <h3>{block.text}</h3>
+  if (block.type === 'ul') {
+    return (
+      <ul>
+        {block.items.map((item) => <li key={item}>{item}</li>)}
+      </ul>
+    )
+  }
+  if (block.type === 'ol') {
+    return (
+      <ol>
+        {block.items.map((item) => <li key={item}>{item}</li>)}
+      </ol>
+    )
+  }
+  return <p>{block.text}</p>
+}
+
+function usePageMeta(route: Route, slug: string) {
+  useEffect(() => {
+    const description = document.querySelector('meta[name="description"]')
+    const post = route === 'blogPost' ? getBlogPost(slug) : undefined
+
+    const clearSyndicationTags = () => {
+      document.querySelector('link[rel="canonical"]')?.remove()
+      document.getElementById('blog-article-jsonld')?.remove()
+    }
+
+    if (post) {
+      document.title = `${post.title} | Local Doctor`
+      description?.setAttribute('content', post.excerpt)
+      let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+      if (!canonical) {
+        canonical = document.createElement('link')
+        canonical.rel = 'canonical'
+        document.head.appendChild(canonical)
+      }
+      canonical.href = post.originalUrl
+
+      let jsonLd = document.getElementById('blog-article-jsonld')
+      if (!jsonLd) {
+        jsonLd = document.createElement('script')
+        jsonLd.id = 'blog-article-jsonld'
+        jsonLd.setAttribute('type', 'application/ld+json')
+        document.head.appendChild(jsonLd)
+      }
+      jsonLd.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: post.title,
+        description: post.excerpt,
+        datePublished: post.published,
+        dateModified: post.updated,
+        author: { '@type': 'Person', name: post.author },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Local Infusion',
+          url: 'https://mylocalinfusion.com/',
+        },
+        isBasedOn: post.originalUrl,
+        sameAs: post.originalUrl,
+        mainEntityOfPage: post.originalUrl,
+      })
+    } else if (route === 'blog') {
+      clearSyndicationTags()
+      document.title = 'Blog | Local Doctor'
+      description?.setAttribute(
+        'content',
+        'Alzheimer’s articles originally published by Local Infusion and republished by Local Doctor with attribution and a link to each source.',
+      )
+    } else {
+      clearSyndicationTags()
+      document.title = defaultTitle
+      description?.setAttribute('content', defaultDescription)
+    }
+
+    return () => {
+      clearSyndicationTags()
+      document.title = defaultTitle
+      description?.setAttribute('content', defaultDescription)
+    }
+  }, [route, slug])
 }
 
 function PilotPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
@@ -940,7 +1133,7 @@ function EligibilityLeadForm() {
         <p>This secure intake collects the information the team needs to understand your situation and decide whether clinical review may make sense.</p>
       </div>
       <div className="intake-frame-wrap">
-        <div className="typeform-live-embed" data-tf-live={typeformLiveId} />
+        <div className="typeform-live-embed" data-tf-live={typeformLiveId} data-tf-inline-on-mobile="" />
       </div>
     </section>
   )
@@ -1118,14 +1311,20 @@ function TreatmentComparison() {
         {treatmentRows.map(([label, leqembi, kisunla]) => (
           <div className="compare-row" role="row" key={label}>
             <span>{label}</span>
-            <p>{leqembi}</p>
-            <p>{kisunla}</p>
+            <p><strong className="compare-drug">Leqembi</strong>{leqembi}</p>
+            <p><strong className="compare-drug">Kisunla</strong>{kisunla}</p>
           </div>
         ))}
         <div className="compare-row visual-row" role="row">
           <span>Risk discussion</span>
-          <RiskBars tone="purple" labels={['Genotype', 'MRI', 'Medication']} />
-          <RiskBars tone="green" labels={['ARIA', 'Infusion', 'Monitoring']} />
+          <div className="compare-cell">
+            <strong className="compare-drug">Leqembi</strong>
+            <RiskBars tone="purple" labels={['Genotype', 'MRI', 'Medication']} />
+          </div>
+          <div className="compare-cell">
+            <strong className="compare-drug">Kisunla</strong>
+            <RiskBars tone="green" labels={['ARIA', 'Infusion', 'Monitoring']} />
+          </div>
         </div>
       </div>
     </div>
@@ -1275,6 +1474,7 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <button type="button" onClick={() => onNavigate('how')}>How it works</button>
         <button type="button" onClick={() => onNavigate('treatments')}>Treatments</button>
         <button type="button" onClick={() => onNavigate('about')}>Meet the Team</button>
+        <button type="button" onClick={() => onNavigate('blog')}>Blog</button>
       </div>
       <div>
         <strong>Get started</strong>
