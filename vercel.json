@@ -1,4 +1,16 @@
 {
+  "redirects": [
+    {
+      "source": "/pilot-plan",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/pilot-plan/:path*",
+      "destination": "/",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",

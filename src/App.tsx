@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
   ArrowRight,
@@ -11,7 +11,6 @@ import {
   ClipboardCheck,
   FileText,
   HeartHandshake,
-  MapPin,
   Menu,
   ShieldAlert,
   Sparkles,
@@ -27,6 +26,16 @@ import {
   medicalDisclaimer,
   type BlogBlock,
 } from './blogPosts'
+import {
+  ContactPage,
+  LegalIdentity,
+  Placeholder,
+  ProviderRoster,
+  PrivacyPage,
+  publicEmail,
+  TermsPage,
+  ConsentPage,
+} from './compliancePages'
 import './App.css'
 
 type Route =
@@ -40,7 +49,10 @@ type Route =
   | 'blog'
   | 'blogPost'
   | 'refer'
-  | 'pilot'
+  | 'privacy'
+  | 'terms'
+  | 'consent'
+  | 'contact'
   | 'leqembiLocal'
 
 const typeformLiveId = '01M49714FSNRJ3YKS1V0XVG66M'
@@ -48,7 +60,30 @@ const typeformEmbedScript = 'https://embed.typeform.com/next/embed.js'
 
 const defaultTitle = "Local Doctor | Alzheimer's Treatment Eligibility Review"
 const defaultDescription =
-  "Local Doctor is a virtual Alzheimer's specialty-care pilot for treatment eligibility review, records, testing, insurance preparation, and local follow-through for people who qualify."
+  "Local Doctor is a virtual Alzheimer's specialty clinic for treatment eligibility review, records, testing, insurance questions, and local follow-through for people who may qualify."
+
+const routeMeta: Partial<Record<Route, { title: string; description: string }>> = {
+  privacy: {
+    title: 'Privacy Policy and Notice of Privacy Practices | Local Doctor',
+    description: 'How Local Doctor collects, uses, and shares information, and the notice of privacy practices for health information.',
+  },
+  terms: {
+    title: 'Terms of Use | Local Doctor',
+    description: 'Terms of use for the Local Doctor website, including what the site does and does not provide.',
+  },
+  consent: {
+    title: 'Telehealth Consent | Local Doctor',
+    description: 'What a Local Doctor virtual visit is, the risks and alternatives, and how telehealth consent is collected.',
+  },
+  contact: {
+    title: 'Contact | Local Doctor',
+    description: 'Contact Local Doctor for the legal entity, physical address, phone number, and licensed providers.',
+  },
+  about: {
+    title: 'Meet the Team | Local Doctor',
+    description: 'Care team roles, the company that operates Local Doctor, and the licensed providers who may see patients.',
+  },
+}
 
 const routePaths: Record<Exclude<Route, 'blogPost'>, string> = {
   home: '/',
@@ -60,7 +95,10 @@ const routePaths: Record<Exclude<Route, 'blogPost'>, string> = {
   resources: '/resources',
   blog: '/blog',
   refer: '/refer-a-patient',
-  pilot: '/pilot-plan',
+  privacy: '/privacy',
+  terms: '/terms',
+  consent: '/telehealth-consent',
+  contact: '/contact',
   leqembiLocal: '/leqembi/florida/miami',
 }
 
@@ -74,7 +112,10 @@ const pathRoutes: Record<string, Route> = {
   resources: 'resources',
   blog: 'blog',
   'refer-a-patient': 'refer',
-  'pilot-plan': 'pilot',
+  privacy: 'privacy',
+  terms: 'terms',
+  'telehealth-consent': 'consent',
+  contact: 'contact',
 }
 
 const discoveryPaths = [
@@ -211,7 +252,7 @@ const journeySteps = [
 ]
 
 const howFaqItems = [
-  ['Is this legitimate, or some kind of online scam?', 'Local Doctor is designed as a focused specialty-care front door connected to Local Infusion\'s established care network. Clinical decisions still require licensed review.'],
+  ['Is this legitimate, or some kind of online scam?', 'Local Doctor is a specialty-care front door connected to Local Infusion\'s established care network. Clinical decisions still require licensed review.'],
   ['Will my insurance cover this?', 'Coverage depends on your plan, clinical criteria, testing, and treatment requirements. The team should review details before you commit to a care path.'],
   ['Will this replace my relationship with my current doctor?', 'No. Local Doctor is meant to work alongside existing clinicians, not erase those relationships.'],
   ['I do not trust something this serious being handled virtually.', 'The early evaluation and coordination can start virtually. Testing and any treatment follow-through happen locally or in person when required.'],
@@ -223,7 +264,7 @@ const faqCategories = [
     id: 'getting-started',
     title: 'Getting Started',
     items: [
-      ['Is this legitimate, or some kind of online scam?', 'Local Doctor is designed as a focused specialty-care front door connected to Local Infusion\'s established care network. Clinical decisions still require licensed review.'],
+      ['Is this legitimate, or some kind of online scam?', 'Local Doctor is a specialty-care front door connected to Local Infusion\'s established care network. Clinical decisions still require licensed review.'],
       ['Do I need a referral from my current doctor?', 'No referral is required to start. If you move forward, the team can coordinate with your existing physician so information does not get lost.'],
       ['How long does the intake process take?', 'The first intake step is short. If review makes sense, the next steps are records, insurance, scheduling, and clinical evaluation.'],
       ['What if I do not qualify?', 'You should still leave with a clearer explanation and a sensible next step. A not-yet answer can be useful, not a dead end.'],
@@ -255,7 +296,7 @@ const faqCategories = [
     items: [
       ['Will insurance cover this?', 'Coverage depends on your plan, clinical criteria, testing, and treatment requirements. The team should review details before you commit to a care path.'],
       ['What if I am on Medicare?', 'Medicare coverage can depend on clinical criteria and registry or policy requirements. Your specific situation should be checked during intake.'],
-      ['Will I get surprise bills?', 'The goal is to review expected costs and coverage before next steps. Final launch copy should be reviewed against the actual billing workflow.'],
+      ['Will I get surprise bills?', 'What you owe depends on your plan, the services ordered, and where care is delivered. Expected coverage is reviewed with you when that information is available. This is not a promise that you will have no out-of-pocket cost.'],
     ],
   },
   {
@@ -266,29 +307,6 @@ const faqCategories = [
       ['Can a family member or caregiver join?', 'Yes. Care partners are welcome and often helpful for history, logistics, visit notes, and monitoring.'],
       ['Who do I contact in a medical emergency?', 'Call 911 immediately. Local Doctor provides specialist evaluation and care coordination. It does not replace emergency care.'],
     ],
-  },
-]
-
-const keywordGroups = [
-  {
-    title: 'Treatment and eligibility',
-    intent: 'Highest intent',
-    terms: ['Leqembi eligibility', 'Kisunla eligibility', 'Alzheimer\'s treatment second opinion', 'disease modifying Alzheimer\'s treatment'],
-  },
-  {
-    title: 'Access and second opinion',
-    intent: 'High intent',
-    terms: ['Alzheimer\'s specialist near me', 'memory clinic waitlist', 'dementia second opinion', 'neurologist for Alzheimer\'s'],
-  },
-  {
-    title: 'Symptom uncertainty',
-    intent: 'Earlier stage',
-    terms: ['mild memory change', 'early dementia symptoms', 'memory loss doctor online', 'is this Alzheimer\'s'],
-  },
-  {
-    title: 'Provider/referral',
-    intent: 'Warmest path',
-    terms: ['refer for Alzheimer\'s treatment eligibility', 'anti amyloid treatment referral', 'Leqembi infusion referral support'],
   },
 ]
 
@@ -325,8 +343,12 @@ const resources = [
   },
 ]
 
+function normalizePath() {
+  return window.location.pathname.replace(/^\/+|\/+$/g, '')
+}
+
 function readLocation(): { route: Route; slug: string } {
-  const path = window.location.pathname.replace(/^\/+|\/+$/g, '')
+  const path = normalizePath()
   if (path.startsWith('leqembi/')) return { route: 'leqembiLocal', slug: '' }
   if (path === 'blog') return { route: 'blog', slug: '' }
   if (path.startsWith('blog/')) {
@@ -343,6 +365,10 @@ function App() {
 
   useEffect(() => {
     function applyPath() {
+      const path = normalizePath()
+      if (path === 'pilot-plan' || path.startsWith('pilot-plan/')) {
+        window.history.replaceState({}, '', '/')
+      }
       const next = readLocation()
       setRoute(next.route)
       setBlogSlug(next.slug)
@@ -360,6 +386,12 @@ function App() {
   }, [menuOpen])
 
   usePageMeta(route, blogSlug)
+
+  useEffect(() => {
+    const hash = window.location.hash.replace(/^#/, '')
+    if (!hash) return
+    document.getElementById(hash)?.scrollIntoView()
+  }, [route])
 
   function navigate(next: Route, slug = '') {
     const path = next === 'blogPost' ? `/blog/${slug}` : routePaths[next]
@@ -385,7 +417,10 @@ function App() {
       {route === 'blog' && <BlogPage onNavigate={navigate} />}
       {route === 'blogPost' && <BlogPostPage slug={blogSlug} onNavigate={navigate} />}
       {route === 'refer' && <ReferPage onNavigate={navigate} />}
-      {route === 'pilot' && <PilotPage onNavigate={navigate} />}
+      {route === 'privacy' && <PrivacyPage />}
+      {route === 'terms' && <TermsPage />}
+      {route === 'consent' && <ConsentPage />}
+      {route === 'contact' && <ContactPage />}
       {route === 'leqembiLocal' && <LeqembiLocalPage onNavigate={navigate} />}
       <Footer onNavigate={navigate} />
     </main>
@@ -526,7 +561,7 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
       <AudienceSplit onNavigate={onNavigate} />
 
       <section className="section mist">
-        <SectionIntro eyebrow="Start in the right place" title="Different visitors need different first steps." copy="A symptom search, a drug-name search, a caregiver visit, and a physician referral should not all land on the same generic form." />
+        <SectionIntro eyebrow="Start in the right place" title="Different visitors need different first steps." copy="Start from the situation you are actually in: a memory concern, an existing diagnosis, support for someone you love, or a referral from a clinician." />
         <div className="path-grid">
           {discoveryPaths.map((path) => {
             const Icon = path.icon
@@ -574,7 +609,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
         <SectionIntro eyebrow="Compare" title="Leqembi and Kisunla, side by side." />
         <TreatmentComparison />
         <div className="disclaimer">
-          Treatment information must be reviewed against current prescribing information and payer requirements before launch.
+          Prescribing information, monitoring schedules, and payer rules can change. A licensed clinician reviews the current label and your situation before any treatment decision. This comparison is general information, not a recommendation.
         </div>
       </section>
       <section className="section white fit-section">
@@ -582,7 +617,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
         <CheckList items={fitChecks} />
       </section>
       <section className="section mist fit-section">
-        <SectionIntro eyebrow="Safety" title="The safety screen is part of the product, not an afterthought." copy="The clinical model should make risks and monitoring visible early, then route people to licensed review before any treatment decision." />
+        <SectionIntro eyebrow="Safety" title="The safety screen is part of the evaluation, not an afterthought." copy="Risks and monitoring are reviewed before any treatment decision. Urgent symptoms belong with emergency care." />
         <div className="safety-grid">
           {safetyChecks.map((item) => (
             <article key={item}>
@@ -661,13 +696,13 @@ function AboutPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
       <PageHero
         eyebrow="Care model"
         title="A specialist evaluation built around getting you an answer."
-        copy="Local Doctor is designed as a focused virtual Alzheimer's specialty clinic, supported by navigators, diagnostic partners, prescribing clinicians, and Local Infusion's local treatment network."
+        copy="Local Doctor is a virtual Alzheimer's specialty clinic, supported by navigators, diagnostic partners, prescribing clinicians, and Local Infusion's local treatment network."
         icon={<UsersRound size={38} />}
         onPrimary={() => onNavigate('start')}
         primaryLabel="Check eligibility"
       />
       <section className="section white">
-        <SectionIntro eyebrow="Care team roles" title="The model is coordinated, not a directory of disconnected appointments." />
+        <SectionIntro eyebrow="Care team roles" title="The clinic is coordinated, not a directory of disconnected appointments." />
         <div className="team-grid">
           {[
             ['Navigator', 'Coordinates benefits, records, diagnostic orders, scheduling, prior authorization, and handoff.'],
@@ -682,6 +717,22 @@ function AboutPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
             </article>
           ))}
         </div>
+      </section>
+      <section className="section mist" id="company">
+        <SectionIntro
+          eyebrow="Company"
+          title="Who operates Local Doctor."
+          copy="The legal name, physical address, phone number, and states where a patient may be seen are listed here."
+        />
+        <LegalIdentity />
+      </section>
+      <section className="section white" id="providers">
+        <SectionIntro
+          eyebrow="Licensed providers"
+          title="Clinicians who may see patients."
+          copy="A virtual visit is available only when the clinician is licensed in the state where the patient is located during the visit."
+        />
+        <ProviderRoster />
       </section>
       <ConversionPanel onNavigate={onNavigate} />
     </>
@@ -729,7 +780,7 @@ function ReferPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
             </ul>
           </article>
           <article>
-            <h2>Not a fit for this pilot</h2>
+            <h2>Not a fit for this pathway</h2>
             <ul>
               <li>Moderate or severe dementia as the primary need</li>
               <li>Emergency neurologic symptoms or rapid decline</li>
@@ -791,7 +842,7 @@ function FaqPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
 function ResourcesPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
   return (
     <>
-      <PageHero eyebrow="Resources" title="Guides for treatment eligibility, records, and next steps." copy="SEO and patient education should start light during the pilot, then expand once search and intake data show what people actually need." icon={<FileText size={38} />} onPrimary={() => onNavigate('blog')} primaryLabel="Read articles" />
+      <PageHero eyebrow="Resources" title="Topics for treatment eligibility, records, and next steps." copy="Plain-language topics on memory changes, evaluation, treatment readiness, care partners, and what to gather next. Published reading is in the article library." icon={<FileText size={38} />} onPrimary={() => onNavigate('blog')} primaryLabel="Read articles" />
       <section className="section white">
         <div className="resource-grid">
           {resources.map((resource) => (
@@ -799,7 +850,7 @@ function ResourcesPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
               <span>{resource.label}</span>
               <h2>{resource.title}</h2>
               <p>{resource.copy}</p>
-              <button type="button" onClick={() => onNavigate('blog')}>Open guide <ArrowRight size={14} /></button>
+              <button type="button" onClick={() => onNavigate('blog')}>Read articles <ArrowRight size={14} /></button>
             </article>
           ))}
         </div>
@@ -1001,8 +1052,9 @@ function usePageMeta(route: Route, slug: string) {
       )
     } else {
       clearSyndicationTags()
-      document.title = defaultTitle
-      description?.setAttribute('content', defaultDescription)
+      const meta = routeMeta[route]
+      document.title = meta?.title ?? defaultTitle
+      description?.setAttribute('content', meta?.description ?? defaultDescription)
     }
 
     return () => {
@@ -1011,28 +1063,6 @@ function usePageMeta(route: Route, slug: string) {
       description?.setAttribute('content', defaultDescription)
     }
   }, [route, slug])
-}
-
-function PilotPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
-  return (
-    <>
-      <PageHero eyebrow="Pilot plan" title="A narrow test to acquire the first 10 qualified patients." copy="This page is for internal review only: one condition, one licensure-driven market, Google Search first, and clinical/legal review before spend." icon={<MapPin size={38} />} onPrimary={() => onNavigate('start')} primaryLabel="Open patient flow" />
-      <section className="section white">
-        <SectionIntro eyebrow="Keyword map" title="Separate search intent before budget goes live." />
-        <div className="keyword-grid">
-          {keywordGroups.map((group) => (
-            <article className="keyword-card" key={group.title}>
-              <span>{group.intent}</span>
-              <h2>{group.title}</h2>
-              <div>
-                {group.terms.map((term) => <small key={term}>{term}</small>)}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-    </>
-  )
 }
 
 function LeqembiLocalPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
@@ -1140,59 +1170,25 @@ function EligibilityLeadForm() {
 }
 
 function ScheduleCallWidget() {
-  const days = useMemo(() => getNextWeekdays(), [])
-  const [day, setDay] = useState('')
-  const [time, setTime] = useState('')
-  const [booked, setBooked] = useState(false)
-  const slots = ['9:00 AM', '10:30 AM', '1:00 PM', '2:30 PM', '4:00 PM']
-  const selectedDay = days.find((item) => item.value === day)
-
   return (
     <section className="consult-card" id="consult">
       <div>
-        <p className="eyebrow">Schedule a call</p>
-        <h2>Speak with a member of our team.</h2>
-        <p>A 30-minute call to understand your needs, verify insurance directionally, and decide whether clinical review makes sense. No obligation.</p>
-        {booked ? (
-          <div className="booking-success">
-            <CheckCircle2 size={24} />
-            <strong>You are booked for {selectedDay?.label} at {time}.</strong>
-            <span>We will call you then. No forms to fill out first.</span>
-            <button type="button" onClick={() => {
-              setBooked(false)
-              setTime('')
-            }}>Choose a different time</button>
-          </div>
-        ) : (
-          <>
-            <div className="day-picker">
-              {days.map((item) => (
-                <button className={day === item.value ? 'selected' : ''} type="button" key={item.value} onClick={() => {
-                  setDay(item.value)
-                  setTime('')
-                }}>
-                  <span>{item.weekday}</span>
-                  <strong>{item.monthDay}</strong>
-                </button>
-              ))}
-            </div>
-            {day && (
-              <div className="time-picker">
-                {slots.map((slot) => (
-                  <button className={time === slot ? 'selected' : ''} type="button" key={slot} onClick={() => setTime(slot)}>{slot}</button>
-                ))}
-              </div>
-            )}
-            <button className="primary" type="button" disabled={!day || !time} onClick={() => setBooked(true)}>Confirm call <ArrowRight size={15} /></button>
-          </>
-        )}
+        <p className="eyebrow">Talk with the team</p>
+        <h2>A call is not booked on this page.</h2>
+        <p>
+          Complete the intake above, or email {publicEmail}. The intake is how the team gets a name and a way to follow up. Neither the form nor an email reserves a time.
+        </p>
+        <div className="consult-actions">
+          <a className="primary" href="#intake">Go to the intake <ArrowRight size={15} /></a>
+          <a className="secondary" href={`mailto:${publicEmail}`}>Email {publicEmail}</a>
+        </div>
       </div>
       <aside>
-        <h3>What to expect</h3>
+        <h3>What happens next</h3>
         <ol>
-          <li>Enrollment team calls at the selected time.</li>
-          <li>You talk through symptoms, goals, and coverage basics.</li>
-          <li>If appropriate, the team helps schedule clinical review.</li>
+          <li>You submit the intake or an email.</li>
+          <li>The team follows up using the contact information you provide.</li>
+          <li>A visit is scheduled only after that follow-up, and only if a clinical review makes sense.</li>
         </ol>
         <h3>What to have handy</h3>
         <ul>
@@ -1205,32 +1201,15 @@ function ScheduleCallWidget() {
   )
 }
 
-function getNextWeekdays() {
-  const formatter = new Intl.DateTimeFormat('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-  const days: Array<{ value: string; label: string; weekday: string; monthDay: string }> = []
-  const current = new Date()
-
-  while (days.length < 6) {
-    current.setDate(current.getDate() + 1)
-    const weekdayIndex = current.getDay()
-    if (weekdayIndex === 0 || weekdayIndex === 6) continue
-    const [weekday, monthDay] = formatter.format(current).split(', ')
-    const value = current.toISOString().slice(0, 10)
-    days.push({ value, label: `${weekday}, ${monthDay}`, weekday, monthDay })
-  }
-
-  return days
-}
-
 function InsuranceStrip() {
   const payerLoop = [...payerNames, ...payerNames]
 
   return (
     <section className="insurance-strip">
       <div>
-        <h2>Local Doctor accepts most major health insurance</h2>
-        <p>We are committed to financial transparency. No surprise bills or hidden costs, and financial assistance support for every eligible patient. We do what it takes to minimize your costs.</p>
-        <div className="payer-marquee" aria-label="Representative payer names">
+        <h2>Coverage is checked for your plan</h2>
+        <p>Local Doctor does not promise that a health plan is accepted. Benefits, prior authorization, and what you may owe depend on your coverage, the services ordered, and where care is delivered. Financial assistance, when a program is available, depends on that program&apos;s rules. The names below are examples of plans patients ask about. They are not a list of plans Local Doctor or its partners participate with.</p>
+        <div className="payer-marquee" aria-label="Examples of plans patients ask about, not a list of accepted insurance">
           <div>
             {payerLoop.map((payer, index) => <span key={`${payer}-${index}`}>{payer}</span>)}
           </div>
@@ -1412,7 +1391,7 @@ function PageHero({
 function ConversionPanel({
   onNavigate,
   title = 'Start with a short check, then move to full intake only when it makes sense.',
-  copy = 'The pilot should measure qualified starts, not raw leads.',
+  copy = 'The intake is a request for review. It is not a diagnosis, a booked visit, or a promise of coverage.',
   secondaryLabel,
   secondaryRoute,
 }: {
@@ -1467,6 +1446,16 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
           <span>Local Doctor</span>
         </button>
         <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation, care coordination, and treatment-readiness review.</p>
+        <p className="footer-identity">
+          <Placeholder value="[LEGAL ENTITY]" />
+          <br />
+          <Placeholder value="[ADDRESS]" />
+          <br />
+          <Placeholder value="[PHONE]" />
+          <br />
+          Patients may be seen in <Placeholder value="[LICENSED STATES]" />.
+        </p>
+        <p className="footer-copy">© {new Date().getFullYear()} <Placeholder value="[LEGAL ENTITY]" /></p>
       </div>
       <div>
         <strong>Explore</strong>
@@ -1481,12 +1470,15 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <button type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
         <button type="button" onClick={() => onNavigate('how')}>How it works</button>
         <button type="button" onClick={() => onNavigate('refer')}>For physicians</button>
-        <a href="mailto:hello@trylocaldoctor.com">Talk to our team</a>
+        <a href={`mailto:${publicEmail}`}>Email the team</a>
       </div>
       <div>
         <strong>Legal</strong>
-        <a href="mailto:hello@trylocaldoctor.com">Contact</a>
-          <button type="button" onClick={() => onNavigate('start')}>Intake form</button>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/privacy#notice">Notice of Privacy Practices</a>
+        <a href="/terms">Terms of Use</a>
+        <a href="/telehealth-consent">Telehealth Consent</a>
+        <a href="/contact">Contact</a>
         <small>Individual results vary. Local Doctor does not replace emergency care. Call 911 for a medical emergency.</small>
       </div>
     </footer>
