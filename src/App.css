@@ -1877,6 +1877,110 @@ h3 {
   font-size: 1.2rem;
 }
 
+.footer-identity,
+.footer-copy {
+  max-width: 420px;
+}
+
+.identity-block {
+  display: grid;
+  gap: 14px;
+  max-width: 720px;
+  margin: 28px 0 8px;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-left: 4px solid #c4a24a;
+  border-radius: 8px;
+}
+
+.identity-block div {
+  display: grid;
+  gap: 3px;
+}
+
+.identity-block dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.identity-block dd {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.05rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.identity-block a,
+.article-body a,
+.legal-doc a {
+  color: var(--deep);
+  font-weight: 700;
+}
+
+.provider-card {
+  max-width: 720px;
+  margin-top: 8px;
+  padding: 22px;
+  background: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.provider-card h3 {
+  font-size: clamp(1.45rem, 1.1rem + 1vw, 1.9rem);
+}
+
+.provider-facts {
+  margin-top: 16px;
+  background: #fff;
+}
+
+.license-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.legal-doc {
+  width: min(100%, 800px);
+}
+
+.legal-lede {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.legal-doc h2[id],
+.section[id] {
+  scroll-margin-top: 96px;
+}
+
+.npp-banner {
+  padding: 14px 16px;
+  color: var(--ink);
+  background: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.consult-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
 a.blog-card {
   color: inherit;
   text-decoration: none;
