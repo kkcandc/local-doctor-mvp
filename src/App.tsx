@@ -366,11 +366,12 @@ function App() {
   useEffect(() => {
     function applyPath() {
       const path = normalizePath()
+      const lowered = path.toLowerCase()
       if (
         path === 'pilot-plan' ||
         path.startsWith('pilot-plan/') ||
-        path === 'leqembi' ||
-        path.startsWith('leqembi/')
+        lowered === 'leqembi' ||
+        lowered.startsWith('leqembi/')
       ) {
         window.history.replaceState({}, '', '/')
       }

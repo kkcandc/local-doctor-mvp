@@ -29,6 +29,16 @@
       "source": "/leqembi/:path*",
       "destination": "/",
       "statusCode": 301
+    },
+    {
+      "source": "/leqembi/",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/leqembi/:path*/",
+      "destination": "/",
+      "statusCode": 301
     }
   ],
   "rewrites": [
