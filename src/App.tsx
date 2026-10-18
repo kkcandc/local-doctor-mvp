@@ -28,13 +28,16 @@ import {
 } from './blogPosts'
 import {
   ContactPage,
-  LegalIdentity,
-  Placeholder,
-  ProviderRoster,
-  PrivacyPage,
-  publicEmail,
-  TermsPage,
   ConsentPage,
+  LegalIdentity,
+  PrivacyPage,
+  ProviderRoster,
+  TermsPage,
+  legalEntity,
+  licensedStates,
+  noPublishedPhone,
+  physicalAddress,
+  publicEmail,
 } from './compliancePages'
 import './App.css'
 
@@ -53,7 +56,6 @@ type Route =
   | 'terms'
   | 'consent'
   | 'contact'
-  | 'leqembiLocal'
 
 const typeformLiveId = '01M49714FSNRJ3YKS1V0XVG66M'
 const typeformEmbedScript = 'https://embed.typeform.com/next/embed.js'
@@ -77,7 +79,7 @@ const routeMeta: Partial<Record<Route, { title: string; description: string }>> 
   },
   contact: {
     title: 'Contact | Local Doctor',
-    description: 'Contact Local Doctor for the legal entity, physical address, phone number, and licensed providers.',
+    description: 'Contact Local Doctor for the legal entity, physical address, and licensed provider.',
   },
   about: {
     title: 'Meet the Team | Local Doctor',
@@ -99,7 +101,6 @@ const routePaths: Record<Exclude<Route, 'blogPost'>, string> = {
   terms: '/terms',
   consent: '/telehealth-consent',
   contact: '/contact',
-  leqembiLocal: '/leqembi/florida/miami',
 }
 
 const pathRoutes: Record<string, Route> = {
@@ -349,7 +350,6 @@ function normalizePath() {
 
 function readLocation(): { route: Route; slug: string } {
   const path = normalizePath()
-  if (path.startsWith('leqembi/')) return { route: 'leqembiLocal', slug: '' }
   if (path === 'blog') return { route: 'blog', slug: '' }
   if (path.startsWith('blog/')) {
     const slug = decodeURIComponent(path.slice('blog/'.length).split('/')[0] ?? '')
@@ -366,7 +366,12 @@ function App() {
   useEffect(() => {
     function applyPath() {
       const path = normalizePath()
-      if (path === 'pilot-plan' || path.startsWith('pilot-plan/')) {
+      if (
+        path === 'pilot-plan' ||
+        path.startsWith('pilot-plan/') ||
+        path === 'leqembi' ||
+        path.startsWith('leqembi/')
+      ) {
         window.history.replaceState({}, '', '/')
       }
       const next = readLocation()
@@ -421,7 +426,6 @@ function App() {
       {route === 'terms' && <TermsPage />}
       {route === 'consent' && <ConsentPage />}
       {route === 'contact' && <ContactPage />}
-      {route === 'leqembiLocal' && <LeqembiLocalPage onNavigate={navigate} />}
       <Footer onNavigate={navigate} />
     </main>
   )
@@ -722,7 +726,7 @@ function AboutPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <SectionIntro
           eyebrow="Company"
           title="Who operates Local Doctor."
-          copy="The legal name, physical address, phone number, and states where a patient may be seen are listed here."
+          copy="The legal name, physical address, and states where a patient may be seen are listed here."
         />
         <LegalIdentity />
       </section>
@@ -1065,63 +1069,6 @@ function usePageMeta(route: Route, slug: string) {
   }, [route, slug])
 }
 
-function LeqembiLocalPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
-  const market = getMarketFromPath()
-
-  return (
-    <>
-      <section className="local-seo-hero">
-        <div>
-          <p className="eyebrow">Leqembi eligibility review</p>
-          <h1>Leqembi treatment-readiness review near {market}.</h1>
-          <p>
-            If you are researching Leqembi for early Alzheimer&apos;s, Local Doctor helps you understand what records, testing, safety review, and local follow-through may be needed before a licensed clinician can make a treatment decision.
-          </p>
-          <button className="primary" type="button" onClick={() => onNavigate('start')}>Start eligibility check <ArrowRight size={15} /></button>
-        </div>
-        <aside>
-          <BadgeCheck size={26} />
-          <strong>Not a prescription from a webpage.</strong>
-          <span>Leqembi requires clinical evaluation, amyloid confirmation, MRI review, safety monitoring, and payer-specific requirements.</span>
-        </aside>
-      </section>
-      <section className="section white">
-        <SectionIntro eyebrow="What this page answers" title="A search landing page should help the patient decide if the next step is worth taking." />
-        <div className="seo-answer-grid">
-          {[
-            ['Who may be considered', 'People in earlier symptomatic stages, such as mild cognitive impairment or mild dementia due to Alzheimer\'s, after clinician review.'],
-            ['What testing may be needed', 'Cognitive assessment, records, amyloid confirmation, MRI safety review, labs, medication review, and risk discussion.'],
-            ['What Local Doctor does', 'Routes patients toward specialist review, testing coordination, insurance readiness, and local treatment planning when appropriate.'],
-            ['What happens locally', 'If treatment is clinically appropriate, the care path can connect into local infusion follow-through and monitoring logistics.'],
-          ].map(([title, copy]) => (
-            <article key={title}>
-              <h3>{title}</h3>
-              <p>{copy}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-      <section className="section mist fit-section">
-        <SectionIntro eyebrow="Before treatment" title="What to gather before a Leqembi second opinion." copy="This mirrors what high-intent search visitors need: not a generic article, but a checklist that moves them toward a qualified next step." />
-        <CheckList items={[
-          'Current diagnosis or reason Alzheimer\'s disease is suspected',
-          'Prior cognitive testing, neurology notes, MRI reports, or memory-clinic records',
-          'Medication list, especially blood thinners or drugs that may affect risk review',
-          'Insurance information and a local testing or infusion geography',
-          'A care partner who can join visits and help with monitoring logistics',
-        ]} />
-      </section>
-      <ConversionPanel onNavigate={onNavigate} />
-    </>
-  )
-}
-
-function getMarketFromPath() {
-  const [, state = '', city = ''] = window.location.pathname.replace(/^\/+|\/+$/g, '').split('/')
-  const pieces = [city, state].filter(Boolean).map((piece) => piece.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' '))
-  return pieces.length ? pieces.join(', ') : 'your area'
-}
-
 function StartExperience() {
   return (
     <div className="start-experience">
@@ -1447,15 +1394,15 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
         </button>
         <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation, care coordination, and treatment-readiness review.</p>
         <p className="footer-identity">
-          <Placeholder value="[LEGAL ENTITY]" />
+          {legalEntity}
           <br />
-          <Placeholder value="[ADDRESS]" />
+          {physicalAddress}
           <br />
-          <Placeholder value="[PHONE]" />
+          {noPublishedPhone}
           <br />
-          Patients may be seen in <Placeholder value="[LICENSED STATES]" />.
+          Patients may be seen in {licensedStates}.
         </p>
-        <p className="footer-copy">© {new Date().getFullYear()} <Placeholder value="[LEGAL ENTITY]" /></p>
+        <p className="footer-copy">© {new Date().getFullYear()} {legalEntity}</p>
       </div>
       <div>
         <strong>Explore</strong>

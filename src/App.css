@@ -1882,22 +1882,6 @@ h3 {
   max-width: 420px;
 }
 
-.footer .placeholder-token {
-  color: #3d3212;
-  background: #f7edcf;
-  border-color: #e3d7a4;
-}
-
-.placeholder-token {
-  padding: 0.05em 0.35em;
-  color: #3d3212;
-  background: var(--warning-bg);
-  border: 1px solid #e3d7a4;
-  border-radius: 4px;
-  font-weight: 800;
-  overflow-wrap: anywhere;
-}
-
 .identity-block {
   display: grid;
   gap: 14px;
@@ -1928,6 +1912,7 @@ h3 {
   color: var(--ink);
   font-size: 1.05rem;
   line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .identity-block a,

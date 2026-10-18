@@ -9,6 +9,26 @@
       "source": "/pilot-plan/:path*",
       "destination": "/",
       "permanent": true
+    },
+    {
+      "source": "/leqembi/:state/:city",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/leqembi/:state/:city/:path*",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/leqembi",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/leqembi/:path*",
+      "destination": "/",
+      "statusCode": 301
     }
   ],
   "rewrites": [

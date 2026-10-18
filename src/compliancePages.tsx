@@ -2,20 +2,34 @@ import type { ReactNode } from 'react'
 
 export const publicEmail = 'hello@trylocaldoctor.com'
 
-export function Placeholder({ value }: { value: string }) {
-  return (
-    <span className="placeholder-token" data-placeholder={value}>
-      {value}
-    </span>
-  )
-}
+export const legalEntity =
+  'Local Infusion Inc. (doing business as Local Doctor), a Delaware corporation'
+
+export const physicalAddress = '4900 Centennial Blvd, Suite 300, Nashville, TN 37209'
+
+export const noPublishedPhone =
+  `No phone number is published on this website. Contact us through our contact page or email ${publicEmail}.`
+
+export const licensedStates = 'Kansas'
+
+export const providerName = 'Deborah Kathleen Rose'
+
+export const providerSpecialty = 'Neurology'
+
+export const providerNpi = '1023646411'
+
+export const providerLicense = 'Kansas 04-50344'
+
+export const effectiveDate = 'October 2026'
+
+export const governingLaw = 'the laws of Tennessee'
 
 export function LegalIdentity() {
   return (
     <dl className="identity-block">
       <div>
         <dt>Legal entity</dt>
-        <dd><Placeholder value="[LEGAL ENTITY]" /></dd>
+        <dd>{legalEntity}</dd>
       </div>
       <div>
         <dt>Brand</dt>
@@ -27,11 +41,11 @@ export function LegalIdentity() {
       </div>
       <div>
         <dt>Physical address</dt>
-        <dd><Placeholder value="[ADDRESS]" /></dd>
+        <dd>{physicalAddress}</dd>
       </div>
       <div>
         <dt>Phone</dt>
-        <dd><Placeholder value="[PHONE]" /></dd>
+        <dd>{noPublishedPhone}</dd>
       </div>
       <div>
         <dt>Email</dt>
@@ -39,7 +53,7 @@ export function LegalIdentity() {
       </div>
       <div>
         <dt>States where patients may be seen</dt>
-        <dd><Placeholder value="[LICENSED STATES]" /></dd>
+        <dd>{licensedStates}</dd>
       </div>
     </dl>
   )
@@ -48,25 +62,21 @@ export function LegalIdentity() {
 export function ProviderRoster() {
   return (
     <article className="provider-card">
-      <h3>
-        <Placeholder value="[PROVIDER NAME]" />, <Placeholder value="[CREDENTIAL]" />
-      </h3>
+      <h3>{providerName}</h3>
       <dl className="identity-block provider-facts">
         <div>
           <dt>Specialty</dt>
-          <dd><Placeholder value="[SPECIALTY]" /></dd>
+          <dd>{providerSpecialty}</dd>
         </div>
         <div>
           <dt>NPI</dt>
-          <dd><Placeholder value="[NPI]" /></dd>
+          <dd>{providerNpi}</dd>
         </div>
         <div>
           <dt>Licenses by state</dt>
           <dd>
             <ul className="license-list">
-              <li>
-                <Placeholder value="[STATE]" /> <Placeholder value="[LICENSE NUMBER]" />
-              </li>
+              <li>{providerLicense}</li>
             </ul>
           </dd>
         </div>
@@ -109,7 +119,7 @@ export function PrivacyPage() {
       <div className="article-body">
         <h2>Privacy Policy</h2>
         <p>
-          This policy applies to trylocaldoctor.com, which is operated by <Placeholder value="[LEGAL ENTITY]" /> under the brand Local Doctor.
+          This policy applies to trylocaldoctor.com, which is operated by {legalEntity} under the brand Local Doctor.
           The public email for the site is <a href={`mailto:${publicEmail}`}>{publicEmail}</a>.
         </p>
 
@@ -121,7 +131,7 @@ export function PrivacyPage() {
           <li>Technical information the hosting provider processes to deliver the site, such as IP address and browser type.</li>
         </ul>
         <p>
-          Analytics, advertising pixels, and similar tools: <Placeholder value="[ANALYTICS AND ADVERTISING TOOLS]" />.
+          Analytics, advertising pixels, and similar tools: no analytics or advertising tools are included in this website&apos;s code.
         </p>
 
         <h3>How that information is used</h3>
@@ -131,13 +141,13 @@ export function PrivacyPage() {
           <li>To operate, secure, and troubleshoot the website.</li>
         </ul>
         <p>
-          Service providers that process information for the site, and where intake responses are sent, are listed at <Placeholder value="[SERVICE PROVIDERS]" />.
-          Sale of personal information, and sharing for cross-context advertising, is <Placeholder value="[SALE OR ADVERTISING SHARING]" />.
+          The eligibility intake is an embedded Typeform on the get-started page. This website does not list other service providers, and it does not state where intake responses are sent after they are submitted.
+          Sale of personal information, and sharing for cross-context advertising, is not stated on this website.
         </p>
 
         <h3>Privacy contact</h3>
         <p>
-          Privacy questions go to <Placeholder value="[PRIVACY OFFICER]" /> at <Placeholder value="[PRIVACY EMAIL]" />, <Placeholder value="[PHONE]" />, <Placeholder value="[ADDRESS]" />.
+          Privacy questions go to {legalEntity} through the <a href="/contact">contact page</a>, by email at <a href={`mailto:${publicEmail}`}>{publicEmail}</a>, or by mail at {physicalAddress}. {noPublishedPhone}
         </p>
 
         <h2 id="notice">Notice of Privacy Practices</h2>
@@ -145,9 +155,9 @@ export function PrivacyPage() {
           This notice describes how medical information about you may be used and disclosed and how you can get access to this information. Please review it carefully.
         </p>
         <p>
-          The organization responsible for health information collected for Local Doctor services is <Placeholder value="[LEGAL ENTITY]" />.
-          Its role under HIPAA is <Placeholder value="[HIPAA ROLE]" />.
-          This notice applies to health information created or received for those services. It takes effect on <Placeholder value="[EFFECTIVE DATE]" />.
+          The organization responsible for health information collected for Local Doctor services is {legalEntity}.
+          A HIPAA role, such as covered entity or business associate, is not stated on this page.
+          This notice applies to health information created or received for those services. It takes effect on {effectiveDate}.
         </p>
 
         <h3>Uses and disclosures</h3>
@@ -157,10 +167,10 @@ export function PrivacyPage() {
           <li>Payment: coverage review, prior authorization, and billing for services that are actually provided.</li>
           <li>Health care operations: quality review, training, and the work of running the practice.</li>
           <li>As required by law, including public-health, health-oversight, judicial, and serious-threat situations described in HIPAA.</li>
-          <li>With your written authorization for uses that are not covered above. Authorization is handled by <Placeholder value="[AUTHORIZATION PROCESS]" />.</li>
+          <li>With your written authorization for uses that are not covered above. To ask about authorization, contact us through our <a href="/contact">contact page</a>.</li>
         </ul>
         <p>
-          Additional protections required by state law are described in <Placeholder value="[STATE PRIVACY LAW ADDENDUM]" />.
+          Additional protections required by state law are not set out in a separate addendum on this website.
         </p>
 
         <h3>Your rights</h3>
@@ -173,21 +183,21 @@ export function PrivacyPage() {
           <li>Receive notice of a breach of unsecured health information when the law requires it.</li>
         </ul>
         <p>
-          To use these rights, contact <Placeholder value="[PRIVACY OFFICER]" /> at <Placeholder value="[PRIVACY EMAIL]" /> or <Placeholder value="[PHONE]" />.
+          To use these rights, contact us through our <a href="/contact">contact page</a> or email <a href={`mailto:${publicEmail}`}>{publicEmail}</a>. {noPublishedPhone}
         </p>
 
         <h3>Responsibilities and complaints</h3>
         <p>
-          <Placeholder value="[LEGAL ENTITY]" /> is required to maintain the privacy of health information, to provide this notice, to follow the notice currently in effect, and to notify you of a breach when the law requires it.
+          {legalEntity} is required to maintain the privacy of health information, to provide this notice, to follow the notice currently in effect, and to notify you of a breach when the law requires it.
           The current notice is posted at <a href="/privacy">https://trylocaldoctor.com/privacy</a>.
         </p>
         <p>
-          You may complain to <Placeholder value="[PRIVACY OFFICER]" /> or to the U.S. Department of Health and Human Services, Office for Civil Rights.
+          You may complain to {legalEntity} through the <a href="/contact">contact page</a>, or to the U.S. Department of Health and Human Services, Office for Civil Rights.
           Filing a complaint will not be held against you.
         </p>
         <p>
-          Clinician names, credentials, and license numbers by state are listed on the <a href="/about#providers">Meet the Team</a> and <a href="/contact">Contact</a> pages.
-          Patients may be seen in <Placeholder value="[LICENSED STATES]" />.
+          The clinician&apos;s name, specialty, NPI, and license number are listed on the <a href="/about#providers">Meet the Team</a> and <a href="/contact">Contact</a> pages.
+          Patients may be seen in {licensedStates}.
         </p>
       </div>
     </ComplianceLayout>
@@ -204,7 +214,7 @@ export function TermsPage() {
       <div className="article-body">
         <h2>The website and the clinic</h2>
         <p>
-          trylocaldoctor.com is operated by <Placeholder value="[LEGAL ENTITY]" />. Local Doctor is the brand on the site.
+          trylocaldoctor.com is operated by {legalEntity}. Local Doctor is the brand on the site.
           The pages describe a virtual pathway for Alzheimer&apos;s treatment-eligibility review. They do not themselves provide a diagnosis, a prescription, or an appointment.
         </p>
 
@@ -217,15 +227,15 @@ export function TermsPage() {
         <h2>Where a visit can happen</h2>
         <p>
           A virtual visit is offered only when the clinician is licensed to see a patient located in that state at the time of the visit.
-          Those states are <Placeholder value="[LICENSED STATES]" />.
-          Telehealth consent is a separate step, described on the <a href="/telehealth-consent">Telehealth Consent</a> page, and is collected by <Placeholder value="[CONSENT METHOD]" />.
+          Those states are {licensedStates}.
+          Telehealth consent is a separate step, described on the <a href="/telehealth-consent">Telehealth Consent</a> page. This website describes that step and does not record a signature. Contact us through our <a href="/contact">contact page</a>.
         </p>
 
         <h2>Intake and email</h2>
         <p>
           The eligibility intake is an embedded Typeform. Submitting it, or emailing {publicEmail}, is a request for follow-up.
           It does not reserve a call, confirm coverage, or promise that you will be seen.
-          There is no patient login on this website. Any portal is <Placeholder value="[PATIENT PORTAL]" />.
+          There is no patient login on this website, and this website does not link to a patient portal.
         </p>
 
         <h2>Insurance and cost</h2>
@@ -237,25 +247,24 @@ export function TermsPage() {
         <h2>Acceptable use and intellectual property</h2>
         <p>
           Do not misuse the site, attempt to break it, or submit information you do not have the right to share.
-          Site content is owned by <Placeholder value="[LEGAL ENTITY]" />, except articles that are labeled as republished from Local Infusion and linked back to the original.
+          Site content is owned by {legalEntity}, except articles that are labeled as republished from Local Infusion and linked back to the original.
         </p>
 
         <h2>Third-party services</h2>
         <p>
-          The intake is provided by Typeform. Other vendors are <Placeholder value="[SERVICE PROVIDERS]" />.
-          Their own terms apply to their services.
+          The intake is provided by Typeform, and Typeform&apos;s own terms apply to that service. This website does not list other vendors.
         </p>
 
         <h2>Liability and governing law</h2>
         <p>
           Website text can be incomplete or out of date. Clinical decisions are made by a licensed clinician after an evaluation, not by these pages.
-          Further limits on liability are <Placeholder value="[LIABILITY TERMS]" />.
-          These terms are governed by <Placeholder value="[GOVERNING LAW]" />.
+          Further limits on liability are not stated on this page.
+          These terms are governed by {governingLaw}.
         </p>
 
         <h2>Changes and contact</h2>
         <p>
-          Updated terms will be posted on this page. Questions can be sent to <a href={`mailto:${publicEmail}`}>{publicEmail}</a>, <Placeholder value="[PHONE]" />, <Placeholder value="[ADDRESS]" />.
+          Updated terms will be posted on this page. Questions can be sent to <a href={`mailto:${publicEmail}`}>{publicEmail}</a> or by mail to {physicalAddress}. Contact us through our <a href="/contact">contact page</a>. {noPublishedPhone}
         </p>
       </div>
     </ComplianceLayout>
@@ -273,27 +282,27 @@ export function ConsentPage() {
         <h2>What a virtual visit is</h2>
         <p>
           Telehealth here means a live audio and video visit between you, a care partner if you want one present, and a clinician who is somewhere else.
-          The visit platform is <Placeholder value="[TELEHEALTH PLATFORM]" />.
+          The visit platform is not named on this website.
           Some steps, including labs, MRI, and any infusion, happen in person at a local site.
         </p>
 
         <h2>Who may see you</h2>
         <p>
-          The clinician must be licensed in the state where you are located during the visit. Those states are <Placeholder value="[LICENSED STATES]" />.
-          The clinician&apos;s name, credential, and license number for each state are on the <a href="/about#providers">Meet the Team</a> page.
+          The clinician must be licensed in the state where you are located during the visit. Those states are {licensedStates}.
+          The clinician&apos;s name, specialty, NPI, and license number are on the <a href="/about#providers">Meet the Team</a> page.
         </p>
 
         <h2>Benefits, risks, and alternatives</h2>
         <ul>
           <li>A virtual visit can start the evaluation when that step does not have to be in person.</li>
           <li>Technology can fail, a video exam can miss something an in-person exam would catch, and a connection or a room that is not private can expose the conversation.</li>
-          <li>You can choose in-person care with a local clinician, or you can decline a video visit. Other alternatives offered by this practice are <Placeholder value="[ALTERNATIVES]" />.</li>
+          <li>You can choose in-person care with a local clinician, or you can decline a video visit. Other alternatives offered by this practice are not listed on this page.</li>
         </ul>
 
         <h2>Privacy, records, and prescriptions</h2>
         <p>
           Health information from a visit is handled under the <a href="/privacy#notice">Notice of Privacy Practices</a>.
-          The record of the visit is kept by <Placeholder value="[RECORDS CUSTODIAN]" />.
+          A separate records custodian is not named on this page. The organization responsible for health information is {legalEntity}.
           The website does not prescribe or dispense medication. A prescription, if one is appropriate, comes from the evaluating clinician and follows the law of the state where you are located.
         </p>
 
@@ -304,8 +313,9 @@ export function ConsentPage() {
 
         <h2>How consent is collected, and how to withdraw it</h2>
         <p>
-          Before a virtual visit, consent is collected by <Placeholder value="[CONSENT METHOD]" />.
-          You may stop a video visit or withdraw consent. The way to do that is <Placeholder value="[WITHDRAWAL METHOD]" />.
+          Before a virtual visit, this website does not record consent. Contact us through our <a href="/contact">contact page</a>.
+          You may stop a video visit or withdraw consent by contacting us through our <a href="/contact">contact page</a>.
+          This page does not describe another way to withdraw consent.
           Withdrawing consent does not erase a record the practice is required to keep.
           If you do not consent, the visit should not proceed by video.
         </p>
@@ -321,7 +331,7 @@ export function ContactPage() {
         <p className="eyebrow">Contact</p>
         <h1>Contact Local Doctor</h1>
         <p className="legal-lede">
-          Use this page for the company name, the physical address, the phone number, and the clinicians who may see patients.
+          Use this page for the company name, the physical address, and the clinician who may see patients.
         </p>
         <div className="consult-actions">
           <a className="primary" href={`mailto:${publicEmail}`}>Email {publicEmail}</a>
@@ -334,7 +344,7 @@ export function ContactPage() {
           <h2>Licensed providers</h2>
           <p>
             A virtual visit is available only when the clinician is licensed in the state where the patient is located during the visit.
-            States where patients may be seen: <Placeholder value="[LICENSED STATES]" />.
+            States where patients may be seen: {licensedStates}.
           </p>
           <ProviderRoster />
           <h2>Policies</h2>
