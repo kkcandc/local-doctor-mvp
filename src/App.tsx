@@ -35,8 +35,8 @@ import {
   TermsPage,
   legalEntity,
   licensedStates,
-  noPublishedPhone,
   physicalAddress,
+  publicPhone,
   publicEmail,
 } from './compliancePages'
 import './App.css'
@@ -727,7 +727,7 @@ function AboutPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <SectionIntro
           eyebrow="Company"
           title="Who operates Local Doctor."
-          copy="The legal name, physical address, and states where a patient may be seen are listed here."
+          copy="The legal name, physical address, phone, and the state where a patient may be seen are listed here."
         />
         <LegalIdentity />
       </section>
@@ -1399,7 +1399,7 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
           <br />
           {physicalAddress}
           <br />
-          {noPublishedPhone}
+          Phone: {publicPhone}
           <br />
           Patients may be seen in {licensedStates}.
         </p>

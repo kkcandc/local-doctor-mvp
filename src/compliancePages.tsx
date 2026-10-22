@@ -7,18 +7,13 @@ export const legalEntity =
 
 export const physicalAddress = '4900 Centennial Blvd, Suite 300, Nashville, TN 37209'
 
-export const noPublishedPhone =
-  `No phone number is published on this website. Contact us through our contact page or email ${publicEmail}.`
+export const publicPhone = '240-376-5730'
 
-export const licensedStates = 'Kansas'
+export const licensedStates = 'Maryland'
 
 export const providerName = 'Deborah Kathleen Rose'
 
 export const providerSpecialty = 'Neurology'
-
-export const providerNpi = '1023646411'
-
-export const providerLicense = 'Kansas 04-50344'
 
 export const effectiveDate = 'October 2026'
 
@@ -32,27 +27,19 @@ export function LegalIdentity() {
         <dd>{legalEntity}</dd>
       </div>
       <div>
-        <dt>Brand</dt>
-        <dd>Local Doctor</dd>
-      </div>
-      <div>
-        <dt>Website</dt>
-        <dd>trylocaldoctor.com</dd>
-      </div>
-      <div>
         <dt>Physical address</dt>
         <dd>{physicalAddress}</dd>
       </div>
       <div>
         <dt>Phone</dt>
-        <dd>{noPublishedPhone}</dd>
+        <dd><a href="tel:+12403765730">{publicPhone}</a></dd>
       </div>
       <div>
         <dt>Email</dt>
         <dd><a href={`mailto:${publicEmail}`}>{publicEmail}</a></dd>
       </div>
       <div>
-        <dt>States where patients may be seen</dt>
+        <dt>State where patients may be seen</dt>
         <dd>{licensedStates}</dd>
       </div>
     </dl>
@@ -69,16 +56,7 @@ export function ProviderRoster() {
           <dd>{providerSpecialty}</dd>
         </div>
         <div>
-          <dt>NPI</dt>
-          <dd>{providerNpi}</dd>
-        </div>
-        <div>
-          <dt>Licenses by state</dt>
-          <dd>
-            <ul className="license-list">
-              <li>{providerLicense}</li>
-            </ul>
-          </dd>
+          <dd>Licensed in {licensedStates}</dd>
         </div>
       </dl>
     </article>
@@ -147,7 +125,7 @@ export function PrivacyPage() {
 
         <h3>Privacy contact</h3>
         <p>
-          Privacy questions go to {legalEntity} through the <a href="/contact">contact page</a>, by email at <a href={`mailto:${publicEmail}`}>{publicEmail}</a>, or by mail at {physicalAddress}. {noPublishedPhone}
+          Privacy questions go to {legalEntity} through the <a href="/contact">contact page</a>, by email at <a href={`mailto:${publicEmail}`}>{publicEmail}</a>, by mail at {physicalAddress}, or by phone at {publicPhone}.
         </p>
 
         <h2 id="notice">Notice of Privacy Practices</h2>
@@ -183,7 +161,7 @@ export function PrivacyPage() {
           <li>Receive notice of a breach of unsecured health information when the law requires it.</li>
         </ul>
         <p>
-          To use these rights, contact us through our <a href="/contact">contact page</a> or email <a href={`mailto:${publicEmail}`}>{publicEmail}</a>. {noPublishedPhone}
+          To use these rights, contact us through our <a href="/contact">contact page</a> or email <a href={`mailto:${publicEmail}`}>{publicEmail}</a>, or call {publicPhone}.
         </p>
 
         <h3>Responsibilities and complaints</h3>
@@ -196,7 +174,7 @@ export function PrivacyPage() {
           Filing a complaint will not be held against you.
         </p>
         <p>
-          The clinician&apos;s name, specialty, NPI, and license number are listed on the <a href="/about#providers">Meet the Team</a> and <a href="/contact">Contact</a> pages.
+          The clinician&apos;s name and specialty are listed on the <a href="/about#providers">Meet the Team</a> and <a href="/contact">Contact</a> pages.
           Patients may be seen in {licensedStates}.
         </p>
       </div>
@@ -227,7 +205,7 @@ export function TermsPage() {
         <h2>Where a visit can happen</h2>
         <p>
           A virtual visit is offered only when the clinician is licensed to see a patient located in that state at the time of the visit.
-          Those states are {licensedStates}.
+          That state is {licensedStates}.
           Telehealth consent is a separate step, described on the <a href="/telehealth-consent">Telehealth Consent</a> page. This website describes that step and does not record a signature. Contact us through our <a href="/contact">contact page</a>.
         </p>
 
@@ -264,7 +242,7 @@ export function TermsPage() {
 
         <h2>Changes and contact</h2>
         <p>
-          Updated terms will be posted on this page. Questions can be sent to <a href={`mailto:${publicEmail}`}>{publicEmail}</a> or by mail to {physicalAddress}. Contact us through our <a href="/contact">contact page</a>. {noPublishedPhone}
+          Updated terms will be posted on this page. Questions can be sent to <a href={`mailto:${publicEmail}`}>{publicEmail}</a> or by mail to {physicalAddress}. Contact us through our <a href="/contact">contact page</a>. You can also call {publicPhone}.
         </p>
       </div>
     </ComplianceLayout>
@@ -288,8 +266,8 @@ export function ConsentPage() {
 
         <h2>Who may see you</h2>
         <p>
-          The clinician must be licensed in the state where you are located during the visit. Those states are {licensedStates}.
-          The clinician&apos;s name, specialty, NPI, and license number are on the <a href="/about#providers">Meet the Team</a> page.
+          The clinician must be licensed in the state where you are located during the visit. That state is {licensedStates}.
+          The clinician&apos;s name and specialty are on the <a href="/about#providers">Meet the Team</a> page.
         </p>
 
         <h2>Benefits, risks, and alternatives</h2>
@@ -344,7 +322,7 @@ export function ContactPage() {
           <h2>Licensed providers</h2>
           <p>
             A virtual visit is available only when the clinician is licensed in the state where the patient is located during the visit.
-            States where patients may be seen: {licensedStates}.
+            State where patients may be seen: {licensedStates}.
           </p>
           <ProviderRoster />
           <h2>Policies</h2>
