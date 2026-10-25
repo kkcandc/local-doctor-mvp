@@ -33,6 +33,7 @@ import {
   PrivacyPage,
   ProviderRoster,
   TermsPage,
+  clinicalPractice,
   legalEntity,
   licensedStates,
   physicalAddress,
@@ -513,9 +514,9 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <div className="hero-content">
           <div className="hero-copy">
             <p className="eyebrow light">Virtual Alzheimer's specialty clinic</p>
-            <h1>Treatment that goes after Alzheimer's directly. <em>Fast.</em></h1>
+            <h1>See if newer Alzheimer's treatments may be right for you. <em>Sooner.</em></h1>
             <p>
-              New FDA-approved treatments can slow early Alzheimer&apos;s progression. Get a second opinion from clinicians who specialize in disease-modifying treatment and cognitive impairment to see if you may be eligible.
+              New FDA-approved treatments may help slow progression in some people with early Alzheimer&apos;s disease. Get a second opinion from clinicians who focus on cognitive impairment and treatment eligibility to see if one may be an option for you.
             </p>
             <div className="hero-actions">
               <button className="primary light-primary" type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
@@ -529,8 +530,8 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
       <section className="stat-band">
         <Metric value="3.5 years" label="average gap between first symptoms and diagnosis, nationally" />
         <Metric value="6-9 months" label="typical wait for a first specialist visit elsewhere" />
-        <Metric value="~300" label="referring physicians already in the network" />
-        <Metric value="97%+" label="patient satisfaction across the network" />
+        <Metric value="Maryland" label="licensed neurologist leads the virtual visit" />
+        <Metric value="Local" label="labs and imaging near home, if ordered" />
       </section>
 
       <section className="section white">
@@ -593,8 +594,8 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
       <section className="treatment-hero">
         <div>
           <p className="eyebrow">Treatments</p>
-          <h1>FDA-approved to go after Alzheimer's directly.</h1>
-          <p>Leqembi and Kisunla are the first FDA-approved therapies shown to act on the underlying disease, not just its symptoms. Here is what they do and who they may be for.</p>
+          <h1>FDA-approved treatments for early Alzheimer's disease.</h1>
+          <p>Leqembi and Kisunla are FDA-approved anti-amyloid therapies for people with early Alzheimer&apos;s disease. In clinical trials they slowed decline for some patients. They are not a cure, they carry real risks such as ARIA, and they are not right for everyone. Here is what they do and who they may be for.</p>
           <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={15} /></button>
         </div>
         <img src="/assets/hero-memory-care.webp" alt="Patient and caregiver speaking with a clinician" />
@@ -727,7 +728,7 @@ function AboutPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <SectionIntro
           eyebrow="Company"
           title="Who operates Local Doctor."
-          copy="The legal name, physical address, phone, and the state where a patient may be seen are listed here."
+          copy="The legal name, the practice that provides clinical care, physical address, phone, and the state where a patient may be seen are listed here."
         />
         <LegalIdentity />
       </section>
@@ -1400,6 +1401,8 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
           {physicalAddress}
           <br />
           Phone: {publicPhone}
+          <br />
+          Clinical care is provided by {clinicalPractice}.
           <br />
           Patients may be seen in {licensedStates}.
         </p>
