@@ -5,9 +5,12 @@ export const publicEmail = 'hello@trylocaldoctor.com'
 export const legalEntity =
   'Local Infusion Inc. (doing business as Local Doctor), a Delaware corporation'
 
-export const physicalAddress = '4900 Centennial Blvd, Suite 300, Nashville, TN 37209'
+export const clinicalPractice =
+  'LIV Specialty Care CT, P.C., a physician-owned professional corporation'
 
-export const publicPhone = '240-376-5730'
+export const physicalAddress = '4900 Centennial Blvd, Suite 300, Box 104, Nashville, TN 37209'
+
+export const publicPhone = '(844) 509-1404'
 
 export const licensedStates = 'Maryland'
 
@@ -27,12 +30,16 @@ export function LegalIdentity() {
         <dd>{legalEntity}</dd>
       </div>
       <div>
+        <dt>Clinical care provided by</dt>
+        <dd>{clinicalPractice}</dd>
+      </div>
+      <div>
         <dt>Physical address</dt>
         <dd>{physicalAddress}</dd>
       </div>
       <div>
         <dt>Phone</dt>
-        <dd><a href="tel:+12403765730">{publicPhone}</a></dd>
+        <dd><a href="tel:+18445091404">{publicPhone}</a></dd>
       </div>
       <div>
         <dt>Email</dt>
@@ -266,6 +273,7 @@ export function ConsentPage() {
 
         <h2>Who may see you</h2>
         <p>
+          Clinical care is provided by {clinicalPractice}.
           The clinician must be licensed in the state where you are located during the visit. That state is {licensedStates}.
           The clinician&apos;s name and specialty are on the <a href="/about#providers">Meet the Team</a> page.
         </p>
