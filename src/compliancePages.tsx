@@ -135,6 +135,11 @@ export function PrivacyPage() {
           Privacy questions go to {legalEntity} through the <a href="/contact">contact page</a>, by email at <a href={`mailto:${publicEmail}`}>{publicEmail}</a>, by mail at {physicalAddress}, or by phone at {publicPhone}.
         </p>
 
+        <h2 id="ai-tools">Use of AI tools</h2>
+        <p>
+          Some website copy and site code are drafted with help from AI tools (Anthropic). Clinicians and counsel review published site content for accuracy. AI tools are not used to make clinical decisions or to access patient information.
+        </p>
+
         <h2 id="notice">Notice of Privacy Practices</h2>
         <p className="npp-banner">
           This notice describes how medical information about you may be used and disclosed and how you can get access to this information. Please review it carefully.
