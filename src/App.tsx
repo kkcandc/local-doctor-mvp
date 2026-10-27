@@ -1430,6 +1430,9 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <a href="/terms">Terms of Use</a>
         <a href="/telehealth-consent">Telehealth Consent</a>
         <a href="/contact">Contact</a>
+        <small>
+          <a href="/privacy#ai-tools">AI-use disclosure</a>: some site copy and code are drafted with AI tools.
+        </small>
         <small>Individual results vary. Local Doctor does not replace emergency care. Call 911 for a medical emergency.</small>
       </div>
     </footer>
