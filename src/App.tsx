@@ -30,6 +30,7 @@ import {
   ContactPage,
   ConsentPage,
   LegalIdentity,
+  PatientRightsPage,
   PrivacyPage,
   ProviderRoster,
   TermsPage,
@@ -55,6 +56,7 @@ type Route =
   | 'refer'
   | 'privacy'
   | 'terms'
+  | 'patientRights'
   | 'consent'
   | 'contact'
 
@@ -67,12 +69,16 @@ const defaultDescription =
 
 const routeMeta: Partial<Record<Route, { title: string; description: string }>> = {
   privacy: {
-    title: 'Privacy Policy and Notice of Privacy Practices | Local Doctor',
-    description: 'How Local Doctor collects, uses, and shares information, and the notice of privacy practices for health information.',
+    title: 'Privacy Policy | Local Doctor',
+    description: 'Privacy Policy for Local Infusion Inc. services offered through trylocaldoctor.com.',
   },
   terms: {
     title: 'Terms of Use | Local Doctor',
-    description: 'Terms of use for the Local Doctor website, including what the site does and does not provide.',
+    description: 'Terms of Use for the Local Doctor platform operated by Local Infusion, Inc.',
+  },
+  patientRights: {
+    title: 'Patient Rights, Notices, and Notice of Privacy Practice | Local Doctor',
+    description: 'Patient rights, nondiscrimination and good faith estimate notices, and the Notice of Privacy Practices.',
   },
   consent: {
     title: 'Telehealth Consent | Local Doctor',
@@ -100,6 +106,7 @@ const routePaths: Record<Exclude<Route, 'blogPost'>, string> = {
   refer: '/refer-a-patient',
   privacy: '/privacy',
   terms: '/terms',
+  patientRights: '/patient-rights',
   consent: '/telehealth-consent',
   contact: '/contact',
 }
@@ -116,6 +123,7 @@ const pathRoutes: Record<string, Route> = {
   'refer-a-patient': 'refer',
   privacy: 'privacy',
   terms: 'terms',
+  'patient-rights': 'patientRights',
   'telehealth-consent': 'consent',
   contact: 'contact',
 }
@@ -376,6 +384,9 @@ function App() {
       ) {
         window.history.replaceState({}, '', '/')
       }
+      if (path === 'privacy' && window.location.hash === '#notice') {
+        window.history.replaceState({}, '', '/patient-rights#notice-of-privacy-practices')
+      }
       const next = readLocation()
       setRoute(next.route)
       setBlogSlug(next.slug)
@@ -426,6 +437,7 @@ function App() {
       {route === 'refer' && <ReferPage onNavigate={navigate} />}
       {route === 'privacy' && <PrivacyPage />}
       {route === 'terms' && <TermsPage />}
+      {route === 'patientRights' && <PatientRightsPage />}
       {route === 'consent' && <ConsentPage />}
       {route === 'contact' && <ContactPage />}
       <Footer onNavigate={navigate} />
@@ -1426,13 +1438,10 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
       <div>
         <strong>Legal</strong>
         <a href="/privacy">Privacy Policy</a>
-        <a href="/privacy#notice">Notice of Privacy Practices</a>
         <a href="/terms">Terms of Use</a>
-        <a href="/telehealth-consent">Telehealth Consent</a>
+        <a href="/patient-rights">Patient Rights & Notices</a>
         <a href="/contact">Contact</a>
-        <small>
-          <a href="/privacy#ai-tools">AI-use disclosure</a>: some site copy and code are drafted with AI tools.
-        </small>
+        <small>AI-use disclosure: some site copy and code are drafted with AI tools.</small>
         <small>Individual results vary. Local Doctor does not replace emergency care. Call 911 for a medical emergency.</small>
       </div>
     </footer>
