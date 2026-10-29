@@ -1331,7 +1331,7 @@ h3 {
 
 .intake-frame-wrap {
   overflow: hidden;
-  height: clamp(420px, calc(100svh - 272px), 620px);
+  height: clamp(525px, calc((100svh - 272px) * 1.25), 775px);
   min-height: 0;
   background: #fff;
   border: 1px solid var(--line);
@@ -2426,7 +2426,7 @@ a.blog-card {
 
   .intake-frame-wrap {
     height: auto;
-    min-height: 70dvh;
+    min-height: 87.5dvh;
   }
 
   .intake-frame-wrap iframe,
@@ -2436,8 +2436,8 @@ a.blog-card {
   .typeform-live-embed .tf-v1-widget {
     width: 100% !important;
     max-width: 100%;
-    height: 70dvh !important;
-    min-height: 560px;
+    height: 87.5dvh !important;
+    min-height: 700px;
   }
 
   .success-card {
