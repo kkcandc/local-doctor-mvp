@@ -10,7 +10,7 @@ export const clinicalPractice =
 
 export const physicalAddress = '4900 Centennial Blvd, Suite 300, Box 104, Nashville, TN 37209'
 
-export const publicPhone = '(844) 509-1404'
+export const publicPhone = '(240) 376-5730'
 
 export const licensedStates = 'Maryland'
 
@@ -39,7 +39,7 @@ export function LegalIdentity() {
       </div>
       <div>
         <dt>Phone</dt>
-        <dd><a href="tel:+18445091404">{publicPhone}</a></dd>
+        <dd><a href="tel:+12403765730">{publicPhone}</a></dd>
       </div>
       <div>
         <dt>Email</dt>

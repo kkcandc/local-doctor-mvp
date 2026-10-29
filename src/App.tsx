@@ -8,7 +8,6 @@ import {
   CalendarClock,
   ChevronDown,
   CheckCircle2,
-  ClipboardCheck,
   FileText,
   HeartHandshake,
   Menu,
@@ -58,7 +57,7 @@ type Route =
   | 'consent'
   | 'contact'
 
-const typeformLiveId = '01M49714FSNRJ3YKS1V0XVG66M'
+const typeformLiveId = '01M64J1XGXT19BH7GGWPKJ243K'
 const typeformEmbedScript = 'https://embed.typeform.com/next/embed.js'
 
 const defaultTitle = "Local Doctor | Alzheimer's Treatment Eligibility Review"
@@ -750,11 +749,11 @@ function StartPage() {
     <>
       <PageHero
         eyebrow="Get started"
-        title="Let's find out if treatment is right for you."
-        copy="Most people leave with a clear next step, including what to do if the honest answer is not yet."
-        icon={<ClipboardCheck size={38} />}
-        primaryLabel="Start eligibility check"
-        onPrimary={() => document.getElementById('intake')?.scrollIntoView({ behavior: 'smooth' })}
+        title="Find out if treatment is right for you."
+        copy="A quick phone call or form will help us understand your needs, verify insurance, and define next steps together."
+        primaryLabel={`Call ${publicPhone}`}
+        href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
+        showAside={false}
       />
       <section className="section white">
         <StartExperience />
@@ -1075,7 +1074,6 @@ function StartExperience() {
   return (
     <div className="start-experience">
       <EligibilityLeadForm />
-      <ScheduleCallWidget />
       <section className="before-call">
         {[
           ['What if I do not qualify?', 'You will still get a clear explanation of why and what a sensible next step may be.'],
@@ -1114,38 +1112,6 @@ function EligibilityLeadForm() {
       <div className="intake-frame-wrap">
         <div className="typeform-live-embed" data-tf-live={typeformLiveId} data-tf-inline-on-mobile="" />
       </div>
-    </section>
-  )
-}
-
-function ScheduleCallWidget() {
-  return (
-    <section className="consult-card" id="consult">
-      <div>
-        <p className="eyebrow">Talk with the team</p>
-        <h2>A call is not booked on this page.</h2>
-        <p>
-          Complete the intake above, or email {publicEmail}. The intake is how the team gets a name and a way to follow up. Neither the form nor an email reserves a time.
-        </p>
-        <div className="consult-actions">
-          <a className="primary" href="#intake">Go to the intake <ArrowRight size={15} /></a>
-          <a className="secondary" href={`mailto:${publicEmail}`}>Email {publicEmail}</a>
-        </div>
-      </div>
-      <aside>
-        <h3>What happens next</h3>
-        <ol>
-          <li>You submit the intake or an email.</li>
-          <li>The team follows up using the contact information you provide.</li>
-          <li>A visit is scheduled only after that follow-up, and only if a clinical review makes sense.</li>
-        </ol>
-        <h3>What to have handy</h3>
-        <ul>
-          <li>Insurance card</li>
-          <li>Medication list</li>
-          <li>Recent testing or imaging</li>
-        </ul>
-      </aside>
     </section>
   )
 }
@@ -1307,15 +1273,19 @@ function PageHero({
   primaryLabel,
   onPrimary,
   href,
+  showAside = true,
 }: {
   eyebrow: string
   title: string
   copy: string
-  icon: ReactNode
+  icon?: ReactNode
   primaryLabel: string
   onPrimary?: () => void
   href?: string
+  showAside?: boolean
 }) {
+  const isPhoneLink = href?.startsWith('tel:')
+
   return (
     <section className="page-hero">
       <div>
@@ -1323,16 +1293,22 @@ function PageHero({
         <h1>{title}</h1>
         <p>{copy}</p>
         {href ? (
-          <a className="primary" href={href} target="_blank" rel="noreferrer">{primaryLabel} <ArrowRight size={15} /></a>
+          isPhoneLink ? (
+            <a className="primary" href={href}>{primaryLabel}</a>
+          ) : (
+            <a className="primary" href={href} target="_blank" rel="noreferrer">{primaryLabel} <ArrowRight size={15} /></a>
+          )
         ) : (
           <button className="primary" type="button" onClick={onPrimary}>{primaryLabel} <ArrowRight size={15} /></button>
         )}
       </div>
-      <aside>
-        {icon}
-        <strong>Clinical decisions require licensed review.</strong>
-        <span>The website is a front door, not a diagnosis or treatment promise.</span>
-      </aside>
+      {showAside && (
+        <aside>
+          {icon}
+          <strong>Clinical decisions require licensed review.</strong>
+          <span>The website is a front door, not a diagnosis or treatment promise.</span>
+        </aside>
+      )}
     </section>
   )
 }
