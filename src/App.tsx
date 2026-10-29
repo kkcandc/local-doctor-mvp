@@ -49,7 +49,6 @@ type Route =
   | 'about'
   | 'start'
   | 'faq'
-  | 'resources'
   | 'blog'
   | 'blogPost'
   | 'refer'
@@ -95,7 +94,6 @@ const routePaths: Record<Exclude<Route, 'blogPost'>, string> = {
   about: '/about',
   start: '/get-started',
   faq: '/faq',
-  resources: '/resources',
   blog: '/blog',
   refer: '/refer-a-patient',
   privacy: '/privacy',
@@ -111,7 +109,6 @@ const pathRoutes: Record<string, Route> = {
   about: 'about',
   'get-started': 'start',
   faq: 'faq',
-  resources: 'resources',
   blog: 'blog',
   'refer-a-patient': 'refer',
   privacy: 'privacy',
@@ -312,38 +309,8 @@ const faqCategories = [
   },
 ]
 
-const resources = [
-  {
-    title: 'Early Alzheimer\'s signs vs. normal aging',
-    label: 'Signs and symptoms',
-    copy: 'A patient-friendly guide to memory and thinking changes that may justify a real medical conversation.',
-  },
-  {
-    title: 'What to expect in a full evaluation',
-    label: 'Evaluation',
-    copy: 'Cognitive assessment, records, labs, imaging, amyloid confirmation, and clinical next steps in plain language.',
-  },
-  {
-    title: 'Leqembi and Kisunla readiness checklist',
-    label: 'Treatment readiness',
-    copy: 'What a clinician may need to review before deciding whether anti-amyloid treatment should be considered.',
-  },
-  {
-    title: 'Brain health habits worth discussing',
-    label: 'Brain health',
-    copy: 'Physical activity, heart-healthy nutrition, social connection, sleep, and mental engagement prompts for a clinician conversation.',
-  },
-  {
-    title: 'Care partner guide for virtual visits',
-    label: 'Caregiver support',
-    copy: 'How spouses, adult children, and trusted supporters can help without taking over the patient\'s voice.',
-  },
-  {
-    title: 'Insurance, records, and local testing',
-    label: 'Access',
-    copy: 'A practical checklist for benefits review, prior authorizations, MRI logistics, and downstream infusion planning.',
-  },
-]
+const headerPhone = '(240) 376-5730'
+const headerPhoneHref = '+12403765730'
 
 function normalizePath() {
   return window.location.pathname.replace(/^\/+|\/+$/g, '')
@@ -420,7 +387,6 @@ function App() {
       {route === 'about' && <AboutPage onNavigate={navigate} />}
       {route === 'start' && <StartPage />}
       {route === 'faq' && <FaqPage onNavigate={navigate} />}
-      {route === 'resources' && <ResourcesPage onNavigate={navigate} />}
       {route === 'blog' && <BlogPage onNavigate={navigate} />}
       {route === 'blogPost' && <BlogPostPage slug={blogSlug} onNavigate={navigate} />}
       {route === 'refer' && <ReferPage onNavigate={navigate} />}
@@ -447,9 +413,13 @@ function Header({
   const navItems: Array<[Route, string]> = [
     ['how', 'How it works'],
     ['treatments', 'Treatments'],
-    ['about', 'Meet the Team'],
   ]
-  const resourcesActive = route === 'resources' || route === 'blog' || route === 'blogPost' || route === 'faq'
+  const aboutItems: Array<[Route, string]> = [
+    ['about', 'Meet the Team'],
+    ['blog', 'Blog'],
+    ['faq', 'FAQs'],
+  ]
+  const aboutActive = route === 'about' || route === 'blog' || route === 'blogPost' || route === 'faq'
 
   return (
     <header className="site-header">
@@ -465,19 +435,22 @@ function Header({
             </button>
           ))}
           <div className="nav-dropdown">
-            <button className={resourcesActive ? 'active' : ''} type="button" onClick={() => onNavigate('resources')}>
-              Resources
+            <button className={aboutActive ? 'active' : ''} type="button" aria-haspopup="true">
+              About
             </button>
             <div>
-              <button type="button" onClick={() => onNavigate('resources')}>Guides</button>
-              <button type="button" onClick={() => onNavigate('blog')}>Blog</button>
-              <button type="button" onClick={() => onNavigate('faq')}>FAQ</button>
+              {aboutItems.map(([itemRoute, label]) => (
+                <button key={itemRoute} type="button" onClick={() => onNavigate(itemRoute)}>{label}</button>
+              ))}
             </div>
           </div>
         </nav>
-        <button className="header-cta" type="button" onClick={() => onNavigate('start')}>
-          Check eligibility
-        </button>
+        <div className="header-actions">
+          <a className="header-phone" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
+          <button className="header-cta" type="button" onClick={() => onNavigate('start')}>
+            Check eligibility
+          </button>
+        </div>
         <button
           className="menu-button"
           type="button"
@@ -495,9 +468,13 @@ function Header({
               {label}
             </button>
           ))}
-          <button type="button" onClick={() => onNavigate('resources')}>Guides</button>
-          <button type="button" onClick={() => onNavigate('blog')}>Blog</button>
-          <button type="button" onClick={() => onNavigate('faq')}>FAQ</button>
+          <span className="mobile-nav-label">About</span>
+          {aboutItems.map(([itemRoute, label]) => (
+            <button className="mobile-nav-sub" key={itemRoute} type="button" onClick={() => onNavigate(itemRoute)}>
+              {label}
+            </button>
+          ))}
+          <a className="mobile-nav-phone" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
           <button type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
         </nav>
       )}
@@ -841,26 +818,6 @@ function FaqPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <a className="primary" href="mailto:hello@trylocaldoctor.com">Email our team</a>
       </section>
       <ConversionPanel onNavigate={onNavigate} />
-    </>
-  )
-}
-
-function ResourcesPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
-  return (
-    <>
-      <PageHero eyebrow="Resources" title="Topics for treatment eligibility, records, and next steps." copy="Plain-language topics on memory changes, evaluation, treatment readiness, care partners, and what to gather next. Published reading is in the article library." icon={<FileText size={38} />} onPrimary={() => onNavigate('blog')} primaryLabel="Read articles" />
-      <section className="section white">
-        <div className="resource-grid">
-          {resources.map((resource) => (
-            <article className="resource-card" key={resource.title}>
-              <span>{resource.label}</span>
-              <h2>{resource.title}</h2>
-              <p>{resource.copy}</p>
-              <button type="button" onClick={() => onNavigate('blog')}>Read articles <ArrowRight size={14} /></button>
-            </article>
-          ))}
-        </div>
-      </section>
     </>
   )
 }
