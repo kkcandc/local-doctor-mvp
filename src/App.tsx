@@ -1089,16 +1089,9 @@ function EligibilityLeadForm() {
   }, [])
 
   return (
-    <section className="lead-card intake-embed-card" id="intake">
-      <div className="intake-copy">
-        <p className="eyebrow">Eligibility intake</p>
-        <h2>Complete the secure intake.</h2>
-        <p>This secure intake collects the information the team needs to understand your situation and decide whether clinical review may make sense.</p>
-      </div>
-      <div className="intake-frame-wrap">
-        <div className="typeform-live-embed" data-tf-live={typeformLiveId} data-tf-inline-on-mobile="" />
-      </div>
-    </section>
+    <div className="intake-frame-wrap" id="intake">
+      <div className="typeform-live-embed" data-tf-live={typeformLiveId} data-tf-inline-on-mobile="" />
+    </div>
   )
 }
 

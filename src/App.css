@@ -1353,18 +1353,6 @@ h3 {
   border-top: 4px solid var(--deep);
 }
 
-.intake-embed-card {
-  grid-template-columns: 1fr;
-  min-height: auto;
-  align-content: start;
-  gap: 16px;
-  padding: 24px;
-}
-
-.intake-copy {
-  max-width: 760px;
-}
-
 .lead-card > div > p:not(.eyebrow),
 .consult-card > div > p,
 .expect-faq p,
@@ -1381,9 +1369,6 @@ h3 {
   overflow: hidden;
   height: clamp(525px, calc((100svh - 272px) * 1.25), 775px);
   min-height: 0;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 8px;
 }
 
 .intake-frame-wrap iframe,
@@ -2265,7 +2250,6 @@ a.blog-card {
   .treatment-hero,
   .local-seo-hero,
   .lead-card,
-  .intake-embed-card,
   .lead-card form,
   .consult-card,
   .expect-columns,
@@ -2495,11 +2479,6 @@ a.blog-card {
     padding: 24px;
   }
 
-  .intake-embed-card {
-    min-height: auto;
-  }
-
-  .intake-embed-card,
   .intake-frame-wrap,
   .typeform-live-embed {
     width: 100%;
