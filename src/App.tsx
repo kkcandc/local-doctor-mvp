@@ -727,11 +727,12 @@ function StartPage() {
       <PageHero
         eyebrow="Get started"
         title="Find out if treatment is right for you."
-        copy="A quick phone call or form will help us understand your needs, verify insurance, and define next steps together."
+        copy="A free eligibility call will help us better understand your background, verify insurance, and define next steps together. No obligation, nor commitment."
         primaryLabel={`Call ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
         showAside={false}
       />
+      <WhatToExpect />
       <section className="section white">
         <StartExperience />
       </section>
@@ -1031,19 +1032,47 @@ function StartExperience() {
   return (
     <div className="start-experience">
       <EligibilityLeadForm />
-      <section className="before-call">
+    </div>
+  )
+}
+
+function WhatToExpect() {
+  return (
+    <section className="section mist">
+      <h2 className="expect-heading">What to expect</h2>
+      <div className="expect-columns">
+        <div>
+          <h3>Here&apos;s how we check eligibility</h3>
+          <ol>
+            <li>Give us a call or fill out the form below so we can call you.</li>
+            <li>We spend time on the call learning about your background, situation, and potential needs.</li>
+            <li>We verify your insurance and whether your needs qualify to meet with our neurology team.</li>
+            <li>If you wish to move forward, we set up time for you to meet on a video call with our leading neurology specialist who will evaluate and recommend the best course of treatment.</li>
+          </ol>
+        </div>
+        <div>
+          <h3>What to have handy for our first call</h3>
+          <ul>
+            <li>Insurance information</li>
+            <li>Medication list</li>
+            <li>Recent test results</li>
+          </ul>
+        </div>
+      </div>
+      <div className="expect-faq">
         {[
-          ['What if I do not qualify?', 'You will still get a clear explanation of why and what a sensible next step may be.'],
-          ['Will this replace my current doctor?', 'No. This is a focused specialist pathway that can work alongside the clinicians you already trust.'],
-          ['Can a caregiver be part of this?', 'Yes. Care partners are welcome and often helpful for history, logistics, and next-step planning.'],
-        ].map(([title, copy]) => (
-          <article key={title}>
-            <h3>{title}</h3>
-            <p>{copy}</p>
+          ['How does this work with my existing doctors?', 'Think of our neurology team as an extension of your current doctors. Our providers do not replace any of your existing provider relationships, and will work with them as needed.'],
+          ['Can a caregiver be a part of this?', 'Yes! We have even seen maximal results when any loved one is involved in this journey.'],
+          ['What if my insurance is not covered?', 'Not a problem, we provide a transparent and low cost for your visits with our neurology team. Any other costs will be communicated transparently.'],
+          ["What if I'm not eligible?", 'If the honest answer is "not yet" we will let you know why and recommend resources that might still be helpful to address any of your concerns.'],
+        ].map(([question, answer]) => (
+          <article key={question}>
+            <h3>{question}</h3>
+            <p>{answer}</p>
           </article>
         ))}
-      </section>
-    </div>
+      </div>
+    </section>
   )
 }
 
@@ -1060,16 +1089,9 @@ function EligibilityLeadForm() {
   }, [])
 
   return (
-    <section className="lead-card intake-embed-card" id="intake">
-      <div className="intake-copy">
-        <p className="eyebrow">Eligibility intake</p>
-        <h2>Complete the secure intake.</h2>
-        <p>This secure intake collects the information the team needs to understand your situation and decide whether clinical review may make sense.</p>
-      </div>
-      <div className="intake-frame-wrap">
-        <div className="typeform-live-embed" data-tf-live={typeformLiveId} data-tf-inline-on-mobile="" />
-      </div>
-    </section>
+    <div className="intake-frame-wrap" id="intake">
+      <div className="typeform-live-embed" data-tf-live={typeformLiveId} data-tf-inline-on-mobile="" />
+    </div>
   )
 }
 

@@ -1338,7 +1338,7 @@ h3 {
 
 .lead-card,
 .consult-card,
-.before-call article {
+.expect-faq article {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1353,21 +1353,10 @@ h3 {
   border-top: 4px solid var(--deep);
 }
 
-.intake-embed-card {
-  grid-template-columns: 1fr;
-  min-height: auto;
-  align-content: start;
-  gap: 16px;
-  padding: 24px;
-}
-
-.intake-copy {
-  max-width: 760px;
-}
-
 .lead-card > div > p:not(.eyebrow),
 .consult-card > div > p,
-.before-call p {
+.expect-faq p,
+.expect-columns li {
   color: var(--muted);
   line-height: 1.62;
 }
@@ -1380,9 +1369,6 @@ h3 {
   overflow: hidden;
   height: clamp(525px, calc((100svh - 272px) * 1.25), 775px);
   min-height: 0;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 8px;
 }
 
 .intake-frame-wrap iframe,
@@ -1589,18 +1575,51 @@ h3 {
   padding: 9px 13px;
 }
 
-.before-call {
+.expect-heading {
+  margin-bottom: 38px;
+  text-align: center;
+}
+
+.expect-columns {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px 48px;
+  margin-bottom: 44px;
+}
+
+.expect-columns h3 {
+  margin-bottom: 18px;
+  font-size: 1.5rem;
+}
+
+.expect-columns ol,
+.expect-columns ul {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding-left: 1.4rem;
+}
+
+.expect-columns li {
+  padding-left: 4px;
+}
+
+.expect-faq {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
 }
 
-.before-call article {
+.expect-faq article {
   padding: 24px;
 }
 
-.before-call h3 {
-  font-size: 1.25rem;
+.expect-faq h3 {
+  font-size: 1.15rem;
+}
+
+.expect-faq p {
+  margin: 10px 0 0;
 }
 
 .screen-layout h2 {
@@ -2175,6 +2194,7 @@ a.blog-card {
 @media (max-width: 1100px) {
   .path-grid,
   .team-grid,
+  .expect-faq,
   .process-grid,
   .safety-grid,
   .seo-answer-grid,
@@ -2230,10 +2250,9 @@ a.blog-card {
   .treatment-hero,
   .local-seo-hero,
   .lead-card,
-  .intake-embed-card,
   .lead-card form,
   .consult-card,
-  .before-call,
+  .expect-columns,
   .question-band,
   .page-hero,
   .screen-layout,
@@ -2332,6 +2351,7 @@ a.blog-card {
   .path-grid,
   .value-grid,
   .team-grid,
+  .expect-faq,
   .resource-grid,
   .blog-grid,
   .keyword-grid,
@@ -2459,11 +2479,6 @@ a.blog-card {
     padding: 24px;
   }
 
-  .intake-embed-card {
-    min-height: auto;
-  }
-
-  .intake-embed-card,
   .intake-frame-wrap,
   .typeform-live-embed {
     width: 100%;
