@@ -816,6 +816,30 @@ h3 {
   max-width: 770px;
 }
 
+.page-hero-band.dark {
+  background: var(--deep);
+}
+
+.page-hero-band.dark .page-hero .eyebrow,
+.page-hero-band.dark .page-hero h1,
+.page-hero-band.dark .page-hero p {
+  color: #fff;
+}
+
+.page-hero.has-image {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+  align-items: center;
+}
+
+.page-hero-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 440px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
 .page-hero h1 {
   font-size: clamp(2rem, 1.15rem + 2.5vw, 4rem);
 }
@@ -1575,6 +1599,14 @@ h3 {
   padding: 9px 13px;
 }
 
+.section.expect-section {
+  padding-bottom: clamp(29px, 4vw, 56px);
+}
+
+.section.intake-section {
+  padding-block: clamp(29px, 4vw, 56px);
+}
+
 .expect-heading {
   margin-bottom: 38px;
   text-align: center;
@@ -2255,9 +2287,14 @@ a.blog-card {
   .expect-columns,
   .question-band,
   .page-hero,
+  .page-hero.has-image,
   .screen-layout,
   .conversion-panel {
     grid-template-columns: 1fr;
+  }
+
+  .page-hero-image {
+    max-height: 320px;
   }
 
   .section-row {
@@ -2397,6 +2434,14 @@ a.blog-card {
 
   .section {
     padding-block: 40px;
+  }
+
+  .section.expect-section {
+    padding-bottom: 20px;
+  }
+
+  .section.intake-section {
+    padding-block: 20px;
   }
 
   .page-hero,

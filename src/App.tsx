@@ -731,9 +731,11 @@ function StartPage() {
         primaryLabel={`Call ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
         showAside={false}
+        dark
+        image={{ src: '/assets/hero-get-started.jpg', alt: 'Three generations of a family sitting together on a lakeside dock' }}
       />
       <WhatToExpect />
-      <section className="section white">
+      <section className="section white intake-section">
         <StartExperience />
       </section>
     </>
@@ -1038,7 +1040,7 @@ function StartExperience() {
 
 function WhatToExpect() {
   return (
-    <section className="section mist">
+    <section className="section mist expect-section">
       <h2 className="expect-heading">What to expect</h2>
       <div className="expect-columns">
         <div>
@@ -1253,6 +1255,8 @@ function PageHero({
   onPrimary,
   href,
   showAside = true,
+  image,
+  dark = false,
 }: {
   eyebrow: string
   title: string
@@ -1262,11 +1266,14 @@ function PageHero({
   onPrimary?: () => void
   href?: string
   showAside?: boolean
+  image?: { src: string; alt: string }
+  dark?: boolean
 }) {
   const isPhoneLink = href?.startsWith('tel:')
 
   return (
-    <section className="page-hero">
+    <div className={dark ? 'page-hero-band dark' : 'page-hero-band'}>
+    <section className={image ? 'page-hero has-image' : 'page-hero'}>
       <div>
         <p className="eyebrow">{eyebrow}</p>
         <h1>{title}</h1>
@@ -1281,6 +1288,7 @@ function PageHero({
           <button className="primary" type="button" onClick={onPrimary}>{primaryLabel} <ArrowRight size={15} /></button>
         )}
       </div>
+      {image && <img className="page-hero-image" src={image.src} alt={image.alt} width={385} height={515} fetchPriority="high" />}
       {showAside && (
         <aside>
           {icon}
@@ -1289,6 +1297,7 @@ function PageHero({
         </aside>
       )}
     </section>
+    </div>
   )
 }
 
