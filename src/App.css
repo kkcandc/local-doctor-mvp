@@ -2061,6 +2061,33 @@ h3 {
   scroll-margin-top: 96px;
 }
 
+.article-body .legal-toc {
+  margin-top: 4px;
+}
+
+.article-body p.legal-callout,
+.article-body p.legal-notice,
+.article-body p.legal-publication-note {
+  padding: 14px 16px;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.article-body p.legal-callout {
+  font-weight: 700;
+  background: var(--warning-bg);
+}
+
+.article-body p.legal-notice {
+  background: var(--mist);
+}
+
+.article-body p.legal-publication-note {
+  background: var(--warning-bg);
+  border-left: 4px solid #c4a24a;
+}
+
 .npp-banner {
   padding: 14px 16px;
   color: var(--ink);
@@ -2153,7 +2180,10 @@ a.blog-card {
 
 .article-body h2 {
   margin: 1.55em 0 0.4em;
-  font-size: clamp(1.45rem, 1.1rem + 1vw, 1.9rem);
+  font-size: clamp(1.35rem, 1.05rem + 0.8vw, 1.75rem);
+  line-height: 1.3;
+  overflow-wrap: break-word;
+  scroll-margin-top: 96px;
 }
 
 .article-body h3 {
