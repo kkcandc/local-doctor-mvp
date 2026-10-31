@@ -45,6 +45,7 @@ body {
   margin: 0;
   font-size: var(--text-body);
   line-height: 1.6;
+  overflow-wrap: break-word;
 }
 
 body.menu-open {
