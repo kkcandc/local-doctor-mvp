@@ -398,6 +398,24 @@ function App() {
   )
 }
 
+function BrandLink({ variant = 'color', onNavigate }: { variant?: 'color' | 'reverse'; onNavigate: (route: Route) => void }) {
+  const src = variant === 'reverse' ? '/assets/brand/local-doctor-logo-reverse.svg' : '/assets/brand/local-doctor-logo.svg'
+
+  return (
+    <a
+      className="brand-link"
+      href="/"
+      onClick={(event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+        event.preventDefault()
+        onNavigate('home')
+      }}
+    >
+      <img src={src} alt="Local Doctor home" width={1337} height={270} />
+    </a>
+  )
+}
+
 function Header({
   route,
   menuOpen,
@@ -423,10 +441,7 @@ function Header({
   return (
     <header className="site-header">
       <div className="header-inner">
-        <button className="brand-button" type="button" onClick={() => onNavigate('home')}>
-          <img src="/assets/mark-color.svg" alt="" />
-          <span>Local Doctor</span>
-        </button>
+        <BrandLink onNavigate={onNavigate} />
         <nav className="desktop-nav" aria-label="Main navigation">
           {navItems.map(([itemRoute, label]) => (
             <button className={route === itemRoute ? 'active' : ''} key={itemRoute} type="button" onClick={() => onNavigate(itemRoute)}>
@@ -1354,10 +1369,7 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
   return (
     <footer className="footer">
       <div>
-        <button className="brand-button footer-brand" type="button" onClick={() => onNavigate('home')}>
-          <img src="/assets/mark-color.svg" alt="" />
-          <span>Local Doctor</span>
-        </button>
+        <BrandLink variant="reverse" onNavigate={onNavigate} />
         <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation, care coordination, and treatment-readiness review.</p>
         <p className="footer-identity">
           {legalEntity}

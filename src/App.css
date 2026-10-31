@@ -56,26 +56,29 @@ main {
   min-height: 72px;
 }
 
-.brand-button {
+.brand-link {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-width: 0;
-  padding: 0;
-  color: var(--ink);
-  background: transparent;
-  border: 0;
-  font-family: var(--font-display);
-  font-size: 1.45rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-decoration: none;
-  white-space: nowrap;
+  min-height: var(--control-height);
+  border-radius: var(--radius-control);
 }
 
-.brand-button img {
-  width: 25px;
-  height: 30px;
+.brand-link img {
+  display: block;
+  width: 160px;
+  height: auto;
+}
+
+@media (min-width: 768px) {
+  .brand-link img {
+    width: 200px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .brand-link img {
+    width: 220px;
+  }
 }
 
 .desktop-nav {
@@ -1553,9 +1556,14 @@ h3 {
   line-height: 1.55;
 }
 
-.footer-brand {
-  color: #fff;
-  font-size: 1.2rem;
+.footer .brand-link img {
+  width: 180px;
+}
+
+@media (min-width: 768px) {
+  .footer .brand-link img {
+    width: 200px;
+  }
 }
 
 .footer-identity,
@@ -2090,10 +2098,6 @@ a.blog-card {
 
   .question-band {
     justify-items: start;
-  }
-
-  .brand-button {
-    font-size: 1.2rem;
   }
 
   .check-list,
