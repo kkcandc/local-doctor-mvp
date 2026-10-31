@@ -65,7 +65,7 @@ main {
   color: var(--ink);
   background: transparent;
   border: 0;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display);
   font-size: 1.45rem;
   font-weight: 600;
   letter-spacing: 0;
@@ -316,7 +316,7 @@ h1,
 h2,
 h3 {
   margin: 0;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display);
   letter-spacing: 0;
 }
 
@@ -414,7 +414,7 @@ h3 {
 .stat-band strong {
   display: block;
   color: #fff;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display);
   font-size: clamp(2rem, 2.8vw, 2.55rem);
   line-height: 1;
   white-space: nowrap;
@@ -560,7 +560,7 @@ h3 {
 }
 
 .path-card strong {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display);
   font-size: 1.24rem;
 }
 
@@ -847,7 +847,7 @@ h3 {
 }
 
 .page-hero aside strong {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display);
   font-size: 1.5rem;
 }
 
@@ -915,7 +915,7 @@ h3 {
 .compare-drug {
   display: none;
   margin-bottom: 6px;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display);
   font-size: 1.05rem;
 }
 
@@ -959,7 +959,7 @@ h3 {
 
 .medicine-heading strong {
   display: block;
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-display);
   font-size: 1.45rem;
 }
 
