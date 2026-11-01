@@ -666,7 +666,7 @@ function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
           ))}
         </div>
       </section>
-      <ConversionPanel onNavigate={onNavigate} title="Ready to find out where you stand?" copy="A short intake is all it takes to get started." secondaryLabel="See treatments" secondaryRoute="treatments" compact />
+      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to find out where you stand?" copy="A short intake is all it takes to get started." secondaryLabel="See treatments" secondaryRoute="treatments" compact />
     </>
   )
 }
@@ -1306,7 +1306,7 @@ function ConversionPanel({
   return (
     <section className={compact ? 'conversion-panel compact' : 'conversion-panel'}>
       <div>
-        <p className="eyebrow">{eyebrow}</p>
+        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <h2>{title}</h2>
         <p>{copy}</p>
       </div>
