@@ -7,6 +7,14 @@
 }
 
 @font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/lora-italic-600.woff2') format('woff2');
+}
+
+@font-face {
   font-family: 'Public Sans';
   font-style: normal;
   font-weight: 400;

@@ -356,7 +356,7 @@ h1 {
 }
 
 h1 em {
-  font-style: normal;
+  font-style: italic;
 }
 
 h2 {
@@ -406,7 +406,7 @@ h3 {
   --focus-color: var(--focus-dark);
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  padding: var(--space-48) var(--page-inline);
+  padding: var(--space-32) max(0px, calc(var(--page-inline) - var(--space-32)));
   color: var(--text-on-dark);
   background: var(--surface-deep);
 }
@@ -417,13 +417,8 @@ h3 {
   border-right: 1px solid var(--border-on-dark);
 }
 
-.stat-band article:first-child {
-  padding-left: 0;
-}
-
 .stat-band article:last-child {
-  padding-right: 0;
-  border-right: 0;
+  border-right-color: transparent;
 }
 
 .stat-band strong {
@@ -446,7 +441,10 @@ h3 {
 
 .section {
   padding: var(--section-pad) var(--page-inline);
-  background: var(--surface-page);
+}
+
+.section.compact-section {
+  padding-block: calc(var(--section-pad) * 0.6);
 }
 
 .section-row {
@@ -461,8 +459,7 @@ h3 {
   margin-bottom: 0;
 }
 
-.text-link,
-.audience-split button {
+.text-link {
   display: inline-flex;
   align-items: center;
   gap: var(--space-8);
@@ -476,8 +473,7 @@ h3 {
   text-decoration: none;
 }
 
-.text-link:hover,
-.audience-split button:hover {
+.text-link:hover {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
@@ -494,17 +490,12 @@ h3 {
   font-size: var(--text-lead);
 }
 
-.path-grid,
 .value-grid,
 .team-grid,
 .blog-grid,
 .provider-grid {
   display: grid;
   gap: var(--space-24);
-}
-
-.path-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .value-grid,
@@ -549,10 +540,23 @@ h3 {
   margin-bottom: 0;
 }
 
+.value-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--space-12);
+  align-content: start;
+  align-items: start;
+}
+
 .value-card > span {
-  display: block;
-  margin-bottom: var(--space-16);
+  display: flex;
+  align-items: center;
+  height: calc(var(--text-h3) * 1.25);
   color: var(--color-primary);
+}
+
+.value-card p {
+  grid-column: 1 / -1;
 }
 
 .team-card svg {
@@ -566,56 +570,19 @@ h3 {
   font-size: 1.25rem;
 }
 
-.path-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-12);
-  padding: var(--space-24);
-  color: var(--text-primary);
-  text-align: left;
-  background: var(--surface-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-card);
-  transition:
-    border-color var(--duration-hover) var(--ease),
-    box-shadow var(--duration-hover) var(--ease);
-}
-
-.path-card:hover,
 a.blog-card:hover {
   border-color: var(--color-primary);
   box-shadow: var(--shadow-subtle);
-}
-
-.path-card svg {
-  color: var(--color-primary);
-}
-
-.path-card strong {
-  font-size: 1.25rem;
-  font-weight: var(--weight-semibold);
-  line-height: 1.3;
-}
-
-.path-card span {
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-.path-card small {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-8);
-  margin-top: auto;
-  color: var(--color-primary);
-  font-size: var(--text-control);
-  font-weight: var(--weight-semibold);
 }
 
 .insurance-strip {
   padding: var(--space-48) var(--page-inline);
   overflow: hidden;
   text-align: center;
+}
+
+.insurance-strip.blue {
+  background: var(--surface-sunken);
 }
 
 .insurance-strip > div {
@@ -633,6 +600,10 @@ a.blog-card:hover {
   margin: var(--space-8) auto var(--space-24);
   color: var(--text-secondary);
   font-size: var(--text-control);
+}
+
+.insurance-strip.blue p {
+  margin-top: var(--space-16);
 }
 
 .payer-marquee {
@@ -743,33 +714,6 @@ a.blog-card:hover {
 
 .treatment-card-grid p {
   margin: var(--space-16) 0 0;
-  color: var(--text-secondary);
-}
-
-.audience-split {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  padding: var(--section-pad) var(--page-inline);
-}
-
-.audience-split article {
-  padding-inline: var(--space-48);
-}
-
-.audience-split article:first-child {
-  padding-left: 0;
-}
-
-.audience-split article:last-child {
-  padding-right: 0;
-  border-left: 1px solid var(--border-subtle);
-}
-
-.audience-split div {
-  max-width: 470px;
-}
-
-.audience-split p {
   color: var(--text-secondary);
 }
 
@@ -1794,7 +1738,6 @@ a.blog-card {
 }
 
 @media (max-width: 1100px) {
-  .path-grid,
   .team-grid,
   .expect-faq,
   .process-grid,
@@ -1802,6 +1745,10 @@ a.blog-card {
   .stat-band,
   .value-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stat-band {
+    padding-inline: var(--page-inline);
   }
 
   .stat-band strong {
@@ -1814,7 +1761,7 @@ a.blog-card {
 
   .stat-band article:nth-child(even) {
     padding-right: 0;
-    border-right: 0;
+    border-right-color: transparent;
   }
 }
 
@@ -1844,7 +1791,6 @@ a.blog-card {
     background: var(--overlay-hero-compact);
   }
 
-  .audience-split,
   .treatment-hero,
   .expect-columns,
   .question-band,
@@ -1871,17 +1817,6 @@ a.blog-card {
     display: none;
   }
 
-  .audience-split article {
-    padding-inline: 0;
-  }
-
-  .audience-split article:last-child {
-    margin-top: var(--space-32);
-    padding-top: var(--space-32);
-    border-top: 1px solid var(--border-subtle);
-    border-left: 0;
-  }
-
   .stat-band article {
     padding: var(--space-8) var(--space-32);
   }
@@ -1895,7 +1830,7 @@ a.blog-card {
   }
 
   .stat-band article:nth-child(2) {
-    border-right: 0;
+    border-right-color: transparent;
   }
 
   .conversion-panel {
@@ -1933,7 +1868,6 @@ a.blog-card {
 }
 
 @media (max-width: 740px) {
-  .path-grid,
   .value-grid,
   .team-grid,
   .expect-faq,
