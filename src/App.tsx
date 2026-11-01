@@ -232,7 +232,7 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
     title: 'Getting Started',
     items: [
       ['Who is eligible for services?', 'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. Our eligibility call is fast and simple, providing a clear answer within 15-30 minutes.'],
-      ['How soon can we be seen?', 'Once you\'ve been determined eligible for our program, you can be seen by one of our neurology specialists in as little as a few days or weeks, depending on your availability.'],
+      ['How soon can I be seen?', 'Once you\'ve been determined eligible for our program, you can be seen by one of our neurology specialists in as little as a few days or weeks, depending on your availability.'],
       ['How long does the eligibility process take?', 'Our eligibility process is centered around a quick call that should take 15-30 minutes. Please have the patient\'s insurance details, medication list, and medical history handy to make it go smoother.'],
       ['Do I need a referral from my current doctor?', 'Depending on your insurance, you may need a referral. We will let you know definitively during your eligibility check.'],
       ['What if I already have a diagnosis?', 'If you already have a diagnosis for mild cognitive impairment, dementia, or Alzheimer\'s disease, you may be a strong candidate for our program and it may expedite your path to treatment.'],
@@ -255,6 +255,7 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
       ['How does the first visit with the provider work and how long will it be?', 'Once you\'ve been in touch with our team, they will help schedule a video call for a day and time of your choice. You will then receive a visit confirmation and visit reminders to your contact method of choice, including on the day of the visit, for you to click the link to join the video call. This visit should last about 1 hour. Ensure you are in a setting with strong access to Wi-Fi or data service with a device that has video and audio capabilities (we use something similar to FaceTime and other video calling applications).'],
       ['Will I be seeing an MD or NP?', 'Our neurology specialists are each board-certified and work interchangeably. Appointment matching is subject to your location, availability, and other factors.'],
       ['Is everything virtual or is there any in-person component?', 'The clinical visits happen via video. Tests like MRIs and the infusions themselves happen at in-person facilities, which may include a Local Infusion center or another appropriate site.'],
+      ['Where do infusions take place?', 'If treatment is clinically appropriate, infusions take place at an appropriate local infusion center near you.'],
       ['What if we only need help with daily caregiving or medication management?', 'Local Doctor is designed to accelerate access to disease-modifying treatments. We partner with services that offer ongoing caregiving-support or general medication-management service who we can refer out to if appropriate. We will work with you to guide you in the best way possible.'],
     ],
   },
@@ -270,7 +271,6 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
         ],
       ],
       ['What if the patient can\'t have an MRI or takes blood thinners?', 'These may affect your eligibility for infusion treatment, so be sure to bring them up in your conversations with us.'],
-      ['Where do infusions take place?', 'If treatment is clinically appropriate, infusions take place at an appropriate local infusion center near you.'],
       ['Who do I contact in a medical emergency?', 'Call 911 immediately. Local Doctor provides specialist evaluation and treatment. It does not replace emergency care.'],
     ],
   },
@@ -793,7 +793,12 @@ function FaqPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         </div>
         <a className="primary" href="mailto:hello@trylocaldoctor.com">Email our team</a>
       </section>
-      <ConversionPanel onNavigate={onNavigate} />
+      <ConversionPanel
+        onNavigate={onNavigate}
+        eyebrow="Ready to make a step towards better memory care?"
+        title="A quick call will help us determine your eligibility."
+        copy="We review your concerns, medical history, and insurance in a quick conversation before coordinating the visit with a neurology specialist."
+      />
     </>
   )
 }
