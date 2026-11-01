@@ -398,6 +398,24 @@ function App() {
   )
 }
 
+function BrandLink({ variant = 'color', onNavigate }: { variant?: 'color' | 'reverse'; onNavigate: (route: Route) => void }) {
+  const src = variant === 'reverse' ? '/assets/brand/local-doctor-logo-reverse.svg' : '/assets/brand/local-doctor-logo.svg'
+
+  return (
+    <a
+      className="brand-link"
+      href="/"
+      onClick={(event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+        event.preventDefault()
+        onNavigate('home')
+      }}
+    >
+      <img src={src} alt="Local Doctor home" width={1337} height={270} />
+    </a>
+  )
+}
+
 function Header({
   route,
   menuOpen,
@@ -423,10 +441,7 @@ function Header({
   return (
     <header className="site-header">
       <div className="header-inner">
-        <button className="brand-button" type="button" onClick={() => onNavigate('home')}>
-          <img src="/assets/mark-color.svg" alt="" />
-          <span>Local Doctor</span>
-        </button>
+        <BrandLink onNavigate={onNavigate} />
         <nav className="desktop-nav" aria-label="Main navigation">
           {navItems.map(([itemRoute, label]) => (
             <button className={route === itemRoute ? 'active' : ''} key={itemRoute} type="button" onClick={() => onNavigate(itemRoute)}>
@@ -485,18 +500,18 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
   return (
     <>
       <section className="hero">
-        <img className="hero-image" src="/assets/hero-patient-caregiver.webp" alt="Older adults walking together outdoors" />
+        <img className="hero-image" src="/assets/hero-patient-caregiver.webp" alt="Older adults walking together outdoors" width={904} height={509} />
         <div className="hero-overlay" />
         <div className="hero-content">
           <div className="hero-copy">
-            <p className="eyebrow light">Virtual Alzheimer's specialty clinic</p>
+            <p className="eyebrow">Virtual Alzheimer's specialty clinic</p>
             <h1>See if newer Alzheimer's treatments may be right for you. <em>Sooner.</em></h1>
             <p>
               New FDA-approved treatments may help slow progression in some people with early Alzheimer&apos;s disease. Get a second opinion from clinicians who focus on cognitive impairment and treatment eligibility to see if one may be an option for you.
             </p>
             <div className="hero-actions">
-              <button className="primary light-primary" type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
-              <button className="secondary light-secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>
+              <button className="accent" type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
+              <button className="secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>
             </div>
             <div className="trust-note"><span /> Backed by a national infusion network and a focused treatment-readiness pathway.</div>
           </div>
@@ -526,23 +541,23 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         </div>
       </section>
 
-      <InsuranceStrip />
+      <InsuranceStrip tone="ivory" />
 
-      <section className="section mist">
+      <section className="section white">
         <div className="section-row">
           <SectionIntro eyebrow="How it works" title="From first concern to treatment readiness, in 4 steps." />
-          <button className="text-link" type="button" onClick={() => onNavigate('how')}>See the full process <ArrowRight size={15} /></button>
+          <button className="text-link" type="button" onClick={() => onNavigate('how')}>See the full process <ArrowRight size={16} /></button>
         </div>
         <ProcessGrid />
       </section>
 
-      <section className="section white">
+      <section className="section ivory">
         <TreatmentPreview onNavigate={onNavigate} />
       </section>
 
       <AudienceSplit onNavigate={onNavigate} />
 
-      <section className="section mist">
+      <section className="section ivory">
         <SectionIntro eyebrow="Start in the right place" title="Different visitors need different first steps." copy="Start from the situation you are actually in: a memory concern, an existing diagnosis, support for someone you love, or a referral from a clinician." />
         <div className="path-grid">
           {discoveryPaths.map((path) => {
@@ -552,7 +567,7 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
                 <Icon size={24} />
                 <strong>{path.title}</strong>
                 <span>{path.copy}</span>
-                <small>{path.action} <ArrowRight size={14} /></small>
+                <small>{path.action} <ArrowRight size={16} /></small>
               </button>
             )
           })}
@@ -572,7 +587,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
           <p className="eyebrow">Treatments</p>
           <h1>FDA-approved treatments for early Alzheimer's disease.</h1>
           <p>Leqembi and Kisunla are FDA-approved anti-amyloid therapies for people with early Alzheimer&apos;s disease. In clinical trials they slowed decline for some patients. They are not a cure, they carry real risks such as ARIA, and they are not right for everyone. Here is what they do and who they may be for.</p>
-          <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={15} /></button>
+          <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={20} /></button>
         </div>
         <img src="/assets/hero-memory-care.webp" alt="Patient and caregiver speaking with a clinician" />
       </section>
@@ -587,7 +602,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
           </div>
         </div>
       </section>
-      <section className="section mist">
+      <section className="section ivory">
         <SectionIntro eyebrow="Compare" title="Leqembi and Kisunla, side by side." />
         <TreatmentComparison />
         <div className="disclaimer">
@@ -598,7 +613,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
         <SectionIntro eyebrow="What we look for" title="Who these treatments may be for." copy="This pathway is for a specific group of patients who want to understand whether treatment targeting amyloid may be an option." />
         <CheckList items={fitChecks} />
       </section>
-      <section className="section mist fit-section">
+      <section className="section ivory fit-section">
         <SectionIntro eyebrow="Safety" title="The safety screen is part of the evaluation, not an afterthought." copy="Risks and monitoring are reviewed before any treatment decision. Urgent symptoms belong with emergency care." />
         <div className="safety-grid">
           {safetyChecks.map((item) => (
@@ -638,7 +653,7 @@ function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
                 <div className="journey-points">
                   {step.points.map((point) => (
                     <p key={point}>
-                      <CheckCircle2 size={18} />
+                      <CheckCircle2 size={20} />
                       <span>{point}</span>
                     </p>
                   ))}
@@ -648,15 +663,15 @@ function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
           ))}
         </div>
       </section>
-      <section className="section cost-band">
+      <section className="section ivory cost-band">
         <div>
           <p className="eyebrow">Insurance & Cost</p>
           <h2>What this costs you, honestly.</h2>
           <p>Most patients access care through commercial insurance or Medicare. Coverage for diagnosis and treatment depends on your specific plan and, for traditional Medicare, participation in a national treatment registry. We will walk through your specific coverage before you commit to anything. There is no blanket promise here, because there is not a blanket policy.</p>
         </div>
       </section>
-      <InsuranceStrip />
-      <section className="section mist mini-faq-section">
+      <InsuranceStrip tone="white" />
+      <section className="section ivory mini-faq-section">
         <SectionIntro eyebrow="FAQ" title="Questions people actually ask." />
         <div className="mini-faq-list">
           {howFaqItems.map(([question, answer]) => (
@@ -700,7 +715,7 @@ function AboutPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
           ))}
         </div>
       </section>
-      <section className="section mist" id="company">
+      <section className="section ivory" id="company">
         <SectionIntro
           eyebrow="Company"
           title="Who operates Local Doctor."
@@ -731,11 +746,10 @@ function StartPage() {
         primaryLabel={`Call ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
         showAside={false}
-        dark
         image={{ src: '/assets/hero-get-started.jpg', alt: 'Three generations of a family sitting together on a lakeside dock' }}
       />
       <WhatToExpect />
-      <section className="section white intake-section">
+      <section className="section ivory intake-section">
         <StartExperience />
       </section>
     </>
@@ -917,7 +931,7 @@ function BlogPostPage({ slug, onNavigate }: { slug: string; onNavigate: (route: 
             Local Doctor is a virtual front door for specialist evaluation. It does not operate infusion centers, set drug prices, or replace the clinician who would prescribe treatment.
           </p>
           <button className="primary" type="button" onClick={() => onNavigate('start')}>
-            Check eligibility <ArrowRight size={15} />
+            Check eligibility <ArrowRight size={20} />
           </button>
         </aside>
         <div className="related-posts">
@@ -1040,7 +1054,7 @@ function StartExperience() {
 
 function WhatToExpect() {
   return (
-    <section className="section mist expect-section">
+    <section className="section white expect-section">
       <h2 className="expect-heading">What to expect</h2>
       <div className="expect-columns">
         <div>
@@ -1097,17 +1111,16 @@ function EligibilityLeadForm() {
   )
 }
 
-function InsuranceStrip() {
-  const payerLoop = [...payerNames, ...payerNames]
-
+function InsuranceStrip({ tone }: { tone: 'white' | 'ivory' }) {
   return (
-    <section className="insurance-strip">
+    <section className={`insurance-strip ${tone}`}>
       <div>
         <h2>Coverage is checked for your plan</h2>
         <p>Local Doctor does not promise that a health plan is accepted. Benefits, prior authorization, and what you may owe depend on your coverage, the services ordered, and where care is delivered. Financial assistance, when a program is available, depends on that program&apos;s rules. The names below are examples of plans patients ask about. They are not a list of plans Local Doctor or its partners participate with.</p>
         <div className="payer-marquee" aria-label="Examples of plans patients ask about, not a list of accepted insurance">
           <div>
-            {payerLoop.map((payer, index) => <span key={`${payer}-${index}`}>{payer}</span>)}
+            {payerNames.map((payer, index) => <span key={`${payer}-${index}`}>{payer}</span>)}
+            {payerNames.map((payer, index) => <span className="payer-repeat" aria-hidden="true" key={`${payer}-repeat-${index}`}>{payer}</span>)}
           </div>
         </div>
       </div>
@@ -1148,7 +1161,7 @@ function TreatmentPreview({ onNavigate }: { onNavigate: (route: Route) => void }
           <p>An IV anti-amyloid treatment for certain patients with early Alzheimer&apos;s, with treatment planning tied to label, safety, and response.</p>
         </article>
       </div>
-      <button className="text-link treatment-link" type="button" onClick={() => onNavigate('treatments')}>See treatment details <ArrowRight size={15} /></button>
+      <button className="text-link treatment-link" type="button" onClick={() => onNavigate('treatments')}>See treatment details <ArrowRight size={16} /></button>
     </>
   )
 }
@@ -1160,14 +1173,14 @@ function AudienceSplit({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <div>
           <h3>For caregivers</h3>
           <p>You are part of the decision, not just the person who found the website. The flow speaks to patients and families together.</p>
-          <button type="button" onClick={() => onNavigate('how')}>See how it works <ArrowRight size={15} /></button>
+          <button type="button" onClick={() => onNavigate('how')}>See how it works <ArrowRight size={16} /></button>
         </div>
       </article>
       <article>
         <div>
           <h3>For referring physicians</h3>
           <p>Send patients for treatment-readiness review, records support, safety screening, and local follow-through without replacing the referring relationship.</p>
-          <button type="button" onClick={() => onNavigate('refer')}>Refer a patient <ArrowRight size={15} /></button>
+          <button type="button" onClick={() => onNavigate('refer')}>Refer a patient <ArrowRight size={16} /></button>
         </div>
       </article>
     </section>
@@ -1179,8 +1192,8 @@ function TreatmentComparison() {
     <div className="compare-wrap">
       <div className="compare-head">
         <span />
-        <MedicineHeading color="purple" name="Leqembi" generic="lecanemab-irmb" />
-        <MedicineHeading color="green" name="Kisunla" generic="donanemab-azbt" />
+        <MedicineHeading color="leqembi" name="Leqembi" generic="lecanemab-irmb" />
+        <MedicineHeading color="kisunla" name="Kisunla" generic="donanemab-azbt" />
       </div>
       <div className="compare-table" role="table" aria-label="Treatment comparison">
         {treatmentRows.map(([label, leqembi, kisunla]) => (
@@ -1194,11 +1207,11 @@ function TreatmentComparison() {
           <span>Risk discussion</span>
           <div className="compare-cell">
             <strong className="compare-drug">Leqembi</strong>
-            <RiskBars tone="purple" labels={['Genotype', 'MRI', 'Medication']} />
+            <RiskBars tone="leqembi" labels={['Genotype', 'MRI', 'Medication']} />
           </div>
           <div className="compare-cell">
             <strong className="compare-drug">Kisunla</strong>
-            <RiskBars tone="green" labels={['ARIA', 'Infusion', 'Monitoring']} />
+            <RiskBars tone="kisunla" labels={['ARIA', 'Infusion', 'Monitoring']} />
           </div>
         </div>
       </div>
@@ -1206,7 +1219,7 @@ function TreatmentComparison() {
   )
 }
 
-function MedicineHeading({ color, name, generic }: { color: 'purple' | 'green'; name: string; generic: string }) {
+function MedicineHeading({ color, name, generic }: { color: 'leqembi' | 'kisunla'; name: string; generic: string }) {
   return (
     <div className="medicine-heading">
       <span className={color} />
@@ -1218,8 +1231,8 @@ function MedicineHeading({ color, name, generic }: { color: 'purple' | 'green'; 
   )
 }
 
-function RiskBars({ tone, labels }: { tone: 'purple' | 'green'; labels: string[] }) {
-  const widths = tone === 'purple' ? ['82%', '64%', '46%'] : ['72%', '54%', '38%']
+function RiskBars({ tone, labels }: { tone: 'leqembi' | 'kisunla'; labels: string[] }) {
+  const widths = tone === 'leqembi' ? ['82%', '64%', '46%'] : ['72%', '54%', '38%']
 
   return (
     <div className="risk-bars">
@@ -1238,7 +1251,7 @@ function CheckList({ items }: { items: string[] }) {
     <div className="check-list">
       {items.map((item) => (
         <div key={item}>
-          <CheckCircle2 size={14} />
+          <CheckCircle2 size={20} />
           <span>{item}</span>
         </div>
       ))}
@@ -1256,7 +1269,6 @@ function PageHero({
   href,
   showAside = true,
   image,
-  dark = false,
 }: {
   eyebrow: string
   title: string
@@ -1267,12 +1279,11 @@ function PageHero({
   href?: string
   showAside?: boolean
   image?: { src: string; alt: string }
-  dark?: boolean
 }) {
   const isPhoneLink = href?.startsWith('tel:')
 
   return (
-    <div className={dark ? 'page-hero-band dark' : 'page-hero-band'}>
+    <div className="page-hero-band">
     <section className={image ? 'page-hero has-image' : 'page-hero'}>
       <div>
         <p className="eyebrow">{eyebrow}</p>
@@ -1282,10 +1293,10 @@ function PageHero({
           isPhoneLink ? (
             <a className="primary" href={href}>{primaryLabel}</a>
           ) : (
-            <a className="primary" href={href} target="_blank" rel="noreferrer">{primaryLabel} <ArrowRight size={15} /></a>
+            <a className="primary" href={href} target="_blank" rel="noreferrer">{primaryLabel} <ArrowRight size={20} /></a>
           )
         ) : (
-          <button className="primary" type="button" onClick={onPrimary}>{primaryLabel} <ArrowRight size={15} /></button>
+          <button className="primary" type="button" onClick={onPrimary}>{primaryLabel} <ArrowRight size={20} /></button>
         )}
       </div>
       {image && <img className="page-hero-image" src={image.src} alt={image.alt} width={385} height={515} fetchPriority="high" />}
@@ -1317,14 +1328,14 @@ function ConversionPanel({
   return (
     <section className="conversion-panel">
       <div>
-        <p className="eyebrow light">Ready to find out where you stand?</p>
+        <p className="eyebrow">Ready to find out where you stand?</p>
         <h2>{title}</h2>
         <p>{copy}</p>
       </div>
       <div className="conversion-actions">
-        <button className="primary light-primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={15} /></button>
+        <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={20} /></button>
         {secondaryLabel && secondaryRoute && (
-          <button className="secondary light-secondary" type="button" onClick={() => onNavigate(secondaryRoute)}>{secondaryLabel}</button>
+          <button className="secondary" type="button" onClick={() => onNavigate(secondaryRoute)}>{secondaryLabel}</button>
         )}
       </div>
     </section>
@@ -1354,10 +1365,7 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
   return (
     <footer className="footer">
       <div>
-        <button className="brand-button footer-brand" type="button" onClick={() => onNavigate('home')}>
-          <img src="/assets/mark-color.svg" alt="" />
-          <span>Local Doctor</span>
-        </button>
+        <BrandLink variant="reverse" onNavigate={onNavigate} />
         <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation, care coordination, and treatment-readiness review.</p>
         <p className="footer-identity">
           {legalEntity}
