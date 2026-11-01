@@ -116,8 +116,8 @@ const pathRoutes: Record<string, Route> = {
 
 const valueProps = [
   {
-    title: 'Dementia specialists, not generalists',
-    copy: 'A real second opinion from specialists focused on dementia and disease-modifying treatment, not general memory care.',
+    title: 'Dementia specialists',
+    copy: 'A real second opinion from board-certified providers who specialize in dementia, not general memory care.',
     icon: BadgeCheck,
   },
   {
@@ -126,7 +126,7 @@ const valueProps = [
     icon: CalendarClock,
   },
   {
-    title: 'A direct path to treatment',
+    title: 'Direct path to treatment',
     copy: 'If you qualify, a direct connection into a national infusion network, not just another referral or paper treatment plan.',
     icon: Building2,
   },
@@ -171,7 +171,7 @@ const payerNames = [
 
 const simpleProcess = [
   ['Tell us what\'s going on', 'A quick call to screen for memory concerns, medical history, and eligibility for an evaluation.'],
-  ['Meet your board-certified specialist', 'A video call for the evaluation and to dive into your questions, concerns, and goals. It all leads to a clear decision on whether testing is needed to confirm diagnoses or treatment.'],
+  ['Meet your specialist', 'A video call for the evaluation, to dive into your questions, concerns, and goals. It all leads to clear direction on next steps and if new labs and imaging are needed.'],
   ['Get a clearer answer', 'We review new or recent labs and imaging to provide a clear answer on diagnosis and treatment options.'],
   ['Start treatment', 'Patients who qualify and want to move forward with infusion treatment are treated seamlessly at a local infusion center.'],
 ]
@@ -474,7 +474,7 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
             <p className="eyebrow">Virtual Alzheimer's specialty clinic</p>
             <h1>Treatment that slows down Alzheimer's. <em>Finally.</em></h1>
             <p>
-              New FDA-approved treatments can slow the progression of early Alzheimer&apos;s. Get a second opinion from our neurology team who specialize in cognitive impairment and these disease-modifying treatments to see if you&apos;re eligible.
+              New FDA-approved treatments can slow the progression of early Alzheimer&apos;s. Get a second opinion from our neurology team who specialize in cognitive impairment and disease-modifying treatments to see if you&apos;re eligible.
             </p>
             <div className="hero-actions">
               <button className="accent" type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
@@ -486,13 +486,13 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
       </section>
 
       <section className="stat-band">
-        <Metric value="3.5 years" label="national average gap between first symptoms and diagnosis of Dementia or Alzheimer's disease" />
+        <Metric value="3.5 years" label="average gap between first symptoms and diagnosis of Alzheimer's" />
         <Metric value="6-9 months" label="typical wait for a new patient visit with a Neurologist in most areas" />
         <Metric value="1-2 weeks" label="average time to see one of our board-certified neurology specialists" />
         <Metric value="1,500+" label="patients treated successfully by our infusion network" />
       </section>
 
-      <section className="section ivory">
+      <section className="section ivory compact-section">
         <SectionIntro eyebrow="Why Local Doctor" title="We're designed around one goal: a clear, credible, and fast answer on treatment options." />
         <div className="value-grid">
           {valueProps.map((prop) => {
@@ -514,7 +514,7 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         copy="Whether we're in network with your insurance or not, we're committed to financial transparency and we do whatever is in our control to minimize your costs. No surprise bills or hidden costs."
       />
 
-      <section className="section white">
+      <section className="section white compact-section">
         <div className="section-row">
           <SectionIntro eyebrow="How it works" title="From getting in touch to real treatment in 4 easy steps." />
           <button className="text-link" type="button" onClick={() => onNavigate('how')}>See the full process <ArrowRight size={16} /></button>
@@ -522,11 +522,16 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <ProcessGrid />
       </section>
 
-      <section className="section ivory">
+      <section className="section ivory compact-section">
         <TreatmentPreview onNavigate={onNavigate} />
       </section>
 
-      <ConversionPanel onNavigate={onNavigate} />
+      <ConversionPanel
+        onNavigate={onNavigate}
+        eyebrow="Ready to make a step towards better memory care?"
+        title="A quick call will help us determine your eligibility."
+        copy="We review your concerns, medical history, and insurance in a quick conversation before coordinating the visit with a neurology specialist."
+      />
     </>
   )
 }
@@ -1253,12 +1258,14 @@ function PageHero({
 
 function ConversionPanel({
   onNavigate,
+  eyebrow = 'Ready to find out where you stand?',
   title = 'Start with a short check, then move to full intake only when it makes sense.',
   copy = 'The intake is a request for review. It is not a diagnosis, a booked visit, or a promise of coverage.',
   secondaryLabel,
   secondaryRoute,
 }: {
   onNavigate: (route: Route) => void
+  eyebrow?: string
   title?: string
   copy?: string
   secondaryLabel?: string
@@ -1267,7 +1274,7 @@ function ConversionPanel({
   return (
     <section className="conversion-panel">
       <div>
-        <p className="eyebrow">Ready to find out where you stand?</p>
+        <p className="eyebrow">{eyebrow}</p>
         <h2>{title}</h2>
         <p>{copy}</p>
       </div>
