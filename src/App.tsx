@@ -224,53 +224,54 @@ const howFaqItems = [
   ['What if I do not qualify?', 'You should still leave with a clearer explanation and a sensible next step. A not-yet answer can be useful, not a dead end.'],
 ]
 
-const faqCategories = [
+type FaqItem = [question: string, answer: string | string[]]
+
+const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
   {
     id: 'getting-started',
     title: 'Getting Started',
     items: [
-      ['Is this legitimate, or some kind of online scam?', 'Local Doctor is a specialty-care front door connected to Local Infusion\'s established care network. Clinical decisions still require licensed review.'],
-      ['Do I need a referral from my current doctor?', 'No referral is required to start. If you move forward, the team can coordinate with your existing physician so information does not get lost.'],
-      ['How long does the intake process take?', 'The first intake step is short. If review makes sense, the next steps are records, insurance, scheduling, and clinical evaluation.'],
-      ['What if I do not qualify?', 'You should still leave with a clearer explanation and a sensible next step. A not-yet answer can be useful, not a dead end.'],
-    ],
-  },
-  {
-    id: 'diagnosis',
-    title: 'Diagnosis & Evaluation',
-    items: [
-      ['I do not have a diagnosis yet. Can I still start here?', 'Yes. Some people start with memory concerns and no formal diagnosis. The right path depends on history, symptoms, records, and clinician review.'],
-      ['What does a full workup involve?', 'A full evaluation may include cognitive assessment, medical history, medication review, labs, MRI, amyloid confirmation, and risk discussion.'],
-      ['Can I get a second opinion if I was diagnosed elsewhere?', 'Yes. A second opinion is one of the clearest use cases. Existing records can help the team avoid starting from zero.'],
-      ['Will this replace my current doctor?', 'No. Local Doctor is meant to work alongside existing clinicians, not erase those relationships.'],
-    ],
-  },
-  {
-    id: 'treatment',
-    title: 'Treatment & Safety',
-    items: [
-      ['What treatments are being reviewed?', 'The first pathway focuses on Leqembi and Kisunla readiness for certain people with early Alzheimer\'s who may qualify after evaluation.'],
-      ['Is this handled entirely online?', 'The early evaluation and coordination can start virtually. Testing and any treatment follow-through happen locally or in person when required.'],
-      ['What is ARIA?', 'ARIA is a known safety concern involving brain swelling or small bleeds visible on MRI. Monitoring and symptom education are part of treatment-readiness review.'],
-      ['How soon might I notice a difference?', 'These treatments are evaluated by slowing decline over time, not by a sudden day-to-day improvement. Expectations should be reviewed with a clinician.'],
+      ['Who is eligible for services?', 'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. Our eligibility call is fast and simple, providing a clear answer within 15-30 minutes.'],
+      ['How soon can we be seen?', 'Once you\'ve been determined eligible for our program, you can be seen by one of our neurology specialists in as little as a few days or weeks, depending on your availability.'],
+      ['How long does the eligibility process take?', 'Our eligibility process is centered around a quick call that should take 15-30 minutes. Please have the patient\'s insurance details, medication list, and medical history handy to make it go smoother.'],
+      ['Do I need a referral from my current doctor?', 'Depending on your insurance, you may need a referral. We will let you know definitively during your eligibility check.'],
+      ['What if I already have a diagnosis?', 'If you already have a diagnosis for mild cognitive impairment, dementia, or Alzheimer\'s disease, you may be a strong candidate for our program and it may expedite your path to treatment.'],
+      ['Can I call on behalf of my spouse, parent, or loved one?', 'Absolutely! We welcome any loved one who wishes to be a part of the process and would prefer that one joins the first visit with the patient.'],
+      ['What if I\'m not eligible for services?', 'If you don\'t happen to be eligible for our program yet, we will let you know transparently and why.'],
     ],
   },
   {
     id: 'cost',
     title: 'Cost & Insurance',
     items: [
-      ['Will insurance cover this?', 'Coverage depends on your plan, clinical criteria, testing, and treatment requirements. The team should review details before you commit to a care path.'],
-      ['What if I am on Medicare?', 'Medicare coverage can depend on clinical criteria and registry or policy requirements. Your specific situation should be checked during intake.'],
-      ['Will I get surprise bills?', 'What you owe depends on your plan, the services ordered, and where care is delivered. Expected coverage is reviewed with you when that information is available. This is not a promise that you will have no out-of-pocket cost.'],
+      ['How much will this cost?', 'Provider visits with our neurologist and dementia clinical team will be at low cost. The labs and imaging exams will depend on your insurance and the sites you visit.'],
+      ['Which insurance plans are currently accepted?', 'Medicare, Medicaid, Aetna, CareFirst, Cigna, Kaiser, and United.'],
     ],
   },
   {
     id: 'visits',
     title: 'Visits & Logistics',
     items: [
-      ['Where do infusions take place?', 'If treatment is clinically appropriate, infusions take place at an appropriate local infusion setting, not through the website.'],
-      ['Can a family member or caregiver join?', 'Yes. Care partners are welcome and often helpful for history, logistics, visit notes, and monitoring.'],
-      ['Who do I contact in a medical emergency?', 'Call 911 immediately. Local Doctor provides specialist evaluation and care coordination. It does not replace emergency care.'],
+      ['How does the first visit with the provider work and how long will it be?', 'Once you\'ve been in touch with our team, they will help schedule a video call for a day and time of your choice. You will then receive a visit confirmation and visit reminders to your contact method of choice, including on the day of the visit, for you to click the link to join the video call. This visit should last about 1 hour. Ensure you are in a setting with strong access to Wi-Fi or data service with a device that has video and audio capabilities (we use something similar to FaceTime and other video calling applications).'],
+      ['Will I be seeing an MD or NP?', 'Our neurology specialists are each board-certified and work interchangeably. Appointment matching is subject to your location, availability, and other factors.'],
+      ['Is everything virtual or is there any in-person component?', 'The clinical visits happen via video. Tests like MRIs and the infusions themselves happen at in-person facilities, which may include a Local Infusion center or another appropriate site.'],
+      ['What if we only need help with daily caregiving or medication management?', 'Local Doctor is designed to accelerate access to disease-modifying treatments. We partner with services that offer ongoing caregiving-support or general medication-management service who we can refer out to if appropriate. We will work with you to guide you in the best way possible.'],
+    ],
+  },
+  {
+    id: 'treatment',
+    title: 'Treatment & Safety',
+    items: [
+      [
+        'What is Local Doctor\'s stance on anti-amyloid IV therapies (Leqembi & Kisunla)?',
+        [
+          'We believe anti-amyloid therapies represent an important advancement in Alzheimer\'s care, with the potential to meaningfully slow disease progression for appropriately selected patients, particularly those in the early stages of the disease. Clinical trials have demonstrated approximately 1/3 slower cognitive and functional decline on certain measures over 18 months compared with placebo. However, these therapies are not cures, benefits vary, and treatment carries real risks, including brain swelling or bleeding.',
+          'Our approach is to carefully evaluate each patient\'s clinical eligibility, individual risk factors, and treatment goals. We support treatment when the anticipated benefits reasonably outweigh the risks and the patient, informed of the trade-offs, chooses to proceed. Our goal is to ensure the right patients have access to appropriate therapies at the right time.',
+        ],
+      ],
+      ['What if the patient can\'t have an MRI or takes blood thinners?', 'These may affect your eligibility for infusion treatment, so be sure to bring them up in your conversations with us.'],
+      ['Where do infusions take place?', 'If treatment is clinically appropriate, infusions take place at an appropriate local infusion center near you.'],
+      ['Who do I contact in a medical emergency?', 'Call 911 immediately. Local Doctor provides specialist evaluation and treatment. It does not replace emergency care.'],
     ],
   },
 ]
@@ -755,7 +756,7 @@ function FaqPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
 
   return (
     <>
-      <PageHero eyebrow="FAQ" title="Answers to what patients and families ask us most." copy="Straight, specific answers about eligibility, diagnosis, treatment, safety, and cost." icon={<FileText size={38} />} onPrimary={() => onNavigate('start')} primaryLabel="Check eligibility" />
+      <PageHero eyebrow="FAQ" title="Answers to what patients and families ask us most." copy="Straight, specific answers about eligibility, cost, visits, treatment, and safety." icon={<FileText size={38} />} onPrimary={() => onNavigate('start')} primaryLabel="Check eligibility" />
       <section className="section white faq-section">
         <div className="faq-jump-list">
           {faqCategories.map((category) => (
@@ -775,7 +776,9 @@ function FaqPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
                       <span>{question}</span>
                       <ChevronDown size={18} />
                     </button>
-                    {isOpen && <p>{answer}</p>}
+                    {isOpen && (Array.isArray(answer) ? answer : [answer]).map((paragraph) => (
+                      <p key={paragraph}>{paragraph}</p>
+                    ))}
                   </article>
                 )
               })}
