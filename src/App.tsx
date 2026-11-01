@@ -7,7 +7,6 @@ import {
   CalendarClock,
   ChevronDown,
   CheckCircle2,
-  FileText,
   Menu,
   ShieldAlert,
   Sparkles,
@@ -756,7 +755,7 @@ function FaqPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
 
   return (
     <>
-      <PageHero eyebrow="FAQ" title="Answers to what patients and families ask us most." copy="Straight, specific answers about eligibility, cost, visits, treatment, and safety." icon={<FileText size={38} />} onPrimary={() => onNavigate('start')} primaryLabel="Check eligibility" />
+      <PageHero eyebrow="FAQ" title="Answers to what patients and families ask us most." copy="Straight, specific answers about eligibility, cost, visits, treatment, and safety." showAside={false} onPrimary={() => onNavigate('start')} primaryLabel="Check eligibility" />
       <section className="section white faq-section">
         <div className="faq-jump-list">
           {faqCategories.map((category) => (
