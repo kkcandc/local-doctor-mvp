@@ -30,13 +30,11 @@ import {
   PrivacyPage,
   ProviderRoster,
   TermsPage,
-  clinicalPractice,
-  legalEntity,
-  licensedStates,
   physicalAddress,
   publicPhone,
   publicEmail,
 } from './compliancePages'
+import { isPageEnabled, type PageFlag } from './featureFlags'
 import './App.css'
 
 type Route =
@@ -216,12 +214,20 @@ const journeySteps = [
   },
 ]
 
-const howFaqItems = [
-  ['Is this legitimate, or some kind of online scam?', 'Local Doctor is a specialty-care front door connected to Local Infusion\'s established care network. Clinical decisions still require licensed review.'],
-  ['Will my insurance cover this?', 'Coverage depends on your plan, clinical criteria, testing, and treatment requirements. The team should review details before you commit to a care path.'],
-  ['Will this replace my relationship with my current doctor?', 'No. Local Doctor is meant to work alongside existing clinicians, not erase those relationships.'],
-  ['I do not trust something this serious being handled virtually.', 'The early evaluation and coordination can start virtually. Testing and any treatment follow-through happen locally or in person when required.'],
-  ['What if I do not qualify?', 'You should still leave with a clearer explanation and a sensible next step. A not-yet answer can be useful, not a dead end.'],
+const howFaqItems: Array<[string, string[]]> = [
+  ['What services does Local Doctor provide?', [
+    'Local Doctor is a virtual Alzheimer\'s clinic focused on accelerating access to life-changing therapies. Our initial focus is evaluation, diagnosis, treatment eligibility, treatment initiation, and required oversight of disease-modifying therapies, not comprehensive longitudinal dementia management, nor care coordination. The Local Doctor model is designed to complement your existing team of providers and will work with them as needed.',
+  ]],
+  ['How much will this cost?', [
+    'Provider visits with our neurologist and dementia clinical team will be at zero cost. The labs and imaging exams will depend on your insurance and the sites you visit.',
+  ]],
+  ['Will I be seeing an MD or NP?', [
+    'Our team of neurology specialists is each board-certified and works interchangeably. Appointment matching is subject to your location, availability, and other factors.',
+  ]],
+  ['What is Local Doctor\'s philosophy on anti-amyloid therapies for Alzheimer\'s disease?', [
+    'We believe anti-amyloid therapies represent an important advancement in Alzheimer\'s care, with the potential to meaningfully slow disease progression for appropriately selected patients, particularly those in the early stages of the disease. Clinical trials have demonstrated approximately ~1/3 slower cognitive and functional decline on certain measures over 18 months compared with placebo. However, these therapies are not cures, benefits vary, and treatment carries real risks, including asymptomatic brain swelling or bleeding.',
+    'Our approach is to carefully evaluate each patient\'s clinical eligibility, individual risk factors, and treatment goals. We support treatment when the anticipated benefits reasonably outweigh the risks and the patient, informed of the trade-offs, chooses to proceed. Our goal is to ensure the right patients have access to appropriate therapies at the right time.',
+  ]],
 ]
 
 const faqCategories = [
@@ -278,6 +284,17 @@ const faqCategories = [
 const headerPhone = '(240) 376-5730'
 const headerPhoneHref = '+12403765730'
 
+const footerEntity = 'Local Infusion Inc. (dba Local Doctor), a Delaware corporation'
+
+function routeEnabled(route: Route) {
+  const flag: PageFlag = route === 'blogPost' ? 'blog' : route
+  return isPageEnabled(flag)
+}
+
+function enabledLinks<T extends readonly [Route, ...unknown[]]>(links: T[]) {
+  return links.filter(([route]) => routeEnabled(route))
+}
+
 function normalizePath() {
   return window.location.pathname.replace(/^\/+|\/+$/g, '')
 }
@@ -309,7 +326,11 @@ function App() {
       ) {
         window.history.replaceState({}, '', '/')
       }
-      const next = readLocation()
+      let next = readLocation()
+      if (!routeEnabled(next.route)) {
+        window.history.replaceState({}, '', '/')
+        next = { route: 'home', slug: '' }
+      }
       setRoute(next.route)
       setBlogSlug(next.slug)
       setMenuOpen(false)
@@ -334,6 +355,10 @@ function App() {
   }, [route])
 
   function navigate(next: Route, slug = '') {
+    if (!routeEnabled(next)) {
+      next = 'home'
+      slug = ''
+    }
     const path = next === 'blogPost' ? `/blog/${slug}` : routePaths[next]
     setRoute(next)
     setBlogSlug(next === 'blogPost' ? slug : '')
@@ -394,15 +419,15 @@ function Header({
   onToggleMenu: () => void
   onNavigate: (route: Route) => void
 }) {
-  const navItems: Array<[Route, string]> = [
+  const navItems = enabledLinks<[Route, string]>([
     ['how', 'How it works'],
     ['treatments', 'Treatments'],
-  ]
-  const aboutItems: Array<[Route, string]> = [
+  ])
+  const aboutItems = enabledLinks<[Route, string]>([
     ['about', 'Meet the Team'],
     ['blog', 'Blog'],
     ['faq', 'FAQs'],
-  ]
+  ])
   const aboutActive = route === 'about' || route === 'blog' || route === 'blogPost' || route === 'faq'
 
   return (
@@ -415,16 +440,18 @@ function Header({
               {label}
             </button>
           ))}
-          <div className="nav-dropdown">
-            <button className={aboutActive ? 'active' : ''} type="button" aria-haspopup="true">
-              About
-            </button>
-            <div>
-              {aboutItems.map(([itemRoute, label]) => (
-                <button key={itemRoute} type="button" onClick={() => onNavigate(itemRoute)}>{label}</button>
-              ))}
+          {aboutItems.length > 0 && (
+            <div className="nav-dropdown">
+              <button className={aboutActive ? 'active' : ''} type="button" aria-haspopup="true">
+                About
+              </button>
+              <div>
+                {aboutItems.map(([itemRoute, label]) => (
+                  <button key={itemRoute} type="button" onClick={() => onNavigate(itemRoute)}>{label}</button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </nav>
         <div className="header-actions">
           <a className="header-phone" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
@@ -449,7 +476,7 @@ function Header({
               {label}
             </button>
           ))}
-          <span className="mobile-nav-label">About</span>
+          {aboutItems.length > 0 && <span className="mobile-nav-label">About</span>}
           {aboutItems.map(([itemRoute, label]) => (
             <button className="mobile-nav-sub" key={itemRoute} type="button" onClick={() => onNavigate(itemRoute)}>
               {label}
@@ -478,7 +505,7 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
             </p>
             <div className="hero-actions">
               <button className="accent" type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
-              <button className="secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>
+              {routeEnabled('how') && <button className="secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>}
             </div>
             <div className="trust-note"><span /> Backed by a national infusion network and a focused treatment-readiness pathway.</div>
           </div>
@@ -517,7 +544,7 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
       <section className="section white compact-section">
         <div className="section-row">
           <SectionIntro eyebrow="How it works" title="From getting in touch to real treatment in 4 easy steps." />
-          <button className="text-link" type="button" onClick={() => onNavigate('how')}>See the full process <ArrowRight size={16} /></button>
+          {routeEnabled('how') && <button className="text-link" type="button" onClick={() => onNavigate('how')}>See the full process <ArrowRight size={16} /></button>}
         </div>
         <ProcessGrid />
       </section>
@@ -595,9 +622,10 @@ function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         copy="Every step is virtual where it can be, and in-person only where it has to be."
         icon={<CalendarClock size={38} />}
         onPrimary={() => onNavigate('start')}
-        primaryLabel="Start the check"
+        primaryLabel="Check eligibility now"
+        compact
       />
-      <section className="section white">
+      <section className="section white compact-section">
         <div className="journey-list">
           {journeySteps.map((step, index) => (
             <article key={step.title} className="journey-step">
@@ -620,26 +648,25 @@ function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
           ))}
         </div>
       </section>
-      <section className="section ivory cost-band">
+      <section className="section ivory cost-band compact-section">
         <div>
           <p className="eyebrow">Insurance & Cost</p>
           <h2>What this costs you, honestly.</h2>
-          <p>Most patients access care through commercial insurance or Medicare. Coverage for diagnosis and treatment depends on your specific plan and, for traditional Medicare, participation in a national treatment registry. We will walk through your specific coverage before you commit to anything. There is no blanket promise here, because there is not a blanket policy.</p>
+          <p>Most patients access care through Medicare, Medicaid, or major health plans (Aetna, Cigna, United, Kaiser, etc.). Coverage for our virtual visits and treatment depends on your specific plan but we do whatever is in our control to minimize your costs. Whether we&apos;re in network with your insurance or not, we will walk through your specific coverage before you commit to anything and you will never receive a surprise bill or hidden cost.</p>
         </div>
       </section>
-      <InsuranceStrip tone="white" />
-      <section className="section ivory mini-faq-section">
-        <SectionIntro eyebrow="FAQ" title="Questions people actually ask." />
+      <section className="section ivory mini-faq-section compact-section">
+        <SectionIntro eyebrow="FAQ" title="Questions you might have." />
         <div className="mini-faq-list">
           {howFaqItems.map(([question, answer]) => (
             <article key={question}>
               <h3>{question}</h3>
-              <p>{answer}</p>
+              {answer.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             </article>
           ))}
         </div>
       </section>
-      <ConversionPanel onNavigate={onNavigate} title="Ready to find out where you stand?" copy="A short intake is all it takes to get started." secondaryLabel="See treatments" secondaryRoute="treatments" />
+      <ConversionPanel onNavigate={onNavigate} title="Ready to find out where you stand?" copy="A short intake is all it takes to get started." secondaryLabel="See treatments" secondaryRoute="treatments" compact />
     </>
   )
 }
@@ -1070,12 +1097,12 @@ function EligibilityLeadForm() {
 
 function InsuranceStrip({
   tone,
-  title = 'Coverage is checked for your plan',
-  copy = 'Local Doctor does not promise that a health plan is accepted. Benefits, prior authorization, and what you may owe depend on your coverage, the services ordered, and where care is delivered. Financial assistance, when a program is available, depends on that program\'s rules. The names below are examples of plans patients ask about. They are not a list of plans Local Doctor or its partners participate with.',
+  title,
+  copy,
 }: {
   tone: 'white' | 'ivory' | 'blue'
-  title?: string
-  copy?: string
+  title: string
+  copy: string
 }) {
   return (
     <section className={`insurance-strip ${tone}`}>
@@ -1126,7 +1153,7 @@ function TreatmentPreview({ onNavigate }: { onNavigate: (route: Route) => void }
           <p>Monthly IV infusion; can stop once amyloid reaches minimal levels on a PET scan.</p>
         </article>
       </div>
-      <button className="text-link treatment-link" type="button" onClick={() => onNavigate('treatments')}>See treatment details <ArrowRight size={16} /></button>
+      {routeEnabled('treatments') && <button className="text-link treatment-link" type="button" onClick={() => onNavigate('treatments')}>See treatment details <ArrowRight size={16} /></button>}
     </>
   )
 }
@@ -1213,6 +1240,7 @@ function PageHero({
   href,
   showAside = true,
   image,
+  compact = false,
 }: {
   eyebrow: string
   title: string
@@ -1223,12 +1251,14 @@ function PageHero({
   href?: string
   showAside?: boolean
   image?: { src: string; alt: string }
+  compact?: boolean
 }) {
   const isPhoneLink = href?.startsWith('tel:')
+  const heroClass = ['page-hero', image && 'has-image', compact && 'compact'].filter(Boolean).join(' ')
 
   return (
     <div className="page-hero-band">
-    <section className={image ? 'page-hero has-image' : 'page-hero'}>
+    <section className={heroClass}>
       <div>
         <p className="eyebrow">{eyebrow}</p>
         <h1>{title}</h1>
@@ -1263,6 +1293,7 @@ function ConversionPanel({
   copy = 'The intake is a request for review. It is not a diagnosis, a booked visit, or a promise of coverage.',
   secondaryLabel,
   secondaryRoute,
+  compact = false,
 }: {
   onNavigate: (route: Route) => void
   eyebrow?: string
@@ -1270,9 +1301,10 @@ function ConversionPanel({
   copy?: string
   secondaryLabel?: string
   secondaryRoute?: Route
+  compact?: boolean
 }) {
   return (
-    <section className="conversion-panel">
+    <section className={compact ? 'conversion-panel compact' : 'conversion-panel'}>
       <div>
         <p className="eyebrow">{eyebrow}</p>
         <h2>{title}</h2>
@@ -1280,7 +1312,7 @@ function ConversionPanel({
       </div>
       <div className="conversion-actions">
         <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={20} /></button>
-        {secondaryLabel && secondaryRoute && (
+        {secondaryLabel && secondaryRoute && routeEnabled(secondaryRoute) && (
           <button className="secondary" type="button" onClick={() => onNavigate(secondaryRoute)}>{secondaryLabel}</button>
         )}
       </div>
@@ -1308,50 +1340,63 @@ function Metric({ value, label }: { value: string; label: string }) {
 }
 
 function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  const exploreLinks = enabledLinks<[Route, string]>([
+    ['home', 'Home'],
+    ['how', 'How it works'],
+    ['treatments', 'Treatments'],
+    ['about', 'Meet the Team'],
+    ['blog', 'Blog'],
+  ])
+  const startLinks = enabledLinks<[Route, string]>([
+    ['start', 'Check eligibility'],
+    ['how', 'How it works'],
+    ['refer', 'For physicians'],
+  ])
+  const legalLinks = enabledLinks<[Route, string, string]>([
+    ['privacy', '/privacy', 'Privacy Policy'],
+    ['privacy', '/privacy#notice', 'Notice of Privacy Practices'],
+    ['terms', '/terms', 'Terms of Use'],
+    ['consent', '/telehealth-consent', 'Telehealth Consent'],
+    ['contact', '/contact', 'Contact'],
+  ])
+
   return (
     <footer className="footer">
       <div>
         <BrandLink variant="reverse" onNavigate={onNavigate} />
-        <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation, care coordination, and treatment-readiness review.</p>
+        <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation and treatment.</p>
         <p className="footer-identity">
-          {legalEntity}
+          {footerEntity}
           <br />
           {physicalAddress}
           <br />
           Phone: {publicPhone}
-          <br />
-          Clinical care is provided by {clinicalPractice}.
-          <br />
-          Patients may be seen in {licensedStates}.
         </p>
-        <p className="footer-copy">© {new Date().getFullYear()} {legalEntity}</p>
       </div>
       <div>
         <strong>Explore</strong>
-        <button type="button" onClick={() => onNavigate('home')}>Home</button>
-        <button type="button" onClick={() => onNavigate('how')}>How it works</button>
-        <button type="button" onClick={() => onNavigate('treatments')}>Treatments</button>
-        <button type="button" onClick={() => onNavigate('about')}>Meet the Team</button>
-        <button type="button" onClick={() => onNavigate('blog')}>Blog</button>
+        {exploreLinks.map(([itemRoute, label]) => (
+          <button key={label} type="button" onClick={() => onNavigate(itemRoute)}>{label}</button>
+        ))}
       </div>
       <div>
         <strong>Get started</strong>
-        <button type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
-        <button type="button" onClick={() => onNavigate('how')}>How it works</button>
-        <button type="button" onClick={() => onNavigate('refer')}>For physicians</button>
+        {startLinks.map(([itemRoute, label]) => (
+          <button key={label} type="button" onClick={() => onNavigate(itemRoute)}>{label}</button>
+        ))}
         <a href={`mailto:${publicEmail}`}>Email the team</a>
       </div>
       <div>
         <strong>Legal</strong>
-        <a href="/privacy">Privacy Policy</a>
-        <a href="/privacy#notice">Notice of Privacy Practices</a>
-        <a href="/terms">Terms of Use</a>
-        <a href="/telehealth-consent">Telehealth Consent</a>
-        <a href="/contact">Contact</a>
-        <small>
-          <a href="/privacy#ai-tools">AI-use disclosure</a>: some site copy and code are drafted with AI tools.
-        </small>
-        <small>Individual results vary. Local Doctor does not replace emergency care. Call 911 for a medical emergency.</small>
+        {legalLinks.map(([, href, label]) => (
+          <a key={href} href={href}>{label}</a>
+        ))}
+      </div>
+      <div className="footer-legal">
+        <p>
+          Leqembi and Kisunla are FDA-approved to help slow the progression of early Alzheimer&apos;s disease in people who qualify. Individual results vary, and these treatments are not a cure. Local Doctor provides specialist evaluation and care coordination; it does not replace emergency care — if you are experiencing a medical emergency, call 911.
+        </p>
+        <p className="footer-copy">© {new Date().getFullYear()} Local Doctor. All rights reserved.</p>
       </div>
     </footer>
   )
