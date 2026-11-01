@@ -500,19 +500,22 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
   return (
     <>
       <section className="hero">
-        <div className="hero-copy">
-          <p className="eyebrow">Virtual Alzheimer's specialty clinic</p>
-          <h1>See if newer Alzheimer's treatments may be right for you. <em>Sooner.</em></h1>
-          <p>
-            New FDA-approved treatments may help slow progression in some people with early Alzheimer&apos;s disease. Get a second opinion from clinicians who focus on cognitive impairment and treatment eligibility to see if one may be an option for you.
-          </p>
-          <div className="hero-actions">
-            <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
-            <button className="secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>
-          </div>
-          <div className="trust-note"><span /> Backed by a national infusion network and a focused treatment-readiness pathway.</div>
-        </div>
         <img className="hero-image" src="/assets/hero-patient-caregiver.webp" alt="Older adults walking together outdoors" width={904} height={509} />
+        <div className="hero-overlay" />
+        <div className="hero-content">
+          <div className="hero-copy">
+            <p className="eyebrow">Virtual Alzheimer's specialty clinic</p>
+            <h1>See if newer Alzheimer's treatments may be right for you. <em>Sooner.</em></h1>
+            <p>
+              New FDA-approved treatments may help slow progression in some people with early Alzheimer&apos;s disease. Get a second opinion from clinicians who focus on cognitive impairment and treatment eligibility to see if one may be an option for you.
+            </p>
+            <div className="hero-actions">
+              <button className="accent" type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
+              <button className="secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>
+            </div>
+            <div className="trust-note"><span /> Backed by a national infusion network and a focused treatment-readiness pathway.</div>
+          </div>
+        </div>
       </section>
 
       <section className="stat-band">

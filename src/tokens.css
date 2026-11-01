@@ -43,6 +43,8 @@
   --border-control: var(--ink-500);
   --border-subtle: var(--ink-100);
   --border-on-dark: rgb(255 255 255 / 0.24);
+  --overlay-hero: linear-gradient(105deg, rgb(10 44 99 / 0.93) 0%, rgb(10 44 99 / 0.84) 42%, rgb(10 44 99 / 0.55) 70%, rgb(10 44 99 / 0.22) 100%);
+  --overlay-hero-compact: linear-gradient(180deg, rgb(10 44 99 / 0.72) 0%, rgb(10 44 99 / 0.87) 38%, rgb(10 44 99 / 0.92) 100%);
   --focus-light: var(--blue-500);
   --focus-dark: var(--white);
   --focus-color: var(--focus-light);
