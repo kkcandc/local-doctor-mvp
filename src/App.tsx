@@ -3,13 +3,11 @@ import type { ReactNode } from 'react'
 import {
   ArrowRight,
   BadgeCheck,
-  Brain,
   Building2,
   CalendarClock,
   ChevronDown,
   CheckCircle2,
   FileText,
-  HeartHandshake,
   Menu,
   ShieldAlert,
   Sparkles,
@@ -116,51 +114,20 @@ const pathRoutes: Record<string, Route> = {
   contact: 'contact',
 }
 
-const discoveryPaths = [
+const valueProps = [
   {
-    title: 'I am worried about memory changes',
-    copy: 'A low-commitment virtual check helps you understand whether specialist review may be useful.',
-    action: 'Take the check',
-    route: 'start' as Route,
-    icon: Brain,
-  },
-  {
-    title: 'I already have a diagnosis',
-    copy: 'Skip basic education and start with treatment-eligibility and second-opinion questions.',
-    action: 'Review eligibility',
-    route: 'treatments' as Route,
+    title: 'Dementia specialists, not generalists',
+    copy: 'A real second opinion from specialists focused on dementia and disease-modifying treatment, not general memory care.',
     icon: BadgeCheck,
   },
   {
-    title: 'I am helping someone I love',
-    copy: 'The path is built for patients and caregivers together, without writing the patient out of the decision.',
-    action: 'See how it works',
-    route: 'how' as Route,
-    icon: HeartHandshake,
-  },
-  {
-    title: 'I am a referring clinician',
-    copy: 'Refer a patient for treatment-readiness review while preserving your relationship with them.',
-    action: 'Refer a patient',
-    route: 'refer' as Route,
-    icon: Stethoscope,
-  },
-]
-
-const valueProps = [
-  {
-    title: 'Speed to a specialist',
-    copy: 'Virtual first, so your evaluation does not wait on a local neurology opening. See a specialist in weeks, not months.',
+    title: 'Less wait and travel',
+    copy: 'Virtual first, so you don\'t wait months for an evaluation with an in-person neurologist. You will get seen in days or weeks, not months.',
     icon: CalendarClock,
   },
   {
-    title: 'A real second opinion',
-    copy: 'From specialists focused on disease-modifying treatment eligibility, not general memory care.',
-    icon: BadgeCheck,
-  },
-  {
-    title: 'A path into treatment',
-    copy: 'If you qualify, a direct connection into a national infusion network, not just another referral.',
+    title: 'A direct path to treatment',
+    copy: 'If you qualify, a direct connection into a national infusion network, not just another referral or paper treatment plan.',
     icon: Building2,
   },
 ]
@@ -203,10 +170,10 @@ const payerNames = [
 ]
 
 const simpleProcess = [
-  ['Tell us what is going on', 'A short form gathers symptoms, diagnosis status, caregiver context, insurance, and location.'],
-  ['Meet the specialist team', 'A virtual visit reviews records, history, goals, and what testing may be needed next.'],
-  ['Get a clearer answer', 'Labs, imaging, biomarker confirmation, and safety factors are reviewed before planning.'],
-  ['Move locally if appropriate', 'Patients who qualify can be routed into local treatment follow-through.'],
+  ['Tell us what\'s going on', 'A quick call to screen for memory concerns, medical history, and eligibility for an evaluation.'],
+  ['Meet your board-certified specialist', 'A video call for the evaluation and to dive into your questions, concerns, and goals. It all leads to a clear decision on whether testing is needed to confirm diagnoses or treatment.'],
+  ['Get a clearer answer', 'We review new or recent labs and imaging to provide a clear answer on diagnosis and treatment options.'],
+  ['Start treatment', 'Patients who qualify and want to move forward with infusion treatment are treated seamlessly at a local infusion center.'],
 ]
 
 const journeySteps = [
@@ -505,9 +472,9 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <div className="hero-content">
           <div className="hero-copy">
             <p className="eyebrow">Virtual Alzheimer's specialty clinic</p>
-            <h1>See if newer Alzheimer's treatments may be right for you. <em>Sooner.</em></h1>
+            <h1>Treatment that slows down Alzheimer's. <em>Finally.</em></h1>
             <p>
-              New FDA-approved treatments may help slow progression in some people with early Alzheimer&apos;s disease. Get a second opinion from clinicians who focus on cognitive impairment and treatment eligibility to see if one may be an option for you.
+              New FDA-approved treatments can slow the progression of early Alzheimer&apos;s. Get a second opinion from our neurology team who specialize in cognitive impairment and these disease-modifying treatments to see if you&apos;re eligible.
             </p>
             <div className="hero-actions">
               <button className="accent" type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
@@ -519,14 +486,14 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
       </section>
 
       <section className="stat-band">
-        <Metric value="3.5 years" label="average gap between first symptoms and diagnosis, nationally" />
-        <Metric value="6-9 months" label="typical wait for a first specialist visit elsewhere" />
-        <Metric value="Maryland" label="licensed neurologist leads the virtual visit" />
-        <Metric value="Local" label="labs and imaging near home, if ordered" />
+        <Metric value="3.5 years" label="national average gap between first symptoms and diagnosis of Dementia or Alzheimer's disease" />
+        <Metric value="6-9 months" label="typical wait for a new patient visit with a Neurologist in most areas" />
+        <Metric value="1-2 weeks" label="average time to see one of our board-certified neurology specialists" />
+        <Metric value="1,500+" label="patients treated successfully by our infusion network" />
       </section>
 
-      <section className="section white">
-        <SectionIntro eyebrow="Why Local Doctor" title="Built around one job: a fast, clear answer on treatment readiness." />
+      <section className="section ivory">
+        <SectionIntro eyebrow="Why Local Doctor" title="We're designed around one goal: a clear, credible, and fast answer on treatment options." />
         <div className="value-grid">
           {valueProps.map((prop) => {
             const Icon = prop.icon
@@ -541,11 +508,15 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         </div>
       </section>
 
-      <InsuranceStrip tone="ivory" />
+      <InsuranceStrip
+        tone="blue"
+        title="We accept Medicare, Medicaid, and most major health plans"
+        copy="Whether we're in network with your insurance or not, we're committed to financial transparency and we do whatever is in our control to minimize your costs. No surprise bills or hidden costs."
+      />
 
       <section className="section white">
         <div className="section-row">
-          <SectionIntro eyebrow="How it works" title="From first concern to treatment readiness, in 4 steps." />
+          <SectionIntro eyebrow="How it works" title="From getting in touch to real treatment in 4 easy steps." />
           <button className="text-link" type="button" onClick={() => onNavigate('how')}>See the full process <ArrowRight size={16} /></button>
         </div>
         <ProcessGrid />
@@ -553,25 +524,6 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
 
       <section className="section ivory">
         <TreatmentPreview onNavigate={onNavigate} />
-      </section>
-
-      <AudienceSplit onNavigate={onNavigate} />
-
-      <section className="section ivory">
-        <SectionIntro eyebrow="Start in the right place" title="Different visitors need different first steps." copy="Start from the situation you are actually in: a memory concern, an existing diagnosis, support for someone you love, or a referral from a clinician." />
-        <div className="path-grid">
-          {discoveryPaths.map((path) => {
-            const Icon = path.icon
-            return (
-              <button className="path-card" type="button" key={path.title} onClick={() => onNavigate(path.route)}>
-                <Icon size={24} />
-                <strong>{path.title}</strong>
-                <span>{path.copy}</span>
-                <small>{path.action} <ArrowRight size={16} /></small>
-              </button>
-            )
-          })}
-        </div>
       </section>
 
       <ConversionPanel onNavigate={onNavigate} />
@@ -1111,12 +1063,20 @@ function EligibilityLeadForm() {
   )
 }
 
-function InsuranceStrip({ tone }: { tone: 'white' | 'ivory' }) {
+function InsuranceStrip({
+  tone,
+  title = 'Coverage is checked for your plan',
+  copy = 'Local Doctor does not promise that a health plan is accepted. Benefits, prior authorization, and what you may owe depend on your coverage, the services ordered, and where care is delivered. Financial assistance, when a program is available, depends on that program\'s rules. The names below are examples of plans patients ask about. They are not a list of plans Local Doctor or its partners participate with.',
+}: {
+  tone: 'white' | 'ivory' | 'blue'
+  title?: string
+  copy?: string
+}) {
   return (
     <section className={`insurance-strip ${tone}`}>
       <div>
-        <h2>Coverage is checked for your plan</h2>
-        <p>Local Doctor does not promise that a health plan is accepted. Benefits, prior authorization, and what you may owe depend on your coverage, the services ordered, and where care is delivered. Financial assistance, when a program is available, depends on that program&apos;s rules. The names below are examples of plans patients ask about. They are not a list of plans Local Doctor or its partners participate with.</p>
+        <h2>{title}</h2>
+        <p>{copy}</p>
         <div className="payer-marquee" aria-label="Examples of plans patients ask about, not a list of accepted insurance">
           <div>
             {payerNames.map((payer, index) => <span key={`${payer}-${index}`}>{payer}</span>)}
@@ -1148,42 +1108,21 @@ function ProcessGrid() {
 function TreatmentPreview({ onNavigate }: { onNavigate: (route: Route) => void }) {
   return (
     <>
-      <SectionIntro eyebrow="Treatments" title="Two FDA-approved treatments for early Alzheimer's." copy="Leqembi and Kisunla are IV anti-amyloid treatments for certain people with early Alzheimer&apos;s. Local Doctor helps families understand the requirements, risks, testing, and next step." />
+      <SectionIntro eyebrow="Treatments" title="Two FDA-approved treatments for early Alzheimer's." copy="Leqembi and Kisunla are disease-modifying IV therapies for early Alzheimer&apos;s disease. In clinical trials, they showed a real, moderate slowing of cognitive decline - roughly 25-33% over 18 months. Not a cure, and not right for everyone, but the first treatments that act on the disease itself. We help you and your family understand the requirements, risks, and everything it entails." />
       <div className="treatment-card-grid">
         <article>
           <h3>Leqembi</h3>
           <span>lecanemab-irmb</span>
-          <p>An IV anti-amyloid treatment for certain patients with early Alzheimer&apos;s, requiring careful eligibility review and monitoring.</p>
+          <p>IV infusion every two weeks; can transition to a once-weekly at-home injection after 18 months.</p>
         </article>
         <article>
           <h3>Kisunla</h3>
           <span>donanemab-azbt</span>
-          <p>An IV anti-amyloid treatment for certain patients with early Alzheimer&apos;s, with treatment planning tied to label, safety, and response.</p>
+          <p>Monthly IV infusion; can stop once amyloid reaches minimal levels on a PET scan.</p>
         </article>
       </div>
       <button className="text-link treatment-link" type="button" onClick={() => onNavigate('treatments')}>See treatment details <ArrowRight size={16} /></button>
     </>
-  )
-}
-
-function AudienceSplit({ onNavigate }: { onNavigate: (route: Route) => void }) {
-  return (
-    <section className="audience-split">
-      <article>
-        <div>
-          <h3>For caregivers</h3>
-          <p>You are part of the decision, not just the person who found the website. The flow speaks to patients and families together.</p>
-          <button type="button" onClick={() => onNavigate('how')}>See how it works <ArrowRight size={16} /></button>
-        </div>
-      </article>
-      <article>
-        <div>
-          <h3>For referring physicians</h3>
-          <p>Send patients for treatment-readiness review, records support, safety screening, and local follow-through without replacing the referring relationship.</p>
-          <button type="button" onClick={() => onNavigate('refer')}>Refer a patient <ArrowRight size={16} /></button>
-        </div>
-      </article>
-    </section>
   )
 }
 
