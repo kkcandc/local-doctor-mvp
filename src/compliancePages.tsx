@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { isPageEnabled } from './featureFlags'
 
 export const publicEmail = 'hello@trylocaldoctor.com'
 
@@ -186,7 +187,11 @@ export function PrivacyPage() {
           Filing a complaint will not be held against you.
         </p>
         <p>
-          The clinician&apos;s name and specialty are listed on the <a href="/about#providers">Meet the Team</a> and <a href="/contact">Contact</a> pages.
+          {isPageEnabled('about') ? (
+            <>The clinician&apos;s name and specialty are listed on the <a href="/about#providers">Meet the Team</a> and <a href="/contact">Contact</a> pages.</>
+          ) : (
+            <>The clinician&apos;s name and specialty are listed on the <a href="/contact#providers">Contact</a> page.</>
+          )}{' '}
           Patients may be seen in {licensedStates}.
         </p>
       </div>
@@ -280,7 +285,8 @@ export function ConsentPage() {
         <p>
           Clinical care is provided by {clinicalPractice}.
           The clinician must be licensed in the state where you are located during the visit. That state is {licensedStates}.
-          The clinician&apos;s name and specialty are on the <a href="/about#providers">Meet the Team</a> page.
+          The clinician&apos;s name and specialty are on the{' '}
+          {isPageEnabled('about') ? <a href="/about#providers">Meet the Team</a> : <a href="/contact#providers">Contact</a>} page.
         </p>
 
         <h2>Benefits, risks, and alternatives</h2>

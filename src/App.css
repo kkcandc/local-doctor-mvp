@@ -748,6 +748,10 @@ a.blog-card:hover {
   border-radius: var(--radius-xl);
 }
 
+.page-hero.compact {
+  padding-block: calc(var(--section-pad) * 0.6);
+}
+
 .page-hero h1 {
   font-size: clamp(2.125rem, 1.6rem + 2vw, 3rem);
 }
@@ -1164,6 +1168,10 @@ a.blog-card:hover {
   color: var(--text-secondary);
 }
 
+.mini-faq-list p + p {
+  margin-top: var(--space-12);
+}
+
 .start-experience {
   display: grid;
   gap: 36px;
@@ -1374,6 +1382,10 @@ a.blog-card:hover {
   background: var(--surface-sunken);
 }
 
+.conversion-panel.compact {
+  padding-block: calc(var(--space-64) * 0.6);
+}
+
 .conversion-panel h2 {
   max-width: 780px;
 }
@@ -1467,9 +1479,26 @@ a.blog-card:hover {
   }
 }
 
-.footer-identity,
-.footer-copy {
+.footer-identity {
   max-width: 420px;
+}
+
+.footer > div.footer-legal {
+  display: block;
+  grid-column: 1 / -1;
+  margin-top: var(--space-16);
+  padding-top: var(--space-32);
+  border-top: 1px solid var(--divider-on-dark);
+}
+
+.footer .footer-legal p {
+  max-width: 840px;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.footer .footer-legal p + p {
+  margin-top: var(--space-16);
 }
 
 .identity-block {
