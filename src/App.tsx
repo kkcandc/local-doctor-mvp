@@ -655,7 +655,7 @@ function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
           <p>Most patients access care through Medicare, Medicaid, or major health plans (Aetna, Cigna, United, Kaiser, etc.). Coverage for our virtual visits and treatment depends on your specific plan but we do whatever is in our control to minimize your costs. Whether we&apos;re in network with your insurance or not, we will walk through your specific coverage before you commit to anything and you will never receive a surprise bill or hidden cost.</p>
         </div>
       </section>
-      <section className="section ivory mini-faq-section compact-section">
+      <section className="section white mini-faq-section compact-section">
         <SectionIntro eyebrow="FAQ" title="Questions you might have." />
         <div className="mini-faq-list">
           {howFaqItems.map(([question, answer]) => (
