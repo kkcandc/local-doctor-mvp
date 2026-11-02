@@ -1,0 +1,158 @@
+/*
+  Google Ads tag configuration.
+
+  This site is Vite, so the browser-visible env prefix is VITE_.
+  NEXT_PUBLIC_GOOGLE_ADS_ID is not read.
+
+  Production builds use AW-18413556843 when VITE_GOOGLE_ADS_ID is unset.
+  Set VITE_GOOGLE_ADS_ID=off to leave the tag out of a build.
+
+  Conversion labels are the short id after the slash in Google's event snippet
+  (AW-18413556843/LABEL). They are optional until copied from Google Ads.
+  Event payloads are page path and event name only: no names, emails, phone
+  numbers, dates of birth, diagnoses, form answers, or Typeform response ids.
+*/
+
+export const DEFAULT_GOOGLE_ADS_ID = 'AW-18413556843'
+
+const ADS_ID = /^AW-\d{6,20}$/
+const CONVERSION_LABEL = /^[A-Za-z0-9_-]{1,64}$/
+const PAGE_PATH = /^\/[A-Za-z0-9/_-]{0,160}$/
+
+// Clinic numbers only. Legal-page 1-800 lines are not lead conversions.
+// (844) 509-1404 is included so a future tel: link is tracked; it is not on the site today.
+const TRACKED_PHONE_DIGITS = new Set([
+  '12403765730',
+  '18445091404',
+])
+
+// Kept on the first gtag page hit so Google Ads can attribute the click.
+// Every other query param is dropped so a link cannot forward an email, phone, or note.
+export const ADS_CLICK_PARAMS = [
+  'gclid',
+  'gbraid',
+  'wbraid',
+  'dclid',
+  'gclsrc',
+  'gad_source',
+  'gad_campaignid',
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_term',
+  'utm_content',
+  'utm_id',
+] as const
+
+export type GtagArgs = [command: string, nameOrId: string, params?: Record<string, string>]
+
+export function resolveGoogleAdsId(envValue: string | undefined, enableByDefault: boolean): string | null {
+  const trimmed = envValue?.trim()
+  if (trimmed === 'off' || trimmed === 'false' || trimmed === '0') return null
+  if (trimmed) return ADS_ID.test(trimmed) ? trimmed : null
+  return enableByDefault ? DEFAULT_GOOGLE_ADS_ID : null
+}
+
+export function conversionSendTo(adsId: string, label: string | undefined): string | null {
+  const trimmed = label?.trim()
+  if (!trimmed || !CONVERSION_LABEL.test(trimmed)) return null
+  return `${adsId}/${trimmed}`
+}
+
+export function safePagePath(input: string): string {
+  const path = input.trim().split('#')[0]?.split('?')[0] ?? ''
+  if (!path.startsWith('/') || path.startsWith('//')) return '/'
+  if (!PAGE_PATH.test(path)) return '/'
+  return path
+}
+
+export function adsPageLocation(href: string): string {
+  const url = new URL(href, 'https://trylocaldoctor.com')
+  const kept = new URLSearchParams()
+  const allowed = new Set<string>(ADS_CLICK_PARAMS)
+  for (const [key, value] of url.searchParams) {
+    if (!allowed.has(key) || value.length > 200 || value.includes('@')) continue
+    kept.append(key, value)
+  }
+  const query = kept.toString()
+  return `${url.origin}${safePagePath(url.pathname)}${query ? `?${query}` : ''}`
+}
+
+export function isTrackedClinicPhone(href: string): boolean {
+  const digits = href.replace(/^tel:/i, '').replace(/\D/g, '')
+  const normalized = digits.length === 10 ? `1${digits}` : digits
+  return TRACKED_PHONE_DIGITS.has(normalized)
+}
+
+export function isTypeformSubmitMessage(origin: string, data: unknown): boolean {
+  if (!isTypeformOrigin(origin)) return false
+  if (data === 'form-submit') return true
+  if (!data || typeof data !== 'object') return false
+  return (data as { type?: unknown }).type === 'form-submit'
+}
+
+export function leadTrackingCalls(adsId: string, leadLabel: string | undefined, pathname: string): GtagArgs[] {
+  return eventCalls('generate_lead', adsId, leadLabel, pathname)
+}
+
+export function phoneTrackingCalls(adsId: string, phoneLabel: string | undefined, pathname: string): GtagArgs[] {
+  return eventCalls('phone_click', adsId, phoneLabel, pathname)
+}
+
+export function spaPageViewCall(
+  adsId: string,
+  pathname: string,
+  previousPath: string | null,
+): { nextPath: string; call: GtagArgs | null } {
+  const pagePath = safePagePath(pathname)
+  if (previousPath === null || previousPath === pagePath) {
+    return { nextPath: pagePath, call: null }
+  }
+  return {
+    nextPath: pagePath,
+    call: ['event', 'page_view', { send_to: adsId, page_path: pagePath }],
+  }
+}
+
+export function googleAdsTagHtml(id: string): string {
+  const allowed = ADS_CLICK_PARAMS.join(',')
+  return [
+    '    <!-- Google tag (gtag.js) -->',
+    `    <script async src="https://www.googletagmanager.com/gtag/js?id=${id}"></script>`,
+    '    <script>',
+    '      window.dataLayer = window.dataLayer || [];',
+    '      function gtag(){dataLayer.push(arguments);}',
+    '      gtag(\'js\', new Date());',
+    '      (function () {',
+    `        var allowed = {${allowed.split(',').map((key) => `${key}:1`).join(',')}};`,
+    '        var pageLocation = location.origin + \'/\';',
+    '        try {',
+    '          var url = new URL(location.href);',
+    '          var kept = new URLSearchParams();',
+    '          url.searchParams.forEach(function (value, key) {',
+    '            if (allowed[key] && value.length <= 200 && value.indexOf(\'@\') === -1) kept.append(key, value);',
+    '          });',
+    '          var path = /^\\/[A-Za-z0-9/_-]{0,160}$/.test(url.pathname) ? url.pathname : \'/\';',
+    '          pageLocation = url.origin + path + (kept.toString() ? \'?\' + kept.toString() : \'\');',
+    '        } catch (e) {}',
+    `        gtag('config', '${id}', { page_location: pageLocation });`,
+    '      })();',
+    '    </script>',
+  ].join('\n')
+}
+
+function eventCalls(eventName: string, adsId: string, label: string | undefined, pathname: string): GtagArgs[] {
+  const calls: GtagArgs[] = [['event', eventName, { page_path: safePagePath(pathname) }]]
+  const sendTo = conversionSendTo(adsId, label)
+  if (sendTo) calls.push(['event', 'conversion', { send_to: sendTo }])
+  return calls
+}
+
+function isTypeformOrigin(origin: string): boolean {
+  try {
+    const url = new URL(origin)
+    return url.protocol === 'https:' && (url.hostname === 'typeform.com' || url.hostname.endsWith('.typeform.com'))
+  } catch {
+    return false
+  }
+}

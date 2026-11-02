@@ -34,6 +34,7 @@ import {
   publicEmail,
 } from './compliancePages'
 import { isPageEnabled, type PageFlag } from './featureFlags'
+import { noteSpaNavigation } from './analytics/googleAds'
 import './App.css'
 
 type Route =
@@ -365,6 +366,10 @@ function App() {
   }, [menuOpen])
 
   usePageMeta(route, blogSlug)
+
+  useEffect(() => {
+    noteSpaNavigation(window.location.pathname)
+  }, [route, blogSlug])
 
   useEffect(() => {
     const hash = window.location.hash.replace(/^#/, '')
@@ -1096,7 +1101,12 @@ function EligibilityLeadForm() {
 
   return (
     <div className="intake-frame-wrap" id="intake">
-      <div className="typeform-live-embed" data-tf-live={typeformLiveId} data-tf-inline-on-mobile="" />
+      <div
+        className="typeform-live-embed"
+        data-tf-live={typeformLiveId}
+        data-tf-inline-on-mobile=""
+        data-tf-on-submit="localDoctorOnTypeformSubmit"
+      />
     </div>
   )
 }

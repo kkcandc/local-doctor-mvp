@@ -4,6 +4,9 @@ import './tokens.css'
 import './index.css'
 import './forms.css'
 import App from './App'
+import { installGoogleAds } from './analytics/googleAds'
+
+installGoogleAds()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
