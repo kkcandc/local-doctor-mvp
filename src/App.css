@@ -1148,12 +1148,14 @@ a.blog-card:hover {
 }
 
 .cost-band > div {
-  max-width: 760px;
+  max-width: 874px;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .cost-band h2 {
   max-width: 680px;
-  margin: 0 0 var(--space-16);
+  margin: 0 auto var(--space-16);
 }
 
 .cost-band p:not(.eyebrow) {
