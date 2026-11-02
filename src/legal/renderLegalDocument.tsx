@@ -46,7 +46,11 @@ function paragraphClass(text: string) {
   if (text.startsWith('This notice describes how medical information about you may be used and disclosed')) {
     return 'legal-notice'
   }
-  if (text.startsWith('[PUBLICATION REQUIREMENT:')) return 'legal-publication-note'
+  return undefined
+}
+
+function paragraphLang(text: string) {
+  if (text.startsWith('Si el inglés no es su idioma de preferencia')) return 'es'
   return undefined
 }
 
@@ -118,7 +122,7 @@ function renderParagraph(
 
   const lines = block.split('\n')
   return (
-    <p className={paragraphClass(block)} key={`p-${key}`}>
+    <p className={paragraphClass(block)} lang={paragraphLang(block)} key={`p-${key}`}>
       {lines.map((line, lineIndex) => (
         <span key={`${key}-${lineIndex}`}>
           {lineIndex > 0 && <br />}

@@ -141,7 +141,13 @@ test('patient rights includes the notice, nondiscrimination, and good faith esti
   await expect(page.locator('#notice-of-privacy-practices')).toHaveText('Notice of Privacy Practices')
   await expect(body).toContainText('This notice describes how medical information about you may be used and disclosed and how you can get access to this information. Please review it carefully.')
   await expect(body).toContainText('42 CFR Part 2')
-  await expect(body).toContainText('[PUBLICATION REQUIREMENT: Add the required translated availability notices and make them accessible across the nine operating states before publishing.]')
+  const spanishNotice =
+    'Si el inglés no es su idioma de preferencia, hay intérpretes calificados e información traducida apropiada disponibles sin costo. Si tiene una discapacidad, hay ayudas apropiadas gratuitas (como intérpretes de lengua de señas y documentos accesibles). Escriba a hello@trylocaldoctor.com para recibir ayuda con formularios, la programación de citas o las visitas de telesalud. No necesita traer ni pagar su propio intérprete.'
+  await expect(body).toContainText('qualified interpreters and appropriate translated information are available free of charge')
+  await expect(body.locator('p[lang="es"]')).toHaveText(spanishNotice)
+  await expect(body.locator('p[lang="es"] a[href="mailto:hello@trylocaldoctor.com"]')).toBeVisible()
+  await expect(page.locator('body')).not.toContainText('PUBLICATION REQUIREMENT')
+  await expect(body).not.toContainText('Connecticut, Virginia, Maryland')
   await expect(body).toContainText('Good Faith Estimate')
   await expect(body).toContainText('cms.gov/nosurprises')
   await expect(body.getByRole('link', { name: 'contact page' }).first()).toHaveAttribute('href', '/contact')

@@ -1968,8 +1968,7 @@ h3 {
 }
 
 .article-body p.legal-callout,
-.article-body p.legal-notice,
-.article-body p.legal-publication-note {
+.article-body p.legal-notice {
   padding: 14px 16px;
   color: var(--ink);
   border: 1px solid var(--line);
@@ -1983,11 +1982,6 @@ h3 {
 
 .article-body p.legal-notice {
   background: var(--mist);
-}
-
-.article-body p.legal-publication-note {
-  background: var(--warning-bg);
-  border-left: 4px solid #c4a24a;
 }
 
 .npp-banner {

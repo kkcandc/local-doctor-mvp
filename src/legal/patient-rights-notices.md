@@ -124,7 +124,7 @@ To raise a concern, contact us at hello@trylocaldoctor.com. You may also complai
 
 If English is not your preferred language, qualified interpreters and appropriate translated information are available free of charge. If you have a disability, free appropriate aids (such as sign-language interpreters and accessible documents) are available. Email hello@trylocaldoctor.com for assistance with forms, scheduling, or telehealth visits. You do not need to bring or pay for your own interpreter.
 
-[PUBLICATION REQUIREMENT: Add the required translated availability notices and make them accessible across the nine operating states before publishing.]
+Si el inglés no es su idioma de preferencia, hay intérpretes calificados e información traducida apropiada disponibles sin costo. Si tiene una discapacidad, hay ayudas apropiadas gratuitas (como intérpretes de lengua de señas y documentos accesibles). Escriba a hello@trylocaldoctor.com para recibir ayuda con formularios, la programación de citas o las visitas de telesalud. No necesita traer ni pagar su propio intérprete.
 
 Good Faith Estimate (uninsured or self-pay patients)
 
