@@ -175,40 +175,40 @@ const simpleProcess = [
 
 const journeySteps = [
   {
-    title: 'Tell us what is going on',
-    meta: 'Virtual',
+    title: 'Tell us what\'s going on, to see if you\'re eligible',
+    meta: 'Phone call',
     points: [
-      'Reach out as the patient, a caregiver, or a physician referral.',
-      'Complete a short intake covering symptoms, daily activities, medications, insurance, and caregiver information.',
-      'Your form routes to the right next step, including what to do if this is not the right fit.',
+      'Give us a call, or fill out a short form so we can call you.',
+      'We collect information regarding current daily activities, cognitive performance, medical history, medications, and insurance.',
+      'If eligible, we schedule a virtual visit for you to meet with a neurology specialist within 1-2 weeks.',
     ],
   },
   {
     title: 'Meet your specialist',
-    meta: 'Virtual - 60-90 min',
+    meta: 'Video visit - 1 hour',
     points: [
-      'We verify insurance in parallel, so it is ready before your visit.',
-      'Diagnostic intake visit with your caregiver present: history, cognitive screen, medication review, and a plan for what is next.',
-      'Orders placed when appropriate: standard labs, amyloid biomarker testing, genetic testing, and brain MRI.',
+      'You confirm the visit and fill out the consent forms prior to the visit',
+      'You and a loved one attend the visit to share your concerns, questions, and provide all information needed for the evaluation by your specialist including medical history, medications, recent testing, and more.',
+      'Your specialist shares their clinical summary and recommended plan of care with you. It may include orders for new labs, genetic testing, and imaging.',
     ],
   },
   {
     title: 'Get your workup and results',
-    meta: 'Local + Virtual - about 2-3 weeks',
+    meta: 'Local + Virtual',
     points: [
-      'A single blood draw can cover labs and biomarker testing when available.',
-      'Brain MRI is completed locally, with careful review for treatment-safety questions.',
-      'The clinical team reviews your full workup before the next visit.',
-      'Results and treatment-planning visit covers diagnosis, options, logistics, and honest risk discussion.',
+      'If new orders were placed, you schedule appointments with a local imaging center and a lab (Quest or LabCorp) to perform the necessary tests in the care plan.',
+      'Your neurology specialist reviews the test results.',
+      'Your follow up appointment is scheduled with the specialist.',
+      'You and a loved one attend the follow up visit to discuss your results and treatment options with the specialist and align on the path that is best for you.',
     ],
   },
   {
-    title: 'Start treatment and stay monitored',
-    meta: 'Hybrid',
+    title: 'Referral to treatment or outside care',
+    meta: 'Local',
     points: [
-      'If you qualify, the team helps route you to an in-network infusion center near you.',
-      'A monitoring calendar keeps infusions, MRIs, and follow-up steps on schedule.',
-      'Clear triage instructions and regular check-ins help watch for side effects.',
+      'If you\'re a candidate and decide to move forward with infusion treatment, we coordinate it and are with you every step of the way.',
+      'We stay in constant touch with you to monitor how things move along and to coordinate the ongoing imaging needed.',
+      'If you wish to move forward with other treatments or care, we help you find the best options and provide any referrals needed.',
     ],
   },
 ]
@@ -621,9 +621,10 @@ function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         title="A clear path from first concern to treatment."
         copy="Every step is virtual where it can be, and in-person only where it has to be."
         icon={<CalendarClock size={38} />}
+        aside={{ title: 'Family and loved ones', text: 'Our preference is for loved ones to join the virtual provider visits and be a part of the process.' }}
         onPrimary={() => onNavigate('start')}
         primaryLabel="Check eligibility now"
-        compact
+        wideCopy
       />
       <section className="section white compact-section">
         <div className="journey-list">
@@ -722,11 +723,11 @@ function AboutPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
 
 function StartPage() {
   return (
-    <>
+    <div className="start-page">
       <PageHero
         eyebrow="Get started"
         title="Find out if treatment is right for you."
-        copy="A free eligibility call will help us better understand your background, verify insurance, and define next steps together. No obligation, nor commitment."
+        copy="A free eligibility call will help us better understand you and your family's situation, verify insurance coverage, and define if you're eligible for our program. No obligation, nor commitment."
         primaryLabel={`Call ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
         showAside={false}
@@ -736,7 +737,7 @@ function StartPage() {
       <section className="section ivory intake-section">
         <StartExperience />
       </section>
-    </>
+    </div>
   )
 }
 
@@ -1052,17 +1053,18 @@ function WhatToExpect() {
           <h3>Here&apos;s how we check eligibility</h3>
           <ol>
             <li>Give us a call or fill out the form below so we can call you.</li>
-            <li>We spend time on the call learning about your background, situation, and potential needs.</li>
+            <li>We collect information regarding current cognitive performance, daily activities, medical history, medications, and insurance.</li>
             <li>We verify your insurance and whether your needs qualify to meet with our neurology team.</li>
-            <li>If you wish to move forward, we set up time for you to meet on a video call with our leading neurology specialist who will evaluate and recommend the best course of treatment.</li>
+            <li>If eligible, we set up a virtual visit for you to meet with a neurology specialist within 1-2 weeks, who will perform an evaluation for diagnosis and treatment options.</li>
           </ol>
         </div>
         <div>
-          <h3>What to have handy for our first call</h3>
+          <h3>What to have handy for the eligibility call</h3>
           <ul>
             <li>Insurance information</li>
             <li>Medication list</li>
             <li>Recent test results</li>
+            <li>Any questions you and your family want to discuss</li>
           </ul>
         </div>
       </div>
@@ -1237,6 +1239,11 @@ function CheckList({ items }: { items: string[] }) {
   )
 }
 
+const defaultHeroAside = {
+  title: 'Clinical decisions require licensed review.',
+  text: 'The website is a front door, not a diagnosis or treatment promise.',
+}
+
 function PageHero({
   eyebrow,
   title,
@@ -1246,8 +1253,9 @@ function PageHero({
   onPrimary,
   href,
   showAside = true,
+  aside = defaultHeroAside,
   image,
-  compact = false,
+  wideCopy = false,
 }: {
   eyebrow: string
   title: string
@@ -1257,11 +1265,12 @@ function PageHero({
   onPrimary?: () => void
   href?: string
   showAside?: boolean
+  aside?: { title: string; text: string }
   image?: { src: string; alt: string }
-  compact?: boolean
+  wideCopy?: boolean
 }) {
   const isPhoneLink = href?.startsWith('tel:')
-  const heroClass = ['page-hero', image && 'has-image', compact && 'compact'].filter(Boolean).join(' ')
+  const heroClass = ['page-hero', image && 'has-image', wideCopy && 'wide-copy'].filter(Boolean).join(' ')
 
   return (
     <div className="page-hero-band">
@@ -1284,8 +1293,8 @@ function PageHero({
       {showAside && (
         <aside>
           {icon}
-          <strong>Clinical decisions require licensed review.</strong>
-          <span>The website is a front door, not a diagnosis or treatment promise.</span>
+          <strong>{aside.title}</strong>
+          <span>{aside.text}</span>
         </aside>
       )}
     </section>

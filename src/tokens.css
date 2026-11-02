@@ -28,6 +28,7 @@
 
   /* Text */
   --text-primary: var(--ink-900);
+  --text-heading: var(--blue-900);
   --text-secondary: var(--ink-700);
   --text-link: var(--harbor-600);
   --text-on-dark: var(--white);
