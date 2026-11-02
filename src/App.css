@@ -877,10 +877,6 @@ a.blog-card:hover {
   margin-top: calc(var(--space-32) + var(--space-8));
 }
 
-.treatment-card-grid + .honest-card {
-  margin-bottom: var(--space-24);
-}
-
 .compare-wrap {
   max-width: 100%;
   overflow-x: auto;
