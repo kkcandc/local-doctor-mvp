@@ -60,19 +60,19 @@ Vite SPA, so the browser env prefix is `VITE_` (not `NEXT_PUBLIC_`). The tag is 
 | Env var | Purpose |
 | --- | --- |
 | `VITE_GOOGLE_ADS_ID` | Google tag id. Production builds default to `AW-18413556843` when this is unset. Set to `off` to omit the tag. A value has to be present at **build** time. |
-| `VITE_GOOGLE_ADS_LEAD_LABEL` | Optional. The label from Google Ads → Goals → Conversions → Tag setup (the part after `AW-…/` in `send_to`). When set, a Typeform submit also sends `gtag('event', 'conversion', { send_to })`. |
-| `VITE_GOOGLE_ADS_PHONE_LABEL` | Optional label for clinic phone clicks, same `send_to` shape. |
+| `VITE_GOOGLE_ADS_LEAD_LABEL` | `KA47CJbG9LAdEOuoosxE`. Account 908-258-0886, conversion “Local Doctor - Lead Typeform”. A Typeform submit sends `gtag('event', 'conversion', { send_to: 'AW-18413556843/KA47CJbG9LAdEOuoosxE' })`. |
+| `VITE_GOOGLE_ADS_PHONE_LABEL` | `gJr-CJnG9LAdEOuoosxE`. Account 908-258-0886, conversion “Local Doctor - Phone click”. A clinic phone click sends `gtag('event', 'conversion', { send_to: 'AW-18413556843/gJr-CJnG9LAdEOuoosxE' })`. |
 
 Event snippets (no names, emails, phone numbers, dates of birth, diagnoses, free-text answers, or Typeform response ids):
 
 - **Tag:** `gtag/js?id=AW-18413556843` and `gtag('config', 'AW-18413556843')` in the built `index.html` (`vite.config.ts`).
-- **Lead:** `generate_lead` with `page_path` only, from the Typeform embed on `/get-started` (`data-tf-on-submit="localDoctorOnTypeformSubmit"` plus a `form-submit` message from `*.typeform.com`). Fired in `src/analytics/googleAds.ts`.
-- **Phone:** `phone_click` with `page_path` only, for clicks on `tel:` links to (240) 376-5730. (844) 509-1404 is recognized if a `tel:` link for it is added later; it is not on the site. The 1-800 numbers on the patient-rights page are not tracked.
+- **Lead:** `generate_lead` with `page_path` only, from the Typeform embed on `/get-started` (`data-tf-on-submit="localDoctorOnTypeformSubmit"` plus a `form-submit` message from `*.typeform.com`). When `VITE_GOOGLE_ADS_LEAD_LABEL` is set, the same action also sends the conversion above. Fired in `src/analytics/googleAds.ts`.
+- **Phone:** `phone_click` with `page_path` only, for clicks on `tel:` links to (240) 376-5730. When `VITE_GOOGLE_ADS_PHONE_LABEL` is set, the same click also sends the conversion above. (844) 509-1404 is recognized if a `tel:` link for it is added later; it is not on the site. The 1-800 numbers on the patient-rights page are not tracked.
 - **Page views:** the tag's first `config` hit sends a page location that keeps Google click ids (`gclid`, `gbraid`, `wbraid`, and the other ad params) and drops every other query param, including anything with `@`. Later in-app navigations send `page_view` with `page_path` only.
 
 "Check eligibility" and other buttons that open `/get-started` do not submit a lead, so they are not conversion events. There is no separate book/schedule widget.
 
-Copy the conversion label from the Google Ads event snippet into the matching Vercel env var and redeploy. Until then, Google still receives the tag and the `generate_lead` / `phone_click` events. Use one primary conversion in Ads for each action so a label and the named event are not both counted.
+Set both label variables on Vercel for Production and Preview. Vite inlines them at build time, so a new deployment is required after a change. Google still receives `generate_lead` and `phone_click` alongside the labeled conversion. Keep one primary conversion per action in Ads so the named event and the label are not both counted.
 
 ## Commands
 

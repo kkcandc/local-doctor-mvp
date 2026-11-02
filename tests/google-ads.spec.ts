@@ -39,6 +39,25 @@ test('the first page hit keeps ad click ids and drops contact details', () => {
   expect(adsPageLocation('https://trylocaldoctor.com/?diagnosis=alzheimers#notes')).toBe('https://trylocaldoctor.com/')
 })
 
+test('official Ads labels become send_to conversions without contact fields', () => {
+  const leadLabel = 'KA47CJbG9LAdEOuoosxE'
+  const phoneLabel = 'gJr-CJnG9LAdEOuoosxE'
+  const lead = leadTrackingCalls(adsId, leadLabel, '/get-started?email=jane@example.com')
+  const phone = phoneTrackingCalls(adsId, phoneLabel, '/')
+  const json = JSON.stringify({ lead, phone })
+
+  expect(lead).toEqual([
+    ['event', 'generate_lead', { page_path: '/get-started' }],
+    ['event', 'conversion', { send_to: `${adsId}/${leadLabel}` }],
+  ])
+  expect(phone).toEqual([
+    ['event', 'phone_click', { page_path: '/' }],
+    ['event', 'conversion', { send_to: `${adsId}/${phoneLabel}` }],
+  ])
+  expect(json).not.toContain('jane')
+  expect(json).not.toContain('@')
+})
+
 test('lead and phone events keep page path and event name only', () => {
   const lead = leadTrackingCalls(adsId, 'leadLabel1', '/get-started?email=jane@example.com&phone=2403765730#notes')
   const phone = phoneTrackingCalls(adsId, undefined, '/get-started')
