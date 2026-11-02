@@ -19,4 +19,13 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    files: ['tests/**/*.ts', 'playwright.config.ts'],
+    languageOptions: {
+      globals: globals.node,
+    },
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ])

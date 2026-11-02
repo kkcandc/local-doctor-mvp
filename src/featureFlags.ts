@@ -17,6 +17,7 @@ const pageDefaults = {
   refer: true,
   privacy: true,
   terms: true,
+  patientRights: true,
   consent: true,
   contact: false,
 }
