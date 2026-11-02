@@ -220,13 +220,16 @@ const journeySteps = [
   },
 ]
 
+const costFaqAnswer = 'Provider visits with our neurology specialists will be at low to no out of pocket cost to you, depending on your insurance coverage. In case you need new labs and imaging exams to confirm a diagnosis or for treatment prescription, their cost will depend on the sites you use and your insurance coverage.'
+
+const imagingFaqQuestion = 'Is ongoing imaging needed while on treatment? What does that entail?'
+const imagingFaqAnswer = 'Yes, while receiving Leqembi or Kisunla treatment, you will need to have ongoing brain MRIs to monitor the presence of ARIA (amyloid related imaging abnormalities). This helps ensure treatment stays safe and that side effects are monitored appropriately.'
+
 const howFaqItems: Array<[string, string[]]> = [
   ['What services does Local Doctor provide?', [
     'Local Doctor is a virtual Alzheimer\'s clinic focused on accelerating access to life-changing therapies. Our initial focus is evaluation, diagnosis, treatment eligibility, treatment initiation, and required oversight of disease-modifying therapies, not comprehensive longitudinal dementia management, nor care coordination. The Local Doctor model is designed to complement your existing team of providers and will work with them as needed.',
   ]],
-  ['How much will this cost?', [
-    'Provider visits with our neurologist and dementia clinical team will be at zero cost. The labs and imaging exams will depend on your insurance and the sites you visit.',
-  ]],
+  ['How much will this cost?', [costFaqAnswer]],
   ['Will I be seeing an MD or NP?', [
     'Our team of neurology specialists is each board-certified and works interchangeably. Appointment matching is subject to your location, availability, and other factors.',
   ]],
@@ -234,6 +237,7 @@ const howFaqItems: Array<[string, string[]]> = [
     'We believe anti-amyloid therapies represent an important advancement in Alzheimer\'s care, with the potential to meaningfully slow disease progression for appropriately selected patients, particularly those in the early stages of the disease. Clinical trials have demonstrated approximately ~1/3 slower cognitive and functional decline on certain measures over 18 months compared with placebo. However, these therapies are not cures, benefits vary, and treatment carries real risks, including asymptomatic brain swelling or bleeding.',
     'Our approach is to carefully evaluate each patient\'s clinical eligibility, individual risk factors, and treatment goals. We support treatment when the anticipated benefits reasonably outweigh the risks and the patient, informed of the trade-offs, chooses to proceed. Our goal is to ensure the right patients have access to appropriate therapies at the right time.',
   ]],
+  [imagingFaqQuestion, [imagingFaqAnswer]],
 ]
 
 type FaqItem = [question: string, answer: string | string[]]
@@ -256,7 +260,7 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
     id: 'cost',
     title: 'Cost & Insurance',
     items: [
-      ['How much will this cost?', 'Provider visits with our neurologist and dementia clinical team will be at low cost. The labs and imaging exams will depend on your insurance and the sites you visit.'],
+      ['How much will this cost?', costFaqAnswer],
       ['Which insurance plans are currently accepted?', 'Medicare, Medicaid, Aetna, CareFirst, Cigna, Kaiser, and United.'],
     ],
   },
@@ -283,6 +287,7 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
         ],
       ],
       ['What if the patient can\'t have an MRI or takes blood thinners?', 'These may affect your eligibility for infusion treatment, so be sure to bring them up in your conversations with us.'],
+      [imagingFaqQuestion, imagingFaqAnswer],
       ['Who do I contact in a medical emergency?', 'Call 911 immediately. Local Doctor provides specialist evaluation and treatment. It does not replace emergency care.'],
     ],
   },
@@ -1401,7 +1406,6 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
         {legalLinks.map(([, href, label]) => (
           <a key={href} href={href}>{label}</a>
         ))}
-        <small>AI-use disclosure: some site copy and code are drafted with AI tools.</small>
       </div>
       <div className="footer-legal">
         <p>
