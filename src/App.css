@@ -816,19 +816,19 @@ a.blog-card:hover {
 
 .treatment-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.78fr);
-  gap: clamp(32px, 6vw, 64px);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, min(460px, 38%));
+  gap: clamp(20px, 3vw, 40px);
   align-items: center;
-  padding: var(--section-pad) var(--page-inline);
+  padding: calc(var(--section-pad) * 0.6) var(--page-inline);
   background: var(--surface-marketing);
 }
 
 .treatment-hero h1 {
-  max-width: 560px;
+  max-width: 640px;
 }
 
 .treatment-hero p:not(.eyebrow) {
-  max-width: 540px;
+  max-width: 660px;
   margin: var(--space-24) 0 var(--space-32);
   color: var(--text-secondary);
   font-size: var(--text-lead);
@@ -836,7 +836,8 @@ a.blog-card:hover {
 
 .treatment-hero img {
   width: 100%;
-  aspect-ratio: 4 / 5;
+  height: auto;
+  aspect-ratio: 1178 / 1335;
   object-fit: cover;
   border-radius: var(--radius-xl);
 }
@@ -867,6 +868,19 @@ a.blog-card:hover {
   color: var(--text-primary);
 }
 
+.section.drug-info-section {
+  padding-block: calc(var(--section-pad) * 0.75);
+}
+
+.disclaimer + .honest-card {
+  margin-inline: auto;
+  margin-top: calc(var(--space-32) + var(--space-8));
+}
+
+.treatment-card-grid + .honest-card {
+  margin-bottom: var(--space-24);
+}
+
 .compare-wrap {
   max-width: 100%;
   overflow-x: auto;
@@ -877,10 +891,6 @@ a.blog-card:hover {
   margin-bottom: var(--space-4);
   font-size: var(--text-body);
   font-weight: var(--weight-semibold);
-}
-
-.compare-cell {
-  min-width: 0;
 }
 
 .compare-head,
@@ -909,13 +919,11 @@ a.blog-card:hover {
   border-radius: 999px;
 }
 
-.medicine-heading .leqembi,
-.risk-bars .leqembi {
+.medicine-heading .leqembi {
   background: var(--color-primary);
 }
 
-.medicine-heading .kisunla,
-.risk-bars .kisunla {
+.medicine-heading .kisunla {
   background: var(--text-link);
 }
 
@@ -961,45 +969,6 @@ a.blog-card:hover {
   color: var(--text-primary);
   font-size: var(--text-control);
   line-height: 1.55;
-}
-
-.visual-row {
-  align-items: start;
-}
-
-.risk-bars {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-12);
-}
-
-.risk-bars > div > div {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-12);
-  margin-bottom: var(--space-4);
-  color: var(--text-secondary);
-  font-size: var(--text-control);
-}
-
-.risk-bars small {
-  color: var(--text-primary);
-  font-size: var(--text-control);
-  font-weight: var(--weight-semibold);
-}
-
-.risk-bars b {
-  display: block;
-  height: 8px;
-  overflow: hidden;
-  background: var(--border-subtle);
-  border-radius: 999px;
-}
-
-.risk-bars i {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
 }
 
 .fit-section {
@@ -1064,6 +1033,7 @@ a.blog-card:hover {
   margin-top: var(--space-24);
   color: var(--text-secondary);
   font-size: var(--text-control);
+  font-style: italic;
 }
 
 .journey-list {
@@ -1870,6 +1840,11 @@ a.blog-card {
     max-height: 320px;
   }
 
+  .treatment-hero img {
+    max-width: 360px;
+    justify-self: center;
+  }
+
   .section-row {
     align-items: flex-start;
     flex-direction: column;
@@ -2032,10 +2007,6 @@ a.blog-card {
 
   .journey-points {
     grid-column: 1 / -1;
-  }
-
-  .treatment-hero img {
-    aspect-ratio: 16 / 10;
   }
 
   .intake-frame-wrap,

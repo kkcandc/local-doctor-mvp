@@ -18,7 +18,7 @@ const pageDefaults = {
   privacy: true,
   terms: true,
   consent: true,
-  contact: true,
+  contact: false,
 }
 
 export type PageFlag = keyof typeof pageDefaults
