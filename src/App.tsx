@@ -25,7 +25,6 @@ import {
 import {
   ContactPage,
   ConsentPage,
-  LegalIdentity,
   PrivacyPage,
   ProviderRoster,
   TermsPage,
@@ -77,7 +76,7 @@ const routeMeta: Partial<Record<Route, { title: string; description: string }>> 
   },
   about: {
     title: 'Meet the Team | Local Doctor',
-    description: 'Care team roles, the company that operates Local Doctor, and the licensed providers who may see patients.',
+    description: 'Care team roles and the licensed providers who may see patients.',
   },
 }
 
@@ -686,14 +685,6 @@ function AboutPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
             </article>
           ))}
         </div>
-      </section>
-      <section className="section ivory" id="company">
-        <SectionIntro
-          eyebrow="Company"
-          title="Who operates Local Doctor."
-          copy="The legal name, the practice that provides clinical care, physical address, phone, and the state where a patient may be seen are listed here."
-        />
-        <LegalIdentity />
       </section>
       <section className="section white" id="providers">
         <SectionIntro
