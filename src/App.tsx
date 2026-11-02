@@ -575,7 +575,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
         </div>
         <img src="/assets/hero-leqembi-iv.webp" alt="Leqembi (lecanemab) IV infusion bag" width={1178} height={1335} fetchPriority="high" />
       </section>
-      <section className="section pale-blue">
+      <section className="section white drug-info-section">
         <SectionIntro eyebrow="Drug information" title="Leqembi and Kisunla, side by side." />
         <TreatmentComparison />
         <div className="disclaimer">
@@ -583,7 +583,6 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
         </div>
         <HonestCard />
       </section>
-      <QualificationSection tone="white" />
       <section className="section ivory fit-section">
         <SectionIntro eyebrow="Safety" title="The safety screen is part of the evaluation, not an afterthought." copy="Risks and monitoring are reviewed before any treatment decision. Urgent symptoms belong with emergency care." />
         <div className="safety-grid">
@@ -595,6 +594,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
           ))}
         </div>
       </section>
+      <QualificationSection tone="white" />
       <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to find out where you stand?" copy="A short intake is all it takes to get started." secondaryLabel="See how it works" secondaryRoute="how" compact />
     </>
   )

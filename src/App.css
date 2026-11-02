@@ -12,10 +12,6 @@ main {
   background: var(--surface-marketing);
 }
 
-.pale-blue {
-  background: var(--surface-sunken);
-}
-
 .site-header {
   position: sticky;
   top: 0;
@@ -846,8 +842,13 @@ a.blog-card:hover {
   color: var(--text-primary);
 }
 
+.section.drug-info-section {
+  padding-block: calc(var(--section-pad) * 0.75);
+}
+
 .disclaimer + .honest-card {
-  margin-top: var(--space-32);
+  margin-inline: auto;
+  margin-top: calc(var(--space-32) + var(--space-8));
 }
 
 .treatment-card-grid + .honest-card {
