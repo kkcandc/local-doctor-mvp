@@ -53,6 +53,27 @@ Every page has a visibility flag in `src/featureFlags.ts`. A disabled page is re
 - Intake uses Eric's Typeform live embed; confirm the receiving workflow, privacy language, and follow-up ownership before paid traffic.
 - The site does not diagnose, prescribe, or guarantee eligibility or treatment.
 
+## Google Ads conversion tracking
+
+Vite SPA, so the browser env prefix is `VITE_` (not `NEXT_PUBLIC_`). The tag is injected into `index.html` at build time, and the Vercel rewrite serves that shell for every route. `src/main.tsx` also installs the tag if a build did not, using the same script-element pattern as the Typeform embed.
+
+| Env var | Purpose |
+| --- | --- |
+| `VITE_GOOGLE_ADS_ID` | Google tag id. Production builds default to `AW-18413556843` when this is unset. Set to `off` to omit the tag. A value has to be present at **build** time. |
+| `VITE_GOOGLE_ADS_LEAD_LABEL` | Optional. The label from Google Ads → Goals → Conversions → Tag setup (the part after `AW-…/` in `send_to`). When set, a Typeform submit also sends `gtag('event', 'conversion', { send_to })`. |
+| `VITE_GOOGLE_ADS_PHONE_LABEL` | Optional label for clinic phone clicks, same `send_to` shape. |
+
+Event snippets (no names, emails, phone numbers, dates of birth, diagnoses, free-text answers, or Typeform response ids):
+
+- **Tag:** `gtag/js?id=AW-18413556843` and `gtag('config', 'AW-18413556843')` in the built `index.html` (`vite.config.ts`).
+- **Lead:** `generate_lead` with `page_path` only, from the Typeform embed on `/get-started` (`data-tf-on-submit="localDoctorOnTypeformSubmit"` plus a `form-submit` message from `*.typeform.com`). Fired in `src/analytics/googleAds.ts`.
+- **Phone:** `phone_click` with `page_path` only, for clicks on `tel:` links to (240) 376-5730. (844) 509-1404 is recognized if a `tel:` link for it is added later; it is not on the site. The 1-800 numbers on the patient-rights page are not tracked.
+- **Page views:** the tag's first `config` hit sends a page location that keeps Google click ids (`gclid`, `gbraid`, `wbraid`, and the other ad params) and drops every other query param, including anything with `@`. Later in-app navigations send `page_view` with `page_path` only.
+
+"Check eligibility" and other buttons that open `/get-started` do not submit a lead, so they are not conversion events. There is no separate book/schedule widget.
+
+Copy the conversion label from the Google Ads event snippet into the matching Vercel env var and redeploy. Until then, Google still receives the tag and the `generate_lead` / `phone_click` events. Use one primary conversion in Ads for each action so a label and the named event are not both counted.
+
 ## Commands
 
 ```bash
