@@ -1154,7 +1154,6 @@ function TreatmentPreview({ onNavigate }: { onNavigate: (route: Route) => void }
           <p>Monthly IV infusion; can stop once amyloid reaches minimal levels on a PET scan.</p>
         </article>
       </div>
-      <HonestCard />
       {routeEnabled('treatments') && <button className="text-link treatment-link" type="button" onClick={() => onNavigate('treatments')}>See treatment details <ArrowRight size={16} /></button>}
     </>
   )
@@ -1188,7 +1187,7 @@ function HonestCard() {
       <div>
         <h2>What to expect, honestly</h2>
         <p>
-          In clinical trials, both treatments showed a real, moderate slowing of cognitive decline. Neither is a cure, and neither reverses symptoms already present. The point is to weigh the potential benefit clearly, without overstating it.
+          In clinical trials, both treatments showed a real, moderate slowing of cognitive decline. Neither is a cure and neither reverses symptoms already present. The goal is to weigh the potential benefits and risks clearly with our neurology specialists and decide what works best for you.
         </p>
       </div>
     </div>
