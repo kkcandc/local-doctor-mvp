@@ -41,7 +41,6 @@ async function expectLegalLinks(column: Locator) {
     { text: 'Privacy Policy', href: '/privacy' },
     { text: 'Terms of Use', href: '/terms' },
     { text: 'Patient Rights & Notices', href: '/patient-rights' },
-    { text: 'Contact', href: '/contact' },
   ])
   await expect(column).not.toContainText('Telehealth Consent')
 }
@@ -55,7 +54,7 @@ test('footer legal links omit telehealth consent', async ({ page }) => {
   const legal = await legalColumn(page)
   await expectLegalLinks(legal)
   await expect(page.getByRole('navigation', { name: 'Main navigation' })).not.toContainText('Telehealth')
-  await expect(page.locator('footer')).toContainText('(844) 509-1404')
+  await expect(page.locator('footer')).toContainText('(240) 376-5730')
   await expect(page.locator('footer')).toContainText('Box 104')
   await expect(page.locator('footer a[href="mailto:hello@trylocaldoctor.com"]')).toHaveText('Email the team')
   await legal.scrollIntoViewIfNeeded()
@@ -90,7 +89,7 @@ test('privacy, terms, and patient rights render Eric’s copy', async ({ page })
     await expect(page.locator('.identity-block')).toContainText('Local Infusion Inc. (doing business as Local Doctor), a Delaware corporation')
     await expect(page.locator('.identity-block')).toContainText('LIV Specialty Care CT, P.C.')
     await expect(page.locator('.identity-block')).toContainText('4900 Centennial Blvd, Suite 300, Box 104, Nashville, TN 37209')
-    await expect(page.locator('.identity-block')).toContainText('(844) 509-1404')
+    await expect(page.locator('.identity-block')).toContainText('(240) 376-5730')
     await expect(page.locator('.identity-block')).toContainText('hello@trylocaldoctor.com')
     await expect(page.locator('.identity-block')).toContainText('Maryland')
     const body = page.locator('.legal-doc .article-body')
@@ -175,11 +174,14 @@ test('telehealth consent stays reachable and out of primary navigation', async (
   await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).not.toContainText('Telehealth')
 })
 
-test('contact policies point at the new legal set', async ({ page }) => {
+test('contact stays off, and its policy list matches the legal set', async ({ page }) => {
   await page.goto('/contact')
-  const policies = page.locator('#providers')
-  await expect(policies.getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute('href', '/privacy')
-  await expect(policies.getByRole('link', { name: 'Terms of Use' })).toHaveAttribute('href', '/terms')
-  await expect(policies.getByRole('link', { name: 'Patient Rights & Notices' })).toHaveAttribute('href', '/patient-rights')
-  await expect(policies).not.toContainText('Telehealth Consent')
+  await expect(page).toHaveURL(/\/$/)
+  const source = fs.readFileSync(path.join(process.cwd(), 'src/compliancePages.tsx'), 'utf8')
+  const policiesAt = source.indexOf('<h2>Policies</h2>')
+  const policies = source.slice(policiesAt, source.indexOf('</ul>', policiesAt))
+  expect(policies).toContain('href="/privacy"')
+  expect(policies).toContain('href="/terms"')
+  expect(policies).toContain('href="/patient-rights"')
+  expect(policies).not.toContain('Telehealth')
 })

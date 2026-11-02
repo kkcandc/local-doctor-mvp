@@ -1,6 +1,21 @@
 {
   "redirects": [
     {
+      "source": "/resources",
+      "destination": "/blog",
+      "statusCode": 301
+    },
+    {
+      "source": "/blog/lecanemab-vs-aducanumab",
+      "destination": "/blog",
+      "statusCode": 301
+    },
+    {
+      "source": "/blog/lecanemab-vs-aducanumab/",
+      "destination": "/blog",
+      "statusCode": 301
+    },
+    {
       "source": "/pilot-plan",
       "destination": "/",
       "permanent": true

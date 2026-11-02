@@ -1,0 +1,107 @@
+.field-group {
+  display: grid;
+  gap: var(--space-24);
+}
+
+.field {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.field-label {
+  color: var(--text-primary);
+  font-size: var(--text-control);
+  font-weight: var(--weight-semibold);
+}
+
+.field-help,
+.field-error {
+  margin: 0;
+  font-size: var(--text-control);
+  line-height: 1.5;
+}
+
+.field-help {
+  color: var(--text-secondary);
+}
+
+.field-error {
+  display: flex;
+  gap: var(--space-8);
+  align-items: flex-start;
+  color: var(--status-error);
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  min-height: var(--control-height);
+  padding: var(--space-12) var(--space-16);
+  color: var(--text-primary);
+  background: var(--surface-card);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  font-size: var(--text-control);
+  line-height: 1.4;
+}
+
+.textarea {
+  min-height: 7.5rem;
+  resize: vertical;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--focus-light);
+}
+
+.input[aria-invalid='true'],
+.select[aria-invalid='true'],
+.textarea[aria-invalid='true'] {
+  padding: calc(var(--space-12) - 1px) calc(var(--space-16) - 1px);
+  border: 2px solid var(--status-error);
+}
+
+.input:disabled,
+.select:disabled,
+.textarea:disabled {
+  cursor: not-allowed;
+  color: var(--disabled-text);
+  background: var(--disabled-fill);
+  border-color: var(--disabled-border);
+}
+
+.input[readonly],
+.textarea[readonly] {
+  background: var(--surface-sunken);
+}
+
+.choice {
+  display: flex;
+  gap: var(--space-12);
+  align-items: center;
+  min-height: var(--target-min);
+  color: var(--text-primary);
+  font-size: var(--text-control);
+  cursor: pointer;
+}
+
+.choice input {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--color-primary);
+}
+
+.choice input[aria-invalid='true'] {
+  outline: 2px solid var(--status-error);
+  outline-offset: 2px;
+}

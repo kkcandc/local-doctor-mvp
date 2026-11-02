@@ -6,6 +6,7 @@ import { patientRightsPhraseLinks, privacyPhraseLinks, termsPhraseLinks, termsRe
 import { patientRightsHeadings, privacyHeadings, termsHeadings } from './legal/headings'
 import { legalDocumentTitle } from './legal/legalMarkdown'
 import { LegalDocument } from './legal/renderLegalDocument'
+import { isPageEnabled } from './featureFlags'
 
 export const publicEmail = 'hello@trylocaldoctor.com'
 
@@ -17,7 +18,7 @@ export const clinicalPractice =
 
 export const physicalAddress = '4900 Centennial Blvd, Suite 300, Box 104, Nashville, TN 37209'
 
-export const publicPhone = '(844) 509-1404'
+export const publicPhone = '(240) 376-5730'
 
 export const licensedStates = 'Maryland'
 
@@ -47,7 +48,7 @@ export function LegalIdentity() {
       </div>
       <div>
         <dt>Phone</dt>
-        <dd><a href="tel:+18445091404">{publicPhone}</a></dd>
+        <dd><a href="tel:+12403765730">{publicPhone}</a></dd>
       </div>
       <div>
         <dt>Email</dt>
@@ -154,7 +155,8 @@ export function ConsentPage() {
         <p>
           Clinical care is provided by {clinicalPractice}.
           The clinician must be licensed in the state where you are located during the visit. That state is {licensedStates}.
-          The clinician&apos;s name and specialty are on the <a href="/about#providers">Meet the Team</a> page.
+          The clinician&apos;s name and specialty are on the{' '}
+          {isPageEnabled('about') ? <a href="/about#providers">Meet the Team</a> : <a href="/contact#providers">Contact</a>} page.
         </p>
 
         <h2>Benefits, risks, and alternatives</h2>

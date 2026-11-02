@@ -3,14 +3,10 @@ import type { ReactNode } from 'react'
 import {
   ArrowRight,
   BadgeCheck,
-  Brain,
   Building2,
   CalendarClock,
   ChevronDown,
   CheckCircle2,
-  ClipboardCheck,
-  FileText,
-  HeartHandshake,
   Menu,
   ShieldAlert,
   Sparkles,
@@ -21,7 +17,6 @@ import {
 } from 'lucide-react'
 import {
   blogPosts,
-  formatBlogDate,
   getBlogPost,
   medicalDisclaimer,
   type BlogBlock,
@@ -34,13 +29,11 @@ import {
   PrivacyPage,
   ProviderRoster,
   TermsPage,
-  clinicalPractice,
-  legalEntity,
-  licensedStates,
   physicalAddress,
   publicPhone,
   publicEmail,
 } from './compliancePages'
+import { isPageEnabled, type PageFlag } from './featureFlags'
 import './App.css'
 
 type Route =
@@ -50,7 +43,6 @@ type Route =
   | 'about'
   | 'start'
   | 'faq'
-  | 'resources'
   | 'blog'
   | 'blogPost'
   | 'refer'
@@ -60,7 +52,7 @@ type Route =
   | 'consent'
   | 'contact'
 
-const typeformLiveId = '01M49714FSNRJ3YKS1V0XVG66M'
+const typeformLiveId = '01M64J1XGXT19BH7GGWPKJ243K'
 const typeformEmbedScript = 'https://embed.typeform.com/next/embed.js'
 
 const defaultTitle = "Local Doctor | Alzheimer's Treatment Eligibility Review"
@@ -101,7 +93,6 @@ const routePaths: Record<Exclude<Route, 'blogPost'>, string> = {
   about: '/about',
   start: '/get-started',
   faq: '/faq',
-  resources: '/resources',
   blog: '/blog',
   refer: '/refer-a-patient',
   privacy: '/privacy',
@@ -118,7 +109,6 @@ const pathRoutes: Record<string, Route> = {
   about: 'about',
   'get-started': 'start',
   faq: 'faq',
-  resources: 'resources',
   blog: 'blog',
   'refer-a-patient': 'refer',
   privacy: 'privacy',
@@ -128,68 +118,37 @@ const pathRoutes: Record<string, Route> = {
   contact: 'contact',
 }
 
-const discoveryPaths = [
+const valueProps = [
   {
-    title: 'I am worried about memory changes',
-    copy: 'A low-commitment virtual check helps you understand whether specialist review may be useful.',
-    action: 'Take the check',
-    route: 'start' as Route,
-    icon: Brain,
-  },
-  {
-    title: 'I already have a diagnosis',
-    copy: 'Skip basic education and start with treatment-eligibility and second-opinion questions.',
-    action: 'Review eligibility',
-    route: 'treatments' as Route,
+    title: 'Dementia specialists',
+    copy: 'A real second opinion from board-certified providers who specialize in dementia, not general memory care.',
     icon: BadgeCheck,
   },
   {
-    title: 'I am helping someone I love',
-    copy: 'The path is built for patients and caregivers together, without writing the patient out of the decision.',
-    action: 'See how it works',
-    route: 'how' as Route,
-    icon: HeartHandshake,
-  },
-  {
-    title: 'I am a referring clinician',
-    copy: 'Refer a patient for treatment-readiness review while preserving your relationship with them.',
-    action: 'Refer a patient',
-    route: 'refer' as Route,
-    icon: Stethoscope,
-  },
-]
-
-const valueProps = [
-  {
-    title: 'Speed to a specialist',
-    copy: 'Virtual first, so your evaluation does not wait on a local neurology opening. See a specialist in weeks, not months.',
+    title: 'Less wait and travel',
+    copy: 'Virtual first, so you don\'t wait months for an evaluation with an in-person neurologist. You will get seen in days or weeks, not months.',
     icon: CalendarClock,
   },
   {
-    title: 'A real second opinion',
-    copy: 'From specialists focused on disease-modifying treatment eligibility, not general memory care.',
-    icon: BadgeCheck,
-  },
-  {
-    title: 'A path into treatment',
-    copy: 'If you qualify, a direct connection into a national infusion network, not just another referral.',
+    title: 'Direct path to treatment',
+    copy: 'If you qualify, a direct connection into a national infusion network, not just another referral or paper treatment plan.',
     icon: Building2,
   },
 ]
 
 const treatmentRows = [
   ['Route', 'IV infusion every two weeks; can transition to a once-weekly at-home injection after 18 months', 'IV infusion every four weeks'],
-  ['MRI monitoring', 'Baseline, then before your 3rd, 5th, 7th, and 14th infusions', 'Baseline, then before your 2nd, 3rd, 4th, and 7th doses'],
-  ['Duration', 'No amyloid-based stopping rule built into treatment today', 'Can stop once amyloid reaches minimal levels on a PET scan, a defined finish line'],
-  ['Infusion reactions', 'Not broken out by genotype in sources reviewed', 'Overall 9%, mostly within the first four infusions'],
+  ['MRI monitoring', 'Baseline during your workup and before your 3rd, 5th, 7th, and 14th infusions', 'Baseline during your workup and before your 2nd, 3rd, 4th, 7th, and 13th infusions'],
+  ['Duration', 'Can stop once amyloid reaches minimal levels on a PET scan', 'Can stop once amyloid reaches minimal levels on a PET scan'],
+  ['ARIA risk', 'The ARIA-E risk was 13% vs 2% on placebo; The ARIA-H was 17% vs 9% on placebo', 'The ARIA-E risk was 24% vs 2% on placebo; The ARIA-H was 31% vs 13% on placebo'],
 ]
 
 const fitChecks = [
-  'You have a diagnosis already, or memory changes serious enough to justify specialist review.',
-  'You are looking for a treatment-readiness answer, not only general memory-care advice.',
-  'You can complete a virtual visit and local testing if the clinician recommends it.',
+  'You are located in Maryland.',
   'A family member or care partner can participate in planning when needed.',
-  'You have not already started a disease-modifying Alzheimer\'s treatment elsewhere.',
+  'There is a diagnosis already, or cognitive changes serious enough to justify specialist review.',
+  'You are looking for an answer on infusion treatment-readiness, not purely general memory-care advice.',
+  'You can complete virtual visits and labs/imaging testing and treatment locally in person, as appropriate.',
 ]
 
 const safetyChecks = [
@@ -215,143 +174,133 @@ const payerNames = [
 ]
 
 const simpleProcess = [
-  ['Tell us what is going on', 'A short form gathers symptoms, diagnosis status, caregiver context, insurance, and location.'],
-  ['Meet the specialist team', 'A virtual visit reviews records, history, goals, and what testing may be needed next.'],
-  ['Get a clearer answer', 'Labs, imaging, biomarker confirmation, and safety factors are reviewed before planning.'],
-  ['Move locally if appropriate', 'Patients who qualify can be routed into local treatment follow-through.'],
+  ['Tell us what\'s going on', 'A quick call to screen for memory concerns, medical history, and eligibility for an evaluation.'],
+  ['Meet your specialist', 'A video call for the evaluation, to dive into your questions, concerns, and goals. It all leads to clear direction on next steps and if new labs and imaging are needed.'],
+  ['Get a clearer answer', 'We review new or recent labs and imaging to provide a clear answer on diagnosis and treatment options.'],
+  ['Start treatment', 'Patients who qualify and want to move forward with infusion treatment are treated seamlessly at a local infusion center.'],
 ]
 
 const journeySteps = [
   {
-    title: 'Tell us what is going on',
-    meta: 'Virtual',
+    title: 'Tell us what\'s going on, to see if you\'re eligible',
+    meta: 'Phone call',
     points: [
-      'Reach out as the patient, a caregiver, or a physician referral.',
-      'Complete a short intake covering symptoms, daily activities, medications, insurance, and caregiver information.',
-      'Your form routes to the right next step, including what to do if this is not the right fit.',
+      'Give us a call, or fill out a short form so we can call you.',
+      'We collect information regarding current daily activities, cognitive performance, medical history, medications, and insurance.',
+      'If eligible, we schedule a virtual visit for you to meet with a neurology specialist within 1-2 weeks.',
     ],
   },
   {
     title: 'Meet your specialist',
-    meta: 'Virtual - 60-90 min',
+    meta: 'Video visit - 1 hour',
     points: [
-      'We verify insurance in parallel, so it is ready before your visit.',
-      'Diagnostic intake visit with your caregiver present: history, cognitive screen, medication review, and a plan for what is next.',
-      'Orders placed when appropriate: standard labs, amyloid biomarker testing, genetic testing, and brain MRI.',
+      'You confirm the visit and fill out the consent forms prior to the visit',
+      'You and a loved one attend the visit to share your concerns, questions, and provide all information needed for the evaluation by your specialist including medical history, medications, recent testing, and more.',
+      'Your specialist shares their clinical summary and recommended plan of care with you. It may include orders for new labs, genetic testing, and imaging.',
     ],
   },
   {
     title: 'Get your workup and results',
-    meta: 'Local + Virtual - about 2-3 weeks',
+    meta: 'Local + Virtual',
     points: [
-      'A single blood draw can cover labs and biomarker testing when available.',
-      'Brain MRI is completed locally, with careful review for treatment-safety questions.',
-      'The clinical team reviews your full workup before the next visit.',
-      'Results and treatment-planning visit covers diagnosis, options, logistics, and honest risk discussion.',
+      'If new orders were placed, you schedule appointments with a local imaging center and a lab (Quest or LabCorp) to perform the necessary tests in the care plan.',
+      'Your neurology specialist reviews the test results.',
+      'Your follow up appointment is scheduled with the specialist.',
+      'You and a loved one attend the follow up visit to discuss your results and treatment options with the specialist and align on the path that is best for you.',
     ],
   },
   {
-    title: 'Start treatment and stay monitored',
-    meta: 'Hybrid',
+    title: 'Referral to treatment or outside care',
+    meta: 'Local',
     points: [
-      'If you qualify, the team helps route you to an in-network infusion center near you.',
-      'A monitoring calendar keeps infusions, MRIs, and follow-up steps on schedule.',
-      'Clear triage instructions and regular check-ins help watch for side effects.',
+      'If you\'re a candidate and decide to move forward with infusion treatment, we coordinate it and are with you every step of the way.',
+      'We stay in constant touch with you to monitor how things move along and to coordinate the ongoing imaging needed.',
+      'If you wish to move forward with other treatments or care, we help you find the best options and provide any referrals needed.',
     ],
   },
 ]
 
-const howFaqItems = [
-  ['Is this legitimate, or some kind of online scam?', 'Local Doctor is a specialty-care front door connected to Local Infusion\'s established care network. Clinical decisions still require licensed review.'],
-  ['Will my insurance cover this?', 'Coverage depends on your plan, clinical criteria, testing, and treatment requirements. The team should review details before you commit to a care path.'],
-  ['Will this replace my relationship with my current doctor?', 'No. Local Doctor is meant to work alongside existing clinicians, not erase those relationships.'],
-  ['I do not trust something this serious being handled virtually.', 'The early evaluation and coordination can start virtually. Testing and any treatment follow-through happen locally or in person when required.'],
-  ['What if I do not qualify?', 'You should still leave with a clearer explanation and a sensible next step. A not-yet answer can be useful, not a dead end.'],
+const howFaqItems: Array<[string, string[]]> = [
+  ['What services does Local Doctor provide?', [
+    'Local Doctor is a virtual Alzheimer\'s clinic focused on accelerating access to life-changing therapies. Our initial focus is evaluation, diagnosis, treatment eligibility, treatment initiation, and required oversight of disease-modifying therapies, not comprehensive longitudinal dementia management, nor care coordination. The Local Doctor model is designed to complement your existing team of providers and will work with them as needed.',
+  ]],
+  ['How much will this cost?', [
+    'Provider visits with our neurologist and dementia clinical team will be at zero cost. The labs and imaging exams will depend on your insurance and the sites you visit.',
+  ]],
+  ['Will I be seeing an MD or NP?', [
+    'Our team of neurology specialists is each board-certified and works interchangeably. Appointment matching is subject to your location, availability, and other factors.',
+  ]],
+  ['What is Local Doctor\'s philosophy on anti-amyloid therapies for Alzheimer\'s disease?', [
+    'We believe anti-amyloid therapies represent an important advancement in Alzheimer\'s care, with the potential to meaningfully slow disease progression for appropriately selected patients, particularly those in the early stages of the disease. Clinical trials have demonstrated approximately ~1/3 slower cognitive and functional decline on certain measures over 18 months compared with placebo. However, these therapies are not cures, benefits vary, and treatment carries real risks, including asymptomatic brain swelling or bleeding.',
+    'Our approach is to carefully evaluate each patient\'s clinical eligibility, individual risk factors, and treatment goals. We support treatment when the anticipated benefits reasonably outweigh the risks and the patient, informed of the trade-offs, chooses to proceed. Our goal is to ensure the right patients have access to appropriate therapies at the right time.',
+  ]],
 ]
 
-const faqCategories = [
+type FaqItem = [question: string, answer: string | string[]]
+
+const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
   {
     id: 'getting-started',
     title: 'Getting Started',
     items: [
-      ['Is this legitimate, or some kind of online scam?', 'Local Doctor is a specialty-care front door connected to Local Infusion\'s established care network. Clinical decisions still require licensed review.'],
-      ['Do I need a referral from my current doctor?', 'No referral is required to start. If you move forward, the team can coordinate with your existing physician so information does not get lost.'],
-      ['How long does the intake process take?', 'The first intake step is short. If review makes sense, the next steps are records, insurance, scheduling, and clinical evaluation.'],
-      ['What if I do not qualify?', 'You should still leave with a clearer explanation and a sensible next step. A not-yet answer can be useful, not a dead end.'],
-    ],
-  },
-  {
-    id: 'diagnosis',
-    title: 'Diagnosis & Evaluation',
-    items: [
-      ['I do not have a diagnosis yet. Can I still start here?', 'Yes. Some people start with memory concerns and no formal diagnosis. The right path depends on history, symptoms, records, and clinician review.'],
-      ['What does a full workup involve?', 'A full evaluation may include cognitive assessment, medical history, medication review, labs, MRI, amyloid confirmation, and risk discussion.'],
-      ['Can I get a second opinion if I was diagnosed elsewhere?', 'Yes. A second opinion is one of the clearest use cases. Existing records can help the team avoid starting from zero.'],
-      ['Will this replace my current doctor?', 'No. Local Doctor is meant to work alongside existing clinicians, not erase those relationships.'],
-    ],
-  },
-  {
-    id: 'treatment',
-    title: 'Treatment & Safety',
-    items: [
-      ['What treatments are being reviewed?', 'The first pathway focuses on Leqembi and Kisunla readiness for certain people with early Alzheimer\'s who may qualify after evaluation.'],
-      ['Is this handled entirely online?', 'The early evaluation and coordination can start virtually. Testing and any treatment follow-through happen locally or in person when required.'],
-      ['What is ARIA?', 'ARIA is a known safety concern involving brain swelling or small bleeds visible on MRI. Monitoring and symptom education are part of treatment-readiness review.'],
-      ['How soon might I notice a difference?', 'These treatments are evaluated by slowing decline over time, not by a sudden day-to-day improvement. Expectations should be reviewed with a clinician.'],
+      ['Who is eligible for services?', 'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. Our eligibility call is fast and simple, providing a clear answer within 15-30 minutes.'],
+      ['How soon can I be seen?', 'Once you\'ve been determined eligible for our program, you can be seen by one of our neurology specialists in as little as a few days or weeks, depending on your availability.'],
+      ['How long does the eligibility process take?', 'Our eligibility process is centered around a quick call that should take 15-30 minutes. Please have the patient\'s insurance details, medication list, and medical history handy to make it go smoother.'],
+      ['Do I need a referral from my current doctor?', 'Depending on your insurance, you may need a referral. We will let you know definitively during your eligibility check.'],
+      ['What if I already have a diagnosis?', 'If you already have a diagnosis for mild cognitive impairment, dementia, or Alzheimer\'s disease, you may be a strong candidate for our program and it may expedite your path to treatment.'],
+      ['Can I call on behalf of my spouse, parent, or loved one?', 'Absolutely! We welcome any loved one who wishes to be a part of the process and would prefer that one joins the first visit with the patient.'],
+      ['What if I\'m not eligible for services?', 'If you don\'t happen to be eligible for our program yet, we will let you know transparently and why.'],
     ],
   },
   {
     id: 'cost',
     title: 'Cost & Insurance',
     items: [
-      ['Will insurance cover this?', 'Coverage depends on your plan, clinical criteria, testing, and treatment requirements. The team should review details before you commit to a care path.'],
-      ['What if I am on Medicare?', 'Medicare coverage can depend on clinical criteria and registry or policy requirements. Your specific situation should be checked during intake.'],
-      ['Will I get surprise bills?', 'What you owe depends on your plan, the services ordered, and where care is delivered. Expected coverage is reviewed with you when that information is available. This is not a promise that you will have no out-of-pocket cost.'],
+      ['How much will this cost?', 'Provider visits with our neurologist and dementia clinical team will be at low cost. The labs and imaging exams will depend on your insurance and the sites you visit.'],
+      ['Which insurance plans are currently accepted?', 'Medicare, Medicaid, Aetna, CareFirst, Cigna, Kaiser, and United.'],
     ],
   },
   {
     id: 'visits',
     title: 'Visits & Logistics',
     items: [
-      ['Where do infusions take place?', 'If treatment is clinically appropriate, infusions take place at an appropriate local infusion setting, not through the website.'],
-      ['Can a family member or caregiver join?', 'Yes. Care partners are welcome and often helpful for history, logistics, visit notes, and monitoring.'],
-      ['Who do I contact in a medical emergency?', 'Call 911 immediately. Local Doctor provides specialist evaluation and care coordination. It does not replace emergency care.'],
+      ['How does the first visit with the provider work and how long will it be?', 'Once you\'ve been in touch with our team, they will help schedule a video call for a day and time of your choice. You will then receive a visit confirmation and visit reminders to your contact method of choice, including on the day of the visit, for you to click the link to join the video call. This visit should last about 1 hour. Ensure you are in a setting with strong access to Wi-Fi or data service with a device that has video and audio capabilities (we use something similar to FaceTime and other video calling applications).'],
+      ['Will I be seeing an MD or NP?', 'Our neurology specialists are each board-certified and work interchangeably. Appointment matching is subject to your location, availability, and other factors.'],
+      ['Is everything virtual or is there any in-person component?', 'The clinical visits happen via video. Tests like MRIs and the infusions themselves happen at in-person facilities, which may include a Local Infusion center or another appropriate site.'],
+      ['Where do infusions take place?', 'If treatment is clinically appropriate, infusions take place at an appropriate local infusion center near you.'],
+      ['What if we only need help with daily caregiving or medication management?', 'Local Doctor is designed to accelerate access to disease-modifying treatments. We partner with services that offer ongoing caregiving-support or general medication-management service who we can refer out to if appropriate. We will work with you to guide you in the best way possible.'],
+    ],
+  },
+  {
+    id: 'treatment',
+    title: 'Treatment & Safety',
+    items: [
+      [
+        'What is Local Doctor\'s stance on anti-amyloid IV therapies (Leqembi & Kisunla)?',
+        [
+          'We believe anti-amyloid therapies represent an important advancement in Alzheimer\'s care, with the potential to meaningfully slow disease progression for appropriately selected patients, particularly those in the early stages of the disease. Clinical trials have demonstrated approximately 1/3 slower cognitive and functional decline on certain measures over 18 months compared with placebo. However, these therapies are not cures, benefits vary, and treatment carries real risks, including brain swelling or bleeding.',
+          'Our approach is to carefully evaluate each patient\'s clinical eligibility, individual risk factors, and treatment goals. We support treatment when the anticipated benefits reasonably outweigh the risks and the patient, informed of the trade-offs, chooses to proceed. Our goal is to ensure the right patients have access to appropriate therapies at the right time.',
+        ],
+      ],
+      ['What if the patient can\'t have an MRI or takes blood thinners?', 'These may affect your eligibility for infusion treatment, so be sure to bring them up in your conversations with us.'],
+      ['Who do I contact in a medical emergency?', 'Call 911 immediately. Local Doctor provides specialist evaluation and treatment. It does not replace emergency care.'],
     ],
   },
 ]
 
-const resources = [
-  {
-    title: 'Early Alzheimer\'s signs vs. normal aging',
-    label: 'Signs and symptoms',
-    copy: 'A patient-friendly guide to memory and thinking changes that may justify a real medical conversation.',
-  },
-  {
-    title: 'What to expect in a full evaluation',
-    label: 'Evaluation',
-    copy: 'Cognitive assessment, records, labs, imaging, amyloid confirmation, and clinical next steps in plain language.',
-  },
-  {
-    title: 'Leqembi and Kisunla readiness checklist',
-    label: 'Treatment readiness',
-    copy: 'What a clinician may need to review before deciding whether anti-amyloid treatment should be considered.',
-  },
-  {
-    title: 'Brain health habits worth discussing',
-    label: 'Brain health',
-    copy: 'Physical activity, heart-healthy nutrition, social connection, sleep, and mental engagement prompts for a clinician conversation.',
-  },
-  {
-    title: 'Care partner guide for virtual visits',
-    label: 'Caregiver support',
-    copy: 'How spouses, adult children, and trusted supporters can help without taking over the patient\'s voice.',
-  },
-  {
-    title: 'Insurance, records, and local testing',
-    label: 'Access',
-    copy: 'A practical checklist for benefits review, prior authorizations, MRI logistics, and downstream infusion planning.',
-  },
-]
+const headerPhone = '(240) 376-5730'
+const headerPhoneHref = '+12403765730'
+
+const footerEntity = 'Local Infusion Inc. (dba Local Doctor), a Delaware corporation'
+
+function routeEnabled(route: Route) {
+  const flag: PageFlag = route === 'blogPost' ? 'blog' : route
+  return isPageEnabled(flag)
+}
+
+function enabledLinks<T extends readonly [Route, ...unknown[]]>(links: T[]) {
+  return links.filter(([route]) => routeEnabled(route))
+}
 
 function normalizePath() {
   return window.location.pathname.replace(/^\/+|\/+$/g, '')
@@ -376,6 +325,9 @@ function App() {
     function applyPath() {
       const path = normalizePath()
       const lowered = path.toLowerCase()
+      if (lowered === 'blog/lecanemab-vs-aducanumab') {
+        window.history.replaceState({}, '', '/blog')
+      }
       if (
         path === 'pilot-plan' ||
         path.startsWith('pilot-plan/') ||
@@ -387,7 +339,11 @@ function App() {
       if (path === 'privacy' && window.location.hash === '#notice') {
         window.history.replaceState({}, '', '/patient-rights#notice-of-privacy-practices')
       }
-      const next = readLocation()
+      let next = readLocation()
+      if (!routeEnabled(next.route)) {
+        window.history.replaceState({}, '', '/')
+        next = { route: 'home', slug: '' }
+      }
       setRoute(next.route)
       setBlogSlug(next.slug)
       setMenuOpen(false)
@@ -412,6 +368,10 @@ function App() {
   }, [route])
 
   function navigate(next: Route, slug = '') {
+    if (!routeEnabled(next)) {
+      next = 'home'
+      slug = ''
+    }
     const path = next === 'blogPost' ? `/blog/${slug}` : routePaths[next]
     setRoute(next)
     setBlogSlug(next === 'blogPost' ? slug : '')
@@ -431,7 +391,6 @@ function App() {
       {route === 'about' && <AboutPage onNavigate={navigate} />}
       {route === 'start' && <StartPage />}
       {route === 'faq' && <FaqPage onNavigate={navigate} />}
-      {route === 'resources' && <ResourcesPage onNavigate={navigate} />}
       {route === 'blog' && <BlogPage onNavigate={navigate} />}
       {route === 'blogPost' && <BlogPostPage slug={blogSlug} onNavigate={navigate} />}
       {route === 'refer' && <ReferPage onNavigate={navigate} />}
@@ -442,6 +401,24 @@ function App() {
       {route === 'contact' && <ContactPage />}
       <Footer onNavigate={navigate} />
     </main>
+  )
+}
+
+function BrandLink({ variant = 'color', onNavigate }: { variant?: 'color' | 'reverse'; onNavigate: (route: Route) => void }) {
+  const src = variant === 'reverse' ? '/assets/brand/local-doctor-logo-reverse.svg' : '/assets/brand/local-doctor-logo.svg'
+
+  return (
+    <a
+      className="brand-link"
+      href="/"
+      onClick={(event) => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+        event.preventDefault()
+        onNavigate('home')
+      }}
+    >
+      <img src={src} alt="Local Doctor home" width={1337} height={270} />
+    </a>
   )
 }
 
@@ -456,40 +433,46 @@ function Header({
   onToggleMenu: () => void
   onNavigate: (route: Route) => void
 }) {
-  const navItems: Array<[Route, string]> = [
+  const navItems = enabledLinks<[Route, string]>([
     ['how', 'How it works'],
     ['treatments', 'Treatments'],
+  ])
+  const aboutItems = enabledLinks<[Route, string]>([
     ['about', 'Meet the Team'],
-  ]
-  const resourcesActive = route === 'resources' || route === 'blog' || route === 'blogPost' || route === 'faq'
+    ['blog', 'Blog'],
+    ['faq', 'FAQs'],
+  ])
+  const aboutActive = route === 'about' || route === 'blog' || route === 'blogPost' || route === 'faq'
 
   return (
     <header className="site-header">
       <div className="header-inner">
-        <button className="brand-button" type="button" onClick={() => onNavigate('home')}>
-          <img src="/assets/mark-color.svg" alt="" />
-          <span>Local Doctor</span>
-        </button>
+        <BrandLink onNavigate={onNavigate} />
         <nav className="desktop-nav" aria-label="Main navigation">
           {navItems.map(([itemRoute, label]) => (
             <button className={route === itemRoute ? 'active' : ''} key={itemRoute} type="button" onClick={() => onNavigate(itemRoute)}>
               {label}
             </button>
           ))}
-          <div className="nav-dropdown">
-            <button className={resourcesActive ? 'active' : ''} type="button" onClick={() => onNavigate('resources')}>
-              Resources
-            </button>
-            <div>
-              <button type="button" onClick={() => onNavigate('resources')}>Guides</button>
-              <button type="button" onClick={() => onNavigate('blog')}>Blog</button>
-              <button type="button" onClick={() => onNavigate('faq')}>FAQ</button>
+          {aboutItems.length > 0 && (
+            <div className="nav-dropdown">
+              <button className={aboutActive ? 'active' : ''} type="button" aria-haspopup="true">
+                About
+              </button>
+              <div>
+                {aboutItems.map(([itemRoute, label]) => (
+                  <button key={itemRoute} type="button" onClick={() => onNavigate(itemRoute)}>{label}</button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </nav>
-        <button className="header-cta" type="button" onClick={() => onNavigate('start')}>
-          Check eligibility
-        </button>
+        <div className="header-actions">
+          <a className="header-phone" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
+          <button className="header-cta" type="button" onClick={() => onNavigate('start')}>
+            Check eligibility
+          </button>
+        </div>
         <button
           className="menu-button"
           type="button"
@@ -507,9 +490,13 @@ function Header({
               {label}
             </button>
           ))}
-          <button type="button" onClick={() => onNavigate('resources')}>Guides</button>
-          <button type="button" onClick={() => onNavigate('blog')}>Blog</button>
-          <button type="button" onClick={() => onNavigate('faq')}>FAQ</button>
+          {aboutItems.length > 0 && <span className="mobile-nav-label">About</span>}
+          {aboutItems.map(([itemRoute, label]) => (
+            <button className="mobile-nav-sub" key={itemRoute} type="button" onClick={() => onNavigate(itemRoute)}>
+              {label}
+            </button>
+          ))}
+          <a className="mobile-nav-phone" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
           <button type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
         </nav>
       )}
@@ -521,18 +508,18 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
   return (
     <>
       <section className="hero">
-        <img className="hero-image" src="/assets/hero-patient-caregiver.webp" alt="Older adults walking together outdoors" />
+        <img className="hero-image" src="/assets/hero-patient-caregiver.webp" alt="Older adults walking together outdoors" width={904} height={509} />
         <div className="hero-overlay" />
         <div className="hero-content">
           <div className="hero-copy">
-            <p className="eyebrow light">Virtual Alzheimer's specialty clinic</p>
-            <h1>See if newer Alzheimer's treatments may be right for you. <em>Sooner.</em></h1>
+            <p className="eyebrow">Virtual Alzheimer's specialty clinic</p>
+            <h1>Treatment that slows down Alzheimer's. <em>Finally.</em></h1>
             <p>
-              New FDA-approved treatments may help slow progression in some people with early Alzheimer&apos;s disease. Get a second opinion from clinicians who focus on cognitive impairment and treatment eligibility to see if one may be an option for you.
+              New FDA-approved treatments can slow the progression of early Alzheimer&apos;s. Get a second opinion from our neurology team who specialize in cognitive impairment and disease-modifying treatments to see if you&apos;re eligible.
             </p>
             <div className="hero-actions">
-              <button className="primary light-primary" type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
-              <button className="secondary light-secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>
+              <button className="accent" type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
+              {routeEnabled('how') && <button className="secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>}
             </div>
             <div className="trust-note"><span /> Backed by a national infusion network and a focused treatment-readiness pathway.</div>
           </div>
@@ -540,14 +527,14 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
       </section>
 
       <section className="stat-band">
-        <Metric value="3.5 years" label="average gap between first symptoms and diagnosis, nationally" />
-        <Metric value="6-9 months" label="typical wait for a first specialist visit elsewhere" />
-        <Metric value="Maryland" label="licensed neurologist leads the virtual visit" />
-        <Metric value="Local" label="labs and imaging near home, if ordered" />
+        <Metric value="3.5 years" label="average gap between first symptoms and diagnosis of Alzheimer's" />
+        <Metric value="6-9 months" label="typical wait for a new patient visit with a Neurologist in most areas" />
+        <Metric value="1-2 weeks" label="average time to see one of our board-certified neurology specialists" />
+        <Metric value="1,500+" label="patients treated successfully by our infusion network" />
       </section>
 
-      <section className="section white">
-        <SectionIntro eyebrow="Why Local Doctor" title="Built around one job: a fast, clear answer on treatment readiness." />
+      <section className="section ivory compact-section">
+        <SectionIntro eyebrow="Why Local Doctor" title="We're designed around one goal: a clear, credible, and fast answer on treatment options." />
         <div className="value-grid">
           {valueProps.map((prop) => {
             const Icon = prop.icon
@@ -562,40 +549,30 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         </div>
       </section>
 
-      <InsuranceStrip />
+      <InsuranceStrip
+        tone="blue"
+        title="We accept Medicare, Medicaid, and most major health plans"
+        copy="Whether we're in network with your insurance or not, we're committed to financial transparency and we do whatever is in our control to minimize your costs. No surprise bills or hidden costs."
+      />
 
-      <section className="section mist">
+      <section className="section white compact-section">
         <div className="section-row">
-          <SectionIntro eyebrow="How it works" title="From first concern to treatment readiness, in 4 steps." />
-          <button className="text-link" type="button" onClick={() => onNavigate('how')}>See the full process <ArrowRight size={15} /></button>
+          <SectionIntro eyebrow="How it works" title="From getting in touch to real treatment in 4 easy steps." />
+          {routeEnabled('how') && <button className="text-link" type="button" onClick={() => onNavigate('how')}>See the full process <ArrowRight size={16} /></button>}
         </div>
         <ProcessGrid />
       </section>
 
-      <section className="section white">
+      <section className="section ivory compact-section">
         <TreatmentPreview onNavigate={onNavigate} />
       </section>
 
-      <AudienceSplit onNavigate={onNavigate} />
-
-      <section className="section mist">
-        <SectionIntro eyebrow="Start in the right place" title="Different visitors need different first steps." copy="Start from the situation you are actually in: a memory concern, an existing diagnosis, support for someone you love, or a referral from a clinician." />
-        <div className="path-grid">
-          {discoveryPaths.map((path) => {
-            const Icon = path.icon
-            return (
-              <button className="path-card" type="button" key={path.title} onClick={() => onNavigate(path.route)}>
-                <Icon size={24} />
-                <strong>{path.title}</strong>
-                <span>{path.copy}</span>
-                <small>{path.action} <ArrowRight size={14} /></small>
-              </button>
-            )
-          })}
-        </div>
-      </section>
-
-      <ConversionPanel onNavigate={onNavigate} />
+      <ConversionPanel
+        onNavigate={onNavigate}
+        eyebrow="Ready to make a step towards better memory care?"
+        title="A quick call will help us determine your eligibility."
+        copy="We review your concerns, medical history, and insurance in a quick conversation before coordinating the visit with a neurology specialist."
+      />
     </>
   )
 }
@@ -607,34 +584,20 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
         <div>
           <p className="eyebrow">Treatments</p>
           <h1>FDA-approved treatments for early Alzheimer's disease.</h1>
-          <p>Leqembi and Kisunla are FDA-approved anti-amyloid therapies for people with early Alzheimer&apos;s disease. In clinical trials they slowed decline for some patients. They are not a cure, they carry real risks such as ARIA, and they are not right for everyone. Here is what they do and who they may be for.</p>
-          <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={15} /></button>
+          <p>Leqembi and Kisunla are FDA-approved infusion treatments shown to slow the progression of Alzheimer&apos;s disease, not just treat its symptoms. In clinical trials they slowed decline for some patients but they are not a cure, they carry risks, and they are not right for everyone. We help you understand all of it.</p>
+          <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={20} /></button>
         </div>
-        <img src="/assets/hero-memory-care.webp" alt="Patient and caregiver speaking with a clinician" />
+        <img src="/assets/hero-leqembi-iv.webp" alt="Leqembi (lecanemab) IV infusion bag" width={1178} height={1335} fetchPriority="high" />
       </section>
-      <section className="section white">
-        <div className="honest-card">
-          <ShieldAlert size={24} />
-          <div>
-            <h2>What to expect, honestly</h2>
-            <p>
-              In clinical trials, both treatments showed a real, moderate slowing of cognitive decline. Neither is a cure, and neither reverses symptoms already present. The point is to weigh the potential benefit clearly, without overstating it.
-            </p>
-          </div>
-        </div>
-      </section>
-      <section className="section mist">
-        <SectionIntro eyebrow="Compare" title="Leqembi and Kisunla, side by side." />
+      <section className="section white drug-info-section">
+        <SectionIntro eyebrow="Drug information" title="Leqembi and Kisunla, side by side." />
         <TreatmentComparison />
         <div className="disclaimer">
-          Prescribing information, monitoring schedules, and payer rules can change. A licensed clinician reviews the current label and your situation before any treatment decision. This comparison is general information, not a recommendation.
+          This information is from the primary trials performed with these medications and the pharmaceutical manufacturers directly. Most ARIA in the trials was asymptomatic and found on routine MRI, with the caveat that these were separate trials, not a head-to-head comparison. Prescribing information, monitoring schedules, and payer rules can change. This comparison is general information, not a recommendation.
         </div>
+        <HonestCard />
       </section>
-      <section className="section white fit-section">
-        <SectionIntro eyebrow="What we look for" title="Who these treatments may be for." copy="This pathway is for a specific group of patients who want to understand whether treatment targeting amyloid may be an option." />
-        <CheckList items={fitChecks} />
-      </section>
-      <section className="section mist fit-section">
+      <section className="section ivory fit-section">
         <SectionIntro eyebrow="Safety" title="The safety screen is part of the evaluation, not an afterthought." copy="Risks and monitoring are reviewed before any treatment decision. Urgent symptoms belong with emergency care." />
         <div className="safety-grid">
           {safetyChecks.map((item) => (
@@ -645,7 +608,8 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
           ))}
         </div>
       </section>
-      <ConversionPanel onNavigate={onNavigate} />
+      <QualificationSection tone="white" />
+      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to find out where you stand?" copy="A short intake is all it takes to get started." secondaryLabel="See how it works" secondaryRoute="how" compact />
     </>
   )
 }
@@ -658,10 +622,12 @@ function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         title="A clear path from first concern to treatment."
         copy="Every step is virtual where it can be, and in-person only where it has to be."
         icon={<CalendarClock size={38} />}
+        aside={{ title: 'Family and loved ones', text: 'Our preference is for loved ones to join the virtual provider visits and be a part of the process.' }}
         onPrimary={() => onNavigate('start')}
-        primaryLabel="Start the check"
+        primaryLabel="Check eligibility now"
+        wideCopy
       />
-      <section className="section white">
+      <section className="section white compact-section">
         <div className="journey-list">
           {journeySteps.map((step, index) => (
             <article key={step.title} className="journey-step">
@@ -674,7 +640,7 @@ function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
                 <div className="journey-points">
                   {step.points.map((point) => (
                     <p key={point}>
-                      <CheckCircle2 size={18} />
+                      <CheckCircle2 size={20} />
                       <span>{point}</span>
                     </p>
                   ))}
@@ -684,26 +650,25 @@ function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
           ))}
         </div>
       </section>
-      <section className="section cost-band">
+      <section className="section ivory cost-band compact-section">
         <div>
           <p className="eyebrow">Insurance & Cost</p>
           <h2>What this costs you, honestly.</h2>
-          <p>Most patients access care through commercial insurance or Medicare. Coverage for diagnosis and treatment depends on your specific plan and, for traditional Medicare, participation in a national treatment registry. We will walk through your specific coverage before you commit to anything. There is no blanket promise here, because there is not a blanket policy.</p>
+          <p>Most patients access care through Medicare, Medicaid, or major health plans (Aetna, Cigna, United, Kaiser, etc.). Coverage for our virtual visits and treatment depends on your specific plan but we do whatever is in our control to minimize your costs. Whether we&apos;re in network with your insurance or not, we will walk through your specific coverage before you commit to anything and you will never receive a surprise bill or hidden cost.</p>
         </div>
       </section>
-      <InsuranceStrip />
-      <section className="section mist mini-faq-section">
-        <SectionIntro eyebrow="FAQ" title="Questions people actually ask." />
+      <section className="section white mini-faq-section compact-section">
+        <SectionIntro eyebrow="FAQ" title="Questions you might have." />
         <div className="mini-faq-list">
           {howFaqItems.map(([question, answer]) => (
             <article key={question}>
               <h3>{question}</h3>
-              <p>{answer}</p>
+              {answer.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             </article>
           ))}
         </div>
       </section>
-      <ConversionPanel onNavigate={onNavigate} title="Ready to find out where you stand?" copy="A short intake is all it takes to get started." secondaryLabel="See treatments" secondaryRoute="treatments" />
+      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to find out where you stand?" copy="A short intake is all it takes to get started." secondaryLabel="See treatments" secondaryRoute="treatments" compact />
     </>
   )
 }
@@ -736,7 +701,7 @@ function AboutPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
           ))}
         </div>
       </section>
-      <section className="section mist" id="company">
+      <section className="section ivory" id="company">
         <SectionIntro
           eyebrow="Company"
           title="Who operates Local Doctor."
@@ -759,19 +724,22 @@ function AboutPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
 
 function StartPage() {
   return (
-    <>
+    <div className="start-page">
       <PageHero
         eyebrow="Get started"
-        title="Let's find out if treatment is right for you."
-        copy="Most people leave with a clear next step, including what to do if the honest answer is not yet."
-        icon={<ClipboardCheck size={38} />}
-        primaryLabel="Start eligibility check"
-        onPrimary={() => document.getElementById('intake')?.scrollIntoView({ behavior: 'smooth' })}
+        title="Find out if treatment is right for you."
+        copy="A free eligibility call will help us better understand you and your family's situation, verify insurance coverage, and define if you're eligible for our program. No obligation, nor commitment."
+        primaryLabel={`Call ${publicPhone}`}
+        href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
+        showAside={false}
+        image={{ src: '/assets/hero-get-started.jpg', alt: 'Three generations of a family sitting together on a lakeside dock' }}
       />
-      <section className="section white">
+      <WhatToExpect />
+      <QualificationSection tone="ivory" />
+      <section className="section ivory intake-section">
         <StartExperience />
       </section>
-    </>
+    </div>
   )
 }
 
@@ -817,7 +785,7 @@ function FaqPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
 
   return (
     <>
-      <PageHero eyebrow="FAQ" title="Answers to what patients and families ask us most." copy="Straight, specific answers about eligibility, diagnosis, treatment, safety, and cost." icon={<FileText size={38} />} onPrimary={() => onNavigate('start')} primaryLabel="Check eligibility" />
+      <PageHero eyebrow="FAQ" title="Answers to what patients and families ask us most." copy="Straight, specific answers about eligibility, cost, visits, treatment, and safety." showAside={false} onPrimary={() => onNavigate('start')} primaryLabel="Check eligibility" />
       <section className="section white faq-section">
         <div className="faq-jump-list">
           {faqCategories.map((category) => (
@@ -837,7 +805,9 @@ function FaqPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
                       <span>{question}</span>
                       <ChevronDown size={18} />
                     </button>
-                    {isOpen && <p>{answer}</p>}
+                    {isOpen && (Array.isArray(answer) ? answer : [answer]).map((paragraph) => (
+                      <p key={paragraph}>{paragraph}</p>
+                    ))}
                   </article>
                 )
               })}
@@ -852,27 +822,12 @@ function FaqPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         </div>
         <a className="primary" href="mailto:hello@trylocaldoctor.com">Email our team</a>
       </section>
-      <ConversionPanel onNavigate={onNavigate} />
-    </>
-  )
-}
-
-function ResourcesPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
-  return (
-    <>
-      <PageHero eyebrow="Resources" title="Topics for treatment eligibility, records, and next steps." copy="Plain-language topics on memory changes, evaluation, treatment readiness, care partners, and what to gather next. Published reading is in the article library." icon={<FileText size={38} />} onPrimary={() => onNavigate('blog')} primaryLabel="Read articles" />
-      <section className="section white">
-        <div className="resource-grid">
-          {resources.map((resource) => (
-            <article className="resource-card" key={resource.title}>
-              <span>{resource.label}</span>
-              <h2>{resource.title}</h2>
-              <p>{resource.copy}</p>
-              <button type="button" onClick={() => onNavigate('blog')}>Read articles <ArrowRight size={14} /></button>
-            </article>
-          ))}
-        </div>
-      </section>
+      <ConversionPanel
+        onNavigate={onNavigate}
+        eyebrow="Ready to make a step towards better memory care?"
+        title="A quick call will help us determine your eligibility."
+        copy="We review your concerns, medical history, and insurance in a quick conversation before coordinating the visit with a neurology specialist."
+      />
     </>
   )
 }
@@ -904,11 +859,6 @@ function BlogPage({ onNavigate }: { onNavigate: (route: Route, slug?: string) =>
               <span>{post.label}</span>
               <h2>{post.title}</h2>
               <p>{post.excerpt}</p>
-              <small className="blog-card-meta">
-                {formatBlogDate(post.published)}
-                <span>Updated {formatBlogDate(post.updated)}</span>
-              </small>
-              <small className="blog-card-credit">Originally published by Local Infusion · {post.author}</small>
             </a>
           ))}
         </div>
@@ -943,11 +893,6 @@ function BlogPostPage({ slug, onNavigate }: { slug: string; onNavigate: (route: 
         </button>
         <p className="eyebrow">{post.label}</p>
         <h1>{post.title}</h1>
-        <p className="blog-byline">
-          By {post.author}
-          <span>Published {formatBlogDate(post.published)}</span>
-          <span>Updated on the source {formatBlogDate(post.updated)}</span>
-        </p>
         <div className="article-body">
           {post.blocks.map((block, index) => (
             <BlogBlockView block={block} key={`${block.type}-${index}`} />
@@ -970,7 +915,7 @@ function BlogPostPage({ slug, onNavigate }: { slug: string; onNavigate: (route: 
             Local Doctor is a virtual front door for specialist evaluation. It does not operate infusion centers, set drug prices, or replace the clinician who would prescribe treatment.
           </p>
           <button className="primary" type="button" onClick={() => onNavigate('start')}>
-            Check eligibility <ArrowRight size={15} />
+            Check eligibility <ArrowRight size={20} />
           </button>
         </aside>
         <div className="related-posts">
@@ -1087,20 +1032,48 @@ function StartExperience() {
   return (
     <div className="start-experience">
       <EligibilityLeadForm />
-      <ScheduleCallWidget />
-      <section className="before-call">
+    </div>
+  )
+}
+
+function WhatToExpect() {
+  return (
+    <section className="section white expect-section">
+      <h2 className="expect-heading">What to expect</h2>
+      <div className="expect-columns">
+        <div>
+          <h3>Here&apos;s how we check eligibility</h3>
+          <ol>
+            <li>Give us a call or fill out the form below so we can call you.</li>
+            <li>We collect information regarding current cognitive performance, daily activities, medical history, medications, and insurance.</li>
+            <li>We verify your insurance and whether your needs qualify to meet with our neurology team.</li>
+            <li>If eligible, we set up a virtual visit for you to meet with a neurology specialist within 1-2 weeks, who will perform an evaluation for diagnosis and treatment options.</li>
+          </ol>
+        </div>
+        <div>
+          <h3>What to have handy for the eligibility call</h3>
+          <ul>
+            <li>Insurance information</li>
+            <li>Medication list</li>
+            <li>Recent test results</li>
+            <li>Any questions you and your family want to discuss</li>
+          </ul>
+        </div>
+      </div>
+      <div className="expect-faq">
         {[
-          ['What if I do not qualify?', 'You will still get a clear explanation of why and what a sensible next step may be.'],
-          ['Will this replace my current doctor?', 'No. This is a focused specialist pathway that can work alongside the clinicians you already trust.'],
-          ['Can a caregiver be part of this?', 'Yes. Care partners are welcome and often helpful for history, logistics, and next-step planning.'],
-        ].map(([title, copy]) => (
-          <article key={title}>
-            <h3>{title}</h3>
-            <p>{copy}</p>
+          ['How does this work with my existing doctors?', 'Think of our neurology team as an extension of your current doctors. Our providers do not replace any of your existing provider relationships, and will work with them as needed.'],
+          ['Can a caregiver be a part of this?', 'Yes! We have even seen maximal results when any loved one is involved in this journey.'],
+          ['What if my insurance is not covered?', 'Not a problem, we provide a transparent and low cost for your visits with our neurology team. Any other costs will be communicated transparently.'],
+          ["What if I'm not eligible?", 'If the honest answer is "not yet" we will let you know why and recommend resources that might still be helpful to address any of your concerns.'],
+        ].map(([question, answer]) => (
+          <article key={question}>
+            <h3>{question}</h3>
+            <p>{answer}</p>
           </article>
         ))}
-      </section>
-    </div>
+      </div>
+    </section>
   )
 }
 
@@ -1117,62 +1090,30 @@ function EligibilityLeadForm() {
   }, [])
 
   return (
-    <section className="lead-card intake-embed-card" id="intake">
-      <div className="intake-copy">
-        <p className="eyebrow">Eligibility intake</p>
-        <h2>Complete the secure intake.</h2>
-        <p>This secure intake collects the information the team needs to understand your situation and decide whether clinical review may make sense.</p>
-      </div>
-      <div className="intake-frame-wrap">
-        <div className="typeform-live-embed" data-tf-live={typeformLiveId} data-tf-inline-on-mobile="" />
-      </div>
-    </section>
+    <div className="intake-frame-wrap" id="intake">
+      <div className="typeform-live-embed" data-tf-live={typeformLiveId} data-tf-inline-on-mobile="" />
+    </div>
   )
 }
 
-function ScheduleCallWidget() {
+function InsuranceStrip({
+  tone,
+  title,
+  copy,
+}: {
+  tone: 'white' | 'ivory' | 'blue'
+  title: string
+  copy: string
+}) {
   return (
-    <section className="consult-card" id="consult">
+    <section className={`insurance-strip ${tone}`}>
       <div>
-        <p className="eyebrow">Talk with the team</p>
-        <h2>A call is not booked on this page.</h2>
-        <p>
-          Complete the intake above, or email {publicEmail}. The intake is how the team gets a name and a way to follow up. Neither the form nor an email reserves a time.
-        </p>
-        <div className="consult-actions">
-          <a className="primary" href="#intake">Go to the intake <ArrowRight size={15} /></a>
-          <a className="secondary" href={`mailto:${publicEmail}`}>Email {publicEmail}</a>
-        </div>
-      </div>
-      <aside>
-        <h3>What happens next</h3>
-        <ol>
-          <li>You submit the intake or an email.</li>
-          <li>The team follows up using the contact information you provide.</li>
-          <li>A visit is scheduled only after that follow-up, and only if a clinical review makes sense.</li>
-        </ol>
-        <h3>What to have handy</h3>
-        <ul>
-          <li>Insurance card</li>
-          <li>Medication list</li>
-          <li>Recent testing or imaging</li>
-        </ul>
-      </aside>
-    </section>
-  )
-}
-
-function InsuranceStrip() {
-  const payerLoop = [...payerNames, ...payerNames]
-
-  return (
-    <section className="insurance-strip">
-      <div>
-        <h2>Coverage is checked for your plan</h2>
-        <p>Local Doctor does not promise that a health plan is accepted. Benefits, prior authorization, and what you may owe depend on your coverage, the services ordered, and where care is delivered. Financial assistance, when a program is available, depends on that program&apos;s rules. The names below are examples of plans patients ask about. They are not a list of plans Local Doctor or its partners participate with.</p>
+        <h2>{title}</h2>
+        <p>{copy}</p>
         <div className="payer-marquee" aria-label="Examples of plans patients ask about, not a list of accepted insurance">
           <div>
-            {payerLoop.map((payer, index) => <span key={`${payer}-${index}`}>{payer}</span>)}
+            {payerNames.map((payer, index) => <span key={`${payer}-${index}`}>{payer}</span>)}
+            {payerNames.map((payer, index) => <span className="payer-repeat" aria-hidden="true" key={`${payer}-repeat-${index}`}>{payer}</span>)}
           </div>
         </div>
       </div>
@@ -1200,42 +1141,22 @@ function ProcessGrid() {
 function TreatmentPreview({ onNavigate }: { onNavigate: (route: Route) => void }) {
   return (
     <>
-      <SectionIntro eyebrow="Treatments" title="Two FDA-approved treatments for early Alzheimer's." copy="Leqembi and Kisunla are IV anti-amyloid treatments for certain people with early Alzheimer&apos;s. Local Doctor helps families understand the requirements, risks, testing, and next step." />
+      <SectionIntro eyebrow="Treatments" title="Two FDA-approved treatments for early Alzheimer's." copy="Leqembi and Kisunla are disease-modifying IV therapies for early Alzheimer&apos;s disease. In clinical trials, they showed a real, moderate slowing of cognitive decline - roughly 25-33% over 18 months. Not a cure, and not right for everyone, but the first treatments that act on the disease itself. We help you and your family understand the requirements, risks, and everything it entails." />
       <div className="treatment-card-grid">
         <article>
           <h3>Leqembi</h3>
           <span>lecanemab-irmb</span>
-          <p>An IV anti-amyloid treatment for certain patients with early Alzheimer&apos;s, requiring careful eligibility review and monitoring.</p>
+          <p>IV infusion every two weeks; can transition to a once-weekly at-home injection after 18 months.</p>
         </article>
         <article>
           <h3>Kisunla</h3>
           <span>donanemab-azbt</span>
-          <p>An IV anti-amyloid treatment for certain patients with early Alzheimer&apos;s, with treatment planning tied to label, safety, and response.</p>
+          <p>Monthly IV infusion; can stop once amyloid reaches minimal levels on a PET scan.</p>
         </article>
       </div>
-      <button className="text-link treatment-link" type="button" onClick={() => onNavigate('treatments')}>See treatment details <ArrowRight size={15} /></button>
+      <HonestCard />
+      {routeEnabled('treatments') && <button className="text-link treatment-link" type="button" onClick={() => onNavigate('treatments')}>See treatment details <ArrowRight size={16} /></button>}
     </>
-  )
-}
-
-function AudienceSplit({ onNavigate }: { onNavigate: (route: Route) => void }) {
-  return (
-    <section className="audience-split">
-      <article>
-        <div>
-          <h3>For caregivers</h3>
-          <p>You are part of the decision, not just the person who found the website. The flow speaks to patients and families together.</p>
-          <button type="button" onClick={() => onNavigate('how')}>See how it works <ArrowRight size={15} /></button>
-        </div>
-      </article>
-      <article>
-        <div>
-          <h3>For referring physicians</h3>
-          <p>Send patients for treatment-readiness review, records support, safety screening, and local follow-through without replacing the referring relationship.</p>
-          <button type="button" onClick={() => onNavigate('refer')}>Refer a patient <ArrowRight size={15} /></button>
-        </div>
-      </article>
-    </section>
   )
 }
 
@@ -1244,8 +1165,8 @@ function TreatmentComparison() {
     <div className="compare-wrap">
       <div className="compare-head">
         <span />
-        <MedicineHeading color="purple" name="Leqembi" generic="lecanemab-irmb" />
-        <MedicineHeading color="green" name="Kisunla" generic="donanemab-azbt" />
+        <MedicineHeading color="leqembi" name="Leqembi" generic="lecanemab-irmb" />
+        <MedicineHeading color="kisunla" name="Kisunla" generic="donanemab-azbt" />
       </div>
       <div className="compare-table" role="table" aria-label="Treatment comparison">
         {treatmentRows.map(([label, leqembi, kisunla]) => (
@@ -1255,23 +1176,35 @@ function TreatmentComparison() {
             <p><strong className="compare-drug">Kisunla</strong>{kisunla}</p>
           </div>
         ))}
-        <div className="compare-row visual-row" role="row">
-          <span>Risk discussion</span>
-          <div className="compare-cell">
-            <strong className="compare-drug">Leqembi</strong>
-            <RiskBars tone="purple" labels={['Genotype', 'MRI', 'Medication']} />
-          </div>
-          <div className="compare-cell">
-            <strong className="compare-drug">Kisunla</strong>
-            <RiskBars tone="green" labels={['ARIA', 'Infusion', 'Monitoring']} />
-          </div>
-        </div>
       </div>
     </div>
   )
 }
 
-function MedicineHeading({ color, name, generic }: { color: 'purple' | 'green'; name: string; generic: string }) {
+function HonestCard() {
+  return (
+    <div className="honest-card">
+      <ShieldAlert size={24} />
+      <div>
+        <h2>What to expect, honestly</h2>
+        <p>
+          In clinical trials, both treatments showed a real, moderate slowing of cognitive decline. Neither is a cure, and neither reverses symptoms already present. The point is to weigh the potential benefit clearly, without overstating it.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function QualificationSection({ tone }: { tone: 'white' | 'ivory' }) {
+  return (
+    <section className={`section ${tone} fit-section`}>
+      <SectionIntro eyebrow="Qualification" title="Who is most likely to qualify." copy="This pathway is for adults with Alzheimer's disease and their families who want to understand whether disease-modifying treatment is an option for them." />
+      <CheckList items={fitChecks} />
+    </section>
+  )
+}
+
+function MedicineHeading({ color, name, generic }: { color: 'leqembi' | 'kisunla'; name: string; generic: string }) {
   return (
     <div className="medicine-heading">
       <span className={color} />
@@ -1283,32 +1216,22 @@ function MedicineHeading({ color, name, generic }: { color: 'purple' | 'green'; 
   )
 }
 
-function RiskBars({ tone, labels }: { tone: 'purple' | 'green'; labels: string[] }) {
-  const widths = tone === 'purple' ? ['82%', '64%', '46%'] : ['72%', '54%', '38%']
-
+function CheckList({ items }: { items: string[] }) {
   return (
-    <div className="risk-bars">
-      {labels.map((label, index) => (
-        <div key={label}>
-          <div><span>{label}</span><small>review</small></div>
-          <b><i className={tone} style={{ width: widths[index] }} /></b>
+    <div className="check-list">
+      {items.map((item) => (
+        <div key={item}>
+          <CheckCircle2 size={20} />
+          <span>{item}</span>
         </div>
       ))}
     </div>
   )
 }
 
-function CheckList({ items }: { items: string[] }) {
-  return (
-    <div className="check-list">
-      {items.map((item) => (
-        <div key={item}>
-          <CheckCircle2 size={14} />
-          <span>{item}</span>
-        </div>
-      ))}
-    </div>
-  )
+const defaultHeroAside = {
+  title: 'Clinical decisions require licensed review.',
+  text: 'The website is a front door, not a diagnosis or treatment promise.',
 }
 
 function PageHero({
@@ -1319,60 +1242,84 @@ function PageHero({
   primaryLabel,
   onPrimary,
   href,
+  showAside = true,
+  aside = defaultHeroAside,
+  image,
+  wideCopy = false,
 }: {
   eyebrow: string
   title: string
   copy: string
-  icon: ReactNode
+  icon?: ReactNode
   primaryLabel: string
   onPrimary?: () => void
   href?: string
+  showAside?: boolean
+  aside?: { title: string; text: string }
+  image?: { src: string; alt: string }
+  wideCopy?: boolean
 }) {
+  const isPhoneLink = href?.startsWith('tel:')
+  const heroClass = ['page-hero', image && 'has-image', wideCopy && 'wide-copy'].filter(Boolean).join(' ')
+
   return (
-    <section className="page-hero">
+    <div className="page-hero-band">
+    <section className={heroClass}>
       <div>
         <p className="eyebrow">{eyebrow}</p>
         <h1>{title}</h1>
         <p>{copy}</p>
         {href ? (
-          <a className="primary" href={href} target="_blank" rel="noreferrer">{primaryLabel} <ArrowRight size={15} /></a>
+          isPhoneLink ? (
+            <a className="primary" href={href}>{primaryLabel}</a>
+          ) : (
+            <a className="primary" href={href} target="_blank" rel="noreferrer">{primaryLabel} <ArrowRight size={20} /></a>
+          )
         ) : (
-          <button className="primary" type="button" onClick={onPrimary}>{primaryLabel} <ArrowRight size={15} /></button>
+          <button className="primary" type="button" onClick={onPrimary}>{primaryLabel} <ArrowRight size={20} /></button>
         )}
       </div>
-      <aside>
-        {icon}
-        <strong>Clinical decisions require licensed review.</strong>
-        <span>The website is a front door, not a diagnosis or treatment promise.</span>
-      </aside>
+      {image && <img className="page-hero-image" src={image.src} alt={image.alt} width={385} height={515} fetchPriority="high" />}
+      {showAside && (
+        <aside>
+          {icon}
+          <strong>{aside.title}</strong>
+          <span>{aside.text}</span>
+        </aside>
+      )}
     </section>
+    </div>
   )
 }
 
 function ConversionPanel({
   onNavigate,
+  eyebrow = 'Ready to find out where you stand?',
   title = 'Start with a short check, then move to full intake only when it makes sense.',
   copy = 'The intake is a request for review. It is not a diagnosis, a booked visit, or a promise of coverage.',
   secondaryLabel,
   secondaryRoute,
+  compact = false,
 }: {
   onNavigate: (route: Route) => void
+  eyebrow?: string
   title?: string
   copy?: string
   secondaryLabel?: string
   secondaryRoute?: Route
+  compact?: boolean
 }) {
   return (
-    <section className="conversion-panel">
+    <section className={compact ? 'conversion-panel compact' : 'conversion-panel'}>
       <div>
-        <p className="eyebrow light">Ready to find out where you stand?</p>
+        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <h2>{title}</h2>
         <p>{copy}</p>
       </div>
       <div className="conversion-actions">
-        <button className="primary light-primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={15} /></button>
-        {secondaryLabel && secondaryRoute && (
-          <button className="secondary light-secondary" type="button" onClick={() => onNavigate(secondaryRoute)}>{secondaryLabel}</button>
+        <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={20} /></button>
+        {secondaryLabel && secondaryRoute && routeEnabled(secondaryRoute) && (
+          <button className="secondary" type="button" onClick={() => onNavigate(secondaryRoute)}>{secondaryLabel}</button>
         )}
       </div>
     </section>
@@ -1399,50 +1346,68 @@ function Metric({ value, label }: { value: string; label: string }) {
 }
 
 function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
+  const exploreLinks = enabledLinks<[Route, string]>([
+    ['home', 'Home'],
+    ['how', 'How it works'],
+    ['treatments', 'Treatments'],
+    ['about', 'Meet the Team'],
+    ['blog', 'Blog'],
+  ])
+  const startLinksBeforeEmail = enabledLinks<[Route, string]>([
+    ['start', 'Check eligibility'],
+    ['faq', 'FAQs'],
+  ])
+  const startLinksAfterEmail = enabledLinks<[Route, string]>([
+    ['refer', 'For physicians'],
+  ])
+  const legalLinks = enabledLinks<[Route, string, string]>([
+    ['privacy', '/privacy', 'Privacy Policy'],
+    ['terms', '/terms', 'Terms of Use'],
+    ['patientRights', '/patient-rights', 'Patient Rights & Notices'],
+    ['contact', '/contact', 'Contact'],
+  ])
+
   return (
     <footer className="footer">
       <div>
-        <button className="brand-button footer-brand" type="button" onClick={() => onNavigate('home')}>
-          <img src="/assets/mark-color.svg" alt="" />
-          <span>Local Doctor</span>
-        </button>
-        <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation, care coordination, and treatment-readiness review.</p>
+        <BrandLink variant="reverse" onNavigate={onNavigate} />
+        <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation and treatment.</p>
         <p className="footer-identity">
-          {legalEntity}
+          {footerEntity}
           <br />
           {physicalAddress}
           <br />
           Phone: {publicPhone}
-          <br />
-          Clinical care is provided by {clinicalPractice}.
-          <br />
-          Patients may be seen in {licensedStates}.
         </p>
-        <p className="footer-copy">© {new Date().getFullYear()} {legalEntity}</p>
       </div>
       <div>
         <strong>Explore</strong>
-        <button type="button" onClick={() => onNavigate('home')}>Home</button>
-        <button type="button" onClick={() => onNavigate('how')}>How it works</button>
-        <button type="button" onClick={() => onNavigate('treatments')}>Treatments</button>
-        <button type="button" onClick={() => onNavigate('about')}>Meet the Team</button>
-        <button type="button" onClick={() => onNavigate('blog')}>Blog</button>
+        {exploreLinks.map(([itemRoute, label]) => (
+          <button key={label} type="button" onClick={() => onNavigate(itemRoute)}>{label}</button>
+        ))}
       </div>
       <div>
         <strong>Get started</strong>
-        <button type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
-        <button type="button" onClick={() => onNavigate('how')}>How it works</button>
-        <button type="button" onClick={() => onNavigate('refer')}>For physicians</button>
+        {startLinksBeforeEmail.map(([itemRoute, label]) => (
+          <button key={label} type="button" onClick={() => onNavigate(itemRoute)}>{label}</button>
+        ))}
         <a href={`mailto:${publicEmail}`}>Email the team</a>
+        {startLinksAfterEmail.map(([itemRoute, label]) => (
+          <button key={label} type="button" onClick={() => onNavigate(itemRoute)}>{label}</button>
+        ))}
       </div>
       <div>
         <strong>Legal</strong>
-        <a href="/privacy">Privacy Policy</a>
-        <a href="/terms">Terms of Use</a>
-        <a href="/patient-rights">Patient Rights & Notices</a>
-        <a href="/contact">Contact</a>
+        {legalLinks.map(([, href, label]) => (
+          <a key={href} href={href}>{label}</a>
+        ))}
         <small>AI-use disclosure: some site copy and code are drafted with AI tools.</small>
-        <small>Individual results vary. Local Doctor does not replace emergency care. Call 911 for a medical emergency.</small>
+      </div>
+      <div className="footer-legal">
+        <p>
+          Leqembi and Kisunla are FDA-approved to help slow the progression of early Alzheimer&apos;s disease in people who qualify. Individual results vary, and these treatments are not a cure. Local Doctor provides specialist evaluation and care coordination; it does not replace emergency care — if you are experiencing a medical emergency, call 911.
+        </p>
+        <p className="footer-copy">© {new Date().getFullYear()} Local Doctor. All rights reserved.</p>
       </div>
     </footer>
   )
