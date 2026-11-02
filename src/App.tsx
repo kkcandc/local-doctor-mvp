@@ -131,17 +131,17 @@ const valueProps = [
 
 const treatmentRows = [
   ['Route', 'IV infusion every two weeks; can transition to a once-weekly at-home injection after 18 months', 'IV infusion every four weeks'],
-  ['MRI monitoring', 'Baseline, then before your 3rd, 5th, 7th, and 14th infusions', 'Baseline, then before your 2nd, 3rd, 4th, and 7th doses'],
-  ['Duration', 'No amyloid-based stopping rule built into treatment today', 'Can stop once amyloid reaches minimal levels on a PET scan, a defined finish line'],
-  ['Infusion reactions', 'Not broken out by genotype in sources reviewed', 'Overall 9%, mostly within the first four infusions'],
+  ['MRI monitoring', 'Baseline during your workup and before your 3rd, 5th, 7th, and 14th infusions', 'Baseline during your workup and before your 2nd, 3rd, 4th, 7th, and 13th infusions'],
+  ['Duration', 'Can stop once amyloid reaches minimal levels on a PET scan', 'Can stop once amyloid reaches minimal levels on a PET scan'],
+  ['ARIA risk', 'The ARIA-E risk was 13% vs 2% on placebo; The ARIA-H was 17% vs 9% on placebo', 'The ARIA-E risk was 24% vs 2% on placebo; The ARIA-H was 31% vs 13% on placebo'],
 ]
 
 const fitChecks = [
-  'You have a diagnosis already, or memory changes serious enough to justify specialist review.',
-  'You are looking for a treatment-readiness answer, not only general memory-care advice.',
-  'You can complete a virtual visit and local testing if the clinician recommends it.',
+  'You are located in Maryland.',
   'A family member or care partner can participate in planning when needed.',
-  'You have not already started a disease-modifying Alzheimer\'s treatment elsewhere.',
+  'There is a diagnosis already, or cognitive changes serious enough to justify specialist review.',
+  'You are looking for an answer on infusion treatment-readiness, not purely general memory-care advice.',
+  'You can complete virtual visits and labs/imaging testing and treatment locally in person, as appropriate.',
 ]
 
 const safetyChecks = [
@@ -570,33 +570,20 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
         <div>
           <p className="eyebrow">Treatments</p>
           <h1>FDA-approved treatments for early Alzheimer's disease.</h1>
-          <p>Leqembi and Kisunla are FDA-approved anti-amyloid therapies for people with early Alzheimer&apos;s disease. In clinical trials they slowed decline for some patients. They are not a cure, they carry real risks such as ARIA, and they are not right for everyone. Here is what they do and who they may be for.</p>
+          <p>Leqembi and Kisunla are FDA-approved infusion treatments shown to slow the progression of Alzheimer&apos;s disease, not just treat its symptoms. In clinical trials they slowed decline for some patients but they are not a cure, they carry risks, and they are not right for everyone. We help you understand all of it.</p>
           <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={20} /></button>
         </div>
-        <img src="/assets/hero-memory-care.webp" alt="Patient and caregiver speaking with a clinician" />
+        <img src="/assets/hero-leqembi-iv.webp" alt="Leqembi (lecanemab) IV infusion bag" width={1178} height={1335} fetchPriority="high" />
       </section>
-      <section className="section white">
-        <div className="honest-card">
-          <ShieldAlert size={24} />
-          <div>
-            <h2>What to expect, honestly</h2>
-            <p>
-              In clinical trials, both treatments showed a real, moderate slowing of cognitive decline. Neither is a cure, and neither reverses symptoms already present. The point is to weigh the potential benefit clearly, without overstating it.
-            </p>
-          </div>
-        </div>
-      </section>
-      <section className="section ivory">
-        <SectionIntro eyebrow="Compare" title="Leqembi and Kisunla, side by side." />
+      <section className="section pale-blue">
+        <SectionIntro eyebrow="Drug information" title="Leqembi and Kisunla, side by side." />
         <TreatmentComparison />
         <div className="disclaimer">
-          Prescribing information, monitoring schedules, and payer rules can change. A licensed clinician reviews the current label and your situation before any treatment decision. This comparison is general information, not a recommendation.
+          This information is from the primary trials performed with these medications and the pharmaceutical manufacturers directly. Most ARIA in the trials was asymptomatic and found on routine MRI, with the caveat that these were separate trials, not a head-to-head comparison. Prescribing information, monitoring schedules, and payer rules can change. This comparison is general information, not a recommendation.
         </div>
+        <HonestCard />
       </section>
-      <section className="section white fit-section">
-        <SectionIntro eyebrow="What we look for" title="Who these treatments may be for." copy="This pathway is for a specific group of patients who want to understand whether treatment targeting amyloid may be an option." />
-        <CheckList items={fitChecks} />
-      </section>
+      <QualificationSection tone="white" />
       <section className="section ivory fit-section">
         <SectionIntro eyebrow="Safety" title="The safety screen is part of the evaluation, not an afterthought." copy="Risks and monitoring are reviewed before any treatment decision. Urgent symptoms belong with emergency care." />
         <div className="safety-grid">
@@ -608,7 +595,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
           ))}
         </div>
       </section>
-      <ConversionPanel onNavigate={onNavigate} />
+      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to find out where you stand?" copy="A short intake is all it takes to get started." secondaryLabel="See how it works" secondaryRoute="how" compact />
     </>
   )
 }
@@ -733,6 +720,7 @@ function StartPage() {
         image={{ src: '/assets/hero-get-started.jpg', alt: 'Three generations of a family sitting together on a lakeside dock' }}
       />
       <WhatToExpect />
+      <QualificationSection tone="ivory" />
       <section className="section ivory intake-section">
         <StartExperience />
       </section>
@@ -1160,6 +1148,7 @@ function TreatmentPreview({ onNavigate }: { onNavigate: (route: Route) => void }
           <p>Monthly IV infusion; can stop once amyloid reaches minimal levels on a PET scan.</p>
         </article>
       </div>
+      <HonestCard />
       {routeEnabled('treatments') && <button className="text-link treatment-link" type="button" onClick={() => onNavigate('treatments')}>See treatment details <ArrowRight size={16} /></button>}
     </>
   )
@@ -1181,19 +1170,31 @@ function TreatmentComparison() {
             <p><strong className="compare-drug">Kisunla</strong>{kisunla}</p>
           </div>
         ))}
-        <div className="compare-row visual-row" role="row">
-          <span>Risk discussion</span>
-          <div className="compare-cell">
-            <strong className="compare-drug">Leqembi</strong>
-            <RiskBars tone="leqembi" labels={['Genotype', 'MRI', 'Medication']} />
-          </div>
-          <div className="compare-cell">
-            <strong className="compare-drug">Kisunla</strong>
-            <RiskBars tone="kisunla" labels={['ARIA', 'Infusion', 'Monitoring']} />
-          </div>
-        </div>
       </div>
     </div>
+  )
+}
+
+function HonestCard() {
+  return (
+    <div className="honest-card">
+      <ShieldAlert size={24} />
+      <div>
+        <h2>What to expect, honestly</h2>
+        <p>
+          In clinical trials, both treatments showed a real, moderate slowing of cognitive decline. Neither is a cure, and neither reverses symptoms already present. The point is to weigh the potential benefit clearly, without overstating it.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function QualificationSection({ tone }: { tone: 'white' | 'ivory' }) {
+  return (
+    <section className={`section ${tone} fit-section`}>
+      <SectionIntro eyebrow="Qualification" title="Who is most likely to qualify." copy="This pathway is for adults with Alzheimer's disease and their families who want to understand whether disease-modifying treatment is an option for them." />
+      <CheckList items={fitChecks} />
+    </section>
   )
 }
 
@@ -1205,21 +1206,6 @@ function MedicineHeading({ color, name, generic }: { color: 'leqembi' | 'kisunla
         <strong>{name}</strong>
         <small>{generic}</small>
       </div>
-    </div>
-  )
-}
-
-function RiskBars({ tone, labels }: { tone: 'leqembi' | 'kisunla'; labels: string[] }) {
-  const widths = tone === 'leqembi' ? ['82%', '64%', '46%'] : ['72%', '54%', '38%']
-
-  return (
-    <div className="risk-bars">
-      {labels.map((label, index) => (
-        <div key={label}>
-          <div><span>{label}</span><small>review</small></div>
-          <b><i className={tone} style={{ width: widths[index] }} /></b>
-        </div>
-      ))}
     </div>
   )
 }
@@ -1354,9 +1340,11 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
     ['about', 'Meet the Team'],
     ['blog', 'Blog'],
   ])
-  const startLinks = enabledLinks<[Route, string]>([
+  const startLinksBeforeEmail = enabledLinks<[Route, string]>([
     ['start', 'Check eligibility'],
-    ['how', 'How it works'],
+    ['faq', 'FAQs'],
+  ])
+  const startLinksAfterEmail = enabledLinks<[Route, string]>([
     ['refer', 'For physicians'],
   ])
   const legalLinks = enabledLinks<[Route, string, string]>([
@@ -1388,10 +1376,13 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
       </div>
       <div>
         <strong>Get started</strong>
-        {startLinks.map(([itemRoute, label]) => (
+        {startLinksBeforeEmail.map(([itemRoute, label]) => (
           <button key={label} type="button" onClick={() => onNavigate(itemRoute)}>{label}</button>
         ))}
         <a href={`mailto:${publicEmail}`}>Email the team</a>
+        {startLinksAfterEmail.map(([itemRoute, label]) => (
+          <button key={label} type="button" onClick={() => onNavigate(itemRoute)}>{label}</button>
+        ))}
       </div>
       <div>
         <strong>Legal</strong>
