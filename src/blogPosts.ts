@@ -237,7 +237,7 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: 'donanemab-vs-lecanemab',
-    title: 'Leqembi (Lecanemab) vs Donanemab For Alzheimer’s: What’s The Difference?',
+    title: 'Leqembi (Lecanemab) vs Kisunla (Donanemab) For Alzheimer’s: What’s The Difference?',
     label: 'Comparison',
     excerpt:
       'How the original Local Infusion article compares lecanemab and donanemab: what each antibody targets, dosing interval, trial results, price, and ARIA rates.',
@@ -370,160 +370,6 @@ export const blogPosts: BlogPost[] = [
       {
         type: 'p',
         text: 'The original article says that in the phase 3 trials, the reported rates of ARIA were slightly higher for donanemab (ARIA-E 24.0%, ARIA-H 31.4%) compared with lecanemab (ARIA-E 12.6%, ARIA-H 17.3%). Which drug, if either, is appropriate is a clinician’s decision after MRI review, genotype discussion when appropriate, and a medication review. It is not a choice a webpage can make.',
-      },
-    ],
-  },
-  {
-    slug: 'lecanemab-vs-aducanumab',
-    title: 'Leqembi (Lecanemab) vs Aduhelm (Aducanumab) For Alzheimer’s: What’s The Difference?',
-    label: 'Comparison',
-    excerpt:
-      'Local Infusion’s comparison of lecanemab and aducanumab: targets, FDA pathway as described in the article, CDR-SB, list prices, and side effects including ARIA.',
-    author: 'Jenna Paladino, NP',
-    published: '2023-08-24',
-    updated: '2024-11-10',
-    originalUrl: 'https://mylocalinfusion.com/lecanemab-vs-aducanumab/',
-    blocks: [
-      {
-        type: 'p',
-        text: 'The original article compares Leqembi (lecanemab) and Aduhelm (aducanumab). It says neither cures or reverses Alzheimer’s disease. Both are described there as anti-amyloid treatments that reduce beta-amyloid plaques in the brain.',
-      },
-      {
-        type: 'p',
-        text: 'Alzheimer’s disease is described as a debilitating condition that affects millions of people. According to the National Institute on Aging and the Alzheimer’s Association Research Framework, as cited in the original, abnormal β-amyloid is a key pathological hallmark of Alzheimer’s disease. β-amyloid, also known as beta-amyloid, is a protein fragment that tends to accumulate and form sticky plaques outside the neurons of the brain. The accumulation disrupts communication between neurons, which is why it is one of the major targets in Alzheimer’s disease drug development.',
-      },
-      { type: 'h2', text: 'About lecanemab' },
-      {
-        type: 'p',
-        text: 'The original article says lecanemab, manufactured by Biogen and Eisai, is a monoclonal antibody that targets a structure of beta-amyloid called N3pG, which helps in the formation of amyloid plaques in the brain.',
-      },
-      {
-        type: 'p',
-        text: 'The same section also says lecanemab targets soluble aggregated Aβ species such as monomers, oligomers, insoluble fibrils in plaques, and protofibrils. It describes those species as forms of β-amyloid peptides that tend to clump together and form aggregates, leading to insoluble plaques. It says research has shown that lecanemab is effective in reducing robust brain fibrillar amyloid and slowing clinical decline in early Alzheimer’s disease (“early” meaning mild cognitive impairment or mild dementia).',
-      },
-      { type: 'h2', text: 'About aducanumab' },
-      {
-        type: 'p',
-        text: 'The original article says aducanumab is an amyloid beta-directed monoclonal antibody. It says aducanumab was found effective in people living with early Alzheimer’s disease, mild cognitive impairment (MCI), or mild dementia due to Alzheimer’s disease, or those with amyloid plaque buildup in the brain.',
-      },
-      { type: 'h2', text: 'Top-line differences between lecanemab and aducanumab' },
-      {
-        type: 'p',
-        text: 'The original article says the main difference is that lecanemab primarily focuses on Aβ protofibrils, while aducanumab focuses on highly aggregated forms of Aβ. It also says another difference is mechanism of action: aducanumab removes beta-amyloid from the brain while lecanemab blocks the formation of amyloid plaques in the brain. Those are the original article’s descriptions, including where its sections emphasize different binding targets.',
-      },
-      { type: 'h2', text: 'Are both lecanemab and aducanumab FDA-approved?' },
-      {
-        type: 'p',
-        text: 'The original article says both lecanemab and aducanumab received approval from the U.S. Food and Drug Administration. It says that in 2021, the FDA approved aducanumab through the Accelerated Approval Pathway. It says that in January 2023, lecanemab received FDA approval based on Clarity AD, where lecanemab met the primary endpoint and all key secondary endpoints with statistically significant results. “Endpoint” here, as the original glosses it, means the specific outcome used to assess effectiveness during a clinical trial. It says lecanemab was also approved through the Accelerated Approval Pathway.',
-      },
-      { type: 'h2', text: 'Efficacy: does lecanemab work as well as aducanumab?' },
-      {
-        type: 'p',
-        text: 'The original article says aducanumab showed significant slowing of cognitive decline in patients with early-stage disease in one of two phase 3 clinical trials.',
-      },
-      {
-        type: 'p',
-        text: 'It says lecanemab has a comparable efficacy to aducanumab, as measured by the Clinical Dementia Rating-Sum of Boxes (CDR-SB), the measurement tool used in clinical trials to assess the severity of dementia in individuals with Alzheimer’s disease and other forms of dementia.',
-      },
-      {
-        type: 'p',
-        text: 'It says one reason lecanemab is beneficial is its binding profile: lecanemab focuses on Aβ protofibrils, while aducanumab and other medications like gantenerumab target highly aggregated forms of Aβ. The original article says this different target focus makes lecanemab more effective and safer, with a substantially lower incidence of amyloid-related imaging abnormalities such as transient immunotherapy-related brain edema and microbleeds.',
-      },
-      { type: 'h2', text: 'What is the cost difference between lecanemab and aducanumab?' },
-      {
-        type: 'p',
-        text: 'The original article says lecanemab costs $26,500 for a year’s worth of treatment while aducanumab costs $28,200. It says the amount a patient eventually pays will depend on insurance or whether they use services like Medicare.',
-      },
-      { type: 'h2', text: 'How long it takes for lecanemab and aducanumab to work' },
-      {
-        type: 'p',
-        text: 'According to the original article’s summary of lecanemab’s phase 3 trial, amyloid reduction is achieved within 3 months of treatment and clinical benefits within 6 months of treatment. It says more than 80% of subjects were amyloid negative (by visual reading) within 12–18 months of treatment in comparison with placebo.',
-      },
-      {
-        type: 'p',
-        text: 'According to the original article’s summary of aducanumab clinical trials, it takes about 18 months to reduce amyloid plaque levels. The article notes that aducanumab is a long-term drug, so if it is effective a doctor may have a patient take it for a longer period.',
-      },
-      { type: 'h2', text: 'Side effects of lecanemab and aducanumab' },
-      { type: 'h3', text: 'Infusion-related reactions with lecanemab' },
-      {
-        type: 'p',
-        text: 'The original article says lecanemab may result in severe reactions during or after infusion, including:',
-      },
-      {
-        type: 'ul',
-        items: [
-          'Chills',
-          'Fever',
-          'Lightheadedness or dizziness',
-          'Nausea',
-          'Vomiting',
-          'Racing heart or chest pounding',
-          'Shortness of breath or difficulty breathing',
-          'Joint pain',
-          'Body aches',
-        ],
-      },
-      {
-        type: 'p',
-        text: 'It says you should inform your healthcare provider if you experience any of those reactions, and that a doctor may give medications before treatment that may prevent a reaction.',
-      },
-      { type: 'h3', text: 'Serious side effects of lecanemab' },
-      {
-        type: 'p',
-        text: 'The original article says lecanemab may cause ARIA. It describes ARIA-E, characterized by parenchymal or pial edema, and ARIA-hemorrhage (ARIA-H), which involves hemosiderin deposition in the form of superficial siderosis or hemorrhage.',
-      },
-      {
-        type: 'p',
-        text: 'It says this is mostly seen as temporary swelling in some parts of the brain which resolves over time. Some patients may have small spots of bleeding in or on the surface of the brain, and sometimes larger areas of brain bleeding. It says patients with this swelling are typically asymptomatic. If ARIA is symptomatic, signs and symptoms may include:',
-      },
-      {
-        type: 'ul',
-        items: [
-          'Headache',
-          'Confusion',
-          'Difficulty walking',
-          'Dizziness',
-          'Seizures',
-          'Vision changes',
-        ],
-      },
-      {
-        type: 'p',
-        text: 'The original article says the genetic risk factor (homozygous apolipoprotein E gene carriers) may increase ARIA risk. It says some medications can increase the risk for larger areas of bleeding in the brain in patients receiving lecanemab, and that a healthcare provider will check medications and carry out MRI scans before and during treatment to check for ARIA.',
-      },
-      { type: 'h3', text: 'Mild side effects of aducanumab' },
-      {
-        type: 'p',
-        text: 'The original article says aducanumab may cause mild side effects, including:',
-      },
-      {
-        type: 'ul',
-        items: [
-          'Headache',
-          'Diarrhea',
-          'Upper respiratory tract infection',
-          'Confusion',
-          'Disorientation',
-        ],
-      },
-      {
-        type: 'p',
-        text: 'It says these side effects may stop within a few days or a couple of weeks.',
-      },
-      { type: 'h3', text: 'Serious allergic reactions with aducanumab' },
-      {
-        type: 'p',
-        text: 'The original article says aducanumab may cause serious allergic reactions during or after an infusion, including hives and swelling of the face, mouth, lips, or tongue. It says to inform a healthcare provider if those symptoms occur during or after an infusion. It also says hypersensitivity reactions such as angioedema or urticaria may occur during an infusion, in which case the provider will immediately discontinue treatment.',
-      },
-      { type: 'h3', text: 'ARIA with aducanumab' },
-      {
-        type: 'p',
-        text: 'The original article says aducanumab may also cause ARIA. It says a healthcare provider will conduct baseline MRI scans before the start of treatment and periodic MRI scans during treatment to monitor for ARIA.',
-      },
-      { type: 'h2', text: 'Safety: is lecanemab a safe alternative to aducanumab, and vice versa?' },
-      {
-        type: 'p',
-        text: 'The original article says there is a substantially lower incidence of amyloid related imaging abnormalities with lecanemab, because lecanemab mainly targets Aβ protofibrils, while aducanumab and other medications like gantenerumab target highly aggregated forms of Aβ. A licensed clinician has to decide whether either medicine is appropriate. This page does not.',
       },
     ],
   },
@@ -667,13 +513,4 @@ const postsBySlug = new Map(blogPosts.map((post) => [post.slug, post]))
 
 export function getBlogPost(slug: string) {
   return postsBySlug.get(slug)
-}
-
-export function formatBlogDate(isoDate: string) {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(`${isoDate}T00:00:00Z`))
 }

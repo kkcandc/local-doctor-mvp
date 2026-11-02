@@ -1645,20 +1645,8 @@ a.blog-card {
 }
 
 .blog-card p {
-  margin: 0 0 var(--space-16);
+  margin: 0;
   color: var(--text-secondary);
-}
-
-.blog-card-meta,
-.blog-card-credit {
-  display: block;
-  color: var(--text-secondary);
-  font-size: var(--text-control);
-  line-height: 1.45;
-}
-
-.blog-card-meta span::before {
-  content: ' · ';
 }
 
 .blog-article {
@@ -1672,16 +1660,6 @@ a.blog-card {
 
 .blog-back {
   margin-bottom: var(--space-16);
-}
-
-.blog-byline {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4) var(--space-16);
-  margin: var(--space-16) 0 0;
-  color: var(--text-secondary);
-  font-size: var(--text-control);
-  line-height: 1.45;
 }
 
 .republication-credit {

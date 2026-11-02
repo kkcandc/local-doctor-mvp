@@ -17,7 +17,6 @@ import {
 } from 'lucide-react'
 import {
   blogPosts,
-  formatBlogDate,
   getBlogPost,
   medicalDisclaimer,
   type BlogBlock,
@@ -318,6 +317,9 @@ function App() {
     function applyPath() {
       const path = normalizePath()
       const lowered = path.toLowerCase()
+      if (lowered === 'blog/lecanemab-vs-aducanumab') {
+        window.history.replaceState({}, '', '/blog')
+      }
       if (
         path === 'pilot-plan' ||
         path.startsWith('pilot-plan/') ||
@@ -845,11 +847,6 @@ function BlogPage({ onNavigate }: { onNavigate: (route: Route, slug?: string) =>
               <span>{post.label}</span>
               <h2>{post.title}</h2>
               <p>{post.excerpt}</p>
-              <small className="blog-card-meta">
-                {formatBlogDate(post.published)}
-                <span>Updated {formatBlogDate(post.updated)}</span>
-              </small>
-              <small className="blog-card-credit">Originally published by Local Infusion · {post.author}</small>
             </a>
           ))}
         </div>
@@ -884,11 +881,6 @@ function BlogPostPage({ slug, onNavigate }: { slug: string; onNavigate: (route: 
         </button>
         <p className="eyebrow">{post.label}</p>
         <h1>{post.title}</h1>
-        <p className="blog-byline">
-          By {post.author}
-          <span>Published {formatBlogDate(post.published)}</span>
-          <span>Updated on the source {formatBlogDate(post.updated)}</span>
-        </p>
         <div className="article-body">
           {post.blocks.map((block, index) => (
             <BlogBlockView block={block} key={`${block.type}-${index}`} />
