@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
   ArrowRight,
@@ -326,6 +326,7 @@ function App() {
   const [route, setRoute] = useState<Route>('home')
   const [blogSlug, setBlogSlug] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [scrollRequest, setScrollRequest] = useState(0)
 
   useEffect(() => {
     function applyPath() {
@@ -360,10 +361,17 @@ function App() {
     return () => window.removeEventListener('popstate', applyPath)
   }, [])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.body.classList.toggle('menu-open', menuOpen)
     return () => document.body.classList.remove('menu-open')
   }, [menuOpen])
+
+  // Scroll after the new route has rendered and the menu's overflow lock is released;
+  // scrolling inside the click handler runs against the old page and gets clamped to the footer.
+  useLayoutEffect(() => {
+    if (scrollRequest === 0) return
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [scrollRequest])
 
   usePageMeta(route, blogSlug)
 
@@ -389,7 +397,7 @@ function App() {
     if (window.location.pathname !== path) {
       window.history.pushState({}, '', path)
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setScrollRequest((count) => count + 1)
   }
 
   return (
