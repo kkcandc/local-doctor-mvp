@@ -38,14 +38,8 @@ main {
 
 .brand-link img {
   display: block;
-  width: 160px;
+  width: 200px;
   height: auto;
-}
-
-@media (min-width: 768px) {
-  .brand-link img {
-    width: 200px;
-  }
 }
 
 @media (min-width: 1100px) {

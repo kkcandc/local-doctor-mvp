@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   Menu,
   ShieldAlert,
-  Sparkles,
   Stethoscope,
   UserRound,
   UsersRound,
@@ -854,7 +853,7 @@ function BlogPage({ onNavigate }: { onNavigate: (route: Route, slug?: string) =>
         eyebrow="Blog"
         title="Alzheimer’s articles, with credit to the original publisher."
         copy="These pieces were originally published by Local Infusion. Local Doctor republishes them so patients and caregivers can read them here, with a link back to the source."
-        icon={<Sparkles size={38} />}
+        showAside={false}
         onPrimary={() => onNavigate('start')}
         primaryLabel="Check eligibility"
       />
