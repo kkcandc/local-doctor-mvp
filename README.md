@@ -40,7 +40,7 @@ If a branch/PR deploy is still `CANCELED` with `errorLink = Ignored Build Step`,
 
 ## Page Feature Flags
 
-Every page has a visibility flag in `src/featureFlags.ts`. A disabled page is removed from the header, footer, and in-page links, and a direct visit redirects to `/`. Meet the Team (`about`) and Contact (`contact`) are currently off.
+Every page has a visibility flag in `src/featureFlags.ts`. A disabled page is removed from the header, footer, and in-page links, and a direct visit redirects to `/`. Meet the Team (`about`) is currently off. Contact (`contact`) is on but intentionally not linked from the footer.
 
 - Change a default in `src/featureFlags.ts` and open a PR.
 - Or override per Vercel environment with `VITE_PAGE_<KEY>=true|false` (for example `VITE_PAGE_ABOUT=true` on Preview only). Env vars are read at build time, so redeploy after changing one.

@@ -1371,11 +1371,11 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
   const startLinksAfterEmail = enabledLinks<[Route, string]>([
     ['refer', 'For physicians'],
   ])
+  // The Contact page is live but intentionally not linked from the footer.
   const legalLinks = enabledLinks<[Route, string, string]>([
     ['privacy', '/privacy', 'Privacy Policy'],
     ['terms', '/terms', 'Terms of Use'],
     ['patientRights', '/patient-rights', 'Patient Rights & Notices'],
-    ['contact', '/contact', 'Contact'],
   ])
 
   return (
