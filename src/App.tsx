@@ -35,6 +35,7 @@ import {
 } from './compliancePages'
 import { isPageEnabled, type PageFlag } from './featureFlags'
 import { noteSpaNavigation } from './analytics/googleAds'
+import { noteEligibilityStarted, notePostHogNavigation } from './analytics/posthog'
 import './App.css'
 
 type Route =
@@ -372,6 +373,10 @@ function App() {
   }, [route, blogSlug])
 
   useEffect(() => {
+    notePostHogNavigation(window.location.pathname)
+  }, [route, blogSlug])
+
+  useEffect(() => {
     const hash = window.location.hash.replace(/^#/, '')
     if (!hash) return
     document.getElementById(hash)?.scrollIntoView()
@@ -382,6 +387,7 @@ function App() {
       next = 'home'
       slug = ''
     }
+    if (next === 'start') noteEligibilityStarted(window.location.pathname)
     const path = next === 'blogPost' ? `/blog/${slug}` : routePaths[next]
     setRoute(next)
     setBlogSlug(next === 'blogPost' ? slug : '')
@@ -1102,7 +1108,7 @@ function EligibilityLeadForm() {
   return (
     <div className="intake-frame-wrap" id="intake">
       <div
-        className="typeform-live-embed"
+        className="typeform-live-embed ph-no-capture"
         data-tf-live={typeformLiveId}
         data-tf-inline-on-mobile=""
         data-tf-on-submit="localDoctorOnTypeformSubmit"

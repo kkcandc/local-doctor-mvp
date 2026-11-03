@@ -14,6 +14,11 @@ export default defineConfig({
     url: 'http://127.0.0.1:5175',
     reuseExistingServer: false,
     timeout: 120_000,
+    // Point PostHog at a path on the dev server so test runs never reach a real project.
+    env: {
+      VITE_POSTHOG_KEY: 'phc_playwright_test_token',
+      VITE_POSTHOG_HOST: 'http://127.0.0.1:5175/__posthog',
+    },
   },
   projects: [
     {
