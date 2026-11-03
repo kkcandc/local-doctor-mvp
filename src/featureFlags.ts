@@ -19,7 +19,7 @@ const pageDefaults = {
   terms: true,
   patientRights: true,
   consent: true,
-  contact: false,
+  contact: true,
 }
 
 export type PageFlag = keyof typeof pageDefaults

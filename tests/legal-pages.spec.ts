@@ -55,7 +55,7 @@ test('footer legal links omit telehealth consent', async ({ page }) => {
   await expectLegalLinks(legal)
   await expect(page.getByRole('navigation', { name: 'Main navigation' })).not.toContainText('Telehealth')
   await expect(page.locator('footer')).toContainText('(240) 376-5730')
-  await expect(page.locator('footer')).toContainText('Box 104')
+  await expect(page.locator('footer')).not.toContainText('Box 104')
   await expect(page.locator('footer a[href="mailto:hello@trylocaldoctor.com"]')).toHaveText('Email the team')
   await legal.scrollIntoViewIfNeeded()
   await page.screenshot({ path: path.join(artifactsDir, 'legal_footer_links.png') })
@@ -174,9 +174,12 @@ test('telehealth consent stays reachable and out of primary navigation', async (
   await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).not.toContainText('Telehealth')
 })
 
-test('contact stays off, and its policy list matches the legal set', async ({ page }) => {
+test('contact is live but not linked in the footer, and its policy list matches the legal set', async ({ page }) => {
   await page.goto('/contact')
-  await expect(page).toHaveURL(/\/$/)
+  await expect(page).toHaveURL(/\/contact$/)
+  await expect(page.getByRole('heading', { level: 1, name: 'Contact Local Doctor' })).toBeVisible()
+  await expectLegalLinks(await legalColumn(page))
+  await expect(page.locator('footer a[href="/contact"]')).toHaveCount(0)
   const source = fs.readFileSync(path.join(process.cwd(), 'src/compliancePages.tsx'), 'utf8')
   const policiesAt = source.indexOf('<h2>Policies</h2>')
   const policies = source.slice(policiesAt, source.indexOf('</ul>', policiesAt))

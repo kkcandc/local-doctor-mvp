@@ -29,7 +29,6 @@ import {
   PrivacyPage,
   ProviderRoster,
   TermsPage,
-  physicalAddress,
   publicPhone,
   publicEmail,
 } from './compliancePages'
@@ -127,7 +126,7 @@ const valueProps = [
   },
   {
     title: 'Less wait and travel',
-    copy: 'Virtual first, so you don\'t wait months for an evaluation with an in-person neurologist. You will get seen in days or weeks, not months.',
+    copy: 'Virtual first, so you don\'t wait months for an evaluation with an in-person neurologist. You will get seen in days, not months.',
     icon: CalendarClock,
   },
   {
@@ -188,7 +187,7 @@ const journeySteps = [
     points: [
       'Give us a call, or fill out a short form so we can call you.',
       'We collect information regarding current daily activities, cognitive performance, medical history, medications, and insurance.',
-      'If eligible, we schedule a virtual visit for you to meet with a neurology specialist within 1-2 weeks.',
+      'If eligible, we schedule a virtual visit for you to meet with a neurology specialist in days.',
     ],
   },
   {
@@ -249,7 +248,7 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
     title: 'Getting Started',
     items: [
       ['Who is eligible for services?', 'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. Our eligibility call is fast and simple, providing a clear answer within 15-30 minutes.'],
-      ['How soon can I be seen?', 'Once you\'ve been determined eligible for our program, you can be seen by one of our neurology specialists in as little as a few days or weeks, depending on your availability.'],
+      ['How soon can I be seen?', 'Once you\'ve been determined eligible for our program, you can be seen by one of our neurology specialists in days, depending on your availability.'],
       ['How long does the eligibility process take?', 'Our eligibility process is centered around a quick call that should take 15-30 minutes. Please have the patient\'s insurance details, medication list, and medical history handy to make it go smoother.'],
       ['Do I need a referral from my current doctor?', 'Depending on your insurance, you may need a referral. We will let you know definitively during your eligibility check.'],
       ['What if I already have a diagnosis?', 'If you already have a diagnosis for mild cognitive impairment, dementia, or Alzheimer\'s disease, you may be a strong candidate for our program and it may expedite your path to treatment.'],
@@ -296,8 +295,6 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
 
 const headerPhone = '(240) 376-5730'
 const headerPhoneHref = '+12403765730'
-
-const footerEntity = 'Local Infusion Inc. (dba Local Doctor), a Delaware corporation'
 
 function routeEnabled(route: Route) {
   const flag: PageFlag = route === 'blogPost' ? 'blog' : route
@@ -539,7 +536,7 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
       <section className="stat-band">
         <Metric value="3.5 years" label="average gap between first symptoms and diagnosis of Alzheimer's" />
         <Metric value="6-9 months" label="typical wait for a new patient visit with a Neurologist in most areas" />
-        <Metric value="1-2 weeks" label="average time to see one of our board-certified neurology specialists" />
+        <Metric value="In days" label="average time to see one of our board-certified neurology specialists" />
         <Metric value="1,500+" label="patients treated successfully by our infusion network" />
       </section>
 
@@ -739,7 +736,7 @@ function StartPage() {
         eyebrow="Get started"
         title="Find out if treatment is right for you."
         copy="A free eligibility call will help us better understand you and your family's situation, verify insurance coverage, and define if you're eligible for our program. No obligation, nor commitment."
-        primaryLabel={`Call ${publicPhone}`}
+        primaryLabel={`Call or text ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
         showAside={false}
         image={{ src: '/assets/hero-get-started.jpg', alt: 'Three generations of a family sitting together on a lakeside dock' }}
@@ -1057,7 +1054,7 @@ function WhatToExpect() {
             <li>Give us a call or fill out the form below so we can call you.</li>
             <li>We collect information regarding current cognitive performance, daily activities, medical history, medications, and insurance.</li>
             <li>We verify your insurance and whether your needs qualify to meet with our neurology team.</li>
-            <li>If eligible, we set up a virtual visit for you to meet with a neurology specialist within 1-2 weeks, who will perform an evaluation for diagnosis and treatment options.</li>
+            <li>If eligible, we set up a virtual visit for you to meet with a neurology specialist in days, who will perform an evaluation for diagnosis and treatment options.</li>
           </ol>
         </div>
         <div>
@@ -1285,7 +1282,7 @@ function PageHero({
         <p>{copy}</p>
         {href ? (
           isPhoneLink ? (
-            <a className="primary" href={href}>{primaryLabel}</a>
+            <a className="hero-phone-link" href={href}>{primaryLabel}</a>
           ) : (
             <a className="primary" href={href} target="_blank" rel="noreferrer">{primaryLabel} <ArrowRight size={20} /></a>
           )
@@ -1374,11 +1371,11 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
   const startLinksAfterEmail = enabledLinks<[Route, string]>([
     ['refer', 'For physicians'],
   ])
+  // The Contact page is live but intentionally not linked from the footer.
   const legalLinks = enabledLinks<[Route, string, string]>([
     ['privacy', '/privacy', 'Privacy Policy'],
     ['terms', '/terms', 'Terms of Use'],
     ['patientRights', '/patient-rights', 'Patient Rights & Notices'],
-    ['contact', '/contact', 'Contact'],
   ])
 
   return (
@@ -1386,13 +1383,7 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
       <div>
         <BrandLink variant="reverse" onNavigate={onNavigate} />
         <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation and treatment.</p>
-        <p className="footer-identity">
-          {footerEntity}
-          <br />
-          {physicalAddress}
-          <br />
-          Phone: {publicPhone}
-        </p>
+        <p className="footer-identity">Phone: {publicPhone}</p>
       </div>
       <div>
         <strong>Explore</strong>

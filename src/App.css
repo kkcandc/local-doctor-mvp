@@ -147,6 +147,24 @@ main {
   text-underline-offset: 4px;
 }
 
+.hero-phone-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: var(--color-primary);
+  font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.375rem);
+  font-weight: var(--weight-semibold);
+  line-height: 1.25;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  overflow-wrap: anywhere;
+}
+
+.hero-phone-link:hover,
+.hero-phone-link:active {
+  color: var(--color-primary-hover);
+}
+
 .header-cta,
 .primary,
 .secondary,
