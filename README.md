@@ -74,6 +74,27 @@ Event snippets (no names, emails, phone numbers, dates of birth, diagnoses, free
 
 Set both label variables on Vercel for Production and Preview. Vite inlines them at build time, so a new deployment is required after a change. Google still receives `generate_lead` and `phone_click` alongside the labeled conversion. Keep one primary conversion per action in Ads so the named event and the label are not both counted.
 
+## PostHog analytics
+
+Browser analytics via `posthog-js`, set up with the PostHog wizard and then tightened for a healthcare site. Code is in `src/analytics/posthog.ts` (init and events) and `src/analytics/posthogConfig.ts` (the `/get-started` filter). It is separate from the Google Ads code above.
+
+| Env var | Purpose |
+| --- | --- |
+| `VITE_POSTHOG_KEY` | PostHog project token (public). Without it PostHog does not start, so local dev and CI send nothing. |
+| `VITE_POSTHOG_HOST` | PostHog ingestion host for the project's region. |
+
+Both are inlined at **build** time, so set them on Vercel for Production and Preview and redeploy after a change. Keep real values in an untracked `.env` (see `.env.example`).
+
+What it does:
+
+- Captures pageviews (including in-app navigation), autocapture, unhandled errors, and session replay, as configured by the wizard defaults and the PostHog project settings.
+- **Sends nothing from `/get-started`**, the only page where visitors enter health details (the Typeform embed). `before_send` drops every event whose URL is that page (pageviews, autocapture, errors, replay snapshots, logs), and replay is paused while the visitor is there and resumed when they leave. Properties that remember the page (session entry URL, previous pageview, landing URL, referrer) are removed from later events.
+- Uses memory-only persistence: no cookies or localStorage, so every page load is a new anonymous visitor. There is no `identify()` call.
+- Turns off the feature-flags request (`advanced_disable_flags`). That request is not covered by `before_send` and carries the landing URL, which can be `/get-started`. Feature flags, surveys, and web experiments are therefore unavailable until that is solved another way.
+- Sends one custom event, `eligibility_check_started` with `source_path`, when a visitor clicks through to `/get-started`. The Typeform submit and phone-click events stay in the Google Ads code only. PostHog autocapture records `tel:` link clicks.
+
+Tests: `tests/posthog.spec.ts`. The Playwright dev server points PostHog at `/__posthog` on itself (`playwright.config.ts`), so test runs never reach a real project. The browser tests mask `navigator.webdriver` and the headless client hints because posthog-js ignores bots.
+
 ## Commands
 
 ```bash

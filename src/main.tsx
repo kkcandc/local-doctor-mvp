@@ -5,8 +5,10 @@ import './index.css'
 import './forms.css'
 import App from './App'
 import { installGoogleAds } from './analytics/googleAds'
+import { installPostHog } from './analytics/posthog'
 
 installGoogleAds()
+installPostHog()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
