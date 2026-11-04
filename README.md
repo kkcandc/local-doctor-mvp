@@ -76,15 +76,15 @@ Set both label variables on Vercel for Production and Preview. Vite inlines them
 
 ## Google Analytics 4
 
-GA4 rides on the same gtag snippet as Google Ads. Production builds default to measurement id `G-0NF3ZM8GFF` when `VITE_GA_MEASUREMENT_ID` is unset. Code is in `src/analytics/googleAnalytics.ts` (install, sanitized page location, and in-app page views) and `src/analytics/googleAnalyticsConfig.ts` (id resolution). The shared HTML snippet and the `page_location` sanitizer live with the Ads code so the two tags cannot drift.
+GA4 rides on the same gtag snippet as Google Ads. Production builds default to measurement id `G-PR7CJ8TK79` when `VITE_GA_MEASUREMENT_ID` is unset. Code is in `src/analytics/googleAnalytics.ts` (install, sanitized page location, and in-app page views) and `src/analytics/googleAnalyticsConfig.ts` (id resolution). The shared HTML snippet and the `page_location` sanitizer live with the Ads code so the two tags cannot drift.
 
 | Env var | Purpose |
 | --- | --- |
-| `VITE_GA_MEASUREMENT_ID` | GA4 measurement id. Production builds default to `G-0NF3ZM8GFF` when this is unset. Set to `off`, `false`, or `0` to omit GA4. A value has to be present at **build** time. |
+| `VITE_GA_MEASUREMENT_ID` | GA4 measurement id. Production builds default to `G-PR7CJ8TK79` when this is unset. Set to `off`, `false`, or `0` to omit GA4. A value has to be present at **build** time. |
 
 What it sends (no names, emails, phone numbers, dates of birth, diagnoses, free-text answers, or Typeform response ids):
 
-- **First hit:** `gtag('config', 'G-0NF3ZM8GFF', { page_location })` in the built `index.html`. `page_location` uses the Ads sanitizer: Google click ids (`gclid`, `gbraid`, `wbraid`, and the other ad params) and `utm_*` stay; every other query param is dropped, including anything with `@`.
+- **First hit:** `gtag('config', 'G-PR7CJ8TK79', { page_location })` in the built `index.html`. `page_location` uses the Ads sanitizer: Google click ids (`gclid`, `gbraid`, `wbraid`, and the other ad params) and `utm_*` stay; every other query param is dropped, including anything with `@`.
 - **In-app navigations:** `page_view` with `send_to` set to the measurement id and `page_path` only, same rules as the Ads SPA page view. The first load does not send a second page view.
 - **Not copied from Ads:** Typeform lead and clinic phone conversions stay `gtag` calls in `src/analytics/googleAds.ts` with their Ads `send_to` labels. GA4 does not get a `generate_lead`, `phone_click`, or `conversion` event.
 - **`/get-started`:** a path-only page view is allowed. This code does not send `form_start` or `form_submit` and does not read field values. The intake form is a Typeform iframe, and the React pages do not render a `<form>`.
