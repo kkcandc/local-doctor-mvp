@@ -4,7 +4,7 @@ import { DEFAULT_GA_MEASUREMENT_ID, resolveGaMeasurementId } from '../src/analyt
 import { gaPageLocation, gaSpaPageViewCall } from '../src/analytics/googleAnalytics'
 
 const adsId = 'AW-18413556843'
-const gaId = 'G-0NF3ZM8GFF'
+const gaId = 'G-PR7CJ8TK79'
 
 test('production builds default to the Local Doctor GA4 measurement id', () => {
   expect(DEFAULT_GA_MEASUREMENT_ID).toBe(gaId)
@@ -16,7 +16,7 @@ test('production builds default to the Local Doctor GA4 measurement id', () => {
   expect(resolveGaMeasurementId('false', true)).toBeNull()
   expect(resolveGaMeasurementId('0', true)).toBeNull()
   expect(resolveGaMeasurementId('AW-18413556843', true)).toBeNull()
-  expect(resolveGaMeasurementId('g-0nf3zm8gff', true)).toBeNull()
+  expect(resolveGaMeasurementId('g-pr7cj8tk79', true)).toBeNull()
   expect(resolveGaMeasurementId('G-ABC', true)).toBeNull()
   expect(resolveGaMeasurementId(undefined, false)).toBeNull()
 })
