@@ -34,6 +34,7 @@ import {
 } from './compliancePages'
 import { isPageEnabled, type PageFlag } from './featureFlags'
 import { noteSpaNavigation } from './analytics/googleAds'
+import { noteGaSpaNavigation } from './analytics/googleAnalytics'
 import { noteEligibilityStarted, notePostHogNavigation } from './analytics/posthog'
 import './App.css'
 
@@ -375,6 +376,10 @@ function App() {
 
   useEffect(() => {
     noteSpaNavigation(window.location.pathname)
+  }, [route, blogSlug])
+
+  useEffect(() => {
+    noteGaSpaNavigation(window.location.pathname)
   }, [route, blogSlug])
 
   useEffect(() => {

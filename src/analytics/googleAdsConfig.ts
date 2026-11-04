@@ -7,6 +7,9 @@
   Production builds use AW-18413556843 when VITE_GOOGLE_ADS_ID is unset.
   Set VITE_GOOGLE_ADS_ID=off to leave the tag out of a build.
 
+  The HTML snippet can also config a GA4 measurement id in the same gtag.js
+  load. Lead and phone conversions stay here; see googleAnalyticsConfig.ts.
+
   Conversion labels are the short id after the slash in Google's event snippet
   (AW-18413556843/LABEL). They are optional until copied from Google Ads.
   Event payloads are page path and event name only: no names, emails, phone
@@ -114,11 +117,25 @@ export function spaPageViewCall(
   }
 }
 
-export function googleAdsTagHtml(id: string): string {
+// One gtag.js load. Pass a GA4 id to add its config next to Ads, using the same
+// sanitized pageLocation. Ads-only output stays the original snippet.
+export function googleTagHtml(adsId: string | null, gaMeasurementId?: string | null): string | null {
+  const gaId = gaMeasurementId || null
+  if (!adsId && !gaId) return null
+  const loaderId = adsId || gaId
+  if (!loaderId) return null
   const allowed = ADS_CLICK_PARAMS.join(',')
+  const configLines = [
+    adsId ? `        gtag('config', '${adsId}', { page_location: pageLocation });` : '',
+    gaId ? `        gtag('config', '${gaId}', { page_location: pageLocation });` : '',
+  ].filter((line) => line.length > 0)
+  const src = `https://www.googletagmanager.com/gtag/js?id=${loaderId}`
+  const script = gaId
+    ? `    <script async src="${src}" data-ga-measurement-id="${gaId}"></script>`
+    : `    <script async src="${src}"></script>`
   return [
     '    <!-- Google tag (gtag.js) -->',
-    `    <script async src="https://www.googletagmanager.com/gtag/js?id=${id}"></script>`,
+    script,
     '    <script>',
     '      window.dataLayer = window.dataLayer || [];',
     '      function gtag(){dataLayer.push(arguments);}',
@@ -135,10 +152,14 @@ export function googleAdsTagHtml(id: string): string {
     '          var path = /^\\/[A-Za-z0-9/_-]{0,160}$/.test(url.pathname) ? url.pathname : \'/\';',
     '          pageLocation = url.origin + path + (kept.toString() ? \'?\' + kept.toString() : \'\');',
     '        } catch (e) {}',
-    `        gtag('config', '${id}', { page_location: pageLocation });`,
+    ...configLines,
     '      })();',
     '    </script>',
   ].join('\n')
+}
+
+export function googleAdsTagHtml(id: string): string {
+  return googleTagHtml(id, null) ?? ''
 }
 
 function eventCalls(eventName: string, adsId: string, label: string | undefined, pathname: string): GtagArgs[] {
