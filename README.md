@@ -65,7 +65,7 @@ Vite SPA, so the browser env prefix is `VITE_` (not `NEXT_PUBLIC_`). The tag is 
 
 Event snippets (no names, emails, phone numbers, dates of birth, diagnoses, free-text answers, or Typeform response ids):
 
-- **Tag:** `gtag/js?id=AW-18413556843` and `gtag('config', 'AW-18413556843')` in the built `index.html` (`vite.config.ts`).
+- **Tag:** `gtag/js?id=AW-18413556843` and `gtag('config', 'AW-18413556843')` in the built `index.html` (`vite.config.ts`). When GA4 is enabled, that same snippet adds its `gtag('config', …)` and still loads `gtag.js` once. See Google Analytics 4 below.
 - **Lead:** `generate_lead` with `page_path` only, from the Typeform embed on `/get-started` (`data-tf-on-submit="localDoctorOnTypeformSubmit"` plus a `form-submit` message from `*.typeform.com`). When `VITE_GOOGLE_ADS_LEAD_LABEL` is set, the same action also sends the conversion above. Fired in `src/analytics/googleAds.ts`.
 - **Phone:** `phone_click` with `page_path` only, for clicks on `tel:` links to (240) 376-5730. When `VITE_GOOGLE_ADS_PHONE_LABEL` is set, the same click also sends the conversion above. (844) 509-1404 is recognized if a `tel:` link for it is added later; it is not on the site. The 1-800 numbers on the patient-rights page are not tracked.
 - **Page views:** the tag's first `config` hit sends a page location that keeps Google click ids (`gclid`, `gbraid`, `wbraid`, and the other ad params) and drops every other query param, including anything with `@`. Later in-app navigations send `page_view` with `page_path` only.
@@ -74,9 +74,33 @@ Event snippets (no names, emails, phone numbers, dates of birth, diagnoses, free
 
 Set both label variables on Vercel for Production and Preview. Vite inlines them at build time, so a new deployment is required after a change. Google still receives `generate_lead` and `phone_click` alongside the labeled conversion. Keep one primary conversion per action in Ads so the named event and the label are not both counted.
 
+## Google Analytics 4
+
+GA4 rides on the same gtag snippet as Google Ads. Production builds default to measurement id `G-0NF3ZM8GFF` when `VITE_GA_MEASUREMENT_ID` is unset. Code is in `src/analytics/googleAnalytics.ts` (install, sanitized page location, and in-app page views) and `src/analytics/googleAnalyticsConfig.ts` (id resolution). The shared HTML snippet and the `page_location` sanitizer live with the Ads code so the two tags cannot drift.
+
+| Env var | Purpose |
+| --- | --- |
+| `VITE_GA_MEASUREMENT_ID` | GA4 measurement id. Production builds default to `G-0NF3ZM8GFF` when this is unset. Set to `off`, `false`, or `0` to omit GA4. A value has to be present at **build** time. |
+
+What it sends (no names, emails, phone numbers, dates of birth, diagnoses, free-text answers, or Typeform response ids):
+
+- **First hit:** `gtag('config', 'G-0NF3ZM8GFF', { page_location })` in the built `index.html`. `page_location` uses the Ads sanitizer: Google click ids (`gclid`, `gbraid`, `wbraid`, and the other ad params) and `utm_*` stay; every other query param is dropped, including anything with `@`.
+- **In-app navigations:** `page_view` with `send_to` set to the measurement id and `page_path` only, same rules as the Ads SPA page view. The first load does not send a second page view.
+- **Not copied from Ads:** Typeform lead and clinic phone conversions stay `gtag` calls in `src/analytics/googleAds.ts` with their Ads `send_to` labels. GA4 does not get a `generate_lead`, `phone_click`, or `conversion` event.
+- **`/get-started`:** a path-only page view is allowed. This code does not send `form_start` or `form_submit` and does not read field values. The intake form is a Typeform iframe, and the React pages do not render a `<form>`.
+
+Enhanced measurement is configured in the GA4 property, not in this repo. gtag.js has no config flag that turns those events off. In Admin → Data streams → the web stream → Enhanced measurement:
+
+- Turn **Form interactions** off so GA4 does not collect `form_start` / `form_submit`.
+- Under Page views → advanced settings, turn **Page changes based on browser history events** off. The site sends its own route `page_view`. Leaving the history listener on double-counts those routes and can send the raw URL, including query params the sanitizer removed.
+
+`VITE_GA_MEASUREMENT_ID` is inlined at build time. Set it on Vercel for Production and Preview only when the id should differ from the default, then redeploy. This repo does not change Vercel env.
+
+Tests: `tests/google-analytics.spec.ts`.
+
 ## PostHog analytics
 
-Browser analytics via `posthog-js`, set up with the PostHog wizard and then tightened for a healthcare site. Code is in `src/analytics/posthog.ts` (init and events) and `src/analytics/posthogConfig.ts` (the `/get-started` filter). It is separate from the Google Ads code above.
+Browser analytics via `posthog-js`, set up with the PostHog wizard and then tightened for a healthcare site. Code is in `src/analytics/posthog.ts` (init and events) and `src/analytics/posthogConfig.ts` (the `/get-started` filter). It is separate from the Google Ads and GA4 tags above.
 
 | Env var | Purpose |
 | --- | --- |
