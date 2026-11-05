@@ -48,12 +48,17 @@ export function notePostHogNavigation(pathname: string) {
   }
 }
 
+const CTA_LOCATION = /^[a-z_]{1,32}$/
+
 // Called when a visitor clicks through to the eligibility page. The path is where they came from.
-export function noteEligibilityStarted(sourcePath: string) {
+// ctaLocation names the button's slot on the page (hero, closing, ...), never anything the visitor typed.
+export function noteEligibilityStarted(sourcePath: string, ctaLocation?: string) {
   if (!posthog.__loaded || isIntakePath(sourcePath)) return
-  posthog.capture('eligibility_check_started', { source_path: sourcePath })
+  const location = ctaLocation && CTA_LOCATION.test(ctaLocation) ? { cta_location: ctaLocation } : {}
+  posthog.capture('eligibility_check_started', { source_path: sourcePath, ...location })
   posthog.logger.info('eligibility journey opened', {
     flow_stage: 'started',
     source_path: sourcePath,
+    ...location,
   })
 }
