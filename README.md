@@ -70,7 +70,7 @@ Event snippets (no names, emails, phone numbers, dates of birth, diagnoses, free
 - **Phone:** `phone_click` with `page_path` only, for clicks on `tel:` links to (240) 376-5730. When `VITE_GOOGLE_ADS_PHONE_LABEL` is set, the same click also sends the conversion above. (844) 509-1404 is recognized if a `tel:` link for it is added later; it is not on the site. The 1-800 numbers on the patient-rights page are not tracked.
 - **Page views:** the tag's first `config` hit sends a page location that keeps Google click ids (`gclid`, `gbraid`, `wbraid`, and the other ad params) and drops every other query param, including anything with `@`. Later in-app navigations send `page_view` with `page_path` only.
 
-"Check eligibility" and other buttons that open `/get-started` do not submit a lead, so they are not conversion events. There is no separate book/schedule widget.
+"Get Started" and other buttons that open `/get-started` do not submit a lead, so they are not conversion events. There is no separate book/schedule widget.
 
 Set both label variables on Vercel for Production and Preview. Vite inlines them at build time, so a new deployment is required after a change. Google still receives `generate_lead` and `phone_click` alongside the labeled conversion. Keep one primary conversion per action in Ads so the named event and the label are not both counted.
 
