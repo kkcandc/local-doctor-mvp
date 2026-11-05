@@ -496,7 +496,7 @@ function Header({
         <div className="header-actions">
           <a className="header-phone" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
           <button className="header-cta" type="button" onClick={() => onNavigate('start')}>
-            Check eligibility
+            Get Started
           </button>
         </div>
         <button
@@ -523,7 +523,7 @@ function Header({
             </button>
           ))}
           <a className="mobile-nav-phone" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
-          <button type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
+          <button type="button" onClick={() => onNavigate('start')}>Get Started</button>
         </nav>
       )}
     </header>
@@ -544,7 +544,7 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
               New FDA-approved treatments can slow the progression of early Alzheimer&apos;s. Get a second opinion from our neurology team who specialize in cognitive impairment and disease-modifying treatments to see if you&apos;re eligible.
             </p>
             <div className="hero-actions">
-              <button className="accent" type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
+              <button className="accent" type="button" onClick={() => onNavigate('start')}>Get Started</button>
               {routeEnabled('how') && <button className="secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>}
             </div>
             <div className="trust-note"><span /> Backed by a national infusion network and a focused treatment-readiness pathway.</div>
@@ -611,7 +611,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
           <p className="eyebrow">Treatments</p>
           <h1>FDA-approved treatments for early Alzheimer's disease.</h1>
           <p>Leqembi and Kisunla are FDA-approved infusion treatments shown to slow the progression of Alzheimer&apos;s disease, not just treat its symptoms. In clinical trials they slowed decline for some patients but they are not a cure, they carry risks, and they are not right for everyone. We help you understand all of it.</p>
-          <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={20} /></button>
+          <button className="primary" type="button" onClick={() => onNavigate('start')}>Get Started <ArrowRight size={20} /></button>
         </div>
         <img src="/assets/hero-leqembi-iv.webp" alt="Leqembi (lecanemab) IV infusion bag" width={1178} height={1335} fetchPriority="high" />
       </section>
@@ -650,7 +650,7 @@ function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         icon={<CalendarClock size={38} />}
         aside={{ title: 'Family and loved ones', text: 'Our preference is for loved ones to join the virtual provider visits and be a part of the process.' }}
         onPrimary={() => onNavigate('start')}
-        primaryLabel="Check eligibility now"
+        primaryLabel="Get Started"
         wideCopy
       />
       <section className="section white compact-section">
@@ -708,7 +708,7 @@ function AboutPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         copy="Local Doctor is a virtual Alzheimer's specialty clinic, supported by navigators, diagnostic partners, prescribing clinicians, and Local Infusion's local treatment network."
         icon={<UsersRound size={38} />}
         onPrimary={() => onNavigate('start')}
-        primaryLabel="Check eligibility"
+        primaryLabel="Get Started"
       />
       <section className="section white">
         <SectionIntro eyebrow="Care team roles" title="The clinic is coordinated, not a directory of disconnected appointments." />
@@ -811,7 +811,7 @@ function FaqPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
 
   return (
     <>
-      <PageHero eyebrow="FAQ" title="Answers to what patients and families ask us most." copy="Straight, specific answers about eligibility, cost, visits, treatment, and safety." showAside={false} onPrimary={() => onNavigate('start')} primaryLabel="Check eligibility" />
+      <PageHero eyebrow="FAQ" title="Answers to what patients and families ask us most." copy="Straight, specific answers about eligibility, cost, visits, treatment, and safety." showAside={false} onPrimary={() => onNavigate('start')} primaryLabel="Get Started" />
       <section className="section white faq-section">
         <div className="faq-jump-list">
           {faqCategories.map((category) => (
@@ -867,7 +867,7 @@ function BlogPage({ onNavigate }: { onNavigate: (route: Route, slug?: string) =>
         copy="These pieces were originally published by Local Infusion. Local Doctor republishes them so patients and caregivers can read them here, with a link back to the source."
         icon={<Sparkles size={38} />}
         onPrimary={() => onNavigate('start')}
-        primaryLabel="Check eligibility"
+        primaryLabel="Get Started"
       />
       <section className="section white">
         <div className="blog-grid">
@@ -941,7 +941,7 @@ function BlogPostPage({ slug, onNavigate }: { slug: string; onNavigate: (route: 
             Local Doctor is a virtual front door for specialist evaluation. It does not operate infusion centers, set drug prices, or replace the clinician who would prescribe treatment.
           </p>
           <button className="primary" type="button" onClick={() => onNavigate('start')}>
-            Check eligibility <ArrowRight size={20} />
+            Get Started <ArrowRight size={20} />
           </button>
         </aside>
         <div className="related-posts">
@@ -1347,7 +1347,7 @@ function ConversionPanel({
         <p>{copy}</p>
       </div>
       <div className="conversion-actions">
-        <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={20} /></button>
+        <button className="primary" type="button" onClick={() => onNavigate('start')}>Get Started <ArrowRight size={20} /></button>
         {secondaryLabel && secondaryRoute && routeEnabled(secondaryRoute) && (
           <button className="secondary" type="button" onClick={() => onNavigate(secondaryRoute)}>{secondaryLabel}</button>
         )}
@@ -1384,7 +1384,7 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
     ['blog', 'Blog'],
   ])
   const startLinksBeforeEmail = enabledLinks<[Route, string]>([
-    ['start', 'Check eligibility'],
+    ['start', 'Get Started'],
     ['faq', 'FAQs'],
   ])
   const startLinksAfterEmail = enabledLinks<[Route, string]>([
