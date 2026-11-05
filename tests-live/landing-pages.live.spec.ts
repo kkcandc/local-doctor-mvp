@@ -34,7 +34,8 @@ for (const slug of landingSlugs) {
     await expect(page.locator('.typeform-live-embed iframe')).toBeVisible({ timeout: 20_000 })
 
     if (screenshotDir && slug === 'dementia-evaluation') {
-      await page.waitForTimeout(1500)
+      await page.locator('.typeform-live-embed iframe').scrollIntoViewIfNeeded()
+      await page.waitForTimeout(2500)
       await page.screenshot({ path: `${screenshotDir}/${testInfo.project.name}-cta-intake.png` })
     }
   })
