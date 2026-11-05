@@ -36,6 +36,8 @@ import { isPageEnabled, type PageFlag } from './featureFlags'
 import { noteSpaNavigation } from './analytics/googleAds'
 import { noteGaSpaNavigation } from './analytics/googleAnalytics'
 import { noteEligibilityStarted, notePostHogNavigation } from './analytics/posthog'
+import { LandingPage } from './landing/LandingPage'
+import { isLandingSlug, landingCanonical, landingMeta } from './landing/landingMeta'
 import './App.css'
 
 type Route =
@@ -53,6 +55,7 @@ type Route =
   | 'patientRights'
   | 'consent'
   | 'contact'
+  | 'landing'
 
 const typeformLiveId = '01M64J1XGXT19BH7GGWPKJ243K'
 const typeformEmbedScript = 'https://embed.typeform.com/next/embed.js'
@@ -60,6 +63,7 @@ const typeformEmbedScript = 'https://embed.typeform.com/next/embed.js'
 const defaultTitle = "Local Doctor | Alzheimer's Treatment Eligibility Review"
 const defaultDescription =
   "Local Doctor is a virtual Alzheimer's specialty clinic for treatment eligibility review, records, testing, insurance questions, and local follow-through for people who may qualify."
+const defaultOgTitle = "Connect with Alzheimer's specialists and advanced treatment today"
 
 const routeMeta: Partial<Record<Route, { title: string; description: string }>> = {
   privacy: {
@@ -88,7 +92,7 @@ const routeMeta: Partial<Record<Route, { title: string; description: string }>> 
   },
 }
 
-const routePaths: Record<Exclude<Route, 'blogPost'>, string> = {
+const routePaths: Record<Exclude<Route, 'blogPost' | 'landing'>, string> = {
   home: '/',
   treatments: '/treatments',
   how: '/how-it-works',
@@ -299,7 +303,7 @@ const headerPhone = '(240) 376-5730'
 const headerPhoneHref = '+12403765730'
 
 function routeEnabled(route: Route) {
-  const flag: PageFlag = route === 'blogPost' ? 'blog' : route
+  const flag: PageFlag = route === 'blogPost' ? 'blog' : route === 'landing' ? 'landingPages' : route
   return isPageEnabled(flag)
 }
 
@@ -311,8 +315,8 @@ function normalizePath() {
   return window.location.pathname.replace(/^\/+|\/+$/g, '')
 }
 
-function readLocation(): { route: Route; slug: string } {
-  const path = normalizePath()
+function readLocation(path = normalizePath()): { route: Route; slug: string } {
+  if (isLandingSlug(path)) return { route: 'landing', slug: path }
   if (path === 'blog') return { route: 'blog', slug: '' }
   if (path.startsWith('blog/')) {
     const slug = decodeURIComponent(path.slice('blog/'.length).split('/')[0] ?? '')
@@ -323,7 +327,7 @@ function readLocation(): { route: Route; slug: string } {
 
 function App() {
   const [route, setRoute] = useState<Route>('home')
-  const [blogSlug, setBlogSlug] = useState('')
+  const [routeSlug, setRouteSlug] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrollRequest, setScrollRequest] = useState(0)
 
@@ -351,7 +355,7 @@ function App() {
         next = { route: 'home', slug: '' }
       }
       setRoute(next.route)
-      setBlogSlug(next.slug)
+      setRouteSlug(next.slug)
       setMenuOpen(false)
     }
 
@@ -372,19 +376,19 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [scrollRequest])
 
-  usePageMeta(route, blogSlug)
+  usePageMeta(route, routeSlug)
 
   useEffect(() => {
     noteSpaNavigation(window.location.pathname)
-  }, [route, blogSlug])
+  }, [route, routeSlug])
 
   useEffect(() => {
     noteGaSpaNavigation(window.location.pathname)
-  }, [route, blogSlug])
+  }, [route, routeSlug])
 
   useEffect(() => {
     notePostHogNavigation(window.location.pathname)
-  }, [route, blogSlug])
+  }, [route, routeSlug])
 
   useEffect(() => {
     const hash = window.location.hash.replace(/^#/, '')
@@ -392,15 +396,15 @@ function App() {
     document.getElementById(hash)?.scrollIntoView()
   }, [route])
 
-  function navigate(next: Route, slug = '') {
+  function navigate(next: Route, slug = '', ctaLocation?: string) {
     if (!routeEnabled(next)) {
       next = 'home'
       slug = ''
     }
-    if (next === 'start') noteEligibilityStarted(window.location.pathname)
-    const path = next === 'blogPost' ? `/blog/${slug}` : routePaths[next]
+    if (next === 'start') noteEligibilityStarted(window.location.pathname, ctaLocation)
+    const path = next === 'blogPost' ? `/blog/${slug}` : next === 'landing' ? `/${slug}` : routePaths[next]
     setRoute(next)
-    setBlogSlug(next === 'blogPost' ? slug : '')
+    setRouteSlug(next === 'blogPost' || next === 'landing' ? slug : '')
     setMenuOpen(false)
     if (window.location.pathname !== path) {
       window.history.pushState({}, '', path)
@@ -418,13 +422,24 @@ function App() {
       {route === 'start' && <StartPage />}
       {route === 'faq' && <FaqPage onNavigate={navigate} />}
       {route === 'blog' && <BlogPage onNavigate={navigate} />}
-      {route === 'blogPost' && <BlogPostPage slug={blogSlug} onNavigate={navigate} />}
+      {route === 'blogPost' && <BlogPostPage slug={routeSlug} onNavigate={navigate} />}
       {route === 'refer' && <ReferPage onNavigate={navigate} />}
       {route === 'privacy' && <PrivacyPage />}
       {route === 'terms' && <TermsPage />}
       {route === 'patientRights' && <PatientRightsPage />}
       {route === 'consent' && <ConsentPage />}
       {route === 'contact' && <ContactPage />}
+      {route === 'landing' && isLandingSlug(routeSlug) && (
+        <LandingPage
+          key={routeSlug}
+          slug={routeSlug}
+          onStart={(ctaLocation) => navigate('start', '', ctaLocation)}
+          onOpenPath={(path) => {
+            const next = readLocation(path.replace(/^\/+|\/+$/g, ''))
+            navigate(next.route, next.slug)
+          }}
+        />
+      )}
       <Footer onNavigate={navigate} />
     </main>
   )
@@ -987,6 +1002,24 @@ function BlogBlockView({ block }: { block: BlogBlock }) {
   return <p>{block.text}</p>
 }
 
+// Landing pages ship a static shell with page-specific Open Graph tags (vite.config.ts),
+// so leaving one has to put the site defaults back.
+function setOpenGraph({ title, description, url }: { title: string; description: string; url?: string }) {
+  document.querySelector('meta[property="og:title"]')?.setAttribute('content', title)
+  document.querySelector('meta[property="og:description"]')?.setAttribute('content', description)
+  let ogUrl = document.querySelector('meta[property="og:url"]')
+  if (!url) {
+    ogUrl?.remove()
+    return
+  }
+  if (!ogUrl) {
+    ogUrl = document.createElement('meta')
+    ogUrl.setAttribute('property', 'og:url')
+    document.head.appendChild(ogUrl)
+  }
+  ogUrl.setAttribute('content', url)
+}
+
 function usePageMeta(route: Route, slug: string) {
   useEffect(() => {
     const description = document.querySelector('meta[name="description"]')
@@ -1039,6 +1072,17 @@ function usePageMeta(route: Route, slug: string) {
         'content',
         'Alzheimer’s articles originally published by Local Infusion and republished by Local Doctor with attribution and a link to each source.',
       )
+    } else if (route === 'landing' && isLandingSlug(slug)) {
+      clearSyndicationTags()
+      const meta = landingMeta[slug]
+      const url = landingCanonical(slug)
+      document.title = meta.title
+      description?.setAttribute('content', meta.description)
+      const canonical = document.createElement('link')
+      canonical.rel = 'canonical'
+      canonical.href = url
+      document.head.appendChild(canonical)
+      setOpenGraph({ title: meta.title, description: meta.description, url })
     } else {
       clearSyndicationTags()
       const meta = routeMeta[route]
@@ -1048,6 +1092,7 @@ function usePageMeta(route: Route, slug: string) {
 
     return () => {
       clearSyndicationTags()
+      setOpenGraph({ title: defaultOgTitle, description: defaultDescription })
       document.title = defaultTitle
       description?.setAttribute('content', defaultDescription)
     }
@@ -1428,7 +1473,7 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
       </div>
       <div className="footer-legal">
         <p>
-          Leqembi and Kisunla are FDA-approved to help slow the progression of early Alzheimer&apos;s disease in people who qualify. Individual results vary, and these treatments are not a cure. Local Doctor provides specialist evaluation and care coordination; it does not replace emergency care — if you are experiencing a medical emergency, call 911.
+          Leqembi and Kisunla are FDA-approved to help slow the progression of early Alzheimer&apos;s disease in people who qualify. Individual results vary, and these treatments are not a cure. Local Doctor provides specialist evaluation and care coordination; it does not replace emergency care. If you are experiencing a medical emergency, call 911.
         </p>
         <p className="footer-copy">© {new Date().getFullYear()} Local Doctor. All rights reserved.</p>
       </div>

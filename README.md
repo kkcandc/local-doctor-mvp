@@ -47,6 +47,19 @@ Every page has a visibility flag in `src/featureFlags.ts`. A disabled page is re
 - `home` cannot be disabled; it is the redirect target.
 - Hiding is not security: a disabled page's code is still in the JS bundle.
 
+## Intent Landing Pages
+
+Seven search-intent pages live in `src/landing/`: `/dementia-evaluation`, `/alzheimers-evaluation`, `/memory-evaluation`, `/alzheimers-doctor-maryland`, `/memory-specialist-maryland`, `/alzheimers-second-opinion`, and `/dementia-test-online`.
+
+- Copy is in `landingContent.ts`. Titles and descriptions are in `landingMeta.ts`. Claims must come from existing site or compliance copy: no credentials, wait times, prices, outcome rates, or diagnosis/eligibility/medication promises, and no links to the LIV practice domain.
+- `npm run build` also writes `dist/<slug>/index.html` with that page's title, description, canonical, and Open Graph tags (`vite.config.ts`). The app bundle is the same; Vercel serves these files before the SPA rewrite.
+- Every primary button is **Get Started** and goes to `/get-started`. The only phone link is the clinic number, which the Ads phone conversion already tracks.
+- PostHog `eligibility_check_started` keeps `source_path` (the landing page) and adds `cta_location` (`hero`, `mid_page`, `closing`, `patient_path`, `caregiver_path`). Nothing typed by the visitor is sent.
+- `/dementia-test-online` is educational. It says no online screening tool is offered and sends people to the evaluation intake. It has no quiz and no score.
+- **When Eric's evaluation or screening Typeform is ready:** set the funnel in `src/landing/destinations.ts` (`evaluation` or `onlineScreening`) to `{ kind: 'external', href: 'https://...' }`. Only https Typeform or trylocaldoctor.com URLs are accepted. An external form does not fire the Typeform lead conversion that the `/get-started` embed does. Before pointing `onlineScreening` at a screener, revise the `/dementia-test-online` copy that says no screening is offered.
+- Flag: `landingPages` in `src/featureFlags.ts` (`VITE_PAGE_LANDINGPAGES`).
+- Tests: `tests/landing-pages.spec.ts` (desktop and mobile). `SCREENSHOT_DIR=... npx playwright test tests/landing-pages.spec.ts -g capture` saves screenshots.
+
 ## Prototype Boundaries
 
 - Claims need clinical/legal review before paid traffic.
