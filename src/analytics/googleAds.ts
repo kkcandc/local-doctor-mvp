@@ -5,6 +5,8 @@ import {
   leadTrackingCalls,
   phoneTrackingCalls,
   resolveGoogleAdsId,
+  resolveGoogleAdsLeadLabel,
+  resolveGoogleAdsPhoneLabel,
   spaPageViewCall,
   type GtagArgs,
 } from './googleAdsConfig'
@@ -25,6 +27,14 @@ declare global {
 
 function adsId(): string | null {
   return resolveGoogleAdsId(import.meta.env.VITE_GOOGLE_ADS_ID, import.meta.env.PROD)
+}
+
+function leadLabel(): string | null {
+  return resolveGoogleAdsLeadLabel(import.meta.env.VITE_GOOGLE_ADS_LEAD_LABEL, import.meta.env.PROD)
+}
+
+function phoneLabel(): string | null {
+  return resolveGoogleAdsPhoneLabel(import.meta.env.VITE_GOOGLE_ADS_PHONE_LABEL, import.meta.env.PROD)
 }
 
 function push(calls: GtagArgs[]) {
@@ -63,7 +73,7 @@ export function onTypeformSubmit() {
   const id = adsId()
   if (!id) return
   lastLeadAt = now
-  push(leadTrackingCalls(id, import.meta.env.VITE_GOOGLE_ADS_LEAD_LABEL, window.location.pathname))
+  push(leadTrackingCalls(id, leadLabel() ?? undefined, window.location.pathname))
 }
 
 export function noteSpaNavigation(pathname: string) {
@@ -83,7 +93,7 @@ function onDocumentClick(event: MouseEvent) {
   if (!isTrackedClinicPhone(href)) return
   const id = adsId()
   if (!id) return
-  push(phoneTrackingCalls(id, import.meta.env.VITE_GOOGLE_ADS_PHONE_LABEL, window.location.pathname))
+  push(phoneTrackingCalls(id, phoneLabel() ?? undefined, window.location.pathname))
 }
 
 function onWindowMessage(event: MessageEvent) {

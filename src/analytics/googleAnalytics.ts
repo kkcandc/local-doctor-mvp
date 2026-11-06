@@ -1,4 +1,4 @@
-import { adsPageLocation, spaPageViewCall, type GtagArgs } from './googleAdsConfig'
+import { adsPageLocation, ctaTrackingCalls, spaPageViewCall, type GtagArgs } from './googleAdsConfig'
 import { resolveGaMeasurementId } from './googleAnalyticsConfig'
 
 // Same allow-list as Google Ads: click ids and utm_* stay, everything else is dropped.
@@ -68,4 +68,10 @@ export function noteGaSpaNavigation(pathname: string) {
   const result = gaSpaPageViewCall(id, pathname, lastSpaPath)
   lastSpaPath = result.nextPath
   if (result.call) push([result.call])
+}
+
+// Fired when a visitor clicks through to /get-started. Path and button slot only.
+export function noteGaCtaClick(pathname: string, ctaLocation?: string) {
+  if (!measurementId()) return
+  push(ctaTrackingCalls(pathname, ctaLocation))
 }

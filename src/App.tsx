@@ -34,7 +34,8 @@ import {
 } from './compliancePages'
 import { isPageEnabled, type PageFlag } from './featureFlags'
 import { noteSpaNavigation } from './analytics/googleAds'
-import { noteGaSpaNavigation } from './analytics/googleAnalytics'
+import { pathWithAdsParams, typeformTransitiveSearchParams } from './analytics/googleAdsConfig'
+import { noteGaCtaClick, noteGaSpaNavigation } from './analytics/googleAnalytics'
 import { noteEligibilityStarted, notePostHogNavigation } from './analytics/posthog'
 import { LandingPage } from './landing/LandingPage'
 import { isLandingSlug, landingCanonical, landingMeta } from './landing/landingMeta'
@@ -256,7 +257,7 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
       ['Who is eligible for services?', 'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. Our eligibility call is fast and simple, providing a clear answer within 15-30 minutes.'],
       ['How soon can I be seen?', 'Once you\'ve been determined eligible for our program, you can be seen by one of our neurology specialists in days, depending on your availability.'],
       ['How long does the eligibility process take?', 'Our eligibility process is centered around a quick call that should take 15-30 minutes. Please have the patient\'s insurance details, medication list, and medical history handy to make it go smoother.'],
-      ['Do I need a referral from my current doctor?', 'Depending on your insurance, you may need a referral. We will let you know definitively during your eligibility check.'],
+      ['Do I need a referral from my current doctor?', 'No referral is needed. Start with a call or the short form, and we review eligibility and insurance with you before a visit is booked.'],
       ['What if I already have a diagnosis?', 'If you already have a diagnosis for mild cognitive impairment, dementia, or Alzheimer\'s disease, you may be a strong candidate for our program and it may expedite your path to treatment.'],
       ['Can I call on behalf of my spouse, parent, or loved one?', 'Absolutely! We welcome any loved one who wishes to be a part of the process and would prefer that one joins the first visit with the patient.'],
       ['What if I\'m not eligible for services?', 'If you don\'t happen to be eligible for our program yet, we will let you know transparently and why.'],
@@ -401,13 +402,19 @@ function App() {
       next = 'home'
       slug = ''
     }
-    if (next === 'start') noteEligibilityStarted(window.location.pathname, ctaLocation)
+    if (next === 'start') {
+      noteEligibilityStarted(window.location.pathname, ctaLocation)
+      noteGaCtaClick(window.location.pathname, ctaLocation)
+    }
     const path = next === 'blogPost' ? `/blog/${slug}` : next === 'landing' ? `/${slug}` : routePaths[next]
+    // Keep gclid and utm_* across SPA navigations so Ads can attribute the visit and
+    // Typeform can read them on /get-started. Contact and health params stay dropped.
+    const nextUrl = pathWithAdsParams(path, window.location.search)
     setRoute(next)
     setRouteSlug(next === 'blogPost' || next === 'landing' ? slug : '')
     setMenuOpen(false)
-    if (window.location.pathname !== path) {
-      window.history.pushState({}, '', path)
+    if (`${window.location.pathname}${window.location.search}` !== nextUrl) {
+      window.history.pushState({}, '', nextUrl)
     }
     setScrollRequest((count) => count + 1)
   }
@@ -1164,6 +1171,7 @@ function EligibilityLeadForm() {
         data-tf-live={typeformLiveId}
         data-tf-inline-on-mobile=""
         data-tf-on-submit="localDoctorOnTypeformSubmit"
+        data-tf-transitive-search-params={typeformTransitiveSearchParams}
       />
     </div>
   )

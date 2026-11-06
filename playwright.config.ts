@@ -15,9 +15,14 @@ export default defineConfig({
     reuseExistingServer: false,
     timeout: 120_000,
     // Point PostHog at a path on the dev server so test runs never reach a real project.
+    // Ads and GA ids match production so landing-route tracking tests can assert real tags.
     env: {
       VITE_POSTHOG_KEY: 'phc_playwright_test_token',
       VITE_POSTHOG_HOST: 'http://127.0.0.1:5175/__posthog',
+      VITE_GOOGLE_ADS_ID: 'AW-18413556843',
+      VITE_GOOGLE_ADS_LEAD_LABEL: 'KA47CJbG9LAdEOuoosxE',
+      VITE_GOOGLE_ADS_PHONE_LABEL: 'gJr-CJnG9LAdEOuoosxE',
+      VITE_GA_MEASUREMENT_ID: 'G-PR7CJ8TK79',
     },
   },
   projects: [

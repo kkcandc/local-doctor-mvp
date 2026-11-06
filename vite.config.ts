@@ -6,6 +6,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { landingHtml } from './src/landing/landingHtml.ts'
 import { landingSlugs } from './src/landing/landingMeta.ts'
+import { siteSitemapXml } from './src/siteMap.ts'
 
 // Injects the Google tag (Ads and GA4) into the SPA shell for production builds.
 // Every route is rewritten to index.html, so one snippet covers the site.
@@ -45,6 +46,25 @@ function landingPagesHtmlPlugin(): Plugin {
         await mkdir(dir, { recursive: true })
         await writeFile(path.join(dir, 'index.html'), landingHtml(indexHtml, slug))
       }
+      await writeFile(path.join(outDir, 'sitemap.xml'), siteSitemapXml())
+    },
+  }
+}
+
+// Serves /sitemap.xml in dev with an XML content type. Production uses the file
+// written into dist, plus the Content-Type header in vercel.json.
+function sitemapDevPlugin(): Plugin {
+  return {
+    name: 'local-doctor-sitemap-dev',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url?.split('?')[0]
+        if (url !== '/sitemap.xml') return next()
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/xml; charset=utf-8')
+        res.end(siteSitemapXml())
+      })
     },
   }
 }
@@ -52,6 +72,6 @@ function landingPagesHtmlPlugin(): Plugin {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
   return {
-    plugins: [react(), googleTagsHtmlPlugin(env.VITE_GOOGLE_ADS_ID, env.VITE_GA_MEASUREMENT_ID), landingPagesHtmlPlugin()],
+    plugins: [react(), googleTagsHtmlPlugin(env.VITE_GOOGLE_ADS_ID, env.VITE_GA_MEASUREMENT_ID), sitemapDevPlugin(), landingPagesHtmlPlugin()],
   }
 })
