@@ -2,12 +2,27 @@ import { gunzipSync } from 'node:zlib'
 import { mkdirSync } from 'node:fs'
 import { expect, test, type Page, type Request } from '@playwright/test'
 import { isAllowedExternalHref, landingDestinations, resolveDestination } from '../src/landing/destinations'
+import { landingPages } from '../src/landing/landingContent'
 import { landingHtml } from '../src/landing/landingHtml'
-import { landingCanonical, landingMeta, landingSlugs, siteOrigin } from '../src/landing/landingMeta'
+import { landingCanonical, landingMeta, landingSitemapXml, landingSlugs, siteOrigin, type LandingSlug } from '../src/landing/landingMeta'
 
 const HOME_H1 = /Treatment that slows down Alzheimer/
 const CLINIC_TEL = 'tel:+12403765730'
+const CLINIC_PHONE = '(240) 376-5730'
+const HERO_REASSURANCE = 'Virtual visit from home with a Maryland-licensed doctor.'
 const DASHES = /[\u2013\u2014]/
+const TYPEFORM_LIVE_ID = '01M6Q39ZHJB5XWV15ABEYGFGS1'
+
+const heroCtaLabels: Record<LandingSlug, string> = {
+  'dementia-evaluation': 'Book Your Evaluation',
+  'alzheimers-evaluation': 'Book Your Evaluation',
+  'memory-evaluation': 'Book Your Evaluation',
+  'alzheimers-doctor-maryland': "See an Alzheimer's Doctor",
+  'memory-specialist-maryland': 'Talk to a Memory Specialist',
+  'alzheimers-second-opinion': 'Request a Second Opinion',
+  'dementia-test-online': 'Talk to a Memory Doctor',
+  'memory-doctor-near-me': 'See a Memory Doctor',
+}
 
 const viewports = [
   { name: 'desktop', use: { viewport: { width: 1366, height: 900 } } },
@@ -24,7 +39,21 @@ test('every landing route has its own title, description, and canonical', () => 
     expect(landingMeta[slug].title.length).toBeLessThanOrEqual(70)
     expect(landingMeta[slug].description.length).toBeLessThanOrEqual(170)
     expect(`${landingMeta[slug].title} ${landingMeta[slug].description}`).not.toMatch(DASHES)
+    expect(landingPages[slug].ctaLabel).toBe(heroCtaLabels[slug])
+    expect(landingPages[slug].reassurance).toBe(HERO_REASSURANCE)
+    expect(landingPages[slug].reassurance).not.toMatch(/referral|wait|price|insurance|\$/i)
   }
+})
+
+test('the sitemap lists every intent page the same way', () => {
+  const xml = landingSitemapXml()
+  expect(xml).toContain('<loc>https://trylocaldoctor.com/</loc>')
+  expect(xml).not.toMatch(DASHES)
+  expect(xml).not.toMatch(/livspecialtycare/i)
+  for (const slug of landingSlugs) {
+    expect(xml).toContain(`<loc>${landingCanonical(slug)}</loc>`)
+  }
+  expect(xml.match(/<loc>/g)?.length).toBe(landingSlugs.length + 1)
 })
 
 test('the static shell for a landing route carries its own head tags', () => {
@@ -35,6 +64,11 @@ test('the static shell for a landing route carries its own head tags', () => {
   expect(html).toContain('<meta property="og:url" content="https://trylocaldoctor.com/alzheimers-second-opinion" />')
   expect(html).toContain(`content="${landingMeta['alzheimers-second-opinion'].description}"`)
   expect(html).not.toContain('content="default"')
+})
+
+test('the homepage hero CTA label stays Get Started', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.locator('.hero-actions').getByRole('button', { name: 'Get Started' })).toBeVisible()
 })
 
 test('landing CTAs use the existing intake until a new form is configured', () => {
@@ -70,9 +104,16 @@ for (const viewport of viewports) {
         const ctas = landing.locator('[data-cta-location]')
         expect(await ctas.count()).toBeGreaterThanOrEqual(2)
         for (const cta of await ctas.all()) {
-          await expect(cta).toHaveText('Get Started')
+          await expect(cta).toHaveText(heroCtaLabels[slug])
           await expect(cta).toHaveAttribute('href', '/get-started')
         }
+
+        const hero = landing.locator('[data-cta-location="hero"]')
+        await expect(hero).toHaveAttribute('aria-describedby', `${slug}-reassurance`)
+        await expect(landing.locator(`#${slug}-reassurance`)).toHaveText(HERO_REASSURANCE)
+        const phone = landing.locator('.landing-phone').first()
+        await expect(phone).toBeVisible()
+        await expect(phone).toContainText(CLINIC_PHONE)
 
         const tels = await landing.locator('a[href^="tel:"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')))
         expect(tels.length).toBeGreaterThan(0)
@@ -89,8 +130,20 @@ for (const viewport of viewports) {
         expect(text).not.toMatch(/livspecialtycare|LIV Specialty/i)
 
         await page.waitForLoadState('load')
+        await page.evaluate(() => document.fonts.ready)
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
         expect(overflow).toBeLessThanOrEqual(0)
+
+        const heroBox = await hero.boundingBox()
+        const phoneBox = await phone.boundingBox()
+        const reassuranceBox = await landing.locator(`#${slug}-reassurance`).boundingBox()
+        expect(heroBox, 'hero CTA').not.toBeNull()
+        expect(phoneBox, 'phone CTA').not.toBeNull()
+        expect(reassuranceBox, 'reassurance').not.toBeNull()
+        const fold = viewport.use.viewport.height
+        expect(heroBox!.y + heroBox!.height, 'hero CTA above the fold').toBeLessThanOrEqual(fold)
+        expect(phoneBox!.y + phoneBox!.height, 'phone above the fold').toBeLessThanOrEqual(fold)
+        expect(reassuranceBox!.y + reassuranceBox!.height, 'reassurance above the fold').toBeLessThanOrEqual(fold)
       })
     }
 
@@ -111,12 +164,13 @@ for (const viewport of viewports) {
       }
     })
 
-    test('Get Started opens the existing intake from each landing page', async ({ page }) => {
+    test('the hero CTA opens the existing intake from each landing page', async ({ page }) => {
       for (const slug of landingSlugs) {
         await page.goto(`/${slug}`)
+        await expect(page.locator('[data-cta-location="hero"]')).toHaveText(heroCtaLabels[slug])
         await page.locator('[data-cta-location="hero"]').click()
         await expect(page).toHaveURL(/\/get-started$/)
-        await expect(page.locator('.typeform-live-embed')).toHaveAttribute('data-tf-live', /.+/)
+        await expect(page.locator('.typeform-live-embed')).toHaveAttribute('data-tf-live', TYPEFORM_LIVE_ID)
         expect(await page.evaluate(() => window.scrollY)).toBe(0)
         await expect(page.locator('link[rel="canonical"]')).toHaveCount(0)
       }

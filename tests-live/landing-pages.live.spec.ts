@@ -1,5 +1,6 @@
 import { mkdirSync } from 'node:fs'
 import { expect, test } from '@playwright/test'
+import { landingPages } from '../src/landing/landingContent'
 import { landingCanonical, landingMeta, landingSlugs } from '../src/landing/landingMeta'
 
 const screenshotDir = process.env.SCREENSHOT_DIR
@@ -27,8 +28,9 @@ for (const slug of landingSlugs) {
     }
 
     const hero = page.locator('[data-cta-location="hero"]')
-    await expect(hero).toHaveText('Get Started')
+    await expect(hero).toHaveText(landingPages[slug].ctaLabel)
     await expect(hero).toHaveAttribute('href', '/get-started')
+    await expect(page.locator('.landing-reassurance')).toHaveText(landingPages[slug].reassurance)
     await hero.click()
     await expect(page).toHaveURL(/\/get-started$/)
     await expect(page.locator('.typeform-live-embed iframe')).toBeVisible({ timeout: 20_000 })

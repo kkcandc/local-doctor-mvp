@@ -16,6 +16,7 @@ export const landingSlugs = [
   'memory-specialist-maryland',
   'alzheimers-second-opinion',
   'dementia-test-online',
+  'memory-doctor-near-me',
 ] as const
 
 export type LandingSlug = (typeof landingSlugs)[number]
@@ -58,6 +59,19 @@ export const landingMeta: Record<LandingSlug, LandingMeta> = {
     description:
       'What an online dementia test can and cannot tell you, how screening, evaluation, and diagnosis differ, and how to request a clinician evaluation in Maryland.',
   },
+  'memory-doctor-near-me': {
+    title: 'Memory Doctor Near You in Maryland | Local Doctor',
+    description:
+      'Looking for a memory doctor, dementia doctor, or neurologist for memory near you? A Maryland clinician can see you by video from home, so you do not have to drive.',
+  },
+}
+
+// Sitemap for the intent pages. Adding a slug above adds its URL here, the same
+// way the build writes that page's HTML shell.
+export function landingSitemapXml(): string {
+  const paths = ['/', ...landingSlugs.map((slug) => `/${slug}`)]
+  const urls = paths.map((path) => `  <url><loc>${siteOrigin}${path}</loc></url>`).join('\n')
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`
 }
 
 export function isLandingSlug(value: string): value is LandingSlug {

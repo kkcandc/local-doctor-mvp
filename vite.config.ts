@@ -5,7 +5,7 @@ import { resolveGaMeasurementId } from './src/analytics/googleAnalyticsConfig.ts
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { landingHtml } from './src/landing/landingHtml.ts'
-import { landingSlugs } from './src/landing/landingMeta.ts'
+import { landingSitemapXml, landingSlugs } from './src/landing/landingMeta.ts'
 
 // Injects the Google tag (Ads and GA4) into the SPA shell for production builds.
 // Every route is rewritten to index.html, so one snippet covers the site.
@@ -45,6 +45,7 @@ function landingPagesHtmlPlugin(): Plugin {
         await mkdir(dir, { recursive: true })
         await writeFile(path.join(dir, 'index.html'), landingHtml(indexHtml, slug))
       }
+      await writeFile(path.join(outDir, 'sitemap.xml'), landingSitemapXml())
     },
   }
 }

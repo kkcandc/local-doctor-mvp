@@ -23,7 +23,22 @@
 .landing-hero-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: var(--space-16);
+}
+
+.landing-hero-primary {
+  display: grid;
+  gap: var(--space-8);
+  justify-items: start;
+}
+
+.landing-reassurance {
+  max-width: 36ch;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-control);
+  line-height: 1.45;
 }
 
 .landing-phone svg {
@@ -390,6 +405,11 @@
 }
 
 @media (max-width: 680px) {
+  .landing-hero-actions,
+  .landing-hero-primary {
+    width: 100%;
+  }
+
   .landing-hero-actions {
     flex-direction: column;
   }
