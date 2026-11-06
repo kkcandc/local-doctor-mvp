@@ -44,9 +44,35 @@ test('production builds default to the verified lead and phone conversion labels
 test('SPA paths keep gclid and utm params and drop contact details', () => {
   expect(keptAdsSearchParams('?gclid=abc&email=jane@example.com&utm_source=google')).toBe('gclid=abc&utm_source=google')
   expect(pathWithAdsParams('/get-started', '?gclid=abc&phone=2403765730')).toBe('/get-started?gclid=abc')
-  expect(ctaTrackingCalls('/alzheimers-doctor-maryland?gclid=abc', 'hero')).toEqual([
-    ['event', 'cta_click', { page_path: '/alzheimers-doctor-maryland', cta_location: 'hero' }],
+  const gaId = 'G-PR7CJ8TK79'
+  const calls = ctaTrackingCalls('/alzheimers-doctor-maryland?gclid=abc', 'hero', {
+    gaId,
+    adsId,
+    ctaLabel: "See an Alzheimer's Doctor",
+  })
+  expect(calls).toEqual([
+    ['event', 'cta_click', {
+      page_path: '/alzheimers-doctor-maryland',
+      cta_location: 'hero',
+      cta_label: "See an Alzheimer's Doctor",
+      send_to: gaId,
+    }],
+    ['event', 'cta_click', {
+      page_path: '/alzheimers-doctor-maryland',
+      cta_location: 'hero',
+      cta_label: "See an Alzheimer's Doctor",
+      send_to: adsId,
+    }],
   ])
+  const json = JSON.stringify(calls)
+  expect(json).not.toContain(DEFAULT_GOOGLE_ADS_LEAD_LABEL)
+  expect(json).not.toContain(DEFAULT_GOOGLE_ADS_PHONE_LABEL)
+  expect(json).not.toContain('conversion')
+  expect(ctaTrackingCalls('/memory-evaluation', 'hero', {
+    gaId,
+    adsId,
+    ctaLabel: 'jane@example.com',
+  })[0]?.[2]).not.toHaveProperty('cta_label')
 })
 
 test('the tag snippet configures only the ads id', () => {

@@ -20,7 +20,7 @@ type Tone = 'white' | 'ivory'
 
 type LandingPageProps = {
   slug: LandingSlug
-  onStart: (ctaLocation: string) => void
+  onStart: (ctaLocation: string, ctaLabel: string) => void
   onOpenPath: (path: string) => void
 }
 
@@ -39,7 +39,7 @@ function GetStartedLink({
   destination: CtaDestination
   location: string
   label: string
-  onStart: (ctaLocation: string) => void
+  onStart: (ctaLocation: string, ctaLabel: string) => void
   variant?: 'primary' | 'accent'
   describedBy?: string
 }) {
@@ -52,12 +52,12 @@ function GetStartedLink({
       aria-describedby={describedBy}
       onClick={(event) => {
         if (external) {
-          onStart(location)
+          onStart(location, label)
           return
         }
         if (!isPlainClick(event)) return
         event.preventDefault()
-        onStart(location)
+        onStart(location, label)
       }}
     >
       {label} <ArrowRight size={20} aria-hidden="true" />
