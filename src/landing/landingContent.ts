@@ -56,11 +56,11 @@ export const relatedLabels: Record<LandingSlug, { title: string; copy: string }>
 }
 
 const heroReassurance =
-  'Next-day virtual visits with a board-certified neurologist. Insurance accepted. No referral needed.'
+  'Video visits from home with a board-certified neurologist. Insurance accepted. No referral needed.'
 
-// Kenny-confirmed trust points for the hero facts panel on every intent page.
+// Trust points for the hero facts panel on every intent page.
 const trustFacts = [
-  'Next-day virtual visits',
+  'Video visits from home',
   'Board-certified neurologist',
   'Insurance accepted',
   'No referral needed',
