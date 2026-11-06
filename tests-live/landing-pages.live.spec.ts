@@ -29,7 +29,7 @@ for (const slug of landingSlugs) {
 
     const hero = page.locator('[data-cta-location="hero"]')
     await expect(hero).toHaveText(landingPages[slug].ctaLabel)
-    await expect(hero).toHaveAttribute('href', '/get-started')
+    await expect(hero).toHaveAttribute('href', /\/get-started/)
     await expect(page.locator('.landing-reassurance')).toHaveText(landingPages[slug].reassurance)
     await hero.click()
     await expect(page).toHaveURL(/\/get-started$/)

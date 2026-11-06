@@ -3,12 +3,18 @@ import type { MouseEvent, ReactNode } from 'react'
 import { ArrowRight, CheckCircle2, ChevronDown, Info, Phone, ShieldAlert } from 'lucide-react'
 import { publicPhone } from '../compliancePages'
 import { isPageEnabled } from '../featureFlags'
+import { pathWithAdsParams } from '../analytics/googleAdsConfig'
 import { intakePath, landingDestinations, resolveDestination, type CtaDestination } from './destinations'
 import { landingPages, relatedLabels, type LandingColumn, type LandingFaq as FaqItem, type LandingSection } from './landingContent'
 import type { LandingSlug } from './landingMeta'
 import './landing.css'
 
 const phoneHref = `tel:+1${publicPhone.replace(/\D/g, '')}`
+
+function intakeHref() {
+  if (typeof window === 'undefined') return intakePath
+  return pathWithAdsParams(intakePath, window.location.search)
+}
 
 type Tone = 'white' | 'ivory'
 
@@ -41,7 +47,7 @@ function GetStartedLink({
   return (
     <a
       className={variant}
-      href={external ? destination.href : intakePath}
+      href={external ? destination.href : intakeHref()}
       data-cta-location={location}
       aria-describedby={describedBy}
       onClick={(event) => {

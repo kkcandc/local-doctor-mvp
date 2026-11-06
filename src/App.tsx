@@ -34,7 +34,8 @@ import {
 } from './compliancePages'
 import { isPageEnabled, type PageFlag } from './featureFlags'
 import { noteSpaNavigation } from './analytics/googleAds'
-import { noteGaSpaNavigation } from './analytics/googleAnalytics'
+import { pathWithAdsParams, typeformTransitiveSearchParams } from './analytics/googleAdsConfig'
+import { noteGaCtaClick, noteGaSpaNavigation } from './analytics/googleAnalytics'
 import { noteEligibilityStarted, notePostHogNavigation } from './analytics/posthog'
 import { LandingPage } from './landing/LandingPage'
 import { isLandingSlug, landingCanonical, landingMeta } from './landing/landingMeta'
@@ -401,13 +402,19 @@ function App() {
       next = 'home'
       slug = ''
     }
-    if (next === 'start') noteEligibilityStarted(window.location.pathname, ctaLocation)
+    if (next === 'start') {
+      noteEligibilityStarted(window.location.pathname, ctaLocation)
+      noteGaCtaClick(window.location.pathname, ctaLocation)
+    }
     const path = next === 'blogPost' ? `/blog/${slug}` : next === 'landing' ? `/${slug}` : routePaths[next]
+    // Keep gclid and utm_* across SPA navigations so Ads can attribute the visit and
+    // Typeform can read them on /get-started. Contact and health params stay dropped.
+    const nextUrl = pathWithAdsParams(path, window.location.search)
     setRoute(next)
     setRouteSlug(next === 'blogPost' || next === 'landing' ? slug : '')
     setMenuOpen(false)
-    if (window.location.pathname !== path) {
-      window.history.pushState({}, '', path)
+    if (`${window.location.pathname}${window.location.search}` !== nextUrl) {
+      window.history.pushState({}, '', nextUrl)
     }
     setScrollRequest((count) => count + 1)
   }
@@ -1164,6 +1171,7 @@ function EligibilityLeadForm() {
         data-tf-live={typeformLiveId}
         data-tf-inline-on-mobile=""
         data-tf-on-submit="localDoctorOnTypeformSubmit"
+        data-tf-transitive-search-params={typeformTransitiveSearchParams}
       />
     </div>
   )

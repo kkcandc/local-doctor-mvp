@@ -2,12 +2,19 @@ import { expect, test } from '@playwright/test'
 import {
   adsPageLocation,
   conversionSendTo,
+  ctaTrackingCalls,
+  DEFAULT_GOOGLE_ADS_LEAD_LABEL,
+  DEFAULT_GOOGLE_ADS_PHONE_LABEL,
   googleAdsTagHtml,
   isTrackedClinicPhone,
   isTypeformSubmitMessage,
+  keptAdsSearchParams,
   leadTrackingCalls,
+  pathWithAdsParams,
   phoneTrackingCalls,
   resolveGoogleAdsId,
+  resolveGoogleAdsLeadLabel,
+  resolveGoogleAdsPhoneLabel,
   safePagePath,
   spaPageViewCall,
 } from '../src/analytics/googleAdsConfig'
@@ -21,6 +28,25 @@ test('production builds default to the Local Doctor Google Ads id', () => {
   expect(resolveGoogleAdsId('off', true)).toBeNull()
   expect(resolveGoogleAdsId('G-ABCDEF', true)).toBeNull()
   expect(resolveGoogleAdsId(undefined, false)).toBeNull()
+})
+
+test('production builds default to the verified lead and phone conversion labels', () => {
+  expect(DEFAULT_GOOGLE_ADS_LEAD_LABEL).toBe('KA47CJbG9LAdEOuoosxE')
+  expect(DEFAULT_GOOGLE_ADS_PHONE_LABEL).toBe('gJr-CJnG9LAdEOuoosxE')
+  expect(resolveGoogleAdsLeadLabel(undefined, true)).toBe(DEFAULT_GOOGLE_ADS_LEAD_LABEL)
+  expect(resolveGoogleAdsPhoneLabel(undefined, true)).toBe(DEFAULT_GOOGLE_ADS_PHONE_LABEL)
+  expect(resolveGoogleAdsLeadLabel('off', true)).toBeNull()
+  expect(resolveGoogleAdsPhoneLabel(undefined, false)).toBeNull()
+  expect(conversionSendTo(adsId, DEFAULT_GOOGLE_ADS_LEAD_LABEL)).toBe(`${adsId}/${DEFAULT_GOOGLE_ADS_LEAD_LABEL}`)
+  expect(conversionSendTo(adsId, DEFAULT_GOOGLE_ADS_PHONE_LABEL)).toBe(`${adsId}/${DEFAULT_GOOGLE_ADS_PHONE_LABEL}`)
+})
+
+test('SPA paths keep gclid and utm params and drop contact details', () => {
+  expect(keptAdsSearchParams('?gclid=abc&email=jane@example.com&utm_source=google')).toBe('gclid=abc&utm_source=google')
+  expect(pathWithAdsParams('/get-started', '?gclid=abc&phone=2403765730')).toBe('/get-started?gclid=abc')
+  expect(ctaTrackingCalls('/alzheimers-doctor-maryland?gclid=abc', 'hero')).toEqual([
+    ['event', 'cta_click', { page_path: '/alzheimers-doctor-maryland', cta_location: 'hero' }],
+  ])
 })
 
 test('the tag snippet configures only the ads id', () => {

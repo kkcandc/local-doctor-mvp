@@ -9,7 +9,8 @@ import { landingCanonical, landingMeta, landingSitemapXml, landingSlugs, siteOri
 const HOME_H1 = /Treatment that slows down Alzheimer/
 const CLINIC_TEL = 'tel:+12403765730'
 const CLINIC_PHONE = '(240) 376-5730'
-const HERO_REASSURANCE = 'Virtual visit from home with a Maryland-licensed doctor.'
+const HERO_REASSURANCE =
+  'Next-day virtual visits with a board-certified neurologist. Insurance accepted. No referral needed.'
 const DASHES = /[\u2013\u2014]/
 const TYPEFORM_LIVE_ID = '01M6Q39ZHJB5XWV15ABEYGFGS1'
 
@@ -41,7 +42,15 @@ test('every landing route has its own title, description, and canonical', () => 
     expect(`${landingMeta[slug].title} ${landingMeta[slug].description}`).not.toMatch(DASHES)
     expect(landingPages[slug].ctaLabel).toBe(heroCtaLabels[slug])
     expect(landingPages[slug].reassurance).toBe(HERO_REASSURANCE)
-    expect(landingPages[slug].reassurance).not.toMatch(/referral|wait|price|insurance|\$/i)
+    expect(landingPages[slug].facts.items).toEqual(
+      expect.arrayContaining([
+        'Next-day virtual visits',
+        'Board-certified neurologist',
+        'Insurance accepted',
+        'No referral needed',
+      ]),
+    )
+    expect(landingPages[slug].reassurance).not.toMatch(/waitlist|price|\$|seen in days/i)
   }
 })
 
@@ -105,7 +114,7 @@ for (const viewport of viewports) {
         expect(await ctas.count()).toBeGreaterThanOrEqual(2)
         for (const cta of await ctas.all()) {
           await expect(cta).toHaveText(heroCtaLabels[slug])
-          await expect(cta).toHaveAttribute('href', '/get-started')
+          await expect(cta).toHaveAttribute('href', /\/get-started/)
         }
 
         const hero = landing.locator('[data-cta-location="hero"]')

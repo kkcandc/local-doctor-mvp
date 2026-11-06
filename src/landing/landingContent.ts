@@ -54,14 +54,16 @@ export const relatedLabels: Record<LandingSlug, { title: string; copy: string }>
   },
 }
 
-const heroReassurance = 'Virtual visit from home with a Maryland-licensed doctor.'
+const heroReassurance =
+  'Next-day virtual visits with a board-certified neurologist. Insurance accepted. No referral needed.'
 
-const virtualFacts = {
-  video: 'Specialist visits happen by live video, not at a local office',
-  maryland: 'Available when the patient is located in Maryland during the visit',
-  local: 'Labs or imaging, if ordered, are done at local sites',
-  family: 'A family member or care partner is welcome to join',
-}
+// Kenny-confirmed trust points for the hero facts panel on every intent page.
+const trustFacts = [
+  'Next-day virtual visits',
+  'Board-certified neurologist',
+  'Insurance accepted',
+  'No referral needed',
+]
 
 const emergencyCallout: LandingSection = {
   kind: 'callout',
@@ -89,7 +91,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     ctaContext: 'This opens a short request form. Our team then calls to review eligibility and insurance before any visit is booked.',
     facts: {
       title: 'How this evaluation works',
-      items: [virtualFacts.video, virtualFacts.maryland, virtualFacts.local, virtualFacts.family],
+      items: [...trustFacts],
     },
     sections: [
       {
@@ -137,7 +139,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
       ['Is this a dementia test?', 'No. A test or screening is one tool. An evaluation is a clinician reviewing your symptoms, history, medications, and any prior results, then recommending what to do next. The request form behind Get Started is not a test and does not score memory.'],
       ['Do I need to live in Maryland?', 'You need to be located in Maryland during the visit, because the clinician must be licensed in the state where the patient is. Virtual visits are not available in other states at this time.'],
       ['Is there an office I go to?', 'No. Local Doctor is a virtual practice and visits happen by video. If labs or imaging are ordered, those are done in person at a local lab or imaging center.'],
-      ['Do I need a referral from my doctor?', 'Depending on your insurance, you may need one. The team will let you know during the eligibility call.'],
+      ['Do I need a referral from my doctor?', 'No referral is needed. Start with the short form or call our team, and we review eligibility and insurance with you before a visit is booked.'],
       ['Will I get a prescription?', 'Not from this website. If a medication is ever appropriate, that decision is made by the evaluating clinician after the evaluation and follows the law of the state where you are located.'],
       ['Who do I contact in a medical emergency?', 'Call 911 immediately. Local Doctor provides specialist evaluation and does not replace emergency care.'],
     ],
@@ -156,7 +158,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     ctaContext: "This takes you to our intake form. It is a request for a specialist review, not an Alzheimer's test.",
     facts: {
       title: 'What to expect',
-      items: [virtualFacts.video, 'Testing is recommended by the clinician, not chosen from a menu', virtualFacts.local, virtualFacts.maryland],
+      items: [...trustFacts],
     },
     sections: [
       {
@@ -227,7 +229,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     ctaContext: 'This opens a short request form you can fill out for yourself or on behalf of a loved one. It is not a memory test.',
     facts: {
       title: 'Built for families',
-      items: ['You can start the request for yourself or for a loved one', virtualFacts.video, virtualFacts.maryland, virtualFacts.local],
+      items: [...trustFacts],
     },
     sections: [
       {
@@ -323,7 +325,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     heroSecondary: { label: 'How virtual visits work', href: '#how-virtual-visits-work' },
     facts: {
       title: 'Serving Maryland, virtually',
-      items: ['Clinicians are licensed in Maryland', 'Visits happen by live video, wherever you are in the state', virtualFacts.local, 'Works alongside the doctors you already see'],
+      items: [...trustFacts],
     },
     sections: [
       {
@@ -342,7 +344,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
       {
         kind: 'providers',
         eyebrow: 'Who you will meet',
-        title: 'A neurology clinician licensed in Maryland.',
+        title: 'A board-certified neurologist licensed in Maryland.',
         copy: 'The clinicians who may see patients are listed by name, specialty, and state license on our Contact page, together with the company that operates Local Doctor.',
       },
       {
@@ -403,7 +405,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     ctaContext: 'This opens a short request form so our team can call you. You can also call us directly.',
     facts: {
       title: 'Near you, honestly',
-      items: ['Local Doctor is a virtual practice with no local office', 'The specialist visit happens wherever you have a video connection', 'Ordered tests are done at labs and imaging centers near you', virtualFacts.maryland],
+      items: [...trustFacts],
     },
     sections: [
       {
@@ -462,7 +464,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     faqTitle: 'Memory specialist questions.',
     faqs: [
       ['Is there a Local Doctor office near me?', 'No. Local Doctor is a virtual practice. Your specialist visit happens by video from home, and only ordered tests take place in person at sites near you.'],
-      ['What kind of specialist will I see?', 'A neurology clinician licensed in Maryland. The clinicians who may see patients are listed on our Contact page.'],
+      ['What kind of specialist will I see?', 'A board-certified neurologist licensed in Maryland. The clinicians who may see patients are listed on our Contact page.'],
       ['Do I have to travel for tests?', 'Only if tests are ordered. Labs and imaging are scheduled at local sites, such as a Quest or LabCorp location or an imaging center near you.'],
       ['Can I call instead of filling out the form?', 'Yes. Call or text our team at the number on this page and we will take it from there.'],
       ['Do you accept insurance?', 'The team verifies your insurance during the eligibility call, before anything is booked, so you know where you stand.'],
@@ -483,7 +485,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     heroSecondary: { label: 'See the records checklist', href: '#records' },
     facts: {
       title: 'A focused review',
-      items: ['A specialist looks at your records and history together', 'May confirm, add to, or question earlier findings', 'Works alongside your current doctors', virtualFacts.video],
+      items: [...trustFacts],
     },
     sections: [
       {
@@ -539,7 +541,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
       ['Do I need all my records before I start?', 'No. Start the request and bring what you have to the eligibility call. The team follows up on anything missing.'],
       ['Do I have to stop seeing my current neurologist?', 'No. Our specialists do not replace your existing providers and will work with them as needed.'],
       ['Can a family member set this up?', 'Yes. A spouse, adult child, or other loved one can start the request and join the visits with the patient.'],
-      ['Do I need a referral?', 'Depending on your insurance, you may need a referral. The team will let you know during the eligibility call.'],
+      ['Do I need a referral?', 'No referral is needed. Start with the short form or call our team, and we review eligibility and insurance with you before a visit is booked.'],
     ],
     closing: { title: 'Request a second opinion review.', copy: 'Start with the short form or call our team. Have your records nearby for the eligibility call.' },
     related: ['alzheimers-evaluation', 'alzheimers-doctor-maryland', 'dementia-evaluation'],
@@ -557,7 +559,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     heroSecondary: { label: 'Screening vs. evaluation vs. diagnosis', href: '#three-steps' },
     facts: {
       title: 'There is no quiz on this page',
-      items: ['Local Doctor does not currently offer an online screening tool', 'What we offer is a clinician evaluation by video', virtualFacts.maryland, 'Any diagnosis comes from a clinician, never from a website'],
+      items: [...trustFacts, 'Local Doctor does not currently offer an online screening tool'],
     },
     sections: [
       {
@@ -646,12 +648,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     heroSecondary: { label: 'What near you means here', href: '#what-near-you-means' },
     facts: {
       title: 'Near you, from home',
-      items: [
-        'The specialist visit is by live video from home',
-        'There is no Local Doctor office to drive to',
-        'Clinicians are licensed in Maryland',
-        'Ordered tests are done at labs and imaging centers near you',
-      ],
+      items: [...trustFacts],
     },
     sections: [
       {
@@ -715,8 +712,8 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
       ['Is there a memory doctor office near me?', 'No. Local Doctor is a virtual practice. Your specialist visit happens by video from home. Only ordered tests take place in person, at labs or imaging centers near you.'],
       ['Do I have to be in Maryland?', 'Yes. You need to be located in Maryland during the visit, because the clinician must be licensed in the state where the patient is. Virtual visits are not available in other states at this time.'],
       ['Will I have to drive at all?', 'Not for the visit with the specialist. If labs or imaging are ordered, those appointments are at local sites, such as a Quest or LabCorp location or an imaging center near you.'],
-      ['What kind of doctor will I see?', 'A neurology clinician licensed in Maryland. The clinicians who may see patients are listed on our Contact page.'],
-      ['Do I need a referral?', 'Depending on your insurance, you may need a referral. The team will let you know during the eligibility call.'],
+      ['What kind of doctor will I see?', 'A board-certified neurologist licensed in Maryland. The clinicians who may see patients are listed on our Contact page.'],
+      ['Do I need a referral?', 'No referral is needed. Start with the short form or call our team, and we review eligibility and insurance with you before a visit is booked.'],
       ['Can a family member join?', 'Yes. A spouse, adult child, or other loved one can start the request and join the video visit with the patient.'],
     ],
     closing: { title: 'See a memory doctor without leaving home.', copy: 'Start a request online or call our team. We confirm eligibility and insurance with you first.' },
