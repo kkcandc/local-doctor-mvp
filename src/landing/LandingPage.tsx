@@ -3,6 +3,7 @@ import type { MouseEvent, ReactNode } from 'react'
 import { ArrowRight, CheckCircle2, ChevronDown, Info, Phone, ShieldAlert } from 'lucide-react'
 import { publicPhone } from '../compliancePages'
 import { isPageEnabled } from '../featureFlags'
+import { pathWithAdsParams } from '../analytics/googleAdsConfig'
 import { intakePath, landingDestinations, resolveDestination, type CtaDestination } from './destinations'
 import { landingPages, relatedLabels, type LandingColumn, type LandingFaq as FaqItem, type LandingSection } from './landingContent'
 import type { LandingSlug } from './landingMeta'
@@ -10,11 +11,16 @@ import './landing.css'
 
 const phoneHref = `tel:+1${publicPhone.replace(/\D/g, '')}`
 
+function intakeHref() {
+  if (typeof window === 'undefined') return intakePath
+  return pathWithAdsParams(intakePath, window.location.search)
+}
+
 type Tone = 'white' | 'ivory'
 
 type LandingPageProps = {
   slug: LandingSlug
-  onStart: (ctaLocation: string) => void
+  onStart: (ctaLocation: string, ctaLabel: string) => void
   onOpenPath: (path: string) => void
 }
 
@@ -25,31 +31,36 @@ function isPlainClick(event: MouseEvent) {
 function GetStartedLink({
   destination,
   location,
+  label,
   onStart,
   variant = 'primary',
+  describedBy,
 }: {
   destination: CtaDestination
   location: string
-  onStart: (ctaLocation: string) => void
+  label: string
+  onStart: (ctaLocation: string, ctaLabel: string) => void
   variant?: 'primary' | 'accent'
+  describedBy?: string
 }) {
   const external = destination.kind === 'external'
   return (
     <a
       className={variant}
-      href={external ? destination.href : intakePath}
+      href={external ? destination.href : intakeHref()}
       data-cta-location={location}
+      aria-describedby={describedBy}
       onClick={(event) => {
         if (external) {
-          onStart(location)
+          onStart(location, label)
           return
         }
         if (!isPlainClick(event)) return
         event.preventDefault()
-        onStart(location)
+        onStart(location, label)
       }}
     >
-      Get Started <ArrowRight size={20} aria-hidden="true" />
+      {label} <ArrowRight size={20} aria-hidden="true" />
     </a>
   )
 }
@@ -117,8 +128,15 @@ export function LandingPage({ slug, onStart, onOpenPath }: LandingPageProps) {
   const page = landingPages[slug]
   const destination = resolveDestination(landingDestinations[page.funnel])
   const { tones, next: faqTone } = sectionTones(page.sections)
-  const cta = (location: string, variant?: 'primary' | 'accent') => (
-    <GetStartedLink destination={destination} location={location} onStart={onStart} variant={variant} />
+  const cta = (location: string, variant?: 'primary' | 'accent', describedBy?: string) => (
+    <GetStartedLink
+      destination={destination}
+      location={location}
+      label={page.ctaLabel}
+      onStart={onStart}
+      variant={variant}
+      describedBy={describedBy}
+    />
   )
 
   function renderColumn(column: LandingColumn) {
@@ -230,8 +248,14 @@ export function LandingPage({ slug, onStart, onOpenPath }: LandingPageProps) {
             <p className="eyebrow">{page.eyebrow}</p>
             <h1>{page.h1}</h1>
             <p className="landing-lede">{page.lede}</p>
+            {page.heroNote && <p className="landing-hero-note">{page.heroNote}</p>}
             <div className="landing-hero-actions">
-              {cta('hero')}
+              <div className="landing-hero-primary">
+                {cta('hero', undefined, `${slug}-reassurance`)}
+                <p className="landing-reassurance" id={`${slug}-reassurance`}>
+                  {page.reassurance}
+                </p>
+              </div>
               <PhoneLink />
             </div>
             <p className="landing-cta-context">{page.ctaContext}</p>

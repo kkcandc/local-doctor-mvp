@@ -5,6 +5,8 @@ import {
   leadTrackingCalls,
   phoneTrackingCalls,
   resolveGoogleAdsId,
+  resolveGoogleAdsLeadLabel,
+  resolveGoogleAdsPhoneLabel,
   spaPageViewCall,
   type GtagArgs,
 } from './googleAdsConfig'
@@ -27,6 +29,14 @@ function adsId(): string | null {
   return resolveGoogleAdsId(import.meta.env.VITE_GOOGLE_ADS_ID, import.meta.env.PROD)
 }
 
+function leadLabel(): string | null {
+  return resolveGoogleAdsLeadLabel(import.meta.env.VITE_GOOGLE_ADS_LEAD_LABEL, import.meta.env.PROD)
+}
+
+function phoneLabel(): string | null {
+  return resolveGoogleAdsPhoneLabel(import.meta.env.VITE_GOOGLE_ADS_PHONE_LABEL, import.meta.env.PROD)
+}
+
 function push(calls: GtagArgs[]) {
   if (typeof window.gtag !== 'function') return
   for (const args of calls) window.gtag(...args)
@@ -44,8 +54,10 @@ export function installGoogleAds() {
   if (!id || document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) return
 
   window.dataLayer = window.dataLayer || []
-  window.gtag = function gtag(...args: unknown[]) {
-    window.dataLayer?.push(args)
+  window.gtag = function gtag() {
+    // gtag.js only dispatches the arguments object. A rest array is ignored.
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer?.push(arguments)
   }
   const script = document.createElement('script')
   script.async = true
@@ -63,7 +75,7 @@ export function onTypeformSubmit() {
   const id = adsId()
   if (!id) return
   lastLeadAt = now
-  push(leadTrackingCalls(id, import.meta.env.VITE_GOOGLE_ADS_LEAD_LABEL, window.location.pathname))
+  push(leadTrackingCalls(id, leadLabel() ?? undefined, window.location.pathname))
 }
 
 export function noteSpaNavigation(pathname: string) {
@@ -83,7 +95,7 @@ function onDocumentClick(event: MouseEvent) {
   if (!isTrackedClinicPhone(href)) return
   const id = adsId()
   if (!id) return
-  push(phoneTrackingCalls(id, import.meta.env.VITE_GOOGLE_ADS_PHONE_LABEL, window.location.pathname))
+  push(phoneTrackingCalls(id, phoneLabel() ?? undefined, window.location.pathname))
 }
 
 function onWindowMessage(event: MessageEvent) {

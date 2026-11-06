@@ -16,6 +16,7 @@ export const landingSlugs = [
   'memory-specialist-maryland',
   'alzheimers-second-opinion',
   'dementia-test-online',
+  'memory-doctor-near-me',
 ] as const
 
 export type LandingSlug = (typeof landingSlugs)[number]
@@ -39,9 +40,9 @@ export const landingMeta: Record<LandingSlug, LandingMeta> = {
       'Concerned about memory changes in yourself or a loved one? Request a memory evaluation by video with a neurology specialist. Family members are welcome to join.',
   },
   'alzheimers-doctor-maryland': {
-    title: "Alzheimer's and Dementia Doctors Serving Maryland | Local Doctor",
+    title: "See an Alzheimer's Doctor in Maryland | Local Doctor",
     description:
-      "Virtual visits with a neurology clinician licensed in Maryland for Alzheimer's and dementia concerns. No office to drive to; local labs and imaging only when needed.",
+      "See an Alzheimer's doctor in Maryland by video. Next-day virtual visits from home with a board-certified neurologist. Insurance accepted. No referral needed.",
   },
   'memory-specialist-maryland': {
     title: 'Virtual Memory Specialist Near You in Maryland | Local Doctor',
@@ -57,6 +58,11 @@ export const landingMeta: Record<LandingSlug, LandingMeta> = {
     title: 'Online Dementia Test vs. Clinical Evaluation | Local Doctor',
     description:
       'What an online dementia test can and cannot tell you, how screening, evaluation, and diagnosis differ, and how to request a clinician evaluation in Maryland.',
+  },
+  'memory-doctor-near-me': {
+    title: 'Memory Doctor Near You in Maryland | Local Doctor',
+    description:
+      'Looking for a memory doctor, dementia doctor, or neurologist for memory near you? A Maryland clinician can see you by video from home, so you do not have to drive.',
   },
 }
 

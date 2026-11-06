@@ -1,4 +1,10 @@
-import { adsPageLocation, spaPageViewCall, type GtagArgs } from './googleAdsConfig'
+import {
+  adsPageLocation,
+  ctaTrackingCalls,
+  resolveGoogleAdsId,
+  spaPageViewCall,
+  type GtagArgs,
+} from './googleAdsConfig'
 import { resolveGaMeasurementId } from './googleAnalyticsConfig'
 
 // Same allow-list as Google Ads: click ids and utm_* stay, everything else is dropped.
@@ -68,4 +74,13 @@ export function noteGaSpaNavigation(pathname: string) {
   const result = gaSpaPageViewCall(id, pathname, lastSpaPath)
   lastSpaPath = result.nextPath
   if (result.call) push([result.call])
+}
+
+// Fired when a visitor clicks through to /get-started.
+// One hit to GA4 and one to the Ads tag. Neither uses a conversion label.
+export function noteGaCtaClick(pathname: string, ctaLocation?: string, ctaLabel?: string) {
+  const gaId = measurementId()
+  const adsId = resolveGoogleAdsId(import.meta.env.VITE_GOOGLE_ADS_ID, import.meta.env.PROD)
+  if (!gaId && !adsId) return
+  push(ctaTrackingCalls(pathname, ctaLocation, { gaId, adsId, ctaLabel }))
 }

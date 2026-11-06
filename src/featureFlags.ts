@@ -20,7 +20,7 @@ const pageDefaults = {
   patientRights: true,
   consent: true,
   contact: true,
-  // The seven intent landing pages in src/landing (VITE_PAGE_LANDINGPAGES).
+  // Intent landing pages in src/landing (VITE_PAGE_LANDINGPAGES).
   landingPages: true,
 }
 
