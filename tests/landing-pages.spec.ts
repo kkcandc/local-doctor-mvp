@@ -11,7 +11,7 @@ const HOME_H1 = /Treatment that slows down Alzheimer/
 const CLINIC_TEL = 'tel:+12403765730'
 const CLINIC_PHONE = '(240) 376-5730'
 const HERO_REASSURANCE =
-  'Next-day virtual visits with a board-certified neurologist. Insurance accepted. No referral needed.'
+  'Get seen by a board-certified neurologist in days. Insurance accepted. No referral needed.'
 const DASHES = /[\u2013\u2014]/
 const TYPEFORM_LIVE_ID = '01M6Q39ZHJB5XWV15ABEYGFGS1'
 const TYPEFORM_EVALUATION = 'https://localdoctor.typeform.com/evaluation'
@@ -57,7 +57,7 @@ test('every landing route has its own title, description, and canonical', () => 
     expect(landingPages[slug].reassurance).toBe(HERO_REASSURANCE)
     expect(landingPages[slug].facts.items).toEqual(
       expect.arrayContaining([
-        'Next-day virtual visits',
+        'See a doctor within days',
         'Board-certified neurologist',
         'Insurance accepted',
         'No referral needed',
