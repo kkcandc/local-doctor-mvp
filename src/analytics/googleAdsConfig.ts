@@ -27,6 +27,7 @@ const ADS_ID = /^AW-\d{6,20}$/
 const CONVERSION_LABEL = /^[A-Za-z0-9_-]{1,64}$/
 const PAGE_PATH = /^\/[A-Za-z0-9/_-]{0,160}$/
 const CTA_LOCATION = /^[a-z_]{1,32}$/
+const CTA_LABEL = /^[A-Za-z0-9][A-Za-z0-9 '.-]{0,80}$/
 
 // Clinic numbers only. Legal-page 1-800 lines are not lead conversions.
 // (844) 509-1404 is included so a future tel: link is tracked; it is not on the site today.
@@ -129,11 +130,36 @@ export function phoneTrackingCalls(adsId: string, phoneLabel: string | undefined
   return eventCalls('phone_click', adsId, phoneLabel, pathname)
 }
 
-// GA4 CTA click. Path and fixed button slot only. Not an Ads conversion.
-export function ctaTrackingCalls(pathname: string, ctaLocation?: string): GtagArgs[] {
+// Button text we chose. Anything with an email or other free text is dropped.
+export function safeCtaLabel(input: string): string | null {
+  const label = input.trim().replace(/\s+/g, ' ')
+  if (!label || label.includes('@') || !CTA_LABEL.test(label)) return null
+  return label
+}
+
+/*
+  CTA click for GA4 and Ads.
+
+  gtag.js is loaded with the Ads id. An event with no send_to is delivered only
+  to that tag (google.com/ccm/collect), so GA4 never sees cta_click. Each call
+  below names one destination. The Ads call uses the bare AW id, not AW/label,
+  so it is not a conversion. Lead and phone conversions stay separate events.
+*/
+export function ctaTrackingCalls(
+  pathname: string,
+  ctaLocation?: string,
+  options?: { gaId?: string | null; adsId?: string | null; ctaLabel?: string },
+): GtagArgs[] {
   const params: Record<string, string> = { page_path: safePagePath(pathname) }
   if (ctaLocation && CTA_LOCATION.test(ctaLocation)) params.cta_location = ctaLocation
-  return [['event', 'cta_click', params]]
+  const label = options?.ctaLabel ? safeCtaLabel(options.ctaLabel) : null
+  if (label) params.cta_label = label
+
+  const calls: GtagArgs[] = []
+  if (options?.gaId) calls.push(['event', 'cta_click', { ...params, send_to: options.gaId }])
+  if (options?.adsId) calls.push(['event', 'cta_click', { ...params, send_to: options.adsId }])
+  if (calls.length === 0) calls.push(['event', 'cta_click', params])
+  return calls
 }
 
 export function spaPageViewCall(

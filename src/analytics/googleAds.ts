@@ -54,8 +54,10 @@ export function installGoogleAds() {
   if (!id || document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) return
 
   window.dataLayer = window.dataLayer || []
-  window.gtag = function gtag(...args: unknown[]) {
-    window.dataLayer?.push(args)
+  window.gtag = function gtag() {
+    // gtag.js only dispatches the arguments object. A rest array is ignored.
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer?.push(arguments)
   }
   const script = document.createElement('script')
   script.async = true

@@ -9,6 +9,7 @@ import {
 import { DEFAULT_GA_MEASUREMENT_ID } from '../src/analytics/googleAnalyticsConfig'
 import { googleTagHtml } from '../src/analytics/googleAdsConfig'
 import { landingHtml } from '../src/landing/landingHtml'
+import { landingPages } from '../src/landing/landingContent'
 import { landingSlugs } from '../src/landing/landingMeta'
 
 const adsId = DEFAULT_GOOGLE_ADS_ID
@@ -31,6 +32,11 @@ async function gtagEntries(page: Page): Promise<GtagEntry[]> {
       })
       .filter((item): item is GtagEntry => Array.isArray(item))
   })
+}
+
+function matchesCta(params: unknown, expected: { page_path: string; cta_location: string; cta_label: string }) {
+  const value = params as { page_path?: string; cta_location?: string; cta_label?: string } | undefined
+  return value?.page_path === expected.page_path && value?.cta_location === expected.cta_location && value?.cta_label === expected.cta_label
 }
 
 async function waitForGtagEvent(page: Page, eventName: string, timeout = 10_000) {
@@ -139,15 +145,26 @@ for (const route of trackedRoutes) {
       await waitForGtagEvent(page, 'page_view')
 
       const afterCta = await gtagEntries(page)
+      const ctaParams = { page_path: `/${route}`, cta_location: 'hero', cta_label: landingPages[route].ctaLabel }
       expect(
         afterCta.some(
           (entry) =>
             entry[0] === 'event' &&
             entry[1] === 'cta_click' &&
-            (entry[2] as { page_path?: string; cta_location?: string } | undefined)?.page_path === `/${route}` &&
-            (entry[2] as { cta_location?: string } | undefined)?.cta_location === 'hero',
+            (entry[2] as { send_to?: string } | undefined)?.send_to === gaId &&
+            matchesCta(entry[2], ctaParams),
         ),
       ).toBe(true)
+      expect(
+        afterCta.some(
+          (entry) =>
+            entry[0] === 'event' &&
+            entry[1] === 'cta_click' &&
+            (entry[2] as { send_to?: string } | undefined)?.send_to === adsId &&
+            matchesCta(entry[2], ctaParams),
+        ),
+      ).toBe(true)
+      expect(afterCta.some((entry) => entry[0] === 'event' && entry[1] === 'conversion')).toBe(false)
       expect(
         afterCta.some(
           (entry) =>
