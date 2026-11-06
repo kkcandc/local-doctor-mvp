@@ -1445,6 +1445,7 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <BrandLink variant="reverse" onNavigate={onNavigate} />
         <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation and treatment.</p>
         <p className="footer-identity">Phone: {publicPhone}</p>
+        <p className="footer-identity">Email: {publicEmail}</p>
       </div>
       <div>
         <strong>Explore</strong>
