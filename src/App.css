@@ -1219,7 +1219,8 @@ a.blog-card:hover {
 }
 
 .section.start-faq-section {
-  padding-block: clamp(17.4px, 2.4vw, 33.6px);
+  padding-top: 0;
+  padding-bottom: var(--section-pad);
 }
 
 .expect-heading {
@@ -1948,10 +1949,6 @@ a.blog-card {
 
   .section.expect-section {
     padding-bottom: 8.4px;
-  }
-
-  .section.start-faq-section {
-    padding-block: 12px;
   }
 
   .primary,
