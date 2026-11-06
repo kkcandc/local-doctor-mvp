@@ -57,7 +57,7 @@ type Route =
   | 'contact'
   | 'landing'
 
-const typeformLiveId = '01M64J1XGXT19BH7GGWPKJ243K'
+const typeformLiveId = '01M6Q39ZHJB5XWV15ABEYGFGS1'
 const typeformEmbedScript = 'https://embed.typeform.com/next/embed.js'
 
 const defaultTitle = "Local Doctor | Alzheimer's Treatment Eligibility Review"
@@ -769,17 +769,15 @@ function StartPage() {
       <PageHero
         eyebrow="Get started"
         title="Find out if treatment is right for you."
-        copy="A free eligibility call will help us better understand you and your family's situation, verify insurance coverage, and define if you're eligible for our program. No obligation, nor commitment."
+        copy="Everyone's situation is unique. We work to understand yours and let you know if you're eligible to meet with one of our neurology specialists."
         primaryLabel={`Call or text ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
         showAside={false}
         image={{ src: '/assets/hero-get-started.jpg', alt: 'Three generations of a family sitting together on a lakeside dock' }}
       />
       <WhatToExpect />
-      <QualificationSection tone="ivory" />
-      <section className="section ivory intake-section">
-        <StartExperience />
-      </section>
+      <QualificationSection tone="ivory" eyebrow="Eligibility" />
+      <StartFaq />
     </div>
   )
 }
@@ -1099,30 +1097,21 @@ function usePageMeta(route: Route, slug: string) {
   }, [route, slug])
 }
 
-function StartExperience() {
-  return (
-    <div className="start-experience">
-      <EligibilityLeadForm />
-    </div>
-  )
-}
-
 function WhatToExpect() {
   return (
     <section className="section white expect-section">
-      <h2 className="expect-heading">What to expect</h2>
+      <h2 className="expect-heading">How to get started</h2>
       <div className="expect-columns">
         <div>
-          <h3>Here&apos;s how we check eligibility</h3>
+          <h3>3 easy steps</h3>
           <ol>
-            <li>Give us a call or fill out the form below so we can call you.</li>
-            <li>We collect information regarding current cognitive performance, daily activities, medical history, medications, and insurance.</li>
+            <li>Give us a call or fill out the form below.</li>
             <li>We verify your insurance and whether your needs qualify to meet with our neurology team.</li>
-            <li>If eligible, we set up a virtual visit for you to meet with a neurology specialist in days, who will perform an evaluation for diagnosis and treatment options.</li>
+            <li>If eligible, we set up a virtual visit for you to meet with a neurology specialist in days.</li>
           </ol>
         </div>
         <div>
-          <h3>What to have handy for the eligibility call</h3>
+          <h3>What to have handy</h3>
           <ul>
             <li>Insurance information</li>
             <li>Medication list</li>
@@ -1131,6 +1120,14 @@ function WhatToExpect() {
           </ul>
         </div>
       </div>
+      <EligibilityLeadForm />
+    </section>
+  )
+}
+
+function StartFaq() {
+  return (
+    <section className="section ivory start-faq-section">
       <div className="expect-faq">
         {[
           ['How does this work with my existing doctors?', 'Think of our neurology team as an extension of your current doctors. Our providers do not replace any of your existing provider relationships, and will work with them as needed.'],
@@ -1270,10 +1267,10 @@ function HonestCard() {
   )
 }
 
-function QualificationSection({ tone }: { tone: 'white' | 'ivory' }) {
+function QualificationSection({ tone, eyebrow = 'Qualification' }: { tone: 'white' | 'ivory'; eyebrow?: string }) {
   return (
     <section className={`section ${tone} fit-section`}>
-      <SectionIntro eyebrow="Qualification" title="Who is most likely to qualify." copy="This pathway is for adults with Alzheimer's disease and their families who want to understand whether disease-modifying treatment is an option for them." />
+      <SectionIntro eyebrow={eyebrow} title="Who is most likely to qualify." copy="We help adults with Alzheimer's disease, and their families, who want to understand whether disease-modifying treatment is an option." />
       <CheckList items={fitChecks} />
     </section>
   )
@@ -1448,6 +1445,7 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <BrandLink variant="reverse" onNavigate={onNavigate} />
         <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation and treatment.</p>
         <p className="footer-identity">Phone: {publicPhone}</p>
+        <p className="footer-identity">Email: {publicEmail}</p>
       </div>
       <div>
         <strong>Explore</strong>

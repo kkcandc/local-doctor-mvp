@@ -1183,11 +1183,6 @@ a.blog-card:hover {
   margin-top: var(--space-12);
 }
 
-.start-experience {
-  display: grid;
-  gap: 36px;
-}
-
 .intake-frame-wrap {
   overflow: hidden;
   height: clamp(525px, calc((100svh - 280px) * 1.25), 775px);
@@ -1223,8 +1218,9 @@ a.blog-card:hover {
   color: var(--text-heading);
 }
 
-.section.intake-section {
-  padding-block: clamp(17.4px, 2.4vw, 33.6px);
+.section.start-faq-section {
+  padding-top: 0;
+  padding-bottom: var(--section-pad);
 }
 
 .expect-heading {
@@ -1953,10 +1949,6 @@ a.blog-card {
 
   .section.expect-section {
     padding-bottom: 8.4px;
-  }
-
-  .section.intake-section {
-    padding-block: 12px;
   }
 
   .primary,
