@@ -8,6 +8,9 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:5175',
     trace: 'retain-on-failure',
+    // The site-wide chatbot embed loads more scripts and an iframe from this host. Keep test
+    // runs off the network for it so page loads stay fast and nothing talks to the live agent.
+    launchOptions: { args: ['--host-resolver-rules=MAP forms.mylocalinfusion.com ~NOTFOUND'] },
   },
   webServer: {
     command: 'npm run dev -- --host 127.0.0.1 --port 5175 --strictPort',
