@@ -60,7 +60,7 @@ type Route =
 
 type Navigate = (next: Route, slug?: string, ctaLocation?: string, ctaLabel?: string) => void
 
-const typeformLiveId = '01M6Q39ZHJB5XWV15ABEYGFGS1'
+const typeformLiveId = '01M64J1XGXT19BH7GGWPKJ243K'
 const typeformEmbedScript = 'https://embed.typeform.com/next/embed.js'
 
 const defaultTitle = "Local Doctor | Alzheimer's Treatment Eligibility Review"
@@ -792,7 +792,7 @@ function StartPage() {
       />
       <WhatToExpect />
       <QualificationSection tone="ivory" eyebrow="Eligibility" />
-      <StartFaq />
+      <EligibilityLeadForm />
     </div>
   )
 }
@@ -1135,28 +1135,26 @@ function WhatToExpect() {
           </ul>
         </div>
       </div>
-      <EligibilityLeadForm />
+      <StartFaq />
     </section>
   )
 }
 
 function StartFaq() {
   return (
-    <section className="section ivory start-faq-section">
-      <div className="expect-faq">
-        {[
-          ['How does this work with my existing doctors?', 'Think of our neurology team as an extension of your current doctors. Our providers do not replace any of your existing provider relationships, and will work with them as needed.'],
-          ['Can a caregiver be a part of this?', 'Yes! We have even seen maximal results when any loved one is involved in this journey.'],
-          ['What if my insurance is not covered?', 'Not a problem, we provide a transparent and low cost for your visits with our neurology team. Any other costs will be communicated transparently.'],
-          ["What if I'm not eligible?", 'If the honest answer is "not yet" we will let you know why and recommend resources that might still be helpful to address any of your concerns.'],
-        ].map(([question, answer]) => (
-          <article key={question}>
-            <h3>{question}</h3>
-            <p>{answer}</p>
-          </article>
-        ))}
-      </div>
-    </section>
+    <div className="expect-faq">
+      {[
+        ['How does this work with my existing doctors?', 'Think of our neurology team as an extension of your current doctors. Our providers do not replace any of your existing provider relationships, and will work with them as needed.'],
+        ['Can a caregiver be a part of this?', 'Yes! We have even seen maximal results when any loved one is involved in this journey.'],
+        ['What if my insurance is not covered?', 'Not a problem, we provide a transparent and low cost for your visits with our neurology team. Any other costs will be communicated transparently.'],
+        ["What if I'm not eligible?", 'If the honest answer is "not yet" we will let you know why and recommend resources that might still be helpful to address any of your concerns.'],
+      ].map(([question, answer]) => (
+        <article key={question}>
+          <h3>{question}</h3>
+          <p>{answer}</p>
+        </article>
+      ))}
+    </div>
   )
 }
 
@@ -1173,15 +1171,17 @@ function EligibilityLeadForm() {
   }, [])
 
   return (
-    <div className="intake-frame-wrap" id="intake">
-      <div
-        className="typeform-live-embed ph-no-capture"
-        data-tf-live={typeformLiveId}
-        data-tf-inline-on-mobile=""
-        data-tf-on-submit="localDoctorOnTypeformSubmit"
-        data-tf-transitive-search-params={typeformTransitiveSearchParams}
-      />
-    </div>
+    <section className="section white start-form-section">
+      <div className="intake-frame-wrap" id="intake">
+        <div
+          className="typeform-live-embed ph-no-capture"
+          data-tf-live={typeformLiveId}
+          data-tf-inline-on-mobile=""
+          data-tf-on-submit="localDoctorOnTypeformSubmit"
+          data-tf-transitive-search-params={typeformTransitiveSearchParams}
+        />
+      </div>
+    </section>
   )
 }
 
