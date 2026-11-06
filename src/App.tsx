@@ -523,6 +523,7 @@ function Header({
             Get Started
           </button>
         </div>
+        <a className="header-phone-mobile" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
         <button
           className="menu-button"
           type="button"
@@ -546,7 +547,9 @@ function Header({
               {label}
             </button>
           ))}
-          <a className="mobile-nav-phone" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
+          <a className="mobile-nav-phone" href={`tel:${headerPhoneHref}`}>
+            <span className="mobile-nav-phone-label">Call or text</span> {headerPhone}
+          </a>
           <button type="button" onClick={() => onNavigate('start', '', 'header', 'Get Started')}>Get Started</button>
         </nav>
       )}
