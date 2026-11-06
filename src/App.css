@@ -147,6 +147,11 @@ main {
   text-underline-offset: 4px;
 }
 
+/* Phone link beside the hamburger; only shown on phones (see the max-width: 767px block). */
+.header-phone-mobile {
+  display: none;
+}
+
 .hero-phone-link {
   display: inline-flex;
   align-items: center;
@@ -1829,6 +1834,59 @@ a.blog-card {
 
   .footer {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Phones: smaller logo, phone number beside the hamburger, and the menu's phone
+   link styled as a full-width button directly above Get Started. */
+@media (max-width: 767px) {
+  .header-inner {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: var(--space-4);
+  }
+
+  .brand-link img {
+    width: 120px;
+  }
+
+  .header-phone-mobile {
+    display: inline-flex;
+    align-items: center;
+    justify-self: end;
+    min-height: var(--control-height);
+    padding-left: var(--space-12);
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    font-weight: var(--weight-semibold);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .mobile-nav-phone {
+    justify-content: center;
+    margin-top: var(--space-16);
+    color: var(--color-primary);
+    background: var(--surface-card);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-control);
+    text-align: center;
+  }
+
+  .mobile-nav-phone:hover,
+  .mobile-nav-phone:active {
+    background: var(--surface-sunken);
+  }
+
+  .mobile-nav > button:last-child {
+    margin-top: var(--space-12);
+  }
+}
+
+/* Very narrow phones (320px class): tighten the phone number so the logo keeps its size. */
+@media (max-width: 359px) {
+  .header-phone-mobile {
+    padding-left: 0;
+    font-size: 0.8125rem;
   }
 }
 
