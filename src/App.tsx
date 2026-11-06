@@ -1270,7 +1270,7 @@ function HonestCard() {
 function QualificationSection({ tone, eyebrow = 'Qualification' }: { tone: 'white' | 'ivory'; eyebrow?: string }) {
   return (
     <section className={`section ${tone} fit-section`}>
-      <SectionIntro eyebrow={eyebrow} title="Who is most likely to qualify." copy="This pathway is for adults with Alzheimer's disease and their families who want to understand whether disease-modifying treatment is an option for them." />
+      <SectionIntro eyebrow={eyebrow} title="Who is most likely to qualify." copy="We help adults with Alzheimer's disease, and their families, who want to understand whether disease-modifying treatment is an option." />
       <CheckList items={fitChecks} />
     </section>
   )
