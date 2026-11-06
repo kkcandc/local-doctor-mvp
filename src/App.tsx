@@ -33,6 +33,11 @@ import {
 } from './compliancePages'
 import { isPageEnabled, type PageFlag } from './featureFlags'
 import { noteSpaNavigation } from './analytics/googleAds'
+import { pathWithAdsParams, typeformTransitiveSearchParams } from './analytics/googleAdsConfig'
+import { noteGaCtaClick, noteGaSpaNavigation } from './analytics/googleAnalytics'
+import { noteEligibilityStarted, notePostHogNavigation } from './analytics/posthog'
+import { LandingPage } from './landing/LandingPage'
+import { isLandingSlug, landingCanonical, landingMeta } from './landing/landingMeta'
 import './App.css'
 
 type Route =
@@ -50,13 +55,17 @@ type Route =
   | 'patientRights'
   | 'consent'
   | 'contact'
+  | 'landing'
 
-const typeformLiveId = '01M64J1XGXT19BH7GGWPKJ243K'
+type Navigate = (next: Route, slug?: string, ctaLocation?: string, ctaLabel?: string) => void
+
+const typeformLiveId = '01M6Q39ZHJB5XWV15ABEYGFGS1'
 const typeformEmbedScript = 'https://embed.typeform.com/next/embed.js'
 
 const defaultTitle = "Local Doctor | Alzheimer's Treatment Eligibility Review"
 const defaultDescription =
   "Local Doctor is a virtual Alzheimer's specialty clinic for treatment eligibility review, records, testing, insurance questions, and local follow-through for people who may qualify."
+const defaultOgTitle = "Connect with Alzheimer's specialists and advanced treatment today"
 
 const routeMeta: Partial<Record<Route, { title: string; description: string }>> = {
   privacy: {
@@ -85,7 +94,7 @@ const routeMeta: Partial<Record<Route, { title: string; description: string }>> 
   },
 }
 
-const routePaths: Record<Exclude<Route, 'blogPost'>, string> = {
+const routePaths: Record<Exclude<Route, 'blogPost' | 'landing'>, string> = {
   home: '/',
   treatments: '/treatments',
   how: '/how-it-works',
@@ -249,7 +258,7 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
       ['Who is eligible for services?', 'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. Our eligibility call is fast and simple, providing a clear answer within 15-30 minutes.'],
       ['How soon can I be seen?', 'Once you\'ve been determined eligible for our program, you can be seen by one of our neurology specialists in days, depending on your availability.'],
       ['How long does the eligibility process take?', 'Our eligibility process is centered around a quick call that should take 15-30 minutes. Please have the patient\'s insurance details, medication list, and medical history handy to make it go smoother.'],
-      ['Do I need a referral from my current doctor?', 'Depending on your insurance, you may need a referral. We will let you know definitively during your eligibility check.'],
+      ['Do I need a referral from my current doctor?', 'No referral is needed. Start with a call or the short form, and we review eligibility and insurance with you before a visit is booked.'],
       ['What if I already have a diagnosis?', 'If you already have a diagnosis for mild cognitive impairment, dementia, or Alzheimer\'s disease, you may be a strong candidate for our program and it may expedite your path to treatment.'],
       ['Can I call on behalf of my spouse, parent, or loved one?', 'Absolutely! We welcome any loved one who wishes to be a part of the process and would prefer that one joins the first visit with the patient.'],
       ['What if I\'m not eligible for services?', 'If you don\'t happen to be eligible for our program yet, we will let you know transparently and why.'],
@@ -296,7 +305,7 @@ const headerPhone = '(240) 376-5730'
 const headerPhoneHref = '+12403765730'
 
 function routeEnabled(route: Route) {
-  const flag: PageFlag = route === 'blogPost' ? 'blog' : route
+  const flag: PageFlag = route === 'blogPost' ? 'blog' : route === 'landing' ? 'landingPages' : route
   return isPageEnabled(flag)
 }
 
@@ -308,8 +317,8 @@ function normalizePath() {
   return window.location.pathname.replace(/^\/+|\/+$/g, '')
 }
 
-function readLocation(): { route: Route; slug: string } {
-  const path = normalizePath()
+function readLocation(path = normalizePath()): { route: Route; slug: string } {
+  if (isLandingSlug(path)) return { route: 'landing', slug: path }
   if (path === 'blog') return { route: 'blog', slug: '' }
   if (path.startsWith('blog/')) {
     const slug = decodeURIComponent(path.slice('blog/'.length).split('/')[0] ?? '')
@@ -320,7 +329,7 @@ function readLocation(): { route: Route; slug: string } {
 
 function App() {
   const [route, setRoute] = useState<Route>('home')
-  const [blogSlug, setBlogSlug] = useState('')
+  const [routeSlug, setRouteSlug] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrollRequest, setScrollRequest] = useState(0)
 
@@ -348,7 +357,7 @@ function App() {
         next = { route: 'home', slug: '' }
       }
       setRoute(next.route)
-      setBlogSlug(next.slug)
+      setRouteSlug(next.slug)
       setMenuOpen(false)
     }
 
@@ -369,11 +378,19 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [scrollRequest])
 
-  usePageMeta(route, blogSlug)
+  usePageMeta(route, routeSlug)
 
   useEffect(() => {
     noteSpaNavigation(window.location.pathname)
-  }, [route, blogSlug])
+  }, [route, routeSlug])
+
+  useEffect(() => {
+    noteGaSpaNavigation(window.location.pathname)
+  }, [route, routeSlug])
+
+  useEffect(() => {
+    notePostHogNavigation(window.location.pathname)
+  }, [route, routeSlug])
 
   useEffect(() => {
     const hash = window.location.hash.replace(/^#/, '')
@@ -381,17 +398,24 @@ function App() {
     document.getElementById(hash)?.scrollIntoView()
   }, [route])
 
-  function navigate(next: Route, slug = '') {
+  function navigate(next: Route, slug = '', ctaLocation?: string, ctaLabel?: string) {
     if (!routeEnabled(next)) {
       next = 'home'
       slug = ''
     }
-    const path = next === 'blogPost' ? `/blog/${slug}` : routePaths[next]
+    if (next === 'start') {
+      noteEligibilityStarted(window.location.pathname, ctaLocation)
+      noteGaCtaClick(window.location.pathname, ctaLocation, ctaLabel)
+    }
+    const path = next === 'blogPost' ? `/blog/${slug}` : next === 'landing' ? `/${slug}` : routePaths[next]
+    // Keep gclid and utm_* across SPA navigations so Ads can attribute the visit and
+    // Typeform can read them on /get-started. Contact and health params stay dropped.
+    const nextUrl = pathWithAdsParams(path, window.location.search)
     setRoute(next)
-    setBlogSlug(next === 'blogPost' ? slug : '')
+    setRouteSlug(next === 'blogPost' || next === 'landing' ? slug : '')
     setMenuOpen(false)
-    if (window.location.pathname !== path) {
-      window.history.pushState({}, '', path)
+    if (`${window.location.pathname}${window.location.search}` !== nextUrl) {
+      window.history.pushState({}, '', nextUrl)
     }
     setScrollRequest((count) => count + 1)
   }
@@ -406,19 +430,30 @@ function App() {
       {route === 'start' && <StartPage />}
       {route === 'faq' && <FaqPage onNavigate={navigate} />}
       {route === 'blog' && <BlogPage onNavigate={navigate} />}
-      {route === 'blogPost' && <BlogPostPage slug={blogSlug} onNavigate={navigate} />}
+      {route === 'blogPost' && <BlogPostPage slug={routeSlug} onNavigate={navigate} />}
       {route === 'refer' && <ReferPage onNavigate={navigate} />}
       {route === 'privacy' && <PrivacyPage />}
       {route === 'terms' && <TermsPage />}
       {route === 'patientRights' && <PatientRightsPage />}
       {route === 'consent' && <ConsentPage />}
       {route === 'contact' && <ContactPage />}
+      {route === 'landing' && isLandingSlug(routeSlug) && (
+        <LandingPage
+          key={routeSlug}
+          slug={routeSlug}
+          onStart={(ctaLocation, ctaLabel) => navigate('start', '', ctaLocation, ctaLabel)}
+          onOpenPath={(path) => {
+            const next = readLocation(path.replace(/^\/+|\/+$/g, ''))
+            navigate(next.route, next.slug)
+          }}
+        />
+      )}
       <Footer onNavigate={navigate} />
     </main>
   )
 }
 
-function BrandLink({ variant = 'color', onNavigate }: { variant?: 'color' | 'reverse'; onNavigate: (route: Route) => void }) {
+function BrandLink({ variant = 'color', onNavigate }: { variant?: 'color' | 'reverse'; onNavigate: Navigate }) {
   const src = variant === 'reverse' ? '/assets/brand/local-doctor-logo-reverse.svg' : '/assets/brand/local-doctor-logo.svg'
 
   return (
@@ -445,7 +480,7 @@ function Header({
   route: Route
   menuOpen: boolean
   onToggleMenu: () => void
-  onNavigate: (route: Route) => void
+  onNavigate: Navigate
 }) {
   const navItems = enabledLinks<[Route, string]>([
     ['how', 'How it works'],
@@ -483,8 +518,8 @@ function Header({
         </nav>
         <div className="header-actions">
           <a className="header-phone" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
-          <button className="header-cta" type="button" onClick={() => onNavigate('start')}>
-            Check eligibility
+          <button className="header-cta" type="button" onClick={() => onNavigate('start', '', 'header', 'Get Started')}>
+            Get Started
           </button>
         </div>
         <button
@@ -511,14 +546,14 @@ function Header({
             </button>
           ))}
           <a className="mobile-nav-phone" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
-          <button type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
+          <button type="button" onClick={() => onNavigate('start', '', 'header', 'Get Started')}>Get Started</button>
         </nav>
       )}
     </header>
   )
 }
 
-function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+function HomePage({ onNavigate }: { onNavigate: Navigate }) {
   return (
     <>
       <section className="hero">
@@ -532,7 +567,7 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
               New FDA-approved treatments can slow the progression of early Alzheimer&apos;s. Get a second opinion from our neurology team who specialize in cognitive impairment and disease-modifying treatments to see if you&apos;re eligible.
             </p>
             <div className="hero-actions">
-              <button className="accent" type="button" onClick={() => onNavigate('start')}>Check eligibility</button>
+              <button className="accent" type="button" onClick={() => onNavigate('start', '', 'hero', 'Get Started')}>Get Started</button>
               {routeEnabled('how') && <button className="secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>}
             </div>
             <div className="trust-note"><span /> Backed by a national infusion network and a focused treatment-readiness pathway.</div>
@@ -591,7 +626,7 @@ function HomePage({ onNavigate }: { onNavigate: (route: Route) => void }) {
   )
 }
 
-function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+function TreatmentsPage({ onNavigate }: { onNavigate: Navigate }) {
   return (
     <>
       <section className="treatment-hero">
@@ -599,7 +634,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
           <p className="eyebrow">Treatments</p>
           <h1>FDA-approved treatments for early Alzheimer's disease.</h1>
           <p>Leqembi and Kisunla are FDA-approved infusion treatments shown to slow the progression of Alzheimer&apos;s disease, not just treat its symptoms. In clinical trials they slowed decline for some patients but they are not a cure, they carry risks, and they are not right for everyone. We help you understand all of it.</p>
-          <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={20} /></button>
+          <button className="primary" type="button" onClick={() => onNavigate('start', '', 'hero', 'Get Started')}>Get Started <ArrowRight size={20} /></button>
         </div>
         <img src="/assets/hero-leqembi-iv.webp" alt="Leqembi (lecanemab) IV infusion bag" width={1178} height={1335} fetchPriority="high" />
       </section>
@@ -628,7 +663,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: (route: Route) => void }) 
   )
 }
 
-function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+function HowPage({ onNavigate }: { onNavigate: Navigate }) {
   return (
     <>
       <PageHero
@@ -637,8 +672,8 @@ function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         copy="Every step is virtual where it can be, and in-person only where it has to be."
         icon={<CalendarClock size={38} />}
         aside={{ title: 'Family and loved ones', text: 'Our preference is for loved ones to join the virtual provider visits and be a part of the process.' }}
-        onPrimary={() => onNavigate('start')}
-        primaryLabel="Check eligibility now"
+        onPrimary={() => onNavigate('start', '', 'hero', 'Get Started')}
+        primaryLabel="Get Started"
         wideCopy
       />
       <section className="section white compact-section">
@@ -687,7 +722,7 @@ function HowPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
   )
 }
 
-function AboutPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+function AboutPage({ onNavigate }: { onNavigate: Navigate }) {
   return (
     <>
       <PageHero
@@ -695,8 +730,8 @@ function AboutPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         title="A specialist evaluation built around getting you an answer."
         copy="Local Doctor is a virtual Alzheimer's specialty clinic, supported by navigators, diagnostic partners, prescribing clinicians, and Local Infusion's local treatment network."
         icon={<UsersRound size={38} />}
-        onPrimary={() => onNavigate('start')}
-        primaryLabel="Check eligibility"
+        onPrimary={() => onNavigate('start', '', 'hero', 'Get Started')}
+        primaryLabel="Get Started"
       />
       <section className="section white">
         <SectionIntro eyebrow="Care team roles" title="The clinic is coordinated, not a directory of disconnected appointments." />
@@ -742,22 +777,20 @@ function StartPage() {
       <PageHero
         eyebrow="Get started"
         title="Find out if treatment is right for you."
-        copy="A free eligibility call will help us better understand you and your family's situation, verify insurance coverage, and define if you're eligible for our program. No obligation, nor commitment."
+        copy="Everyone's situation is unique. We work to understand yours and let you know if you're eligible to meet with one of our neurology specialists."
         primaryLabel={`Call or text ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
         showAside={false}
         image={{ src: '/assets/hero-get-started.jpg', alt: 'Three generations of a family sitting together on a lakeside dock' }}
       />
       <WhatToExpect />
-      <QualificationSection tone="ivory" />
-      <section className="section ivory intake-section">
-        <StartExperience />
-      </section>
+      <QualificationSection tone="ivory" eyebrow="Eligibility" />
+      <StartFaq />
     </div>
   )
 }
 
-function ReferPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+function ReferPage({ onNavigate }: { onNavigate: Navigate }) {
   return (
     <>
       <PageHero
@@ -765,7 +798,7 @@ function ReferPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
         title="Refer patients for Alzheimer's treatment-readiness review without ending your relationship."
         copy="Local Doctor is a focused pathway for patients who may need anti-amyloid treatment eligibility review, diagnostic workup coordination, payer support, and local infusion follow-through."
         icon={<Stethoscope size={38} />}
-        onPrimary={() => onNavigate('start')}
+        onPrimary={() => onNavigate('start', '', 'hero', 'Prepare a referral')}
         primaryLabel="Prepare a referral"
       />
       <section className="section white">
@@ -794,12 +827,12 @@ function ReferPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
   )
 }
 
-function FaqPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
+function FaqPage({ onNavigate }: { onNavigate: Navigate }) {
   const [openItem, setOpenItem] = useState('getting-started-0')
 
   return (
     <>
-      <PageHero eyebrow="FAQ" title="Answers to what patients and families ask us most." copy="Straight, specific answers about eligibility, cost, visits, treatment, and safety." showAside={false} onPrimary={() => onNavigate('start')} primaryLabel="Check eligibility" />
+      <PageHero eyebrow="FAQ" title="Answers to what patients and families ask us most." copy="Straight, specific answers about eligibility, cost, visits, treatment, and safety." showAside={false} onPrimary={() => onNavigate('start', '', 'hero', 'Get Started')} primaryLabel="Get Started" />
       <section className="section white faq-section">
         <div className="faq-jump-list">
           {faqCategories.map((category) => (
@@ -846,7 +879,7 @@ function FaqPage({ onNavigate }: { onNavigate: (route: Route) => void }) {
   )
 }
 
-function BlogPage({ onNavigate }: { onNavigate: (route: Route, slug?: string) => void }) {
+function BlogPage({ onNavigate }: { onNavigate: Navigate }) {
   return (
     <>
       <PageHero
@@ -854,8 +887,8 @@ function BlogPage({ onNavigate }: { onNavigate: (route: Route, slug?: string) =>
         title="Alzheimer’s articles, with credit to the original publisher."
         copy="These pieces were originally published by Local Infusion. Local Doctor republishes them so patients and caregivers can read them here, with a link back to the source."
         showAside={false}
-        onPrimary={() => onNavigate('start')}
-        primaryLabel="Check eligibility"
+        onPrimary={() => onNavigate('start', '', 'hero', 'Get Started')}
+        primaryLabel="Get Started"
       />
       <section className="section white">
         <div className="blog-grid">
@@ -881,7 +914,7 @@ function BlogPage({ onNavigate }: { onNavigate: (route: Route, slug?: string) =>
   )
 }
 
-function BlogPostPage({ slug, onNavigate }: { slug: string; onNavigate: (route: Route, slug?: string) => void }) {
+function BlogPostPage({ slug, onNavigate }: { slug: string; onNavigate: Navigate }) {
   const post = getBlogPost(slug)
 
   if (!post) {
@@ -928,8 +961,8 @@ function BlogPostPage({ slug, onNavigate }: { slug: string; onNavigate: (route: 
           <p>
             Local Doctor is a virtual front door for specialist evaluation. It does not operate infusion centers, set drug prices, or replace the clinician who would prescribe treatment.
           </p>
-          <button className="primary" type="button" onClick={() => onNavigate('start')}>
-            Check eligibility <ArrowRight size={20} />
+          <button className="primary" type="button" onClick={() => onNavigate('start', '', 'article', 'Get Started')}>
+            Get Started <ArrowRight size={20} />
           </button>
         </aside>
         <div className="related-posts">
@@ -973,6 +1006,24 @@ function BlogBlockView({ block }: { block: BlogBlock }) {
     )
   }
   return <p>{block.text}</p>
+}
+
+// Landing pages ship a static shell with page-specific Open Graph tags (vite.config.ts),
+// so leaving one has to put the site defaults back.
+function setOpenGraph({ title, description, url }: { title: string; description: string; url?: string }) {
+  document.querySelector('meta[property="og:title"]')?.setAttribute('content', title)
+  document.querySelector('meta[property="og:description"]')?.setAttribute('content', description)
+  let ogUrl = document.querySelector('meta[property="og:url"]')
+  if (!url) {
+    ogUrl?.remove()
+    return
+  }
+  if (!ogUrl) {
+    ogUrl = document.createElement('meta')
+    ogUrl.setAttribute('property', 'og:url')
+    document.head.appendChild(ogUrl)
+  }
+  ogUrl.setAttribute('content', url)
 }
 
 function usePageMeta(route: Route, slug: string) {
@@ -1027,6 +1078,17 @@ function usePageMeta(route: Route, slug: string) {
         'content',
         'Alzheimer’s articles originally published by Local Infusion and republished by Local Doctor with attribution and a link to each source.',
       )
+    } else if (route === 'landing' && isLandingSlug(slug)) {
+      clearSyndicationTags()
+      const meta = landingMeta[slug]
+      const url = landingCanonical(slug)
+      document.title = meta.title
+      description?.setAttribute('content', meta.description)
+      const canonical = document.createElement('link')
+      canonical.rel = 'canonical'
+      canonical.href = url
+      document.head.appendChild(canonical)
+      setOpenGraph({ title: meta.title, description: meta.description, url })
     } else {
       clearSyndicationTags()
       const meta = routeMeta[route]
@@ -1036,36 +1098,28 @@ function usePageMeta(route: Route, slug: string) {
 
     return () => {
       clearSyndicationTags()
+      setOpenGraph({ title: defaultOgTitle, description: defaultDescription })
       document.title = defaultTitle
       description?.setAttribute('content', defaultDescription)
     }
   }, [route, slug])
 }
 
-function StartExperience() {
-  return (
-    <div className="start-experience">
-      <EligibilityLeadForm />
-    </div>
-  )
-}
-
 function WhatToExpect() {
   return (
     <section className="section white expect-section">
-      <h2 className="expect-heading">What to expect</h2>
+      <h2 className="expect-heading">How to get started</h2>
       <div className="expect-columns">
         <div>
-          <h3>Here&apos;s how we check eligibility</h3>
+          <h3>3 easy steps</h3>
           <ol>
-            <li>Give us a call or fill out the form below so we can call you.</li>
-            <li>We collect information regarding current cognitive performance, daily activities, medical history, medications, and insurance.</li>
+            <li>Give us a call or fill out the form below.</li>
             <li>We verify your insurance and whether your needs qualify to meet with our neurology team.</li>
-            <li>If eligible, we set up a virtual visit for you to meet with a neurology specialist in days, who will perform an evaluation for diagnosis and treatment options.</li>
+            <li>If eligible, we set up a virtual visit for you to meet with a neurology specialist in days.</li>
           </ol>
         </div>
         <div>
-          <h3>What to have handy for the eligibility call</h3>
+          <h3>What to have handy</h3>
           <ul>
             <li>Insurance information</li>
             <li>Medication list</li>
@@ -1074,6 +1128,14 @@ function WhatToExpect() {
           </ul>
         </div>
       </div>
+      <EligibilityLeadForm />
+    </section>
+  )
+}
+
+function StartFaq() {
+  return (
+    <section className="section ivory start-faq-section">
       <div className="expect-faq">
         {[
           ['How does this work with my existing doctors?', 'Think of our neurology team as an extension of your current doctors. Our providers do not replace any of your existing provider relationships, and will work with them as needed.'],
@@ -1106,10 +1168,11 @@ function EligibilityLeadForm() {
   return (
     <div className="intake-frame-wrap" id="intake">
       <div
-        className="typeform-live-embed"
+        className="typeform-live-embed ph-no-capture"
         data-tf-live={typeformLiveId}
         data-tf-inline-on-mobile=""
         data-tf-on-submit="localDoctorOnTypeformSubmit"
+        data-tf-transitive-search-params={typeformTransitiveSearchParams}
       />
     </div>
   )
@@ -1157,7 +1220,7 @@ function ProcessGrid() {
   )
 }
 
-function TreatmentPreview({ onNavigate }: { onNavigate: (route: Route) => void }) {
+function TreatmentPreview({ onNavigate }: { onNavigate: Navigate }) {
   return (
     <>
       <SectionIntro eyebrow="Treatments" title="Two FDA-approved treatments for early Alzheimer's." copy="Leqembi and Kisunla are disease-modifying IV therapies for early Alzheimer&apos;s disease. In clinical trials, they showed a real, moderate slowing of cognitive decline - roughly 25-33% over 18 months. Not a cure, and not right for everyone, but the first treatments that act on the disease itself. We help you and your family understand the requirements, risks, and everything it entails." />
@@ -1213,10 +1276,10 @@ function HonestCard() {
   )
 }
 
-function QualificationSection({ tone }: { tone: 'white' | 'ivory' }) {
+function QualificationSection({ tone, eyebrow = 'Qualification' }: { tone: 'white' | 'ivory'; eyebrow?: string }) {
   return (
     <section className={`section ${tone} fit-section`}>
-      <SectionIntro eyebrow="Qualification" title="Who is most likely to qualify." copy="This pathway is for adults with Alzheimer's disease and their families who want to understand whether disease-modifying treatment is an option for them." />
+      <SectionIntro eyebrow={eyebrow} title="Who is most likely to qualify." copy="We help adults with Alzheimer's disease, and their families, who want to understand whether disease-modifying treatment is an option." />
       <CheckList items={fitChecks} />
     </section>
   )
@@ -1319,7 +1382,7 @@ function ConversionPanel({
   secondaryRoute,
   compact = false,
 }: {
-  onNavigate: (route: Route) => void
+  onNavigate: Navigate
   eyebrow?: string
   title?: string
   copy?: string
@@ -1335,7 +1398,7 @@ function ConversionPanel({
         <p>{copy}</p>
       </div>
       <div className="conversion-actions">
-        <button className="primary" type="button" onClick={() => onNavigate('start')}>Check eligibility <ArrowRight size={20} /></button>
+        <button className="primary" type="button" onClick={() => onNavigate('start', '', 'closing', 'Get Started')}>Get Started <ArrowRight size={20} /></button>
         {secondaryLabel && secondaryRoute && routeEnabled(secondaryRoute) && (
           <button className="secondary" type="button" onClick={() => onNavigate(secondaryRoute)}>{secondaryLabel}</button>
         )}
@@ -1363,7 +1426,7 @@ function Metric({ value, label }: { value: string; label: string }) {
   )
 }
 
-function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
+function Footer({ onNavigate }: { onNavigate: Navigate }) {
   const exploreLinks = enabledLinks<[Route, string]>([
     ['home', 'Home'],
     ['how', 'How it works'],
@@ -1372,7 +1435,7 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
     ['blog', 'Blog'],
   ])
   const startLinksBeforeEmail = enabledLinks<[Route, string]>([
-    ['start', 'Check eligibility'],
+    ['start', 'Get Started'],
     ['faq', 'FAQs'],
   ])
   const startLinksAfterEmail = enabledLinks<[Route, string]>([
@@ -1391,6 +1454,7 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
         <BrandLink variant="reverse" onNavigate={onNavigate} />
         <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation and treatment.</p>
         <p className="footer-identity">Phone: {publicPhone}</p>
+        <p className="footer-identity">Email: {publicEmail}</p>
       </div>
       <div>
         <strong>Explore</strong>
@@ -1416,7 +1480,7 @@ function Footer({ onNavigate }: { onNavigate: (route: Route) => void }) {
       </div>
       <div className="footer-legal">
         <p>
-          Leqembi and Kisunla are FDA-approved to help slow the progression of early Alzheimer&apos;s disease in people who qualify. Individual results vary, and these treatments are not a cure. Local Doctor provides specialist evaluation and care coordination; it does not replace emergency care — if you are experiencing a medical emergency, call 911.
+          Leqembi and Kisunla are FDA-approved to help slow the progression of early Alzheimer&apos;s disease in people who qualify. Individual results vary, and these treatments are not a cure. Local Doctor provides specialist evaluation and care coordination; it does not replace emergency care. If you are experiencing a medical emergency, call 911.
         </p>
         <p className="footer-copy">© {new Date().getFullYear()} Local Doctor. All rights reserved.</p>
       </div>

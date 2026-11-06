@@ -20,6 +20,8 @@ const pageDefaults = {
   patientRights: true,
   consent: true,
   contact: true,
+  // Intent landing pages in src/landing (VITE_PAGE_LANDINGPAGES).
+  landingPages: true,
 }
 
 export type PageFlag = keyof typeof pageDefaults
