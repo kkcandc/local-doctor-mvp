@@ -399,15 +399,17 @@ function App() {
     document.getElementById(hash)?.scrollIntoView()
   }, [route])
 
+  function trackCtaClick(ctaLocation?: string, ctaLabel?: string) {
+    noteEligibilityStarted(window.location.pathname, ctaLocation)
+    noteGaCtaClick(window.location.pathname, ctaLocation, ctaLabel)
+  }
+
   function navigate(next: Route, slug = '', ctaLocation?: string, ctaLabel?: string) {
     if (!routeEnabled(next)) {
       next = 'home'
       slug = ''
     }
-    if (next === 'start') {
-      noteEligibilityStarted(window.location.pathname, ctaLocation)
-      noteGaCtaClick(window.location.pathname, ctaLocation, ctaLabel)
-    }
+    if (next === 'start') trackCtaClick(ctaLocation, ctaLabel)
     const path = next === 'blogPost' ? `/blog/${slug}` : next === 'landing' ? `/${slug}` : routePaths[next]
     // Keep gclid and utm_* across SPA navigations so Ads can attribute the visit and
     // Typeform can read them on /get-started. Contact and health params stay dropped.
@@ -443,6 +445,7 @@ function App() {
           key={routeSlug}
           slug={routeSlug}
           onStart={(ctaLocation, ctaLabel) => navigate('start', '', ctaLocation, ctaLabel)}
+          onTrackCta={trackCtaClick}
           onOpenPath={(path) => {
             const next = readLocation(path.replace(/^\/+|\/+$/g, ''))
             navigate(next.route, next.slug)

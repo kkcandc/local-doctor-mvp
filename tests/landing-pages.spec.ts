@@ -11,14 +11,15 @@ const HOME_H1 = /Treatment that slows down Alzheimer/
 const CLINIC_TEL = 'tel:+12403765730'
 const CLINIC_PHONE = '(240) 376-5730'
 const HERO_REASSURANCE =
-  'Next-day virtual visits with a board-certified neurologist. Insurance accepted. No referral needed.'
+  'Get seen by a board-certified neurologist in days. Insurance accepted. No referral needed.'
 const DASHES = /[\u2013\u2014]/
 const TYPEFORM_LIVE_ID = '01M6Q39ZHJB5XWV15ABEYGFGS1'
+const TYPEFORM_EVALUATION = 'https://localdoctor.typeform.com/evaluation'
 
 const heroCtaLabels: Record<LandingSlug, string> = {
-  'dementia-evaluation': 'Book Your Evaluation',
-  'alzheimers-evaluation': 'Book Your Evaluation',
-  'memory-evaluation': 'Book Your Evaluation',
+  'dementia-evaluation': 'Start Evaluation',
+  'alzheimers-evaluation': 'Start Evaluation',
+  'memory-evaluation': 'Start Evaluation',
   'alzheimers-doctor-maryland': "See an Alzheimer's Doctor",
   'memory-specialist-maryland': 'Talk to a Memory Specialist',
   'alzheimers-second-opinion': 'Request a Second Opinion',
@@ -30,6 +31,17 @@ const viewports = [
   { name: 'desktop', use: { viewport: { width: 1366, height: 900 } } },
   { name: 'mobile', use: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } },
 ] as const
+
+function expectedDestination(slug: LandingSlug) {
+  return resolveDestination(landingDestinations[landingPages[slug].funnel])
+}
+
+// Keeps the browser off the real Typeform while still letting a click navigate there.
+async function stubTypeform(page: Page) {
+  await page.route('https://localdoctor.typeform.com/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>Typeform stub</title>' }),
+  )
+}
 
 test('every landing route has its own title, description, and canonical', () => {
   const titles = landingSlugs.map((slug) => landingMeta[slug].title)
@@ -45,7 +57,7 @@ test('every landing route has its own title, description, and canonical', () => 
     expect(landingPages[slug].reassurance).toBe(HERO_REASSURANCE)
     expect(landingPages[slug].facts.items).toEqual(
       expect.arrayContaining([
-        'Next-day virtual visits',
+        'See a doctor within days',
         'Board-certified neurologist',
         'Insurance accepted',
         'No referral needed',
@@ -113,9 +125,13 @@ test('the homepage hero CTA label stays Get Started', async ({ page }) => {
   await expect(page.locator('.hero-actions').getByRole('button', { name: 'Get Started' })).toBeVisible()
 })
 
-test('landing CTAs use the existing intake until a new form is configured', () => {
+test('only the three evaluation pages send their CTAs to the evaluation Typeform', () => {
+  expect(landingDestinations.evaluationForm).toEqual({ kind: 'external', href: TYPEFORM_EVALUATION })
+  expect(resolveDestination(landingDestinations.evaluationForm)).toEqual({ kind: 'external', href: TYPEFORM_EVALUATION })
   expect(landingDestinations.evaluation).toEqual({ kind: 'intake' })
   expect(landingDestinations.onlineScreening).toEqual({ kind: 'intake' })
+  const typeformSlugs = landingSlugs.filter((slug) => expectedDestination(slug).kind === 'external')
+  expect(typeformSlugs).toEqual(['dementia-evaluation', 'alzheimers-evaluation', 'memory-evaluation'])
   expect(isAllowedExternalHref('https://localdoctor.typeform.com/to/abc123')).toBe(true)
   expect(isAllowedExternalHref('https://form.typeform.com/to/abc123')).toBe(true)
   expect(isAllowedExternalHref('http://form.typeform.com/to/abc123')).toBe(false)
@@ -145,9 +161,11 @@ for (const viewport of viewports) {
 
         const ctas = landing.locator('[data-cta-location]')
         expect(await ctas.count()).toBeGreaterThanOrEqual(2)
+        const destination = expectedDestination(slug)
         for (const cta of await ctas.all()) {
           await expect(cta).toHaveText(heroCtaLabels[slug])
-          await expect(cta).toHaveAttribute('href', /\/get-started/)
+          if (destination.kind === 'external') await expect(cta).toHaveAttribute('href', destination.href)
+          else await expect(cta).toHaveAttribute('href', /\/get-started/)
         }
 
         const hero = landing.locator('[data-cta-location="hero"]')
@@ -206,11 +224,21 @@ for (const viewport of viewports) {
       }
     })
 
-    test('the hero CTA opens the existing intake from each landing page', async ({ page }) => {
+    test('the hero CTA opens its destination from each landing page', async ({ page }) => {
+      await stubTypeform(page)
       for (const slug of landingSlugs) {
         await page.goto(`/${slug}`)
         await expect(page.locator('[data-cta-location="hero"]')).toHaveText(heroCtaLabels[slug])
         await page.locator('[data-cta-location="hero"]').click()
+        const destination = expectedDestination(slug)
+        if (destination.kind === 'external') {
+          await expect(page).toHaveURL(destination.href)
+          // Back must return to the landing page, not to an in-app /get-started entry.
+          await page.goBack()
+          await expect(page).toHaveURL(new RegExp(`/${slug}$`))
+          await expect(page.locator(`.landing-page[data-landing="${slug}"]`)).toBeVisible()
+          continue
+        }
         await expect(page).toHaveURL(/\/get-started$/)
         await expect(page.locator('.typeform-live-embed')).toHaveAttribute('data-tf-live', TYPEFORM_LIVE_ID)
         expect(await page.evaluate(() => window.scrollY)).toBe(0)
@@ -289,8 +317,12 @@ test.describe('CTA attribution', () => {
   test('a landing CTA reports the source page and button slot only', async ({ page }) => {
     const events = await recordEvents(page)
     await page.goto('/memory-evaluation')
-    await page.locator('[data-cta-location="caregiver_path"]').click()
-    await expect(page).toHaveURL(/\/get-started$/)
+    const cta = page.locator('[data-cta-location="caregiver_path"]')
+    await expect(cta).toHaveAttribute('href', TYPEFORM_EVALUATION)
+    // Stay on the page so the recorded events are not cut off by leaving for Typeform.
+    // Navigation itself is covered by the hero CTA test above.
+    await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), true))
+    await cta.click()
     await expect
       .poll(() => events.find((e) => e.event === 'eligibility_check_started')?.properties, { timeout: 20_000 })
       .toMatchObject({ source_path: '/memory-evaluation', cta_location: 'caregiver_path' })
