@@ -293,6 +293,11 @@ main {
   text-decoration: none;
 }
 
+/* "Call or text" prefix; only shown on phones (see the max-width: 767px block). */
+.mobile-nav-phone-label {
+  display: none;
+}
+
 .mobile-nav button {
   min-height: var(--control-height);
   padding: var(--space-12) var(--space-8);
@@ -1875,6 +1880,13 @@ a.blog-card {
   .mobile-nav-phone:hover,
   .mobile-nav-phone:active {
     background: var(--surface-sunken);
+  }
+
+  .mobile-nav-phone-label {
+    display: inline;
+    margin-right: var(--space-4);
+    font-size: 0.875rem;
+    font-weight: var(--weight-regular);
   }
 
   .mobile-nav > button:last-child {
