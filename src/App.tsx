@@ -61,7 +61,7 @@ type Route =
 type Navigate = (next: Route, slug?: string, ctaLocation?: string, ctaLabel?: string) => void
 
 const typeformLiveId = '01M6Q39ZHJB5XWV15ABEYGFGS1'
-const typeformEmbedScript = 'https://embed.typeform.com/next/embed.js'
+const typeformEmbedScript = '//embed.typeform.com/next/embed.js'
 
 const defaultTitle = "Local Doctor | Alzheimer's Treatment Eligibility Review"
 const defaultDescription =
@@ -1174,7 +1174,6 @@ function EligibilityLeadForm() {
       <div
         className="typeform-live-embed ph-no-capture"
         data-tf-live={typeformLiveId}
-        data-tf-inline-on-mobile=""
         data-tf-on-submit="localDoctorOnTypeformSubmit"
         data-tf-transitive-search-params={typeformTransitiveSearchParams}
       />

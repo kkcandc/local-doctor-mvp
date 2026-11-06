@@ -2092,9 +2092,11 @@ a.blog-card {
     min-width: 0;
   }
 
+  /* On phones Typeform shows a placeholder welcome screen here and opens the form full
+     screen on tap, so the frame only needs Typeform's default live-embed height. */
   .intake-frame-wrap {
     height: auto;
-    min-height: 87.5dvh;
+    min-height: 0;
   }
 
   .intake-frame-wrap iframe,
@@ -2104,8 +2106,8 @@ a.blog-card {
   .typeform-live-embed .tf-v1-widget {
     width: 100% !important;
     max-width: 100%;
-    height: 87.5dvh !important;
-    min-height: 700px;
+    height: 500px !important;
+    min-height: 0;
   }
 
   .question-band {

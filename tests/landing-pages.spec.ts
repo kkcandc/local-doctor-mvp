@@ -213,6 +213,8 @@ for (const viewport of viewports) {
         await page.locator('[data-cta-location="hero"]').click()
         await expect(page).toHaveURL(/\/get-started$/)
         await expect(page.locator('.typeform-live-embed')).toHaveAttribute('data-tf-live', TYPEFORM_LIVE_ID)
+        // Omitting inline-on-mobile lets Typeform open the form full screen on phones.
+        await expect(page.locator('.typeform-live-embed')).not.toHaveAttribute('data-tf-inline-on-mobile', /.*/)
         expect(await page.evaluate(() => window.scrollY)).toBe(0)
         await expect(page.locator('link[rel="canonical"]')).toHaveCount(0)
       }
