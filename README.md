@@ -133,6 +133,12 @@ What it does:
 
 Tests: `tests/posthog.spec.ts`. The Playwright dev server points PostHog at `/__posthog` on itself (`playwright.config.ts`), so test runs never reach a real project. The browser tests mask `navigator.webdriver` and the headless client hints because posthog-js ignores bots.
 
+## Chatbot
+
+A hosted AI chat agent (served from `forms.mylocalinfusion.com`) shows on every page. It is one `<script async>` tag at the end of `<body>` in `index.html`. Every route is rewritten to that shell and the intent landing pages are built from it, so no per-page wiring is needed. To change the agent, replace the embed URL in that one tag. Appearance and greeting are set on the agent itself, not in this repo.
+
+Tests: `tests/chatbot-embed.spec.ts` checks the tag is on every path in `publicSitemapPaths`. `playwright.config.ts` blocks the chatbot host in the test browser, so test runs never reach the live agent.
+
 ## Commands
 
 ```bash
