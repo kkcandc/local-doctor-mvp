@@ -18,11 +18,16 @@ test('CTA click sends cta_click to GA4 g/collect and does not fire a conversion'
     hits.push(hitText(url, request.postData()))
   })
 
+  // dementia-evaluation sends its button to the external evaluation form, so this also proves the
+  // GA4 hit goes out before the page leaves the site.
+  await page.route('https://localdoctor.typeform.com/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>Typeform stub</title>' }),
+  )
   await page.goto('/dementia-evaluation')
   const hero = page.locator('.landing-page[data-landing="dementia-evaluation"] [data-cta-location="hero"]')
   await expect(hero).toBeVisible()
   await hero.click()
-  await expect(page).toHaveURL(/\/get-started/)
+  await expect(page).toHaveURL('https://localdoctor.typeform.com/evaluation')
 
   await expect
     .poll(() => hits.filter((hit) => hit.includes('/g/collect') && hit.includes(`tid=${gaId}`) && hit.includes('en=cta_click')), {

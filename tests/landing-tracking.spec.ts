@@ -8,6 +8,7 @@ import {
 } from '../src/analytics/googleAdsConfig'
 import { DEFAULT_GA_MEASUREMENT_ID } from '../src/analytics/googleAnalyticsConfig'
 import { googleTagHtml } from '../src/analytics/googleAdsConfig'
+import { landingDestinations, resolveDestination } from '../src/landing/destinations'
 import { landingHtml } from '../src/landing/landingHtml'
 import { landingPages } from '../src/landing/landingContent'
 import { landingSlugs } from '../src/landing/landingMeta'
@@ -37,6 +38,21 @@ async function gtagEntries(page: Page): Promise<GtagEntry[]> {
 function matchesCta(params: unknown, expected: { page_path: string; cta_location: string; cta_label: string }) {
   const value = params as { page_path?: string; cta_location?: string; cta_label?: string } | undefined
   return value?.page_path === expected.page_path && value?.cta_location === expected.cta_location && value?.cta_label === expected.cta_label
+}
+
+function expectCtaClickSent(entries: GtagEntry[], ctaParams: { page_path: string; cta_location: string; cta_label: string }) {
+  for (const sendTo of [gaId, adsId]) {
+    expect(
+      entries.some(
+        (entry) =>
+          entry[0] === 'event' &&
+          entry[1] === 'cta_click' &&
+          (entry[2] as { send_to?: string } | undefined)?.send_to === sendTo &&
+          matchesCta(entry[2], ctaParams),
+      ),
+    ).toBe(true)
+  }
+  expect(entries.some((entry) => entry[0] === 'event' && entry[1] === 'conversion')).toBe(false)
 }
 
 async function waitForGtagEvent(page: Page, eventName: string, timeout = 10_000) {
@@ -135,50 +151,45 @@ for (const route of trackedRoutes) {
       await expect(landing.locator('.landing-reassurance')).toContainText('No referral needed')
 
       const hero = landing.locator('[data-cta-location="hero"]')
-      await expect(hero).toHaveAttribute('href', /\/get-started\?.*gclid=test_gclid_123/)
-      await hero.click()
-      await expect(page).toHaveURL(/\/get-started\?/)
-      expect(page.url()).toContain('gclid=test_gclid_123')
-      expect(page.url()).toContain('utm_source=google')
-      expect(page.url()).not.toContain('jane@')
-      await waitForGtagEvent(page, 'cta_click')
-      await waitForGtagEvent(page, 'page_view')
-
-      const afterCta = await gtagEntries(page)
+      const destination = resolveDestination(landingDestinations[landingPages[route].funnel])
       const ctaParams = { page_path: `/${route}`, cta_location: 'hero', cta_label: landingPages[route].ctaLabel }
-      expect(
-        afterCta.some(
-          (entry) =>
-            entry[0] === 'event' &&
-            entry[1] === 'cta_click' &&
-            (entry[2] as { send_to?: string } | undefined)?.send_to === gaId &&
-            matchesCta(entry[2], ctaParams),
-        ),
-      ).toBe(true)
-      expect(
-        afterCta.some(
-          (entry) =>
-            entry[0] === 'event' &&
-            entry[1] === 'cta_click' &&
-            (entry[2] as { send_to?: string } | undefined)?.send_to === adsId &&
-            matchesCta(entry[2], ctaParams),
-        ),
-      ).toBe(true)
-      expect(afterCta.some((entry) => entry[0] === 'event' && entry[1] === 'conversion')).toBe(false)
-      expect(
-        afterCta.some(
-          (entry) =>
-            entry[0] === 'event' &&
-            entry[1] === 'page_view' &&
-            (entry[2] as { send_to?: string; page_path?: string } | undefined)?.send_to === gaId &&
-            (entry[2] as { page_path?: string } | undefined)?.page_path === '/get-started',
-        ),
-      ).toBe(true)
 
-      await expect(page.locator('.typeform-live-embed')).toHaveAttribute(
-        'data-tf-transitive-search-params',
-        typeformTransitiveSearchParams,
-      )
+      if (destination.kind === 'external') {
+        // The button leaves the site for an external form, which would discard this page's dataLayer.
+        // Block the navigation (the click handler still runs) so the recorded events can be checked.
+        await expect(hero).toHaveAttribute('href', destination.href)
+        await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), true))
+        await hero.click()
+        await waitForGtagEvent(page, 'cta_click')
+        expect(new URL(page.url()).pathname).toBe(`/${route}`)
+        expectCtaClickSent(await gtagEntries(page), ctaParams)
+      } else {
+        await expect(hero).toHaveAttribute('href', /\/get-started\?.*gclid=test_gclid_123/)
+        await hero.click()
+        await expect(page).toHaveURL(/\/get-started\?/)
+        expect(page.url()).toContain('gclid=test_gclid_123')
+        expect(page.url()).toContain('utm_source=google')
+        expect(page.url()).not.toContain('jane@')
+        await waitForGtagEvent(page, 'cta_click')
+        await waitForGtagEvent(page, 'page_view')
+
+        const afterCta = await gtagEntries(page)
+        expectCtaClickSent(afterCta, ctaParams)
+        expect(
+          afterCta.some(
+            (entry) =>
+              entry[0] === 'event' &&
+              entry[1] === 'page_view' &&
+              (entry[2] as { send_to?: string; page_path?: string } | undefined)?.send_to === gaId &&
+              (entry[2] as { page_path?: string } | undefined)?.page_path === '/get-started',
+          ),
+        ).toBe(true)
+
+        await expect(page.locator('.typeform-live-embed')).toHaveAttribute(
+          'data-tf-transitive-search-params',
+          typeformTransitiveSearchParams,
+        )
+      }
     }
 
     // Phone conversion from the clinic tel link on the page (landing hero or site header).

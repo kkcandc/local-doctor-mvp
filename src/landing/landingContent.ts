@@ -83,8 +83,8 @@ const prepareChecklist = [
 export const landingPages: Record<LandingSlug, LandingPageContent> = {
   'dementia-evaluation': {
     slug: 'dementia-evaluation',
-    funnel: 'evaluation',
-    ctaLabel: 'Book Your Evaluation',
+    funnel: 'evaluationForm',
+    ctaLabel: 'Start Evaluation',
     reassurance: heroReassurance,
     eyebrow: 'Dementia evaluation by telehealth',
     h1: 'A dementia evaluation with a specialist, by video, from home.',
@@ -150,8 +150,8 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
 
   'alzheimers-evaluation': {
     slug: 'alzheimers-evaluation',
-    funnel: 'evaluation',
-    ctaLabel: 'Book Your Evaluation',
+    funnel: 'evaluationForm',
+    ctaLabel: 'Start Evaluation',
     reassurance: heroReassurance,
     eyebrow: "Alzheimer's evaluation online",
     h1: "An Alzheimer's evaluation that starts with a virtual specialist visit.",
@@ -221,8 +221,8 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
 
   'memory-evaluation': {
     slug: 'memory-evaluation',
-    funnel: 'evaluation',
-    ctaLabel: 'Book Your Evaluation',
+    funnel: 'evaluationForm',
+    ctaLabel: 'Start Evaluation',
     reassurance: heroReassurance,
     eyebrow: 'Memory evaluation from home',
     h1: 'A memory evaluation from home, for you or someone you love.',

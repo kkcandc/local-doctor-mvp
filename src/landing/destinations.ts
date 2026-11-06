@@ -1,10 +1,12 @@
 /*
   Where each landing page's Get Started button goes.
 
-  Today every funnel uses the existing /get-started intake (the Typeform embed).
-  When Eric's evaluation or screening Typeform is ready, change the funnel's
-  entry below to { kind: 'external', href: 'https://...' }. Nothing else in the
-  landing pages needs to change for the button to point at the new form.
+  Most funnels use the existing /get-started intake (the Typeform embed).
+  evaluationForm is the exception: /dementia-evaluation, /alzheimers-evaluation
+  and /memory-evaluation send their buttons straight to the evaluation Typeform.
+  To point another funnel at an external form, change its entry below to
+  { kind: 'external', href: 'https://...' }. To move a single page, give it its
+  own funnel key rather than flipping a shared one.
 
   Constraints:
   - An external form does not fire the Google Ads lead conversion; that is wired
@@ -15,12 +17,13 @@
     the intake so a typo can never produce a dead or off-site button.
 */
 
-export type LandingFunnel = 'evaluation' | 'onlineScreening'
+export type LandingFunnel = 'evaluation' | 'evaluationForm' | 'onlineScreening'
 
 export type CtaDestination = { kind: 'intake' } | { kind: 'external'; href: string }
 
 export const landingDestinations: Record<LandingFunnel, CtaDestination> = {
   evaluation: { kind: 'intake' },
+  evaluationForm: { kind: 'external', href: 'https://localdoctor.typeform.com/evaluation' },
   onlineScreening: { kind: 'intake' },
 }
 
