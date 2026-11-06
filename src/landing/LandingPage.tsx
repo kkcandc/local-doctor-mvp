@@ -248,6 +248,7 @@ export function LandingPage({ slug, onStart, onOpenPath }: LandingPageProps) {
             <p className="eyebrow">{page.eyebrow}</p>
             <h1>{page.h1}</h1>
             <p className="landing-lede">{page.lede}</p>
+            {page.heroNote && <p className="landing-hero-note">{page.heroNote}</p>}
             <div className="landing-hero-actions">
               <div className="landing-hero-primary">
                 {cta('hero', undefined, `${slug}-reassurance`)}

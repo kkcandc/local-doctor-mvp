@@ -31,6 +31,7 @@ export type LandingPageContent = {
   ctaLabel: string
   reassurance: string
   ctaContext: string
+  heroNote?: string
   heroSecondary?: { label: string; href: `#${string}` }
   facts: { title: string; items: string[] }
   sections: LandingSection[]
@@ -319,7 +320,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     ctaLabel: "See an Alzheimer's Doctor",
     reassurance: heroReassurance,
     eyebrow: 'Serving Maryland by telehealth',
-    h1: "Alzheimer's and dementia doctors serving Maryland, by video.",
+    h1: "See an Alzheimer's doctor in Maryland, by video.",
     lede: "Local Doctor connects people in Maryland with a neurology clinician for virtual visits about memory, dementia, and Alzheimer's concerns. There is no office to drive to. You meet by video, and labs or imaging, if they are ordered, happen at local sites near you.",
     ctaContext: 'This opens a short request form. A team member calls to confirm eligibility and insurance before a visit is scheduled.',
     heroSecondary: { label: 'How virtual visits work', href: '#how-virtual-visits-work' },
@@ -481,6 +482,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     eyebrow: 'Second opinion',
     h1: "A second opinion on an Alzheimer's or dementia diagnosis.",
     lede: 'Already have a diagnosis, or a workup that left you with more questions than answers? A neurology specialist can review your records and history by video, explain what the findings show, and recommend next steps. Visits are for people located in Maryland.',
+    heroNote: 'Bring prior notes and results. A neurology specialist reviews them by video.',
     ctaContext: 'This opens a short request form. On the eligibility call, the team will ask which records you have.',
     heroSecondary: { label: 'See the records checklist', href: '#records' },
     facts: {

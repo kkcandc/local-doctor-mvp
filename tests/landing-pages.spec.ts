@@ -4,7 +4,8 @@ import { expect, test, type Page, type Request } from '@playwright/test'
 import { isAllowedExternalHref, landingDestinations, resolveDestination } from '../src/landing/destinations'
 import { landingPages } from '../src/landing/landingContent'
 import { landingHtml } from '../src/landing/landingHtml'
-import { landingCanonical, landingMeta, landingSitemapXml, landingSlugs, siteOrigin, type LandingSlug } from '../src/landing/landingMeta'
+import { landingCanonical, landingMeta, landingSlugs, siteOrigin, type LandingSlug } from '../src/landing/landingMeta'
+import { publicSitemapPaths, siteSitemapXml } from '../src/siteMap'
 
 const HOME_H1 = /Treatment that slows down Alzheimer/
 const CLINIC_TEL = 'tel:+12403765730'
@@ -54,15 +55,47 @@ test('every landing route has its own title, description, and canonical', () => 
   }
 })
 
-test('the sitemap lists every intent page the same way', () => {
-  const xml = landingSitemapXml()
-  expect(xml).toContain('<loc>https://trylocaldoctor.com/</loc>')
+test('the sitemap lists the homepage, intake, and every public route', () => {
+  const xml = siteSitemapXml()
+  expect(xml.startsWith('<?xml')).toBe(true)
+  expect(xml).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
   expect(xml).not.toMatch(DASHES)
-  expect(xml).not.toMatch(/livspecialtycare/i)
+  expect(xml).not.toMatch(/livspecialtycare|<html/i)
+  for (const path of publicSitemapPaths) {
+    expect(xml).toContain(`<loc>${siteOrigin}${path}</loc>`)
+  }
+  expect(xml).toContain('<loc>https://trylocaldoctor.com/</loc>')
+  expect(xml).toContain('<loc>https://trylocaldoctor.com/get-started</loc>')
   for (const slug of landingSlugs) {
     expect(xml).toContain(`<loc>${landingCanonical(slug)}</loc>`)
   }
-  expect(xml.match(/<loc>/g)?.length).toBe(landingSlugs.length + 1)
+  expect(xml.match(/<loc>/g)?.length).toBe(publicSitemapPaths.length)
+})
+
+test('sitemap.xml and robots.txt are served as real files', async ({ request }) => {
+  const sitemap = await request.get('/sitemap.xml')
+  expect(sitemap.status()).toBe(200)
+  expect(sitemap.headers()['content-type'] ?? '').toContain('application/xml')
+  const xml = await sitemap.text()
+  expect(xml.startsWith('<?xml')).toBe(true)
+  expect(xml).not.toContain('<html')
+  expect(xml).toContain('<loc>https://trylocaldoctor.com/memory-doctor-near-me</loc>')
+  expect(xml).toContain('<loc>https://trylocaldoctor.com/get-started</loc>')
+  expect(xml.match(/<loc>/g)?.length).toBe(publicSitemapPaths.length)
+
+  const robots = await request.get('/robots.txt')
+  expect(robots.status()).toBe(200)
+  const robotsBody = await robots.text()
+  expect(robotsBody).toContain('Sitemap: https://trylocaldoctor.com/sitemap.xml')
+  expect(robotsBody).not.toContain('<html')
+})
+
+test('alzheimers doctor and second opinion hero copy', () => {
+  expect(landingPages['alzheimers-doctor-maryland'].h1).toBe("See an Alzheimer's doctor in Maryland, by video.")
+  expect(landingMeta['alzheimers-doctor-maryland'].title).toBe("See an Alzheimer's Doctor in Maryland | Local Doctor")
+  expect(landingPages['alzheimers-second-opinion'].heroNote).toBe(
+    'Bring prior notes and results. A neurology specialist reviews them by video.',
+  )
 })
 
 test('the static shell for a landing route carries its own head tags', () => {

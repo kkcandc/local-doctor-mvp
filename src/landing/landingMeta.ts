@@ -40,9 +40,9 @@ export const landingMeta: Record<LandingSlug, LandingMeta> = {
       'Concerned about memory changes in yourself or a loved one? Request a memory evaluation by video with a neurology specialist. Family members are welcome to join.',
   },
   'alzheimers-doctor-maryland': {
-    title: "Alzheimer's and Dementia Doctors Serving Maryland | Local Doctor",
+    title: "See an Alzheimer's Doctor in Maryland | Local Doctor",
     description:
-      "Virtual visits with a neurology clinician licensed in Maryland for Alzheimer's and dementia concerns. No office to drive to; local labs and imaging only when needed.",
+      "See an Alzheimer's doctor in Maryland by video. Next-day virtual visits from home with a board-certified neurologist. Insurance accepted. No referral needed.",
   },
   'memory-specialist-maryland': {
     title: 'Virtual Memory Specialist Near You in Maryland | Local Doctor',
@@ -64,14 +64,6 @@ export const landingMeta: Record<LandingSlug, LandingMeta> = {
     description:
       'Looking for a memory doctor, dementia doctor, or neurologist for memory near you? A Maryland clinician can see you by video from home, so you do not have to drive.',
   },
-}
-
-// Sitemap for the intent pages. Adding a slug above adds its URL here, the same
-// way the build writes that page's HTML shell.
-export function landingSitemapXml(): string {
-  const paths = ['/', ...landingSlugs.map((slug) => `/${slug}`)]
-  const urls = paths.map((path) => `  <url><loc>${siteOrigin}${path}</loc></url>`).join('\n')
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`
 }
 
 export function isLandingSlug(value: string): value is LandingSlug {
