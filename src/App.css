@@ -276,16 +276,28 @@ main {
   padding-left: var(--space-24);
 }
 
+/* Same box as the Check eligibility button below it, in the outline style so the two read as a pair. */
 .mobile-nav-phone {
   display: flex;
   align-items: center;
+  justify-content: center;
   min-height: var(--control-height);
+  margin-top: var(--space-16);
   padding: var(--space-12) var(--space-8);
-  color: var(--text-primary);
-  border-bottom: 1px solid var(--border-subtle);
+  color: var(--color-primary);
+  background: var(--surface-card);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-control);
   font-size: var(--text-body);
   font-weight: var(--weight-semibold);
+  line-height: 1.25;
+  text-align: center;
   text-decoration: none;
+}
+
+.mobile-nav-phone:hover,
+.mobile-nav-phone:active {
+  background: var(--surface-sunken);
 }
 
 .mobile-nav button {
@@ -302,11 +314,12 @@ main {
 
 /* The header CTA is hidden at this size, so the last menu row carries its primary-button look. */
 .mobile-nav > button:last-child {
-  margin-top: var(--space-16);
+  margin-top: var(--space-8);
   color: var(--text-on-dark);
   background: var(--color-primary);
   border: 2px solid var(--color-primary);
   border-radius: var(--radius-control);
+  line-height: 1.25;
   text-align: center;
 }
 
@@ -1829,6 +1842,34 @@ a.blog-card {
 
   .footer {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* On phones the bar is logo, phone number, then the menu button; the CTA stays in the menu. */
+@media (max-width: 767px) {
+  .header-inner {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    column-gap: 0;
+  }
+
+  .header-actions {
+    display: flex;
+    margin-left: var(--space-12);
+  }
+
+  .header-cta {
+    display: none;
+  }
+
+  /* 14px at 360px wide, growing to the usual 16px by 390px, so the logo keeps its full width beside it. */
+  .header-phone {
+    font-size: clamp(0.875rem, 6.67vw - 10px, 1rem);
+  }
+
+  /* The icon sits 13px inside its 48px tap target; letting the target overhang the page margin
+     aligns the icon with the content edge and frees room for the phone number. */
+  .menu-button {
+    margin-right: -13px;
   }
 }
 
