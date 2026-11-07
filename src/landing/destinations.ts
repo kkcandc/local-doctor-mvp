@@ -47,3 +47,16 @@ export function resolveDestination(destination: CtaDestination): CtaDestination 
   if (destination.kind === 'external' && !isAllowedExternalHref(destination.href)) return { kind: 'intake' }
   return destination
 }
+
+/*
+  Optional booking link for /get-started (VITE_BOOKING_URL). There is no real
+  scheduler yet, so this is unset and the page keeps the existing Typeform intake.
+  When a scheduler is chosen, set the URL and add its host to allowedExternalHosts
+  after it has been reviewed (including whether a BAA is needed). Anything that is
+  not an allowed https URL is ignored, so a bad value never produces a dead button.
+*/
+export function resolveBookingUrl(raw: string | undefined): string | null {
+  const value = raw?.trim()
+  if (!value) return null
+  return isAllowedExternalHref(value) ? value : null
+}

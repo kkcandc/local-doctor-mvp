@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle2, ChevronDown, Info, Phone, ShieldAlert } from 
 import { publicPhone } from '../compliancePages'
 import { isPageEnabled } from '../featureFlags'
 import { pathWithAdsParams } from '../analytics/googleAdsConfig'
+import { StickyCta } from '../StickyCta'
 import { intakePath, landingDestinations, resolveDestination, type CtaDestination } from './destinations'
 import { landingPages, relatedLabels, type LandingColumn, type LandingFaq as FaqItem, type LandingSection } from './landingContent'
 import type { LandingSlug } from './landingMeta'
@@ -166,13 +167,14 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
     const key = `${section.kind}-${index}`
 
     if (section.kind === 'midCta') {
+      const midId = `${slug}-mid-${index}`
       return (
         <section className="landing-mid-cta" key={key}>
           <div>
-            <h2>{section.title}</h2>
-            <p>{section.copy}</p>
+            <h2 id={`${midId}-title`}>{section.title}</h2>
+            <p id={`${midId}-copy`}>{section.copy}</p>
           </div>
-          {cta('mid_page', 'accent')}
+          {cta('mid_page', 'accent', `${midId}-title ${midId}-copy`)}
         </section>
       )
     }
@@ -192,11 +194,12 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
       )
     }
 
+    const headingId = `${slug}-section-${index}`
     return (
       <section className={`section ${tone} compact-section landing-section`} key={key} id={section.id}>
         <div className="section-intro">
           <p className="eyebrow">{section.eyebrow}</p>
-          <h2>{section.title}</h2>
+          <h2 id={headingId}>{section.title}</h2>
           {'intro' in section && section.intro && <p>{section.intro}</p>}
         </div>
 
@@ -213,17 +216,20 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
         )}
 
         {section.kind === 'steps' && (
-          <ol className="landing-steps">
-            {section.steps.map((step, stepIndex) => (
-              <li key={step.title}>
-                <b aria-hidden="true">{stepIndex + 1}</b>
-                <div>
-                  <h3>{step.title}</h3>
-                  <p>{step.copy}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
+          <>
+            <ol className="landing-steps">
+              {section.steps.map((step, stepIndex) => (
+                <li key={step.title}>
+                  <b aria-hidden="true">{stepIndex + 1}</b>
+                  <div>
+                    <h3>{step.title}</h3>
+                    <p>{step.copy}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <div className="landing-section-cta">{cta('steps', undefined, headingId)}</div>
+          </>
         )}
 
         {section.kind === 'checklist' && (
@@ -285,12 +291,12 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
 
       <section className="conversion-panel landing-closing">
         <div>
-          <h2>{page.closing.title}</h2>
-          <p>{page.closing.copy}</p>
+          <h2 id={`${slug}-closing-title`}>{page.closing.title}</h2>
+          <p id={`${slug}-closing-copy`}>{page.closing.copy}</p>
           <p className="landing-safety">The request form is not a test or a diagnosis. If this is a medical emergency, call 911.</p>
         </div>
         <div className="conversion-actions">
-          {cta('closing')}
+          {cta('closing', undefined, `${slug}-closing-title ${slug}-closing-copy`)}
           <PhoneLink />
         </div>
       </section>
@@ -312,6 +318,23 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
           )}
         </div>
       </section>
+
+      <StickyCta
+        label={page.ctaLabel}
+        href={destination.kind === 'external' ? destination.href : intakeHref()}
+        describedBy={`${slug}-reassurance`}
+        anchorSelector={`.landing-page[data-landing="${slug}"] .landing-hero-actions`}
+        stopSelectors={['.landing-mid-cta', '.landing-section-cta', '.landing-column-cta', '.landing-closing', '.footer']}
+        onClick={(event) => {
+          if (destination.kind === 'external') {
+            onTrackCta('sticky_mobile', page.ctaLabel)
+            return
+          }
+          if (!isPlainClick(event)) return
+          event.preventDefault()
+          onStart('sticky_mobile', page.ctaLabel)
+        }}
+      />
     </div>
   )
 }

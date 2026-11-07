@@ -1,0 +1,41 @@
+.sticky-cta {
+  display: none;
+}
+
+@media (max-width: 680px) {
+  .sticky-cta {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    display: block;
+    /* 72px on the right keeps the bar clear of the chatbot launcher. */
+    padding: var(--space-12) calc(72px + env(safe-area-inset-right)) calc(var(--space-12) + env(safe-area-inset-bottom))
+      calc(var(--space-16) + env(safe-area-inset-left));
+    background: var(--surface-page);
+    border-top: 1px solid var(--border-subtle);
+    box-shadow: 0 -6px 18px rgb(0 0 0 / 8%);
+  }
+
+  .sticky-cta .primary {
+    width: 100%;
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 680px) and (prefers-reduced-motion: no-preference) {
+  .sticky-cta {
+    animation: sticky-cta-in 160ms ease-out;
+  }
+
+  @keyframes sticky-cta-in {
+    from {
+      transform: translateY(100%);
+    }
+
+    to {
+      transform: translateY(0);
+    }
+  }
+}
