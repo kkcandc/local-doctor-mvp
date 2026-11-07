@@ -38,8 +38,12 @@ import { pathWithAdsParams, typeformTransitiveSearchParams } from './analytics/g
 import { noteGaCtaClick, noteGaSpaNavigation } from './analytics/googleAnalytics'
 import { noteEligibilityStarted, notePostHogNavigation } from './analytics/posthog'
 import { LandingPage } from './landing/LandingPage'
+import { resolveBookingUrl } from './landing/destinations'
 import { isLandingSlug, landingCanonical, landingMeta } from './landing/landingMeta'
+import { StickyCta } from './StickyCta'
 import './App.css'
+
+const bookingUrl = resolveBookingUrl(import.meta.env.VITE_BOOKING_URL)
 
 type Route =
   | 'home'
@@ -629,6 +633,17 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
         title="A quick call will help us determine your eligibility."
         copy="We review your concerns, medical history, and insurance in a quick conversation before coordinating the visit with a neurology specialist."
       />
+      <StickyCta
+        label="Get Started"
+        href={pathWithAdsParams(routePaths.start, typeof window === 'undefined' ? '' : window.location.search)}
+        anchorSelector=".hero .hero-actions"
+        stopSelectors={['.conversion-panel', '.footer']}
+        onClick={(event) => {
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+          event.preventDefault()
+          onNavigate('start', '', 'sticky_mobile', 'Get Started')
+        }}
+      />
     </>
   )
 }
@@ -787,12 +802,19 @@ function StartPage() {
         copy="Everyone's situation is unique. We work to understand yours and let you know if you're eligible to meet with one of our neurology specialists."
         primaryLabel={`Call or text ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
+        secondary={bookingUrl ? { label: 'Book your neurologist appointment', href: bookingUrl } : { label: 'Fill out the form', href: '#intake' }}
         showAside={false}
         image={{ src: '/assets/hero-get-started.jpg', alt: 'Three generations of a family sitting together on a lakeside dock' }}
       />
       <WhatToExpect />
       <QualificationSection tone="ivory" eyebrow="Eligibility" />
       <EligibilityLeadForm />
+      <StickyCta
+        label="Fill out the form"
+        href="#intake"
+        anchorSelector=".start-page .page-hero"
+        stopSelectors={['.start-form-section', '.footer']}
+      />
     </div>
   )
 }
@@ -1119,11 +1141,19 @@ function WhatToExpect() {
       <div className="expect-columns">
         <div>
           <h3>3 easy steps</h3>
-          <ol>
-            <li>Give us a call or fill out the form below.</li>
-            <li>We verify your insurance and whether your needs qualify to meet with our neurology team.</li>
-            <li>If eligible, we set up a virtual visit for you to meet with a neurology specialist in days.</li>
-          </ol>
+          {bookingUrl ? (
+            <ol>
+              <li>Book your neurologist appointment online, or give us a call.</li>
+              <li>Before your visit, we call you to review your medical history and verify your insurance.</li>
+              <li>Meet your neurology specialist by video from home.</li>
+            </ol>
+          ) : (
+            <ol>
+              <li>Give us a call or fill out the form below. Sending the form does not book a visit.</li>
+              <li>We call you to review your medical history, verify your insurance, and see whether your needs qualify to meet with our neurology team.</li>
+              <li>If eligible, we set up a virtual visit for you to meet with a neurology specialist in days.</li>
+            </ol>
+          )}
         </div>
         <div>
           <h3>What to have handy</h3>
@@ -1334,6 +1364,7 @@ function PageHero({
   aside = defaultHeroAside,
   image,
   wideCopy = false,
+  secondary,
 }: {
   eyebrow: string
   title: string
@@ -1342,6 +1373,7 @@ function PageHero({
   primaryLabel: string
   onPrimary?: () => void
   href?: string
+  secondary?: { label: string; href: string }
   showAside?: boolean
   aside?: { title: string; text: string }
   image?: { src: string; alt: string }
@@ -1365,6 +1397,11 @@ function PageHero({
           )
         ) : (
           <button className="primary" type="button" onClick={onPrimary}>{primaryLabel} <ArrowRight size={20} /></button>
+        )}
+        {secondary && (
+          <div className="page-hero-secondary">
+            <a className="primary" href={secondary.href}>{secondary.label} <ArrowRight size={20} aria-hidden="true" /></a>
+          </div>
         )}
       </div>
       {image && <img className="page-hero-image" src={image.src} alt={image.alt} width={385} height={515} fetchPriority="high" />}
