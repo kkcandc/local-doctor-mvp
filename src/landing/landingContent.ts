@@ -55,12 +55,13 @@ export const relatedLabels: Record<LandingSlug, { title: string; copy: string }>
   },
 }
 
+// No visit-speed claim. Visits are not offered next-day or "in days".
 const heroReassurance =
-  'Get seen by a board-certified neurologist in days. Insurance accepted. No referral needed.'
+  'Board-certified neurologist. Insurance accepted. No referral needed. Phone answered on weekdays.'
 
-// Kenny-confirmed trust points for the hero facts panel on every intent page.
+// Trust points on every intent hero. No visit-speed claim.
 const trustFacts = [
-  'See a doctor within days',
+  'Maryland video visits',
   'Board-certified neurologist',
   'Insurance accepted',
   'No referral needed',
@@ -459,14 +460,14 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
       {
         kind: 'steps',
         eyebrow: 'How to start',
-        title: 'Booking a virtual memory visit.',
+        title: 'Requesting a virtual memory visit.',
         steps: [
           { title: 'Send a request or call', copy: 'A team member follows up by phone.' },
           { title: 'Eligibility call', copy: 'We review concerns, history, medications, and insurance, and confirm whether a visit fits.' },
           { title: 'Schedule your video visit', copy: 'You pick a day and time, then get a confirmation and reminders with the link to join.' },
         ],
       },
-      { kind: 'midCta', title: 'Book a virtual visit with a memory specialist.', copy: 'Start with the request form. Our team will call to set up the visit if it is a fit.' },
+      { kind: 'midCta', title: 'Request a visit with a memory specialist.', copy: 'Start with the request form. Our team will call to set up the visit if it is a fit.' },
     ],
     faqTitle: 'Memory specialist questions.',
     faqs: [

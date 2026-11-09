@@ -263,13 +263,13 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
             <p className="landing-lede">{page.lede}</p>
             {page.heroNote && <p className="landing-hero-note">{page.heroNote}</p>}
             <div className="landing-hero-actions">
-              <div className="landing-hero-primary">
+              <div className="landing-hero-buttons">
                 {cta('hero', undefined, `${slug}-reassurance`)}
-                <p className="landing-reassurance" id={`${slug}-reassurance`}>
-                  {page.reassurance}
-                </p>
+                <PhoneLink />
               </div>
-              <PhoneLink />
+              <p className="landing-reassurance" id={`${slug}-reassurance`}>
+                {page.reassurance}
+              </p>
             </div>
             <p className="landing-cta-context">{page.ctaContext}</p>
             {page.heroSecondary && (

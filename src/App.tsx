@@ -138,8 +138,8 @@ const valueProps = [
     icon: BadgeCheck,
   },
   {
-    title: 'Less wait and travel',
-    copy: 'Virtual first, so you don\'t wait months for an evaluation with an in-person neurologist. You will get seen in days, not months.',
+    title: 'Visits from home',
+    copy: 'The specialist visit happens by video from home in Maryland, instead of a trip to an in-person neurologist.',
     icon: CalendarClock,
   },
   {
@@ -200,7 +200,7 @@ const journeySteps = [
     points: [
       'Give us a call, or fill out a short form so we can call you.',
       'We collect information regarding current daily activities, cognitive performance, medical history, medications, and insurance.',
-      'If eligible, we schedule a virtual visit for you to meet with a neurology specialist in days.',
+      'If eligible, we schedule a virtual visit for you to meet with a neurology specialist.',
     ],
   },
   {
@@ -261,7 +261,7 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
     title: 'Getting Started',
     items: [
       ['Who is eligible for services?', 'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. Our eligibility call is fast and simple, providing a clear answer within 15-30 minutes.'],
-      ['How soon can I be seen?', 'Once you\'ve been determined eligible for our program, you can be seen by one of our neurology specialists in days, depending on your availability.'],
+      ['How soon can I be seen?', 'Once you\'ve been determined eligible for our program, we schedule a virtual visit with one of our neurology specialists based on your availability.'],
       ['How long does the eligibility process take?', 'Our eligibility process is centered around a quick call that should take 15-30 minutes. Please have the patient\'s insurance details, medication list, and medical history handy to make it go smoother.'],
       ['Do I need a referral from my current doctor?', 'No referral is needed. Start with a call or the short form, and we review eligibility and insurance with you before a visit is booked.'],
       ['What if I already have a diagnosis?', 'If you already have a diagnosis for mild cognitive impairment, dementia, or Alzheimer\'s disease, you may be a strong candidate for our program and it may expedite your path to treatment.'],
@@ -589,12 +589,12 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
       <section className="stat-band">
         <Metric value="3.5 years" label="average gap between first symptoms and diagnosis of Alzheimer's" />
         <Metric value="6-9 months" label="typical wait for a new patient visit with a Neurologist in most areas" />
-        <Metric value="In days" label="average time to see one of our board-certified neurology specialists" />
+        <Metric value="By video" label="see a board-certified neurology specialist from home in Maryland" />
         <Metric value="1,500+" label="patients treated successfully by our infusion network" />
       </section>
 
       <section className="section ivory compact-section">
-        <SectionIntro eyebrow="Why Local Doctor" title="We're designed around one goal: a clear, credible, and fast answer on treatment options." />
+        <SectionIntro eyebrow="Why Local Doctor" title="We're designed around one goal: a clear, credible answer on treatment options." />
         <div className="value-grid">
           {valueProps.map((prop) => {
             const Icon = prop.icon
@@ -1151,7 +1151,7 @@ function WhatToExpect() {
             <ol>
               <li>Give us a call or fill out the form below. Sending the form does not book a visit.</li>
               <li>We call you to review your medical history, verify your insurance, and see whether your needs qualify to meet with our neurology team.</li>
-              <li>If eligible, we set up a virtual visit for you to meet with a neurology specialist in days.</li>
+              <li>If eligible, we set up a virtual visit for you to meet with a neurology specialist.</li>
             </ol>
           )}
         </div>

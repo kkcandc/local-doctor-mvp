@@ -97,10 +97,12 @@ host needs a code change and a review first.
 
 1. Scheduler. Which tool, the booking URL, and whether its vendor will sign a BAA.
    Until it exists, the booking slot stays off.
-2. Provider availability. The provider currently sees patients Wednesday 8 to
-   noon, and the time zone is not confirmed. The site shows no times, days, or
-   time zone. The existing "in days" wording on the homepage, /get-started, and
-   the landing trust points should be checked against Wednesday-only capacity.
+2. Provider availability. The provider currently sees patients Wednesday 8am
+   to noon ET. The site does not publish those clinic hours. Visit-speed claims
+   ("in days", "within days", "next-day", and "fast answer") were removed from
+   the homepage, /get-started, how it works, the FAQ, and the landing hero
+   reassurance, facts, and the Alzheimer's doctor meta description. Phone copy
+   says the phone is answered on weekdays.
 3. Evaluation form completion signal. If a "Form completed" count is wanted for
    the evaluation pages, Eric would need to set up a completion signal in
    Typeform (for example a thank-you redirect to a trylocaldoctor.com page that
