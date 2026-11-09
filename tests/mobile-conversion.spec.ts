@@ -22,7 +22,6 @@ function landingHref(slug: LandingSlug) {
 
 const stickyCases: StickyCase[] = [
   { path: '/', label: 'Get Started', href: `/get-started${clickQuery}`, stops: ['.conversion-panel', '.footer'] },
-  { path: '/get-started', label: 'Book now', href: '#book', stops: ['.booking-layout', '.footer'] },
   ...landingSlugs.map((slug) => ({
     path: `/${slug}`,
     label: landingPages[slug].ctaLabel,
@@ -138,24 +137,27 @@ test.describe('mobile sticky Get Started', () => {
     })
   }
 
-  test('/get-started sticky and hero jump link scroll to the scheduler without sending events', async ({ page }) => {
+  test('/get-started has no sticky bar while scrolling', async ({ page }) => {
+    await page.goto(`/get-started${clickQuery}`)
+    await expect(page.locator('h1')).toBeVisible()
+    const sticky = page.locator('[data-sticky-cta]')
+    const pageHeight = await page.evaluate(() => document.documentElement.scrollHeight)
+    for (let y = 0; y <= pageHeight; y += 280) {
+      await page.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), y)
+      await page.waitForTimeout(120)
+      await expect(sticky, `sticky bar showed at y=${y}`).toHaveCount(0)
+    }
+  })
+
+  test('/get-started hero Book now link scrolls to the scheduler without sending events', async ({ page }) => {
     await page.goto(`/get-started${clickQuery}`)
     const heroJump = page.locator('.page-hero-secondary a')
     await expect(heroJump).toHaveText('Book now')
     await expect(heroJump).toHaveAttribute('href', '#book')
 
-    // The scheduler sits right under the hero, so the bar only shows once it has scrolled past
-    // (at the FAQs) and offers a jump back up. It stays hidden while the scheduler is on screen.
-    await page.evaluate(() => {
-      const faqTop = document.querySelector('.expect-faq')!.getBoundingClientRect().top + window.scrollY
-      window.scrollTo({ top: faqTop - 20, behavior: 'instant' })
-    })
-    const sticky = page.locator('[data-sticky-cta] a')
-    await expect(sticky).toBeVisible()
     const before = (await ctaEvents(page)).length
-    await sticky.click()
-    // Starting from the FAQs, the section is above the viewport, so wait for the jump to finish
-    // with the section landing just below the sticky header.
+    await heroJump.click()
+    // Wait for the jump to finish with the section landing just below the sticky header.
     await expect
       .poll(() =>
         page.evaluate(() => {
@@ -165,7 +167,6 @@ test.describe('mobile sticky Get Started', () => {
         }),
       )
       .toBe(true)
-    await expect(sticky).toHaveCount(0)
     const header = await page.locator('.site-header').boundingBox()
     const booking = await page.locator('#book').boundingBox()
     expect(booking!.y).toBeGreaterThanOrEqual(header!.y + header!.height - 1)
@@ -296,7 +297,7 @@ test('leaving /get-started and coming back never adds a second Calendly iframe',
   await expect(page).toHaveURL(/\/$/)
   await expect(page.locator('.calendly-inline-widget')).toHaveCount(0)
   await page.getByRole('button', { name: 'Book a Neurologist today' }).click()
-  await expect(page).toHaveURL(/\/get-started$/)
+  await expect(page).toHaveURL(/\/get-started#book$/)
   await expect(page.locator('.calendly-inline-widget iframe')).toHaveCount(1)
   await expect(page.locator('script[data-local-doctor-calendly]')).toHaveCount(1)
 })

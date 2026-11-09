@@ -10,7 +10,25 @@ test.describe('home page', () => {
     await expect(page.locator('h1')).toHaveText("Treatment that slows down Alzheimer's. Finally. Today.")
     await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a Neurologist today' })).toBeVisible()
     await page.locator('.hero-actions').getByRole('button', { name: 'Book a Neurologist today' }).click()
-    await expect(page).toHaveURL(/\/get-started$/)
+    await expect(page).toHaveURL(/\/get-started#book$/)
+  })
+
+  test('the hero button lands on the booking section of Get Started, keeping ad click ids', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 900 })
+    await page.goto('/?gclid=test_gclid_123&utm_source=google')
+    await page.locator('.hero-actions').getByRole('button', { name: 'Book a Neurologist today' }).click()
+    await expect(page).toHaveURL(/\/get-started\?gclid=test_gclid_123&utm_source=google#book$/)
+    // Wait for the scroll to finish with the section just below the sticky header.
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const top = document.getElementById('book')!.getBoundingClientRect().top
+          const headerBottom = document.querySelector('.site-header')!.getBoundingClientRect().bottom
+          return top >= headerBottom - 1 && top < 200
+        }),
+      )
+      .toBe(true)
+    await expect(page.locator('#book .calendly-inline-widget')).toBeInViewport()
   })
 
   test('the hero copy asks to be evaluated as early as this week', async ({ page }) => {

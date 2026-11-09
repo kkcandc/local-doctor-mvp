@@ -60,7 +60,7 @@ type Route =
   | 'contact'
   | 'landing'
 
-type Navigate = (next: Route, slug?: string, ctaLocation?: string, ctaLabel?: string) => void
+type Navigate = (next: Route, slug?: string, ctaLocation?: string, ctaLabel?: string, hash?: string) => void
 
 const defaultTitle = "Local Doctor | Alzheimer's Treatment Eligibility Review"
 const defaultDescription =
@@ -413,16 +413,19 @@ function App() {
     noteGaCtaClick(window.location.pathname, ctaLocation, ctaLabel)
   }
 
-  function navigate(next: Route, slug = '', ctaLocation?: string, ctaLabel?: string) {
+  function navigate(next: Route, slug = '', ctaLocation?: string, ctaLabel?: string, hash = '') {
     if (!routeEnabled(next)) {
       next = 'home'
       slug = ''
+      hash = ''
     }
     if (next === 'start') trackCtaClick(ctaLocation, ctaLabel)
     const path = next === 'blogPost' ? `/blog/${slug}` : next === 'landing' ? `/${slug}` : routePaths[next]
     // Keep gclid and utm_* across SPA navigations so Ads can attribute the visit and
     // Typeform can read them on /get-started. Contact and health params stay dropped.
-    const nextUrl = pathWithAdsParams(path, window.location.search)
+    // An optional hash (for example #book) is added after the params. The hash effect above
+    // scrolls to that element once the new page has rendered.
+    const nextUrl = `${pathWithAdsParams(path, window.location.search)}${hash ? `#${hash}` : ''}`
     setRoute(next)
     setRouteSlug(next === 'blogPost' || next === 'landing' ? slug : '')
     setMenuOpen(false)
@@ -583,7 +586,7 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
               FDA-approved treatments can slow down the progression of early Alzheimer&apos;s disease. Get evaluated as early as this week by our neurologists who specialize in cognitive impairment and disease-modifying treatments.
             </p>
             <div className="hero-actions">
-              <button className="accent" type="button" onClick={() => onNavigate('start', '', 'hero', 'Get Started')}>Book a Neurologist today</button>
+              <button className="accent" type="button" onClick={() => onNavigate('start', '', 'hero', 'Get Started', 'book')}>Book a Neurologist today</button>
               {routeEnabled('how') && <button className="secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>}
             </div>
             <div className="trust-note"><span /> Backed by a national infusion network and a focused treatment-readiness pathway.</div>
@@ -819,12 +822,7 @@ function StartPage() {
         image={{ src: '/assets/hero-get-started.jpg', alt: 'Three generations of a family sitting together on a lakeside dock' }}
       />
       <BookingSection />
-      <StickyCta
-        label="Book now"
-        href="#book"
-        anchorSelector=".start-page .page-hero"
-        stopSelectors={['.booking-layout', '.footer']}
-      />
+      {/* No mobile sticky bar here for now: it did not behave well while scrolling. */}
     </div>
   )
 }
