@@ -129,7 +129,7 @@ const pathRoutes: Record<string, Route> = {
 const valueProps = [
   {
     title: 'Dementia specialists',
-    copy: 'A real second opinion from board-certified providers who specialize in dementia, not general memory care.',
+    copy: 'A valued, credible opinion from board-certified neurologists who specialize in dementia and cognitive impairment, not general memory care.',
     icon: BadgeCheck,
   },
   {
@@ -207,9 +207,7 @@ const journeySteps: Array<{ title: string; meta?: string; cta?: string; points: 
     title: 'Book your appointment with a neurologist',
     cta: 'Book now',
     points: [
-      'Book your appointment today - our neurology specialists are available to see you every Wednesday.',
-      'You will receive an appointment confirmation via text or email, whichever you prefer.',
-      'We will be in touch with you on the same day or the next business day to share more information about the visit, confirm eligibility, and answer any questions you have.',
+      'Book your appointment today. Our neurologists are specialized in cognitive impairment and disease-modifying treatments.',
     ],
   },
   {
@@ -247,7 +245,7 @@ const imagingFaqAnswer = 'Yes, while receiving Leqembi or Kisunla treatment, you
 
 const howFaqItems: Array<[string, string[]]> = [
   ['What services does Local Doctor provide?', [
-    'Local Doctor is a virtual Alzheimer\'s clinic focused on accelerating access to life-changing therapies. Our initial focus is evaluation, diagnosis, treatment eligibility, treatment initiation, and required oversight of disease-modifying therapies, not comprehensive longitudinal dementia management, nor care coordination. The Local Doctor model is designed to complement your existing team of providers and will work with them as needed.',
+    'Local Doctor is a virtual Alzheimer\'s clinic focused on accelerating access to life-changing therapies. Our initial focus is evaluation, diagnosis, treatment eligibility, treatment initiation, and required oversight of disease-modifying therapies. Whether you already have a neurologist or you\'re searching for one, Local Doctor is designed to help you find treatment faster. We complement your existing doctors and will work with them as needed.',
   ]],
   ['How much will this cost?', [costFaqAnswer]],
   ['Will I be seeing an MD or NP?', [
@@ -582,7 +580,7 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
             <p className="eyebrow">Virtual Alzheimer's specialty clinic</p>
             <h1>Treatment that slows down Alzheimer's. <em>Finally. Today.</em></h1>
             <p>
-              New FDA-approved treatments can slow the progression of early Alzheimer&apos;s. Get a second opinion from our neurology team who specialize in cognitive impairment and disease-modifying treatments to see if you&apos;re eligible.
+              FDA-approved treatments can slow down the progression of early Alzheimer&apos;s disease. Get evaluated as early as this week by our neurologists who specialize in cognitive impairment and disease-modifying treatments.
             </p>
             <div className="hero-actions">
               <button className="accent" type="button" onClick={() => onNavigate('start', '', 'hero', 'Get Started')}>Book a Neurologist today</button>

@@ -13,6 +13,21 @@ test.describe('home page', () => {
     await expect(page).toHaveURL(/\/get-started$/)
   })
 
+  test('the hero copy asks to be evaluated as early as this week', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.locator('.hero-copy > p').nth(1)).toHaveText(
+      "FDA-approved treatments can slow down the progression of early Alzheimer's disease. Get evaluated as early as this week by our neurologists who specialize in cognitive impairment and disease-modifying treatments.",
+    )
+  })
+
+  test('the Dementia specialists card has the new copy', async ({ page }) => {
+    await page.goto('/')
+    const card = page.locator('.value-card').filter({ has: page.getByRole('heading', { name: 'Dementia specialists' }) })
+    await expect(card.locator('p')).toHaveText(
+      'A valued, credible opinion from board-certified neurologists who specialize in dementia and cognitive impairment, not general memory care.',
+    )
+  })
+
   test('the banner shows In days, and only In days and 1,500+ are light blue', async ({ page }) => {
     await page.goto('/')
     const stats = page.locator('.stat-band article')
@@ -124,9 +139,7 @@ test.describe('how it works page', () => {
     ])
     const bullets = (index: number) => steps.nth(index).locator('.journey-points span')
     await expect(bullets(0)).toHaveText([
-      'Book your appointment today - our neurology specialists are available to see you every Wednesday.',
-      'You will receive an appointment confirmation via text or email, whichever you prefer.',
-      'We will be in touch with you on the same day or the next business day to share more information about the visit, confirm eligibility, and answer any questions you have.',
+      'Book your appointment today. Our neurologists are specialized in cognitive impairment and disease-modifying treatments.',
     ])
     await expect(bullets(1)).toHaveText([
       'You and a loved one attend the visit to share your concerns, questions, and provide all information needed for the evaluation by the neurologist including medical history, medications, recent testing, and more.',
@@ -145,13 +158,22 @@ test.describe('how it works page', () => {
     const text = await page.locator('main').innerText()
     expect(text).not.toContain('Neurologist')
     expect(text).not.toMatch(/our providers/i)
-    expect(text).toContain('our neurology specialists are available to see you every Wednesday')
+    expect(text).toContain('Our neurologists are specialized in cognitive impairment and disease-modifying treatments.')
+    expect(text).not.toContain('Wednesday')
+  })
+
+  test('the services FAQ has the new answer', async ({ page }) => {
+    await page.goto('/how-it-works')
+    const item = page.locator('.mini-faq-list article').filter({ has: page.getByRole('heading', { name: 'What services does Local Doctor provide?' }) })
+    await expect(item.locator('p')).toHaveText(
+      "Local Doctor is a virtual Alzheimer's clinic focused on accelerating access to life-changing therapies. Our initial focus is evaluation, diagnosis, treatment eligibility, treatment initiation, and required oversight of disease-modifying therapies. Whether you already have a neurologist or you're searching for one, Local Doctor is designed to help you find treatment faster. We complement your existing doctors and will work with them as needed.",
+    )
   })
 
   test('every step bullet ends with a period', async ({ page }) => {
     await page.goto('/how-it-works')
     const bullets = await page.locator('.journey-points span').allTextContents()
-    expect(bullets).toHaveLength(11)
+    expect(bullets).toHaveLength(9)
     for (const bullet of bullets) expect(bullet.trim(), bullet).toMatch(/\.$/)
   })
 

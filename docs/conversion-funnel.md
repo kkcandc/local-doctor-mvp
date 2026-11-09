@@ -99,9 +99,10 @@ removed from /get-started.
    is still open, and the site loads its script and iframe from calendly.com
    without any other review gate.
 2. Provider availability. The provider currently sees patients Wednesday 8am
-   to noon ET. The homepage ("in days", "fast, credible answer"), /how-it-works
-   ("get seen within days", "every Wednesday") and the booking-page copy now carry
-   speed and availability claims on purpose, and the Playwright guard against
+   to noon ET. The homepage ("in days", "as early as this week", "fast, credible
+   answer"), /how-it-works ("get seen within days") and the booking-page copy now
+   carry speed claims on purpose. The site no longer names the Wednesday clinic
+   day anywhere. The Playwright guard against
    them was removed. The landing pages (hero reassurance, facts, and the
    Alzheimer's doctor meta description) and the FAQ still avoid them. Phone copy
    says the phone is answered on weekdays. Keep the Calendly availability in
