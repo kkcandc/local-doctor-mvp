@@ -22,7 +22,6 @@ function landingHref(slug: LandingSlug) {
 
 const stickyCases: StickyCase[] = [
   { path: '/', label: 'Get Started', href: `/get-started${clickQuery}`, stops: ['.conversion-panel', '.footer'] },
-  { path: '/get-started', label: 'Fill out the form', href: '#intake', stops: ['.start-form-section', '.footer'] },
   ...landingSlugs.map((slug) => ({
     path: `/${slug}`,
     label: landingPages[slug].ctaLabel,
@@ -138,24 +137,39 @@ test.describe('mobile sticky Get Started', () => {
     })
   }
 
-  test('/get-started sticky and hero jump link scroll to the form without sending events', async ({ page }) => {
+  test('/get-started has no sticky bar while scrolling', async ({ page }) => {
+    await page.goto(`/get-started${clickQuery}`)
+    await expect(page.locator('h1')).toBeVisible()
+    const sticky = page.locator('[data-sticky-cta]')
+    const pageHeight = await page.evaluate(() => document.documentElement.scrollHeight)
+    for (let y = 0; y <= pageHeight; y += 280) {
+      await page.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), y)
+      await page.waitForTimeout(120)
+      await expect(sticky, `sticky bar showed at y=${y}`).toHaveCount(0)
+    }
+  })
+
+  test('/get-started hero Book now link scrolls to the scheduler without sending events', async ({ page }) => {
     await page.goto(`/get-started${clickQuery}`)
     const heroJump = page.locator('.page-hero-secondary a')
-    await expect(heroJump).toHaveText('Fill out the form')
-    await expect(heroJump).toHaveAttribute('href', '#intake')
+    await expect(heroJump).toHaveText('Book now')
+    await expect(heroJump).toHaveAttribute('href', '#book')
 
-    await page.evaluate(() => window.scrollTo({ top: 1000, behavior: 'instant' }))
-    const sticky = page.locator('[data-sticky-cta] a')
-    await expect(sticky).toBeVisible()
     const before = (await ctaEvents(page)).length
-    await sticky.click()
+    await heroJump.click()
+    // Wait for the jump to finish with the section landing just below the sticky header.
     await expect
-      .poll(() => page.evaluate(() => document.getElementById('intake')!.getBoundingClientRect().top))
-      .toBeLessThan(200)
-    await expect(sticky).toHaveCount(0)
+      .poll(() =>
+        page.evaluate(() => {
+          const top = document.getElementById('book')!.getBoundingClientRect().top
+          const headerBottom = document.querySelector('.site-header')!.getBoundingClientRect().bottom
+          return top >= headerBottom - 1 && top < 200
+        }),
+      )
+      .toBe(true)
     const header = await page.locator('.site-header').boundingBox()
-    const intake = await page.locator('#intake').boundingBox()
-    expect(intake!.y).toBeGreaterThanOrEqual(header!.y + header!.height - 1)
+    const booking = await page.locator('#book').boundingBox()
+    expect(booking!.y).toBeGreaterThanOrEqual(header!.y + header!.height - 1)
     const events = (await ctaEvents(page)).slice(before)
     expect(events.filter((event) => event.name !== 'page_view')).toEqual([])
   })
@@ -238,11 +252,97 @@ test('the booking slot only accepts an allowed https URL and is off by default',
   expect(resolveBookingUrl('https://localdoctor.typeform.com/book')).toBe('https://localdoctor.typeform.com/book')
 })
 
-test('without a booking URL, /get-started keeps the Typeform intake and makes no booking claim', async ({ page }) => {
+const CALENDLY_URL = 'https://calendly.com/local-doctor/virtualvisit?hide_event_type_details=1&primary_color=2970d6'
+
+// Stands in for Calendly's widget.js so tests never reach the network. Like the real script, it
+// provides Calendly.initInlineWidget. It adds one iframe per call, so a double embed is visible.
+async function stubCalendly(page: Page) {
+  await page.route('https://assets.calendly.com/assets/external/widget.js', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/javascript',
+      body: `window.Calendly = { initInlineWidget: function (options) {
+        var frame = document.createElement('iframe');
+        frame.src = 'about:blank';
+        frame.dataset.url = options.url;
+        options.parentElement.appendChild(frame);
+      } };`,
+    }),
+  )
+}
+
+test('/get-started embeds the Calendly scheduler and drops the Typeform and Eligibility section', async ({ page }) => {
+  await stubCalendly(page)
   await page.goto('/get-started')
-  await expect(page.locator('#intake .typeform-live-embed')).toHaveAttribute('data-tf-live', '01M64J1XGXT19BH7GGWPKJ243K')
+  await expect(page.locator('h1')).toContainText('Book a neurologist today to find out if treatment is right for you.')
+  await expect(page.locator('#book .expect-heading')).toHaveText('Book a neurologist')
+  const widget = page.locator('#book .calendly-inline-widget')
+  await expect(widget).toHaveAttribute('data-url', CALENDLY_URL)
+  await expect(widget.locator('iframe')).toHaveCount(1)
+  expect(await widget.evaluate((node) => (node as HTMLElement).style.height)).toBe('700px')
+  await expect(page.locator('.typeform-live-embed')).toHaveCount(0)
+  await expect(page.locator('script[src*="embed.typeform.com"]')).toHaveCount(0)
+  await expect(page.getByText('Eligibility', { exact: true })).toHaveCount(0)
   await expect(page.getByText('Book your neurologist appointment')).toHaveCount(0)
-  await expect(page.locator('.expect-section ol li').first()).toContainText('Sending the form does not book a visit.')
   const text = await page.locator('main').innerText()
+  expect(text).not.toContain('Neurologist')
   expect(text).not.toMatch(/appointment (is )?confirmed|booking confirmed|you are booked/i)
+})
+
+test('leaving /get-started and coming back never adds a second Calendly iframe', async ({ page }) => {
+  await stubCalendly(page)
+  await page.goto('/get-started')
+  await expect(page.locator('.calendly-inline-widget iframe')).toHaveCount(1)
+  await page.locator('.brand-link').first().click()
+  await expect(page).toHaveURL(/\/$/)
+  await expect(page.locator('.calendly-inline-widget')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Book a Neurologist today' }).click()
+  await expect(page).toHaveURL(/\/get-started#book$/)
+  await expect(page.locator('.calendly-inline-widget iframe')).toHaveCount(1)
+  await expect(page.locator('script[data-local-doctor-calendly]')).toHaveCount(1)
+})
+
+test.describe('/get-started booking layout', () => {
+  async function layout(page: Page) {
+    const box = async (selector: string) => {
+      const found = await page.locator(selector).first().boundingBox()
+      expect(found, selector).not.toBeNull()
+      return found!
+    }
+    return { embed: await box('#book .calendly-inline-widget'), aside: await box('.booking-aside'), faq: await box('.expect-faq') }
+  }
+
+  test('desktop: details sit to the right of the scheduler and the FAQs run below both', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 900 })
+    await stubCalendly(page)
+    await page.goto('/get-started')
+    const { embed, aside, faq } = await layout(page)
+    expect(aside.x).toBeGreaterThanOrEqual(embed.x + embed.width - 1)
+    expect(faq.y).toBeGreaterThanOrEqual(Math.max(embed.y + embed.height, aside.y + aside.height) - 1)
+    await expect(page.locator('.expect-faq article')).toHaveCount(4)
+  })
+
+  test('mobile: the scheduler comes first, then the details, then the FAQs', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await stubCalendly(page)
+    await page.goto('/get-started')
+    const { embed, aside, faq } = await layout(page)
+    expect(aside.y).toBeGreaterThanOrEqual(embed.y + embed.height - 1)
+    expect(faq.y).toBeGreaterThanOrEqual(aside.y + aside.height - 1)
+    expect(embed.x + embed.width).toBeLessThanOrEqual(390)
+  })
+
+  test('the details list, in order, and the clinic phone link', async ({ page }) => {
+    await stubCalendly(page)
+    await page.goto('/get-started')
+    const aside = page.locator('.booking-aside')
+    await expect(aside.locator('h3')).toHaveText(['What to expect', 'What to have handy', 'Prefer to speak to us directly?'])
+    await expect(aside.locator('ol li')).toHaveText([
+      'Book your appointment for the day and time that works best for you.',
+      'We will call you to review your medical history and verify your insurance and eligibility.',
+      'You join the virtual visit over a video call to meet your neurologist.',
+    ])
+    await expect(aside).toContainText('Call or text (240) 376-5730 to speak with a member of our team')
+    await expect(aside.locator('a[href="tel:+12403765730"]')).toHaveText('(240) 376-5730')
+  })
 })

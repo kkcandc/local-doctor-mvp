@@ -34,16 +34,14 @@ import {
 } from './compliancePages'
 import { isPageEnabled, type PageFlag } from './featureFlags'
 import { noteSpaNavigation } from './analytics/googleAds'
-import { pathWithAdsParams, typeformTransitiveSearchParams } from './analytics/googleAdsConfig'
+import { pathWithAdsParams } from './analytics/googleAdsConfig'
 import { noteGaCtaClick, noteGaSpaNavigation } from './analytics/googleAnalytics'
 import { noteEligibilityStarted, notePostHogNavigation } from './analytics/posthog'
+import { CalendlyEmbed } from './CalendlyEmbed'
 import { LandingPage } from './landing/LandingPage'
-import { resolveBookingUrl } from './landing/destinations'
 import { isLandingSlug, landingCanonical, landingMeta } from './landing/landingMeta'
 import { StickyCta } from './StickyCta'
 import './App.css'
-
-const bookingUrl = resolveBookingUrl(import.meta.env.VITE_BOOKING_URL)
 
 type Route =
   | 'home'
@@ -62,10 +60,7 @@ type Route =
   | 'contact'
   | 'landing'
 
-type Navigate = (next: Route, slug?: string, ctaLocation?: string, ctaLabel?: string) => void
-
-const typeformLiveId = '01M64J1XGXT19BH7GGWPKJ243K'
-const typeformEmbedScript = 'https://embed.typeform.com/next/embed.js'
+type Navigate = (next: Route, slug?: string, ctaLocation?: string, ctaLabel?: string, hash?: string) => void
 
 const defaultTitle = "Local Doctor | Alzheimer's Treatment Eligibility Review"
 const defaultDescription =
@@ -134,7 +129,7 @@ const pathRoutes: Record<string, Route> = {
 const valueProps = [
   {
     title: 'Dementia specialists',
-    copy: 'A real second opinion from board-certified providers who specialize in dementia, not general memory care.',
+    copy: 'A valued, credible opinion from board-certified neurologists who specialize in dementia and cognitive impairment, not general memory care.',
     icon: BadgeCheck,
   },
   {
@@ -186,44 +181,54 @@ const payerNames = [
   'Community Health Options',
 ]
 
-const simpleProcess = [
-  ['Tell us what\'s going on', 'A quick call to screen for memory concerns, medical history, and eligibility for an evaluation.'],
-  ['Meet your specialist', 'A video call for the evaluation, to dive into your questions, concerns, and goals. It all leads to clear direction on next steps and if new labs and imaging are needed.'],
-  ['Get a clearer answer', 'We review new or recent labs and imaging to provide a clear answer on diagnosis and treatment options.'],
-  ['Start treatment', 'Patients who qualify and want to move forward with infusion treatment are treated seamlessly at a local infusion center.'],
+const simpleProcess: Array<{ title: string; copy: string; cta?: string }> = [
+  {
+    title: 'Book visit with a neurologist',
+    copy: 'Schedule your appointment now and we\'ll get in touch with you to share more information about your visit and what to expect.',
+    cta: 'Book now',
+  },
+  {
+    title: 'Meet neurologist',
+    copy: 'A video call with the neurologist to dive into your questions, concerns, and goals. It all leads to clear direction on next steps and if new imaging or bloodwork are needed.',
+  },
+  {
+    title: 'Get a clear answer',
+    copy: 'The neurologist uses your results and medical history to provide a clear answer on diagnosis and treatment options.',
+  },
+  {
+    title: 'Start treatment',
+    copy: 'Patients who qualify for and opt in to infusion treatment are treated seamlessly at a local infusion center.',
+  },
 ]
 
-const journeySteps = [
+// A step shows either a light-blue pill (meta) or, for the booking step, a Book now button (cta).
+const journeySteps: Array<{ title: string; meta?: string; cta?: string; points: string[] }> = [
   {
-    title: 'Tell us what\'s going on, to see if you\'re eligible',
-    meta: 'Phone call',
+    title: 'Book your appointment with a neurologist',
+    cta: 'Book now',
     points: [
-      'Give us a call, or fill out a short form so we can call you.',
-      'We collect information regarding current daily activities, cognitive performance, medical history, medications, and insurance.',
-      'If eligible, we schedule a virtual visit for you to meet with a neurology specialist.',
+      'Book your appointment today. Our neurologists are specialized in cognitive impairment and disease-modifying treatments.',
     ],
   },
   {
-    title: 'Meet your specialist',
+    title: 'Meet neurologist',
     meta: 'Video visit - 1 hour',
     points: [
-      'You confirm the visit and fill out the consent forms prior to the visit',
-      'You and a loved one attend the visit to share your concerns, questions, and provide all information needed for the evaluation by your specialist including medical history, medications, recent testing, and more.',
-      'Your specialist shares their clinical summary and recommended plan of care with you. It may include orders for new labs, genetic testing, and imaging.',
+      'You and a loved one attend the visit to share your concerns, questions, and provide all information needed for the evaluation by the neurologist including medical history, medications, recent testing, and more.',
+      'The neurologist shares their clinical summary and recommended plan of care with you. It may include orders for new tests such as an MRI or PET scan, bloodwork, and genetic testing.',
     ],
   },
   {
-    title: 'Get your workup and results',
+    title: 'Get your tests done and review results in a follow up visit',
     meta: 'Local + Virtual',
     points: [
-      'If new orders were placed, you schedule appointments with a local imaging center and a lab (Quest or LabCorp) to perform the necessary tests in the care plan.',
-      'Your neurology specialist reviews the test results.',
-      'Your follow up appointment is scheduled with the specialist.',
-      'You and a loved one attend the follow up visit to discuss your results and treatment options with the specialist and align on the path that is best for you.',
+      'If new test orders were placed with your care plan, you schedule appointments with a local imaging center and a lab (Quest or LabCorp) to get them completed.',
+      'Your neurologist reviews the test results and a follow up appointment is scheduled for you to discuss them together.',
+      'You and a loved one attend the follow up visit to review your results and treatment options with the specialist and align on the path that is best for you.',
     ],
   },
   {
-    title: 'Referral to treatment or outside care',
+    title: 'Treatment begins',
     meta: 'Local',
     points: [
       'If you\'re a candidate and decide to move forward with infusion treatment, we coordinate it and are with you every step of the way.',
@@ -240,7 +245,7 @@ const imagingFaqAnswer = 'Yes, while receiving Leqembi or Kisunla treatment, you
 
 const howFaqItems: Array<[string, string[]]> = [
   ['What services does Local Doctor provide?', [
-    'Local Doctor is a virtual Alzheimer\'s clinic focused on accelerating access to life-changing therapies. Our initial focus is evaluation, diagnosis, treatment eligibility, treatment initiation, and required oversight of disease-modifying therapies, not comprehensive longitudinal dementia management, nor care coordination. The Local Doctor model is designed to complement your existing team of providers and will work with them as needed.',
+    'Local Doctor is a virtual Alzheimer\'s clinic focused on accelerating access to life-changing therapies. Our initial focus is evaluation, diagnosis, treatment eligibility, treatment initiation, and required oversight of disease-modifying therapies. Whether you already have a neurologist or you\'re searching for one, Local Doctor is designed to help you find treatment faster. We complement your existing doctors and will work with them as needed.',
   ]],
   ['How much will this cost?', [costFaqAnswer]],
   ['Will I be seeing an MD or NP?', [
@@ -408,16 +413,19 @@ function App() {
     noteGaCtaClick(window.location.pathname, ctaLocation, ctaLabel)
   }
 
-  function navigate(next: Route, slug = '', ctaLocation?: string, ctaLabel?: string) {
+  function navigate(next: Route, slug = '', ctaLocation?: string, ctaLabel?: string, hash = '') {
     if (!routeEnabled(next)) {
       next = 'home'
       slug = ''
+      hash = ''
     }
     if (next === 'start') trackCtaClick(ctaLocation, ctaLabel)
     const path = next === 'blogPost' ? `/blog/${slug}` : next === 'landing' ? `/${slug}` : routePaths[next]
     // Keep gclid and utm_* across SPA navigations so Ads can attribute the visit and
     // Typeform can read them on /get-started. Contact and health params stay dropped.
-    const nextUrl = pathWithAdsParams(path, window.location.search)
+    // An optional hash (for example #book) is added after the params. The hash effect above
+    // scrolls to that element once the new page has rendered.
+    const nextUrl = `${pathWithAdsParams(path, window.location.search)}${hash ? `#${hash}` : ''}`
     setRoute(next)
     setRouteSlug(next === 'blogPost' || next === 'landing' ? slug : '')
     setMenuOpen(false)
@@ -573,12 +581,12 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
         <div className="hero-content">
           <div className="hero-copy">
             <p className="eyebrow">Virtual Alzheimer's specialty clinic</p>
-            <h1>Treatment that slows down Alzheimer's. <em>Finally.</em></h1>
+            <h1>Treatment that slows down Alzheimer's. <em>Finally. Today.</em></h1>
             <p>
-              New FDA-approved treatments can slow the progression of early Alzheimer&apos;s. Get a second opinion from our neurology team who specialize in cognitive impairment and disease-modifying treatments to see if you&apos;re eligible.
+              FDA-approved treatments can slow down the progression of early Alzheimer&apos;s disease. Get evaluated as early as this week by our neurologists who specialize in cognitive impairment and disease-modifying treatments.
             </p>
             <div className="hero-actions">
-              <button className="accent" type="button" onClick={() => onNavigate('start', '', 'hero', 'Get Started')}>Get Started</button>
+              <button className="accent" type="button" onClick={() => onNavigate('start', '', 'hero', 'Get Started', 'book')}>Book a Neurologist today</button>
               {routeEnabled('how') && <button className="secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>}
             </div>
             <div className="trust-note"><span /> Backed by a national infusion network and a focused treatment-readiness pathway.</div>
@@ -588,13 +596,13 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
 
       <section className="stat-band">
         <Metric value="3.5 years" label="average gap between first symptoms and diagnosis of Alzheimer's" />
-        <Metric value="6-9 months" label="typical wait for a new patient visit with a Neurologist in most areas" />
-        <Metric value="By video" label="see a board-certified neurology specialist from home in Maryland" />
-        <Metric value="1,500+" label="patients treated successfully by our infusion network" />
+        <Metric value="6-9 months" label="typical wait for a new patient visit with a neurologist in most areas" />
+        <Metric tone="light" value="In days" label="See a board-certified neurologist in days from the comfort of your home" />
+        <Metric tone="light" value="1,500+" label="patients treated successfully by our infusion network" />
       </section>
 
       <section className="section ivory compact-section">
-        <SectionIntro eyebrow="Why Local Doctor" title="We're designed around one goal: a clear, credible answer on treatment options." />
+        <SectionIntro eyebrow="Why Local Doctor" title="We're designed around one goal: a fast, credible answer on treatment options." />
         <div className="value-grid">
           {valueProps.map((prop) => {
             const Icon = prop.icon
@@ -617,10 +625,10 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
 
       <section className="section white compact-section">
         <div className="section-row">
-          <SectionIntro eyebrow="How it works" title="From getting in touch to real treatment in 4 easy steps." />
+          <SectionIntro eyebrow="How it works" title="Real treatment in 4 easy steps and an answer in days" />
           {routeEnabled('how') && <button className="text-link" type="button" onClick={() => onNavigate('how')}>See the full process <ArrowRight size={16} /></button>}
         </div>
-        <ProcessGrid />
+        <ProcessGrid onNavigate={onNavigate} />
       </section>
 
       <section className="section ivory compact-section">
@@ -630,8 +638,9 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
       <ConversionPanel
         onNavigate={onNavigate}
         eyebrow="Ready to make a step towards better memory care?"
-        title="A quick call will help us determine your eligibility."
-        copy="We review your concerns, medical history, and insurance in a quick conversation before coordinating the visit with a neurology specialist."
+        title="Book a visit with a neurologist today."
+        copy="Our neurologists are on stand-by to help you find the best treatment options and can see you as soon as this week."
+        ctaLabel="Book now"
       />
       <StickyCta
         label="Get Started"
@@ -680,7 +689,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: Navigate }) {
         </div>
       </section>
       <QualificationSection tone="white" />
-      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to find out where you stand?" copy="A short intake is all it takes to get started." secondaryLabel="See how it works" secondaryRoute="how" compact />
+      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to meet with a Neurologist?" copy="Book your appointment today and get seen within days." ctaLabel="Book now" secondaryLabel="See how it works" secondaryRoute="how" compact />
     </>
   )
 }
@@ -690,12 +699,12 @@ function HowPage({ onNavigate }: { onNavigate: Navigate }) {
     <>
       <PageHero
         eyebrow="How it works"
-        title="A clear path from first concern to treatment."
-        copy="Every step is virtual where it can be, and in-person only where it has to be."
+        title="A fast path you can trust from first concern to treatment."
+        copy="Our trusted team of neurology specialists has over 20 years of experience in treating dementia and mild cognitive impairment."
         icon={<CalendarClock size={38} />}
         aside={{ title: 'Family and loved ones', text: 'Our preference is for loved ones to join the virtual provider visits and be a part of the process.' }}
         onPrimary={() => onNavigate('start', '', 'hero', 'Get Started')}
-        primaryLabel="Get Started"
+        primaryLabel="Book now"
         wideCopy
       />
       <section className="section white compact-section">
@@ -706,7 +715,13 @@ function HowPage({ onNavigate }: { onNavigate: Navigate }) {
               <div>
                 <div className="journey-heading">
                   <h3>{step.title}</h3>
-                  <span>{step.meta}</span>
+                  {step.cta ? (
+                    <button className="primary journey-cta" type="button" onClick={() => onNavigate('start', '', 'journey_step', step.cta)}>
+                      {step.cta}
+                    </button>
+                  ) : (
+                    <span>{step.meta}</span>
+                  )}
                 </div>
                 <div className="journey-points">
                   {step.points.map((point) => (
@@ -739,7 +754,7 @@ function HowPage({ onNavigate }: { onNavigate: Navigate }) {
           ))}
         </div>
       </section>
-      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to find out where you stand?" copy="A short intake is all it takes to get started." secondaryLabel="See treatments" secondaryRoute="treatments" compact />
+      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to meet with a neurologist?" copy="Book your appointment today and get seen within days." ctaLabel="Book now" secondaryLabel="See treatments" secondaryRoute="treatments" compact />
     </>
   )
 }
@@ -798,23 +813,16 @@ function StartPage() {
     <div className="start-page">
       <PageHero
         eyebrow="Get started"
-        title="Find out if treatment is right for you."
-        copy="Everyone's situation is unique. We work to understand yours and let you know if you're eligible to meet with one of our neurology specialists."
+        title="Book a neurologist today to find out if treatment is right for you."
+        copy="Everyone's situation is unique. Our neurology specialists listen to deeply understand yours and let you know if you're eligible for disease-modifying treatment."
         primaryLabel={`Call or text ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
-        secondary={bookingUrl ? { label: 'Book your neurologist appointment', href: bookingUrl } : { label: 'Fill out the form', href: '#intake' }}
+        secondary={{ label: 'Book now', href: '#book' }}
         showAside={false}
         image={{ src: '/assets/hero-get-started.jpg', alt: 'Three generations of a family sitting together on a lakeside dock' }}
       />
-      <WhatToExpect />
-      <QualificationSection tone="ivory" eyebrow="Eligibility" />
-      <EligibilityLeadForm />
-      <StickyCta
-        label="Fill out the form"
-        href="#intake"
-        anchorSelector=".start-page .page-hero"
-        stopSelectors={['.start-form-section', '.footer']}
-      />
+      <BookingSection />
+      {/* No mobile sticky bar here for now: it did not behave well while scrolling. */}
     </div>
   )
 }
@@ -1134,36 +1142,37 @@ function usePageMeta(route: Route, slug: string) {
   }, [route, slug])
 }
 
-function WhatToExpect() {
+function BookingSection() {
   return (
-    <section className="section white expect-section">
-      <h2 className="expect-heading">How to get started</h2>
-      <div className="expect-columns">
-        <div>
-          <h3>3 easy steps</h3>
-          {bookingUrl ? (
+    <section className="section white expect-section start-booking-section" id="book">
+      <h2 className="expect-heading">Book a neurologist</h2>
+      <div className="booking-layout">
+        <CalendlyEmbed />
+        <aside className="booking-aside">
+          <div>
+            <h3>What to expect</h3>
             <ol>
-              <li>Book your neurologist appointment online, or give us a call.</li>
-              <li>Before your visit, we call you to review your medical history and verify your insurance.</li>
-              <li>Meet your neurology specialist by video from home.</li>
+              <li>Book your appointment for the day and time that works best for you.</li>
+              <li>We will call you to review your medical history and verify your insurance and eligibility.</li>
+              <li>You join the virtual visit over a video call to meet your neurologist.</li>
             </ol>
-          ) : (
-            <ol>
-              <li>Give us a call or fill out the form below. Sending the form does not book a visit.</li>
-              <li>We call you to review your medical history, verify your insurance, and see whether your needs qualify to meet with our neurology team.</li>
-              <li>If eligible, we set up a virtual visit for you to meet with a neurology specialist.</li>
-            </ol>
-          )}
-        </div>
-        <div>
-          <h3>What to have handy</h3>
-          <ul>
-            <li>Insurance information</li>
-            <li>Medication list</li>
-            <li>Recent test results</li>
-            <li>Any questions you and your family want to discuss</li>
-          </ul>
-        </div>
+          </div>
+          <div>
+            <h3>What to have handy</h3>
+            <ul>
+              <li>Insurance information</li>
+              <li>Medication list</li>
+              <li>Recent test results</li>
+              <li>Any questions you and your family want to discuss</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Prefer to speak to us directly?</h3>
+            <p>
+              Call or text <a href={`tel:+1${publicPhone.replace(/\D/g, '')}`}>{publicPhone}</a> to speak with a member of our team
+            </p>
+          </div>
+        </aside>
       </div>
       <StartFaq />
     </section>
@@ -1185,33 +1194,6 @@ function StartFaq() {
         </article>
       ))}
     </div>
-  )
-}
-
-function EligibilityLeadForm() {
-  useEffect(() => {
-    const previousScript = document.querySelector('script[data-local-doctor-typeform]')
-    previousScript?.remove()
-
-    const script = document.createElement('script')
-    script.src = typeformEmbedScript
-    script.async = true
-    script.dataset.localDoctorTypeform = 'true'
-    document.body.appendChild(script)
-  }, [])
-
-  return (
-    <section className="section white start-form-section">
-      <div className="intake-frame-wrap" id="intake">
-        <div
-          className="typeform-live-embed ph-no-capture"
-          data-tf-live={typeformLiveId}
-          data-tf-inline-on-mobile=""
-          data-tf-on-submit="localDoctorOnTypeformSubmit"
-          data-tf-transitive-search-params={typeformTransitiveSearchParams}
-        />
-      </div>
-    </section>
   )
 }
 
@@ -1240,10 +1222,10 @@ function InsuranceStrip({
   )
 }
 
-function ProcessGrid() {
+function ProcessGrid({ onNavigate }: { onNavigate: Navigate }) {
   return (
     <div className="process-grid">
-      {simpleProcess.map(([title, copy], index) => (
+      {simpleProcess.map(({ title, copy, cta }, index) => (
         <article key={title}>
           <div>
             <b>{index + 1}</b>
@@ -1251,6 +1233,11 @@ function ProcessGrid() {
           </div>
           <h3>{title}</h3>
           <p>{copy}</p>
+          {cta && (
+            <button className="primary process-cta" type="button" onClick={() => onNavigate('start', '', 'how_it_works', cta)}>
+              {cta}
+            </button>
+          )}
         </article>
       ))}
     </div>
@@ -1422,6 +1409,7 @@ function ConversionPanel({
   eyebrow = 'Ready to find out where you stand?',
   title = 'Start with a short check, then move to full intake only when it makes sense.',
   copy = 'The intake is a request for review. It is not a diagnosis, a booked visit, or a promise of coverage.',
+  ctaLabel = 'Get Started',
   secondaryLabel,
   secondaryRoute,
   compact = false,
@@ -1430,6 +1418,7 @@ function ConversionPanel({
   eyebrow?: string
   title?: string
   copy?: string
+  ctaLabel?: string
   secondaryLabel?: string
   secondaryRoute?: Route
   compact?: boolean
@@ -1442,7 +1431,7 @@ function ConversionPanel({
         <p>{copy}</p>
       </div>
       <div className="conversion-actions">
-        <button className="primary" type="button" onClick={() => onNavigate('start', '', 'closing', 'Get Started')}>Get Started <ArrowRight size={20} /></button>
+        <button className="primary" type="button" onClick={() => onNavigate('start', '', 'closing', 'Get Started')}>{ctaLabel} <ArrowRight size={20} /></button>
         {secondaryLabel && secondaryRoute && routeEnabled(secondaryRoute) && (
           <button className="secondary" type="button" onClick={() => onNavigate(secondaryRoute)}>{secondaryLabel}</button>
         )}
@@ -1461,9 +1450,9 @@ function SectionIntro({ eyebrow, title, copy }: { eyebrow: string; title: string
   )
 }
 
-function Metric({ value, label }: { value: string; label: string }) {
+function Metric({ value, label, tone }: { value: string; label: string; tone?: 'light' }) {
   return (
-    <article>
+    <article className={tone}>
       <strong>{value}</strong>
       <span>{label}</span>
     </article>

@@ -8,6 +8,7 @@
   --blue-900: #0a2c63;
   --blue-700: #0f3f8c;
   --blue-500: #1d6bb8;
+  --blue-300: #8cc4f5;
   --blue-100: #e4f0fb;
   --yellow-500: #ffe58a;
   --yellow-300: #ffefb8;
@@ -37,6 +38,8 @@
   /* Actions */
   --color-primary: var(--blue-700);
   --color-primary-hover: var(--blue-900);
+  /* Light blue stat figures on the dark band. Contrast on --blue-900 is 7.29:1. */
+  --accent-light-blue: var(--blue-300);
   --accent-yellow: var(--yellow-500);
   --accent-yellow-hover: var(--yellow-300);
 

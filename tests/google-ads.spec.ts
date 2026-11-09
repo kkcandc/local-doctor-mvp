@@ -6,6 +6,7 @@ import {
   DEFAULT_GOOGLE_ADS_LEAD_LABEL,
   DEFAULT_GOOGLE_ADS_PHONE_LABEL,
   googleAdsTagHtml,
+  isCalendlyScheduledMessage,
   isTrackedClinicPhone,
   isTypeformSubmitMessage,
   keptAdsSearchParams,
@@ -153,6 +154,29 @@ test('typeform submit detection ignores form answers and foreign origins', () =>
   const calls = leadTrackingCalls(adsId, undefined, '/get-started')
   expect(JSON.stringify(calls)).not.toContain('resp_123')
   expect(JSON.stringify(calls)).not.toContain('jane@example.com')
+})
+
+test('calendly booking detection reads only the event name and ignores foreign origins', () => {
+  const payload = {
+    event: 'calendly.event_scheduled',
+    payload: {
+      event: { uri: 'https://api.calendly.com/scheduled_events/abc' },
+      invitee: { uri: 'https://api.calendly.com/invitees/xyz', email: 'jane@example.com', name: 'Jane Doe' },
+    },
+  }
+  expect(isCalendlyScheduledMessage('https://calendly.com', payload)).toBe(true)
+  expect(isCalendlyScheduledMessage('https://calendly.com', { event: 'calendly.event_type_viewed' })).toBe(false)
+  expect(isCalendlyScheduledMessage('https://calendly.com', { event: 'calendly.date_and_time_selected' })).toBe(false)
+  expect(isCalendlyScheduledMessage('https://calendly.com', 'calendly.event_scheduled')).toBe(false)
+  expect(isCalendlyScheduledMessage('https://calendly.com', null)).toBe(false)
+  expect(isCalendlyScheduledMessage('https://evil.example', payload)).toBe(false)
+  expect(isCalendlyScheduledMessage('https://calendly.com.evil.com', payload)).toBe(false)
+  expect(isCalendlyScheduledMessage('http://calendly.com', payload)).toBe(false)
+  expect(isCalendlyScheduledMessage('https://assets.calendly.com', payload)).toBe(false)
+
+  const calls = leadTrackingCalls(adsId, undefined, '/get-started')
+  expect(JSON.stringify(calls)).not.toContain('jane@example.com')
+  expect(JSON.stringify(calls)).not.toContain('Jane Doe')
 })
 
 test('spa page views skip the first load and drop query strings', () => {

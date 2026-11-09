@@ -10,7 +10,13 @@ export default defineConfig({
     trace: 'retain-on-failure',
     // The site-wide chatbot embed loads more scripts and an iframe from this host. Keep test
     // runs off the network for it so page loads stay fast and nothing talks to the live agent.
-    launchOptions: { args: ['--host-resolver-rules=MAP forms.mylocalinfusion.com ~NOTFOUND'] },
+    // The /get-started Calendly scheduler is kept off the network the same way, so no test books
+    // against the live calendar. Specs that need its widget script stub it with page.route.
+    launchOptions: {
+      args: [
+        '--host-resolver-rules=MAP forms.mylocalinfusion.com ~NOTFOUND, MAP assets.calendly.com ~NOTFOUND, MAP calendly.com ~NOTFOUND',
+      ],
+    },
   },
   webServer: {
     command: 'npm run dev -- --host 127.0.0.1 --port 5175 --strictPort',

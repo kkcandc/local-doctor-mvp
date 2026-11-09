@@ -474,6 +474,10 @@ h3 {
   white-space: nowrap;
 }
 
+.stat-band article.light strong {
+  color: var(--accent-light-blue);
+}
+
 .stat-band span {
   display: block;
   max-width: 260px;
@@ -575,7 +579,8 @@ h3 {
 .team-card p,
 .provider-grid li,
 .expect-faq p,
-.expect-columns li {
+.booking-aside li,
+.booking-aside p {
   color: var(--text-secondary);
 }
 
@@ -733,6 +738,10 @@ a.blog-card:hover {
 .process-grid p {
   margin: var(--space-8) 0 0;
   color: var(--text-secondary);
+}
+
+.process-cta {
+  margin-top: var(--space-16);
 }
 
 .treatment-card-grid {
@@ -1121,6 +1130,11 @@ a.blog-card:hover {
   font-weight: var(--weight-semibold);
 }
 
+.journey-heading .journey-cta {
+  min-height: 0;
+  padding: var(--space-8) var(--space-16);
+}
+
 .journey-points {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1193,31 +1207,6 @@ a.blog-card:hover {
   margin-top: var(--space-12);
 }
 
-.intake-frame-wrap {
-  overflow: hidden;
-  height: clamp(525px, calc((100svh - 280px) * 1.25), 775px);
-  min-height: 0;
-  background: var(--surface-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-}
-
-.intake-frame-wrap iframe,
-.typeform-live-embed,
-.typeform-live-embed [data-tf-widget],
-.typeform-live-embed [data-tf-live] {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-
-.typeform-live-embed [data-tf-widget],
-.typeform-live-embed .tf-v1-widget,
-.typeform-live-embed iframe {
-  height: 100% !important;
-}
-
 .section.expect-section {
   padding-top: calc(var(--section-pad) * 0.49);
 }
@@ -1230,7 +1219,7 @@ a.blog-card:hover {
   margin-top: var(--space-16);
 }
 
-#intake {
+#book {
   scroll-margin-top: calc(var(--header-height) + var(--space-16));
 }
 
@@ -1239,24 +1228,30 @@ a.blog-card:hover {
   text-align: center;
 }
 
-.expect-columns {
+.booking-layout {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-32) var(--space-64);
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: var(--space-32) var(--space-48);
+  align-items: start;
   margin-bottom: var(--space-64);
 }
 
-.expect-columns h3 {
+.booking-aside {
+  display: grid;
+  gap: var(--space-32);
+}
+
+.booking-aside h3 {
   margin-bottom: var(--space-16);
 }
 
-.expect-columns h3,
+.booking-aside h3,
 .expect-faq h3 {
   color: var(--color-primary);
 }
 
-.expect-columns ol,
-.expect-columns ul {
+.booking-aside ol,
+.booking-aside ul {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-12);
@@ -1264,8 +1259,16 @@ a.blog-card:hover {
   padding-left: 1.5rem;
 }
 
-.expect-columns li {
+.booking-aside li {
   padding-left: var(--space-4);
+}
+
+.booking-aside p {
+  margin: 0;
+}
+
+.booking-aside a {
+  font-weight: var(--weight-semibold);
 }
 
 .expect-faq {
@@ -1909,7 +1912,7 @@ a.blog-card {
   }
 
   .treatment-hero,
-  .expect-columns,
+  .booking-layout,
   .question-band,
   .page-hero,
   .page-hero.has-image,
@@ -2080,29 +2083,6 @@ a.blog-card {
 
   .journey-points {
     grid-column: 1 / -1;
-  }
-
-  .intake-frame-wrap,
-  .typeform-live-embed {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-  }
-
-  .intake-frame-wrap {
-    height: auto;
-    min-height: 87.5dvh;
-  }
-
-  .intake-frame-wrap iframe,
-  .typeform-live-embed,
-  .typeform-live-embed [data-tf-widget],
-  .typeform-live-embed [data-tf-live],
-  .typeform-live-embed .tf-v1-widget {
-    width: 100% !important;
-    max-width: 100%;
-    height: 87.5dvh !important;
-    min-height: 700px;
   }
 
   .question-band {

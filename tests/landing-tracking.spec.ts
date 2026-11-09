@@ -124,13 +124,16 @@ for (const route of trackedRoutes) {
     expect(gaLocation).toContain('gclid=test_gclid_123')
 
     if (route === 'get-started') {
-      const embed = page.locator('.typeform-live-embed')
-      await expect(embed).toHaveAttribute('data-tf-on-submit', 'localDoctorOnTypeformSubmit')
-      await expect(embed).toHaveAttribute('data-tf-transitive-search-params', typeformTransitiveSearchParams)
-      await expect(embed).toHaveAttribute('data-tf-live', /.+/)
+      await expect(page.locator('.calendly-inline-widget')).toHaveAttribute('data-url', /^https:\/\/calendly\.com\/local-doctor\//)
 
+      // Calendly posts this from its iframe after a booking. Only the event name is read.
       await page.evaluate(() => {
-        window.localDoctorOnTypeformSubmit?.()
+        window.dispatchEvent(
+          new MessageEvent('message', {
+            origin: 'https://calendly.com',
+            data: { event: 'calendly.event_scheduled', payload: { invitee: { uri: 'ignored' } } },
+          }),
+        )
       })
       await waitForGtagEvent(page, 'generate_lead')
       await waitForGtagEvent(page, 'conversion')
@@ -186,10 +189,7 @@ for (const route of trackedRoutes) {
           ),
         ).toBe(true)
 
-        await expect(page.locator('.typeform-live-embed')).toHaveAttribute(
-          'data-tf-transitive-search-params',
-          typeformTransitiveSearchParams,
-        )
+        await expect(page.locator('.calendly-inline-widget')).toBeVisible()
       }
     }
 
