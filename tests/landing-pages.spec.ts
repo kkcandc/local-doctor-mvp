@@ -1,6 +1,6 @@
 import { gunzipSync } from 'node:zlib'
 import { mkdirSync } from 'node:fs'
-import { expect, test, type Page, type Request } from '@playwright/test'
+import { expect, test, type Locator, type Page, type Request } from '@playwright/test'
 import { isAllowedExternalHref, landingDestinations, resolveDestination } from '../src/landing/destinations'
 import { landingPages } from '../src/landing/landingContent'
 import { landingHtml } from '../src/landing/landingHtml'
@@ -11,7 +11,14 @@ const HOME_H1 = /Treatment that slows down Alzheimer/
 const CLINIC_TEL = 'tel:+12403765730'
 const CLINIC_PHONE = '(240) 376-5730'
 const HERO_REASSURANCE =
-  'Get seen by a board-certified neurologist in days. Insurance accepted. No referral needed.'
+  'Board-certified neurologist. Insurance accepted. No referral needed. Phone answered on weekdays.'
+const TRUST_FACTS = [
+  'Maryland video visits',
+  'Board-certified neurologist',
+  'Insurance accepted',
+  'No referral needed',
+]
+const SPEED_CLAIM = /\bin days\b|within days|next[-\s]?day|fast answer|fast appointment/i
 const DASHES = /[\u2013\u2014]/
 const TYPEFORM_LIVE_ID = '01M64J1XGXT19BH7GGWPKJ243K'
 const TYPEFORM_EVALUATION = 'https://localdoctor.typeform.com/evaluation'
@@ -31,6 +38,23 @@ const viewports = [
   { name: 'desktop', use: { viewport: { width: 1366, height: 900 } } },
   { name: 'mobile', use: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } },
 ] as const
+
+type Box = { x: number; y: number; width: number; height: number }
+
+function horizontalGap(a: Box, b: Box) {
+  const [left, right] = a.x <= b.x ? [a, b] : [b, a]
+  return right.x - (left.x + left.width)
+}
+
+function sameRow(a: Box, b: Box) {
+  return a.y < b.y + b.height - 1 && b.y < a.y + a.height - 1
+}
+
+async function boxOf(locator: Locator): Promise<Box> {
+  const box = await locator.boundingBox()
+  expect(box, locator.toString()).not.toBeNull()
+  return box!
+}
 
 function expectedDestination(slug: LandingSlug) {
   return resolveDestination(landingDestinations[landingPages[slug].funnel])
@@ -55,15 +79,10 @@ test('every landing route has its own title, description, and canonical', () => 
     expect(`${landingMeta[slug].title} ${landingMeta[slug].description}`).not.toMatch(DASHES)
     expect(landingPages[slug].ctaLabel).toBe(heroCtaLabels[slug])
     expect(landingPages[slug].reassurance).toBe(HERO_REASSURANCE)
-    expect(landingPages[slug].facts.items).toEqual(
-      expect.arrayContaining([
-        'See a doctor within days',
-        'Board-certified neurologist',
-        'Insurance accepted',
-        'No referral needed',
-      ]),
-    )
+    expect(landingPages[slug].facts.items.slice(0, TRUST_FACTS.length)).toEqual(TRUST_FACTS)
     expect(landingPages[slug].reassurance).not.toMatch(/waitlist|price|\$|seen in days/i)
+    expect(`${landingPages[slug].reassurance} ${landingPages[slug].facts.items.join(' ')}`).not.toMatch(SPEED_CLAIM)
+    expect(landingMeta[slug].description).not.toMatch(SPEED_CLAIM)
   }
 })
 
@@ -101,6 +120,59 @@ test('sitemap.xml and robots.txt are served as real files', async ({ request }) 
   expect(robotsBody).toContain('Sitemap: https://trylocaldoctor.com/sitemap.xml')
   expect(robotsBody).not.toContain('<html')
 })
+
+test('memory specialist page asks visitors to request a visit', () => {
+  const page = landingPages['memory-specialist-maryland']
+  const steps = page.sections.find((section) => section.kind === 'steps')
+  const mid = page.sections.find((section) => section.kind === 'midCta')
+  expect(steps && steps.kind === 'steps' ? steps.title : '').toBe('Requesting a virtual memory visit.')
+  expect(mid && mid.kind === 'midCta' ? mid.title : '').toBe('Request a visit with a memory specialist.')
+  expect(JSON.stringify(page)).not.toMatch(/"title":"Book|"title":"Booking/)
+})
+
+test('homepage, intake, how-it-works, and FAQ drop visit-speed claims', async ({ page }) => {
+  for (const path of ['/', '/get-started', '/how-it-works', '/faq']) {
+    await page.goto(path)
+    await expect(page.locator('h1')).toBeVisible()
+    const text = await page.locator('main').evaluate((node) => node.textContent ?? '')
+    expect(text, path).not.toMatch(SPEED_CLAIM)
+  }
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/')
+  const actions = page.locator('.hero-actions')
+  const primary = await boxOf(actions.getByRole('button', { name: 'Get Started' }))
+  const secondary = await boxOf(actions.getByRole('button', { name: 'Learn more' }))
+  expect(sameRow(primary, secondary)).toBe(true)
+  expect(horizontalGap(primary, secondary)).toBeCloseTo(16, 0)
+})
+
+for (const width of [1280, 1440]) {
+  test.describe(`landing CTA rows at ${width}px`, () => {
+    test.use({ viewport: { width, height: 900 } })
+
+    test('hero buttons stay 16px apart and closing pairs stay paired', async ({ page }) => {
+      for (const slug of landingSlugs) {
+        await page.goto(`/${slug}`)
+        const landing = page.locator(`.landing-page[data-landing="${slug}"]`)
+        const hero = await boxOf(landing.locator('[data-cta-location="hero"]'))
+        const phone = await boxOf(landing.locator('.landing-hero-buttons .landing-phone'))
+        const reassurance = await boxOf(landing.locator(`#${slug}-reassurance`))
+        const gap = horizontalGap(hero, phone)
+        expect(sameRow(hero, phone), slug).toBe(true)
+        expect(gap, slug).toBeCloseTo(16, 0)
+        expect(reassurance.y, slug).toBeGreaterThanOrEqual(Math.max(hero.y + hero.height, phone.y + phone.height) - 1)
+        expect(reassurance.x, slug).toBeLessThanOrEqual(hero.x + 2)
+
+        const closing = landing.locator('.landing-closing .conversion-actions')
+        await closing.scrollIntoViewIfNeeded()
+        const closingPrimary = await boxOf(closing.locator('[data-cta-location="closing"]'))
+        const closingPhone = await boxOf(closing.locator('.landing-phone'))
+        expect(sameRow(closingPrimary, closingPhone), `${slug} closing`).toBe(true)
+        expect(horizontalGap(closingPrimary, closingPhone), `${slug} closing`).toBeCloseTo(16, 0)
+      }
+    })
+  })
+}
 
 test('alzheimers doctor and second opinion hero copy', () => {
   expect(landingPages['alzheimers-doctor-maryland'].h1).toBe("See an Alzheimer's doctor in Maryland, by video.")
@@ -171,6 +243,10 @@ for (const viewport of viewports) {
         const hero = landing.locator('[data-cta-location="hero"]')
         await expect(hero).toHaveAttribute('aria-describedby', `${slug}-reassurance`)
         await expect(landing.locator(`#${slug}-reassurance`)).toHaveText(HERO_REASSURANCE)
+        const buttonRow = landing.locator('.landing-hero-buttons')
+        await expect(buttonRow.locator('[data-cta-location="hero"]')).toBeVisible()
+        await expect(buttonRow.locator('.landing-phone')).toHaveCount(1)
+        await expect(buttonRow.locator('.landing-reassurance')).toHaveCount(0)
         const phone = landing.locator('.landing-phone').first()
         await expect(phone).toBeVisible()
         await expect(phone).toContainText(CLINIC_PHONE)
@@ -204,6 +280,16 @@ for (const viewport of viewports) {
         expect(heroBox!.y + heroBox!.height, 'hero CTA above the fold').toBeLessThanOrEqual(fold)
         expect(phoneBox!.y + phoneBox!.height, 'phone above the fold').toBeLessThanOrEqual(fold)
         expect(reassuranceBox!.y + reassuranceBox!.height, 'reassurance above the fold').toBeLessThanOrEqual(fold)
+        if (viewport.name === 'desktop') {
+          expect(sameRow(heroBox!, phoneBox!), 'hero and phone share a row').toBe(true)
+          expect(horizontalGap(heroBox!, phoneBox!), 'hero to phone gap').toBeCloseTo(16, 0)
+          expect(reassuranceBox!.y).toBeGreaterThanOrEqual(heroBox!.y + heroBox!.height - 1)
+          expect(reassuranceBox!.y).toBeGreaterThanOrEqual(phoneBox!.y + phoneBox!.height - 1)
+        } else {
+          expect(phoneBox!.y, 'phone stacks under the hero button').toBeGreaterThanOrEqual(heroBox!.y + heroBox!.height - 1)
+          expect(reassuranceBox!.y, 'reassurance follows both buttons').toBeGreaterThanOrEqual(phoneBox!.y + phoneBox!.height - 1)
+          expect(Math.abs(heroBox!.width - phoneBox!.width), 'stacked buttons match width').toBeLessThanOrEqual(2)
+        }
       })
     }
 
