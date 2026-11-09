@@ -95,7 +95,11 @@
   /* Layout */
   --content-max: 1200px;
   --gutter: clamp(20px, 2.5vw + 12px, 48px);
-  --page-inline: max(var(--gutter), calc((100% - var(--content-max)) / 2));
+  /* The safe-area term keeps content out of the notch in landscape (viewport-fit=cover). */
+  --page-inline: max(
+    calc(var(--gutter) + max(env(safe-area-inset-left), env(safe-area-inset-right))),
+    calc((100% - var(--content-max)) / 2)
+  );
   --section-pad: clamp(48px, 4vw + 32px, 96px);
   --header-height: 80px;
 

@@ -55,12 +55,13 @@ export const relatedLabels: Record<LandingSlug, { title: string; copy: string }>
   },
 }
 
+// No visit-speed claim. Visits are not offered next-day or "in days".
 const heroReassurance =
-  'Get seen by a board-certified neurologist in days. Insurance accepted. No referral needed.'
+  'Board-certified neurologist. Insurance accepted. No referral needed. Phone answered on weekdays.'
 
-// Kenny-confirmed trust points for the hero facts panel on every intent page.
+// Trust points on every intent hero. No visit-speed claim.
 const trustFacts = [
-  'See a doctor within days',
+  'Maryland video visits',
   'Board-certified neurologist',
   'Insurance accepted',
   'No referral needed',
@@ -88,8 +89,9 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     reassurance: heroReassurance,
     eyebrow: 'Dementia evaluation by telehealth',
     h1: 'A dementia evaluation with a specialist, by video, from home.',
-    lede: 'If you or someone close to you is having changes in memory, thinking, or daily function, the next step is a clinician who looks at the whole picture. Local Doctor offers virtual visits with a neurology specialist for people in Maryland, who reviews your concerns and history and recommends what testing, if any, should come next.',
-    ctaContext: 'This opens a short request form. Our team then calls to review eligibility and insurance before any visit is booked.',
+    lede: 'Changes in memory, thinking, or daily function call for a clinician who looks at the whole picture. A neurology specialist sees people in Maryland by video, reviews concerns and history, and recommends what testing, if any, comes next.',
+    ctaContext: 'Start Evaluation opens our short evaluation form. Sending it does not book a visit. Our team calls first to review your medical history and insurance.',
+    heroSecondary: { label: 'How the evaluation works', href: '#how-it-works' },
     facts: {
       title: 'How this evaluation works',
       items: [...trustFacts],
@@ -110,6 +112,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
       },
       {
         kind: 'steps',
+        id: 'how-it-works',
         eyebrow: 'How it works',
         title: 'From a short form to a clear next step.',
         steps: [
@@ -137,7 +140,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     ],
     faqTitle: 'Dementia evaluation questions.',
     faqs: [
-      ['Is this a dementia test?', 'No. A test or screening is one tool. An evaluation is a clinician reviewing your symptoms, history, medications, and any prior results, then recommending what to do next. The request form behind Get Started is not a test and does not score memory.'],
+      ['Is this a dementia test?', 'No. A test or screening is one tool. An evaluation is a clinician reviewing your symptoms, history, medications, and any prior results, then recommending what to do next. The Start Evaluation form is not a test and does not score memory.'],
       ['Do I need to live in Maryland?', 'You need to be located in Maryland during the visit, because the clinician must be licensed in the state where the patient is. Virtual visits are not available in other states at this time.'],
       ['Is there an office I go to?', 'No. Local Doctor is a virtual practice and visits happen by video. If labs or imaging are ordered, those are done in person at a local lab or imaging center.'],
       ['Do I need a referral from my doctor?', 'No referral is needed. Start with the short form or call our team, and we review eligibility and insurance with you before a visit is booked.'],
@@ -156,7 +159,8 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     eyebrow: "Alzheimer's evaluation online",
     h1: "An Alzheimer's evaluation that starts with a virtual specialist visit.",
     lede: "Worried that memory changes could be early Alzheimer's disease? A neurology specialist can review what you are noticing, your history, and any past results by video, then explain which tests would help answer the question. Visits are for people located in Maryland.",
-    ctaContext: "This takes you to our intake form. It is a request for a specialist review, not an Alzheimer's test.",
+    ctaContext: "Start Evaluation opens our short evaluation form. It is a request for a specialist review, not an Alzheimer's test, and sending it does not book a visit.",
+    heroSecondary: { label: 'How the evaluation works', href: '#how-it-works' },
     facts: {
       title: 'What to expect',
       items: [...trustFacts],
@@ -183,6 +187,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
       },
       {
         kind: 'steps',
+        id: 'how-it-works',
         eyebrow: 'How it works',
         title: "The path through an Alzheimer's evaluation.",
         steps: [
@@ -227,7 +232,8 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     eyebrow: 'Memory evaluation from home',
     h1: 'A memory evaluation from home, for you or someone you love.',
     lede: 'Concerned about memory changes in yourself or a family member? Start with a virtual evaluation by a neurology specialist. You stay home for the visit, a loved one can join, and any testing is arranged at local sites only if it is needed.',
-    ctaContext: 'This opens a short request form you can fill out for yourself or on behalf of a loved one. It is not a memory test.',
+    ctaContext: 'Start Evaluation opens a short form you can fill out for yourself or for a loved one. It is not a memory test, and sending it does not book a visit.',
+    heroSecondary: { label: 'How the evaluation works', href: '#how-it-works' },
     facts: {
       title: 'Built for families',
       items: [...trustFacts],
@@ -281,6 +287,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
       },
       {
         kind: 'steps',
+        id: 'how-it-works',
         eyebrow: 'How it works',
         title: 'What happens after you reach out.',
         steps: [
@@ -307,7 +314,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
       ['Do I need a diagnosis before asking for an evaluation?', 'No. Many people reach out with concerns and no diagnosis. If there is already a diagnosis, share it during the eligibility call.'],
       ['How long is the video visit?', 'Plan for about an hour. Use a device with video and audio, in a place with a strong Wi-Fi or data connection.'],
       ['Can I call on behalf of my spouse or parent?', 'Yes. We welcome family members who want to be part of the process, and we prefer that one joins the first visit with the patient.'],
-      ['Is the Get Started form a memory test?', 'No. It is a request for our team to contact you about an evaluation. It does not test or score memory.'],
+      ['Is the evaluation form a memory test?', 'No. It is a request for our team to contact you about an evaluation. It does not test or score memory.'],
       ['Can you help with memory care placement or daily caregiving?', 'That is not what Local Doctor does. Our focus is evaluation and treatment eligibility. If caregiving support is what you need, the team can suggest partner services where appropriate.'],
     ],
     closing: { title: 'Take the first step toward answers about memory.', copy: 'Start a request for yourself or someone you love, or call our team.' },
@@ -453,14 +460,14 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
       {
         kind: 'steps',
         eyebrow: 'How to start',
-        title: 'Booking a virtual memory visit.',
+        title: 'Requesting a virtual memory visit.',
         steps: [
           { title: 'Send a request or call', copy: 'A team member follows up by phone.' },
           { title: 'Eligibility call', copy: 'We review concerns, history, medications, and insurance, and confirm whether a visit fits.' },
           { title: 'Schedule your video visit', copy: 'You pick a day and time, then get a confirmation and reminders with the link to join.' },
         ],
       },
-      { kind: 'midCta', title: 'Book a virtual visit with a memory specialist.', copy: 'Start with the request form. Our team will call to set up the visit if it is a fit.' },
+      { kind: 'midCta', title: 'Request a visit with a memory specialist.', copy: 'Start with the request form. Our team will call to set up the visit if it is a fit.' },
     ],
     faqTitle: 'Memory specialist questions.',
     faqs: [

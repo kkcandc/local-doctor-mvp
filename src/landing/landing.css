@@ -28,21 +28,22 @@
   line-height: 1.45;
 }
 
+/* Buttons share one row. The reassurance sits under both, so its width cannot push the phone aside. */
 .landing-hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--space-16);
-}
-
-.landing-hero-primary {
   display: grid;
   gap: var(--space-8);
   justify-items: start;
 }
 
+.landing-hero-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-16);
+}
+
 .landing-reassurance {
-  max-width: 36ch;
+  max-width: 52ch;
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--text-control);
@@ -203,6 +204,11 @@
   color: var(--text-secondary);
   font-size: var(--text-control);
   line-height: 1.55;
+}
+
+.landing-section-cta {
+  display: flex;
+  margin-top: var(--space-32);
 }
 
 .landing-checklist {
@@ -413,19 +419,61 @@
 }
 
 @media (max-width: 680px) {
+  .landing-hero {
+    padding-block: var(--space-32) var(--space-48);
+  }
+
+  .landing-lede {
+    margin: var(--space-16) 0 var(--space-24);
+  }
+
   .landing-hero-actions,
-  .landing-hero-primary {
+  .landing-hero-buttons {
     width: 100%;
   }
 
-  .landing-hero-actions {
+  .landing-hero-buttons {
     flex-direction: column;
+    align-items: stretch;
   }
 
-  .landing-facts,
+  .landing-hero-buttons .primary,
+  .landing-hero-buttons .secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .landing-reassurance {
+    max-width: none;
+  }
+
   .landing-column,
   .landing-callout {
     padding: var(--space-24);
+  }
+
+  /* On phones the trust points read as a compact two-column list instead of a tall card. */
+  .landing-facts {
+    gap: var(--space-12);
+    padding: var(--space-16);
+  }
+
+  .landing-facts strong {
+    font-size: 1.125rem;
+  }
+
+  .landing-facts ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-12) var(--space-16);
+  }
+
+  .landing-facts li {
+    gap: var(--space-8);
+    font-size: 0.9375rem;
+  }
+
+  .landing-section-cta .primary {
+    width: 100%;
   }
 
   .landing-callout {

@@ -42,7 +42,7 @@ export const landingMeta: Record<LandingSlug, LandingMeta> = {
   'alzheimers-doctor-maryland': {
     title: "See an Alzheimer's Doctor in Maryland | Local Doctor",
     description:
-      "See an Alzheimer's doctor in Maryland by video. Next-day virtual visits from home with a board-certified neurologist. Insurance accepted. No referral needed.",
+      "See an Alzheimer's doctor in Maryland by video. Virtual visits from home with a board-certified neurologist. Insurance accepted. No referral needed.",
   },
   'memory-specialist-maryland': {
     title: 'Virtual Memory Specialist Near You in Maryland | Local Doctor',
