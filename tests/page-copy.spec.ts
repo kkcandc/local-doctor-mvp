@@ -59,7 +59,35 @@ test.describe('home page', () => {
     await page.goto('/')
     expect(await page.locator('main').innerText()).not.toMatch(DASHES)
   })
+
+  test('the bottom banner asks to book a visit and its button says Book now', async ({ page }) => {
+    await page.goto('/')
+    const panel = page.locator('.conversion-panel')
+    await expect(panel.locator('h2')).toHaveText('Book a visit with a Neurologist today.')
+    await expect(panel.locator('p:not(.eyebrow)')).toHaveText(
+      'Our Neurologists are on stand-by to help you find the best treatment options and can see you as soon as this week.',
+    )
+    await expect(panel.getByRole('button', { name: 'Get Started' })).toHaveCount(0)
+    await panel.getByRole('button', { name: 'Book now' }).click()
+    await expect(page).toHaveURL(/\/get-started$/)
+  })
 })
+
+for (const [path, other] of [
+  ['/how-it-works', 'See treatments'],
+  ['/treatments', 'See how it works'],
+] as const) {
+  test(`${path} bottom banner asks to meet a Neurologist and its button says Book now`, async ({ page }) => {
+    await page.goto(path)
+    const panel = page.locator('.conversion-panel')
+    await expect(panel.locator('h2')).toHaveText('Ready to meet with a Neurologist?')
+    await expect(panel.locator('p')).toHaveText('Book your appointment today and get seen within days.')
+    await expect(panel.getByRole('button', { name: 'Get Started' })).toHaveCount(0)
+    await expect(panel.getByRole('button', { name: other })).toBeVisible()
+    await panel.getByRole('button', { name: 'Book now' }).click()
+    await expect(page).toHaveURL(/\/get-started$/)
+  })
+}
 
 test.describe('how it works page', () => {
   test('hero header, copy, and Book now button', async ({ page }) => {
@@ -86,9 +114,9 @@ test.describe('how it works page', () => {
     ])
     const bullets = (index: number) => steps.nth(index).locator('.journey-points span')
     await expect(bullets(0)).toHaveText([
-      'Book your appointment today - our providers are available to see you every Wednesday',
-      'You will receive an appointment confirmation via text or email, whichever you prefer',
-      'We will be in touch with you on the same day or the next business day to share more information about the visit, confirm eligibility, and answer any questions you have',
+      'Book your appointment today - our providers are available to see you every Wednesday.',
+      'You will receive an appointment confirmation via text or email, whichever you prefer.',
+      'We will be in touch with you on the same day or the next business day to share more information about the visit, confirm eligibility, and answer any questions you have.',
     ])
     await expect(bullets(1)).toHaveText([
       'You and a loved one attend the visit to share your concerns, questions, and provide all information needed for the evaluation by your specialist including medical history, medications, recent testing, and more.',
@@ -100,6 +128,13 @@ test.describe('how it works page', () => {
       'You and a loved one attend the follow up visit to review your results and treatment options with the specialist and align on the path that is best for you.',
     ])
     await expect(bullets(3)).toHaveCount(3)
+  })
+
+  test('every step bullet ends with a period', async ({ page }) => {
+    await page.goto('/how-it-works')
+    const bullets = await page.locator('.journey-points span').allTextContents()
+    expect(bullets).toHaveLength(11)
+    for (const bullet of bullets) expect(bullet.trim(), bullet).toMatch(/\.$/)
   })
 
   test('step 1 has a Book now button instead of the Phone call pill, and the other steps keep their pills', async ({ page }) => {

@@ -207,9 +207,9 @@ const journeySteps: Array<{ title: string; meta?: string; cta?: string; points: 
     title: 'Book a same-week appointment with a Neurologist',
     cta: 'Book now',
     points: [
-      'Book your appointment today - our providers are available to see you every Wednesday',
-      'You will receive an appointment confirmation via text or email, whichever you prefer',
-      'We will be in touch with you on the same day or the next business day to share more information about the visit, confirm eligibility, and answer any questions you have',
+      'Book your appointment today - our providers are available to see you every Wednesday.',
+      'You will receive an appointment confirmation via text or email, whichever you prefer.',
+      'We will be in touch with you on the same day or the next business day to share more information about the visit, confirm eligibility, and answer any questions you have.',
     ],
   },
   {
@@ -637,8 +637,9 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
       <ConversionPanel
         onNavigate={onNavigate}
         eyebrow="Ready to make a step towards better memory care?"
-        title="A quick call will help us determine your eligibility."
-        copy="We review your concerns, medical history, and insurance in a quick conversation before coordinating the visit with a neurology specialist."
+        title="Book a visit with a Neurologist today."
+        copy="Our Neurologists are on stand-by to help you find the best treatment options and can see you as soon as this week."
+        ctaLabel="Book now"
       />
       <StickyCta
         label="Get Started"
@@ -687,7 +688,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: Navigate }) {
         </div>
       </section>
       <QualificationSection tone="white" />
-      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to find out where you stand?" copy="A short intake is all it takes to get started." secondaryLabel="See how it works" secondaryRoute="how" compact />
+      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to meet with a Neurologist?" copy="Book your appointment today and get seen within days." ctaLabel="Book now" secondaryLabel="See how it works" secondaryRoute="how" compact />
     </>
   )
 }
@@ -752,7 +753,7 @@ function HowPage({ onNavigate }: { onNavigate: Navigate }) {
           ))}
         </div>
       </section>
-      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to find out where you stand?" copy="A short intake is all it takes to get started." secondaryLabel="See treatments" secondaryRoute="treatments" compact />
+      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to meet with a Neurologist?" copy="Book your appointment today and get seen within days." ctaLabel="Book now" secondaryLabel="See treatments" secondaryRoute="treatments" compact />
     </>
   )
 }
@@ -1412,6 +1413,7 @@ function ConversionPanel({
   eyebrow = 'Ready to find out where you stand?',
   title = 'Start with a short check, then move to full intake only when it makes sense.',
   copy = 'The intake is a request for review. It is not a diagnosis, a booked visit, or a promise of coverage.',
+  ctaLabel = 'Get Started',
   secondaryLabel,
   secondaryRoute,
   compact = false,
@@ -1420,6 +1422,7 @@ function ConversionPanel({
   eyebrow?: string
   title?: string
   copy?: string
+  ctaLabel?: string
   secondaryLabel?: string
   secondaryRoute?: Route
   compact?: boolean
@@ -1432,7 +1435,7 @@ function ConversionPanel({
         <p>{copy}</p>
       </div>
       <div className="conversion-actions">
-        <button className="primary" type="button" onClick={() => onNavigate('start', '', 'closing', 'Get Started')}>Get Started <ArrowRight size={20} /></button>
+        <button className="primary" type="button" onClick={() => onNavigate('start', '', 'closing', 'Get Started')}>{ctaLabel} <ArrowRight size={20} /></button>
         {secondaryLabel && secondaryRoute && routeEnabled(secondaryRoute) && (
           <button className="secondary" type="button" onClick={() => onNavigate(secondaryRoute)}>{secondaryLabel}</button>
         )}
