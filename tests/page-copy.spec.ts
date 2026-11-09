@@ -18,7 +18,7 @@ test.describe('home page', () => {
     const stats = page.locator('.stat-band article')
     await expect(stats).toHaveCount(4)
     await expect(stats.locator('strong')).toHaveText(['3.5 years', '6-9 months', 'In days', '1,500+'])
-    await expect(stats.nth(2).locator('span')).toHaveText('See a board-certified Neurologist in days from the comfort of your home')
+    await expect(stats.nth(2).locator('span')).toHaveText('See a board-certified neurologist in days from the comfort of your home')
     const colors = await stats.locator('strong').evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).color))
     expect(colors).toEqual([YELLOW, YELLOW, LIGHT_BLUE, LIGHT_BLUE])
   })
@@ -34,7 +34,7 @@ test.describe('home page', () => {
     const steps = page.locator('.process-grid article')
     await expect(steps.locator('h3')).toHaveText([
       'Book visit with a neurologist',
-      'Meet your specialist',
+      'Meet neurologist',
       'Get a clear answer',
       'Start treatment',
     ])
@@ -55,6 +55,15 @@ test.describe('home page', () => {
     await expect(page).toHaveURL(/\/get-started$/)
   })
 
+  test('neurologist is lower case everywhere except the hero button', async ({ page }) => {
+    await page.goto('/')
+    const text = await page.locator('main').innerText()
+    expect(text.match(/Neurologist/g)).toHaveLength(1)
+    await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a Neurologist today' })).toHaveText(
+      'Book a Neurologist today',
+    )
+  })
+
   test('the page has no long dashes', async ({ page }) => {
     await page.goto('/')
     expect(await page.locator('main').innerText()).not.toMatch(DASHES)
@@ -63,9 +72,9 @@ test.describe('home page', () => {
   test('the bottom banner asks to book a visit and its button says Book now', async ({ page }) => {
     await page.goto('/')
     const panel = page.locator('.conversion-panel')
-    await expect(panel.locator('h2')).toHaveText('Book a visit with a Neurologist today.')
+    await expect(panel.locator('h2')).toHaveText('Book a visit with a neurologist today.')
     await expect(panel.locator('p:not(.eyebrow)')).toHaveText(
-      'Our Neurologists are on stand-by to help you find the best treatment options and can see you as soon as this week.',
+      'Our neurologists are on stand-by to help you find the best treatment options and can see you as soon as this week.',
     )
     await expect(panel.getByRole('button', { name: 'Get Started' })).toHaveCount(0)
     await panel.getByRole('button', { name: 'Book now' }).click()
@@ -109,7 +118,7 @@ test.describe('how it works page', () => {
     const steps = page.locator('.journey-step')
     await expect(steps.locator('h3')).toHaveText([
       'Book your appointment with a neurologist',
-      'Meet your specialist',
+      'Meet neurologist',
       'Get your tests done and review results in a follow up visit',
       'Treatment begins',
     ])
@@ -120,8 +129,8 @@ test.describe('how it works page', () => {
       'We will be in touch with you on the same day or the next business day to share more information about the visit, confirm eligibility, and answer any questions you have.',
     ])
     await expect(bullets(1)).toHaveText([
-      'You and a loved one attend the visit to share your concerns, questions, and provide all information needed for the evaluation by your specialist including medical history, medications, recent testing, and more.',
-      'Your specialist shares their clinical summary and recommended plan of care with you. It may include orders for new tests such as an MRI or PET scan, bloodwork, and genetic testing.',
+      'You and a loved one attend the visit to share your concerns, questions, and provide all information needed for the evaluation by the neurologist including medical history, medications, recent testing, and more.',
+      'The neurologist shares their clinical summary and recommended plan of care with you. It may include orders for new tests such as an MRI or PET scan, bloodwork, and genetic testing.',
     ])
     await expect(bullets(2)).toHaveText([
       'If new test orders were placed with your care plan, you schedule appointments with a local imaging center and a lab (Quest or LabCorp) to get them completed.',

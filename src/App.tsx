@@ -188,7 +188,7 @@ const simpleProcess: Array<{ title: string; copy: string; cta?: string }> = [
     cta: 'Book now',
   },
   {
-    title: 'Meet your specialist',
+    title: 'Meet neurologist',
     copy: 'A video call with the neurologist to dive into your questions, concerns, and goals. It all leads to clear direction on next steps and if new imaging or bloodwork are needed.',
   },
   {
@@ -213,11 +213,11 @@ const journeySteps: Array<{ title: string; meta?: string; cta?: string; points: 
     ],
   },
   {
-    title: 'Meet your specialist',
+    title: 'Meet neurologist',
     meta: 'Video visit - 1 hour',
     points: [
-      'You and a loved one attend the visit to share your concerns, questions, and provide all information needed for the evaluation by your specialist including medical history, medications, recent testing, and more.',
-      'Your specialist shares their clinical summary and recommended plan of care with you. It may include orders for new tests such as an MRI or PET scan, bloodwork, and genetic testing.',
+      'You and a loved one attend the visit to share your concerns, questions, and provide all information needed for the evaluation by the neurologist including medical history, medications, recent testing, and more.',
+      'The neurologist shares their clinical summary and recommended plan of care with you. It may include orders for new tests such as an MRI or PET scan, bloodwork, and genetic testing.',
     ],
   },
   {
@@ -595,8 +595,8 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
 
       <section className="stat-band">
         <Metric value="3.5 years" label="average gap between first symptoms and diagnosis of Alzheimer's" />
-        <Metric value="6-9 months" label="typical wait for a new patient visit with a Neurologist in most areas" />
-        <Metric tone="light" value="In days" label="See a board-certified Neurologist in days from the comfort of your home" />
+        <Metric value="6-9 months" label="typical wait for a new patient visit with a neurologist in most areas" />
+        <Metric tone="light" value="In days" label="See a board-certified neurologist in days from the comfort of your home" />
         <Metric tone="light" value="1,500+" label="patients treated successfully by our infusion network" />
       </section>
 
@@ -637,8 +637,8 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
       <ConversionPanel
         onNavigate={onNavigate}
         eyebrow="Ready to make a step towards better memory care?"
-        title="Book a visit with a Neurologist today."
-        copy="Our Neurologists are on stand-by to help you find the best treatment options and can see you as soon as this week."
+        title="Book a visit with a neurologist today."
+        copy="Our neurologists are on stand-by to help you find the best treatment options and can see you as soon as this week."
         ctaLabel="Book now"
       />
       <StickyCta
@@ -812,7 +812,7 @@ function StartPage() {
     <div className="start-page">
       <PageHero
         eyebrow="Get started"
-        title="Book a Neurologist today to find out if treatment is right for you."
+        title="Book a neurologist today to find out if treatment is right for you."
         copy="Everyone's situation is unique. Our neurology specialists listen to deeply understand yours and let you know if you're eligible for disease-modifying treatment."
         primaryLabel={`Call or text ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
@@ -1158,7 +1158,7 @@ function BookingSection() {
             <ol>
               <li>Book your appointment for the day and time that works best for you.</li>
               <li>We will call you to review your medical history and verify your insurance and eligibility.</li>
-              <li>You join the virtual visit over a video call to meet your Neurologist.</li>
+              <li>You join the virtual visit over a video call to meet your neurologist.</li>
             </ol>
           </div>
           <div>

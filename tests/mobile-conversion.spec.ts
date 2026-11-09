@@ -273,7 +273,7 @@ async function stubCalendly(page: Page) {
 test('/get-started embeds the Calendly scheduler and drops the Typeform and Eligibility section', async ({ page }) => {
   await stubCalendly(page)
   await page.goto('/get-started')
-  await expect(page.locator('h1')).toContainText('Book a Neurologist today to find out if treatment is right for you.')
+  await expect(page.locator('h1')).toContainText('Book a neurologist today to find out if treatment is right for you.')
   await expect(page.locator('#book .expect-heading')).toHaveText('Book a neurologist')
   const widget = page.locator('#book .calendly-inline-widget')
   await expect(widget).toHaveAttribute('data-url', CALENDLY_URL)
@@ -284,6 +284,7 @@ test('/get-started embeds the Calendly scheduler and drops the Typeform and Elig
   await expect(page.getByText('Eligibility', { exact: true })).toHaveCount(0)
   await expect(page.getByText('Book your neurologist appointment')).toHaveCount(0)
   const text = await page.locator('main').innerText()
+  expect(text).not.toContain('Neurologist')
   expect(text).not.toMatch(/appointment (is )?confirmed|booking confirmed|you are booked/i)
 })
 
@@ -338,7 +339,7 @@ test.describe('/get-started booking layout', () => {
     await expect(aside.locator('ol li')).toHaveText([
       'Book your appointment for the day and time that works best for you.',
       'We will call you to review your medical history and verify your insurance and eligibility.',
-      'You join the virtual visit over a video call to meet your Neurologist.',
+      'You join the virtual visit over a video call to meet your neurologist.',
     ])
     await expect(aside).toContainText('Call or text (240) 376-5730 to speak with a member of our team')
     await expect(aside.locator('a[href="tel:+12403765730"]')).toHaveText('(240) 376-5730')
