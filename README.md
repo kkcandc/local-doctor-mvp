@@ -26,7 +26,7 @@ If a branch/PR deploy is still `CANCELED` with `errorLink = Ignored Build Step`,
 
 - Claude export: `../local-doctor-mvp-export/Local Doctor MVP Website Files/`
 - Temporary domain direction: `trylocaldoctor.com`
-- Production intake form: Typeform live embed `01M6Q39ZHJB5XWV15ABEYGFGS1`
+- Production intake form: Typeform live embed `01M64J1XGXT19BH7GGWPKJ243K`
 
 ## What It Includes
 
@@ -53,12 +53,12 @@ Eight search-intent pages live in `src/landing/`: `/dementia-evaluation`, `/alzh
 
 - Copy is in `landingContent.ts`. Titles and descriptions are in `landingMeta.ts`. Claims must come from existing site or compliance copy: no credentials, wait times, prices, outcome rates, or diagnosis/eligibility/medication promises, and no links to the LIV practice domain.
 - `npm run build` also writes `dist/<slug>/index.html` with that page's title, description, canonical, and Open Graph tags (`vite.config.ts`). The app bundle is the same; Vercel serves these files before the SPA rewrite. The same build writes `dist/sitemap.xml` (`src/siteMap.ts`) for `/`, `/get-started`, the intent pages, and the other public routes. `vercel.json` keeps `/sitemap.xml` and `/robots.txt` out of the SPA rewrite and serves the sitemap as `application/xml`. `public/robots.txt` points at `https://trylocaldoctor.com/sitemap.xml`.
-- Each intent page has its own primary button label (for example **See an Alzheimer's Doctor** or **Book Your Evaluation**). Every one of those buttons goes to `/get-started` through `src/landing/destinations.ts`. The homepage **Get Started** label is separate. The hero reassurance line and facts panel use Kenny-confirmed claims only: next-day visits, board-certified neurologist, insurance accepted, no referral needed. The only phone link is the clinic number, which the Ads phone conversion already tracks. `/dementia-test-online` stays informational: its button says **Talk to a Memory Doctor** and the page still says no online test is offered.
+- Each intent page has its own primary button label (for example **See an Alzheimer's Doctor** or **Book Your Evaluation**). Those buttons go to `/get-started` through `src/landing/destinations.ts`, except on `/dementia-evaluation`, `/alzheimers-evaluation` and `/memory-evaluation`, where the **Start Evaluation** buttons (hero, mid-page, closing, and the two paths on `/memory-evaluation`) open the evaluation Typeform, `https://localdoctor.typeform.com/evaluation`, in the same tab (the `evaluationForm` funnel). The homepage **Get Started** label is separate. The hero reassurance line and facts panel use Kenny-confirmed claims only: see a doctor within days, board-certified neurologist, insurance accepted, no referral needed. The only phone link is the clinic number, which the Ads phone conversion already tracks. `/dementia-test-online` stays informational: its button says **Talk to a Memory Doctor** and the page still says no online test is offered.
 - Tracking on every intent page and `/get-started`: Ads `AW-18413556843`, GA4 `G-PR7CJ8TK79`, CTA `cta_click` sent to both GA4 and the Ads tag (page path, `cta_location`, `cta_label`; not an Ads conversion), phone `phone_click` plus Ads conversion, Typeform lead conversion on submit only. SPA navigation keeps `gclid` / `utm_*` into `/get-started`, and the Typeform embed uses `data-tf-transitive-search-params` so those values can fill hidden fields when the form defines them.
 - The `/get-started` embed is the standard live embed (`<div data-tf-live="01M6Q39ZHJB5XWV15ABEYGFGS1">` plus `//embed.typeform.com/next/embed.js`). It intentionally omits `data-tf-inline-on-mobile`, so on phones Typeform shows its placeholder welcome screen and opens the form full screen on tap. Desktop stays inline. Do not add that attribute back.
 - PostHog `eligibility_check_started` keeps `source_path` (the landing page) and adds `cta_location` (`hero`, `mid_page`, `closing`, `patient_path`, `caregiver_path`). Nothing typed by the visitor is sent.
 - `/dementia-test-online` is educational. It says no online screening tool is offered and sends people to the evaluation intake. It has no quiz and no score.
-- **When Eric's evaluation or screening Typeform is ready:** set the funnel in `src/landing/destinations.ts` (`evaluation` or `onlineScreening`) to `{ kind: 'external', href: 'https://...' }`. Only https Typeform or trylocaldoctor.com URLs are accepted. An external form does not fire the Typeform lead conversion that the `/get-started` embed does. Before pointing `onlineScreening` at a screener, revise the `/dementia-test-online` copy that says no screening is offered.
+- **Pointing a landing page at an external form:** set its funnel in `src/landing/destinations.ts` (`evaluationForm` already does this for the three evaluation pages; `evaluation` is shared by four other pages and `onlineScreening` by `/dementia-test-online`) to `{ kind: 'external', href: 'https://...' }`, or give a single page its own funnel key. Only https Typeform or trylocaldoctor.com URLs are accepted. An external click records `cta_click` and `eligibility_check_started` but does not push an in-app route, so Back returns to the landing page. An external form does not fire the Typeform lead conversion that the `/get-started` embed does, and `gclid` / `utm_*` are not appended to the link. Before pointing `onlineScreening` at a screener, revise the `/dementia-test-online` copy that says no screening is offered.
 - Flag: `landingPages` in `src/featureFlags.ts` (`VITE_PAGE_LANDINGPAGES`).
 - Tests: `tests/landing-pages.spec.ts` (desktop and mobile). `SCREENSHOT_DIR=... npx playwright test tests/landing-pages.spec.ts -g capture` saves screenshots.
 
@@ -133,6 +133,12 @@ What it does:
 - Sends one custom event, `eligibility_check_started` with `source_path`, when a visitor clicks through to `/get-started`. The Typeform submit and phone-click events stay in the Google Ads code only. PostHog autocapture records `tel:` link clicks.
 
 Tests: `tests/posthog.spec.ts`. The Playwright dev server points PostHog at `/__posthog` on itself (`playwright.config.ts`), so test runs never reach a real project. The browser tests mask `navigator.webdriver` and the headless client hints because posthog-js ignores bots.
+
+## Chatbot
+
+A hosted AI chat agent (served from `forms.mylocalinfusion.com`) shows on every page. It is one `<script async>` tag at the end of `<body>` in `index.html`. Every route is rewritten to that shell and the intent landing pages are built from it, so no per-page wiring is needed. To change the agent, replace the embed URL in that one tag. Appearance and greeting are set on the agent itself, not in this repo.
+
+Tests: `tests/chatbot-embed.spec.ts` checks the tag is on every path in `publicSitemapPaths`. `playwright.config.ts` blocks the chatbot host in the test browser, so test runs never reach the live agent.
 
 ## Commands
 

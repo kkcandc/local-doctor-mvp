@@ -1218,19 +1218,12 @@ a.blog-card:hover {
   height: 100% !important;
 }
 
-/* The intake sections keep tight padding so the embedded form fits the first screen. */
 .section.expect-section {
   padding-top: calc(var(--section-pad) * 0.49);
-  padding-bottom: clamp(12px, 1.68vw, 23.4px);
 }
 
 .start-page :is(h1, h2, h3) {
   color: var(--text-heading);
-}
-
-.section.start-faq-section {
-  padding-top: 0;
-  padding-bottom: var(--section-pad);
 }
 
 .expect-heading {
@@ -1242,7 +1235,7 @@ a.blog-card:hover {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-32) var(--space-64);
-  margin-bottom: var(--space-48);
+  margin-bottom: var(--space-64);
 }
 
 .expect-columns h3 {
@@ -2015,10 +2008,6 @@ a.blog-card {
 
   .trust-note {
     align-items: flex-start;
-  }
-
-  .section.expect-section {
-    padding-bottom: 8.4px;
   }
 
   .primary,

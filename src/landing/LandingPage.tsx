@@ -20,7 +20,11 @@ type Tone = 'white' | 'ivory'
 
 type LandingPageProps = {
   slug: LandingSlug
+  // Internal CTAs: record the click and move to the intake route.
   onStart: (ctaLocation: string, ctaLabel: string) => void
+  // External CTAs: record the click only. The browser follows the link itself, so the
+  // app must not push a /get-started history entry first.
+  onTrackCta: (ctaLocation: string, ctaLabel: string) => void
   onOpenPath: (path: string) => void
 }
 
@@ -33,6 +37,7 @@ function GetStartedLink({
   location,
   label,
   onStart,
+  onTrackCta,
   variant = 'primary',
   describedBy,
 }: {
@@ -40,6 +45,7 @@ function GetStartedLink({
   location: string
   label: string
   onStart: (ctaLocation: string, ctaLabel: string) => void
+  onTrackCta: (ctaLocation: string, ctaLabel: string) => void
   variant?: 'primary' | 'accent'
   describedBy?: string
 }) {
@@ -52,7 +58,7 @@ function GetStartedLink({
       aria-describedby={describedBy}
       onClick={(event) => {
         if (external) {
-          onStart(location, label)
+          onTrackCta(location, label)
           return
         }
         if (!isPlainClick(event)) return
@@ -124,7 +130,7 @@ function sectionTones(sections: LandingSection[]): { tones: Tone[]; next: Tone }
   return { tones, next: current }
 }
 
-export function LandingPage({ slug, onStart, onOpenPath }: LandingPageProps) {
+export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPageProps) {
   const page = landingPages[slug]
   const destination = resolveDestination(landingDestinations[page.funnel])
   const { tones, next: faqTone } = sectionTones(page.sections)
@@ -134,6 +140,7 @@ export function LandingPage({ slug, onStart, onOpenPath }: LandingPageProps) {
       location={location}
       label={page.ctaLabel}
       onStart={onStart}
+      onTrackCta={onTrackCta}
       variant={variant}
       describedBy={describedBy}
     />

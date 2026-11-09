@@ -35,5 +35,7 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Site-wide chatbot. Every route is served from this shell (and the landing pages are built from it), so one tag covers all pages. async keeps a slow chatbot host from delaying the app. -->
+    <script async src="https://forms.mylocalinfusion.com/agent/embedjs/01a1b1d2aee870008666e6dab388dee90d6f/embed.js"></script>
   </body>
 </html>
