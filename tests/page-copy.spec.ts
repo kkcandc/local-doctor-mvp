@@ -73,14 +73,15 @@ test.describe('home page', () => {
   })
 })
 
-for (const [path, other] of [
-  ['/how-it-works', 'See treatments'],
-  ['/treatments', 'See how it works'],
+// The How it works banner says "neurologist" in lower case. The Treatments banner keeps "Neurologist".
+for (const [path, title, other] of [
+  ['/how-it-works', 'Ready to meet with a neurologist?', 'See treatments'],
+  ['/treatments', 'Ready to meet with a Neurologist?', 'See how it works'],
 ] as const) {
-  test(`${path} bottom banner asks to meet a Neurologist and its button says Book now`, async ({ page }) => {
+  test(`${path} bottom banner asks to meet a neurologist and its button says Book now`, async ({ page }) => {
     await page.goto(path)
     const panel = page.locator('.conversion-panel')
-    await expect(panel.locator('h2')).toHaveText('Ready to meet with a Neurologist?')
+    await expect(panel.locator('h2')).toHaveText(title)
     await expect(panel.locator('p')).toHaveText('Book your appointment today and get seen within days.')
     await expect(panel.getByRole('button', { name: 'Get Started' })).toHaveCount(0)
     await expect(panel.getByRole('button', { name: other })).toBeVisible()
@@ -107,14 +108,14 @@ test.describe('how it works page', () => {
     await page.goto('/how-it-works')
     const steps = page.locator('.journey-step')
     await expect(steps.locator('h3')).toHaveText([
-      'Book a same-week appointment with a Neurologist',
+      'Book your appointment with a neurologist',
       'Meet your specialist',
       'Get your tests done and review results in a follow up visit',
       'Treatment begins',
     ])
     const bullets = (index: number) => steps.nth(index).locator('.journey-points span')
     await expect(bullets(0)).toHaveText([
-      'Book your appointment today - our providers are available to see you every Wednesday.',
+      'Book your appointment today - our neurology specialists are available to see you every Wednesday.',
       'You will receive an appointment confirmation via text or email, whichever you prefer.',
       'We will be in touch with you on the same day or the next business day to share more information about the visit, confirm eligibility, and answer any questions you have.',
     ])
@@ -128,6 +129,14 @@ test.describe('how it works page', () => {
       'You and a loved one attend the follow up visit to review your results and treatment options with the specialist and align on the path that is best for you.',
     ])
     await expect(bullets(3)).toHaveCount(3)
+  })
+
+  test('the page writes neurologist in lower case and never says "our providers"', async ({ page }) => {
+    await page.goto('/how-it-works')
+    const text = await page.locator('main').innerText()
+    expect(text).not.toContain('Neurologist')
+    expect(text).not.toMatch(/our providers/i)
+    expect(text).toContain('our neurology specialists are available to see you every Wednesday')
   })
 
   test('every step bullet ends with a period', async ({ page }) => {

@@ -204,10 +204,10 @@ const simpleProcess: Array<{ title: string; copy: string; cta?: string }> = [
 // A step shows either a light-blue pill (meta) or, for the booking step, a Book now button (cta).
 const journeySteps: Array<{ title: string; meta?: string; cta?: string; points: string[] }> = [
   {
-    title: 'Book a same-week appointment with a Neurologist',
+    title: 'Book your appointment with a neurologist',
     cta: 'Book now',
     points: [
-      'Book your appointment today - our providers are available to see you every Wednesday.',
+      'Book your appointment today - our neurology specialists are available to see you every Wednesday.',
       'You will receive an appointment confirmation via text or email, whichever you prefer.',
       'We will be in touch with you on the same day or the next business day to share more information about the visit, confirm eligibility, and answer any questions you have.',
     ],
@@ -753,7 +753,7 @@ function HowPage({ onNavigate }: { onNavigate: Navigate }) {
           ))}
         </div>
       </section>
-      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to meet with a Neurologist?" copy="Book your appointment today and get seen within days." ctaLabel="Book now" secondaryLabel="See treatments" secondaryRoute="treatments" compact />
+      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to meet with a neurologist?" copy="Book your appointment today and get seen within days." ctaLabel="Book now" secondaryLabel="See treatments" secondaryRoute="treatments" compact />
     </>
   )
 }
