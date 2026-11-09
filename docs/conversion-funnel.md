@@ -17,9 +17,9 @@ compliance for Local Doctor before the funnel is expanded.
 | Landing page | GA4 (G-PR7CJ8TK79) | `page_view` | Sent on first load and on every in-app navigation. `page_location` keeps only the Google click ids (gclid, gbraid, wbraid, dclid, gclsrc, gad_*) and utm_* query params. |
 | Click CTA (form) | GA4 and Google Ads | `cta_click` | Params: `page_path`, `cta_location`, `cta_label`. One copy to GA4 and one to the Ads tag per click. Never a conversion. |
 | Click CTA (call) | Google Ads only | `phone_click` plus the phone conversion (label gJr-CJnG9LAdEOuoosxE) | Fires on clicks of the clinic number. Not delivered to GA4 today (see audit). |
-| Conversion through form | Google Ads only | `generate_lead` plus the lead conversion (label KA47CJbG9LAdEOuoosxE) | Fires once per Typeform submit on /get-started (4 second dedupe). Not delivered to GA4 today (see audit). |
+| Conversion through booking | Google Ads only | `generate_lead` plus the lead conversion (label KA47CJbG9LAdEOuoosxE) | Fires once per Calendly booking on /get-started, when Calendly posts `calendly.event_scheduled` (4 second dedupe). Only the event name is read. Not delivered to GA4 today (see audit). |
 | Form completed | Not available for the evaluation form | None | The three evaluation pages send visitors to the external form at localdoctor.typeform.com/evaluation. The site cannot see that submit. See dependencies. |
-| Booking completed | Not measured | None | No scheduler exists. Nothing is sent, and nothing should be reported for this stage. |
+| Booking completed | Google Ads only | The same `generate_lead` conversion as above | The Calendly booking is the only completion signal the site can see. Whether the visit was attended is not measured. |
 | Attended visit | Not measured | None | Needs secure, server-side data. See dependencies. |
 
 ### cta_location values
@@ -60,10 +60,10 @@ below.
 | Tracker | Where it runs | What it receives | Review flag |
 | --- | --- | --- | --- |
 | Google tag (Ads AW-18413556843 and GA4 G-PR7CJ8TK79) | Every page, including /get-started | Page URL with the allow-listed ad params, page title, Google cookies and IP address by default, plus the events above | Google's standard terms are not a BAA. Health-topic URLs and the intake page are on the same tag as ads attribution. Needs review before any new event is added on /get-started. |
-| Google Ads lead conversion | /get-started, on Typeform submit | Event name and conversion label only. No form answers. | Conversion on a clinical intake page. Needs review. |
+| Google Ads lead conversion | /get-started, on a Calendly booking | Event name and conversion label only. No invitee or appointment details. | Conversion on a clinical booking page. Needs review. |
 | Google Ads phone conversion | Any page, on clinic number click | Event name, conversion label, page path | Needs review. |
 | PostHog | Every page | Pageviews, `eligibility_check_started`, errors, and session replay outside /get-started. Events on /get-started are dropped before sending and replay pauses there. | Replay on health-topic landing pages needs review. |
-| Typeform embed | /get-started | Form answers go to Typeform. The same Google click ids and utm_* params are passed into the form as hidden fields. | Typeform account settings (BAA, data retention, any third-party integrations on the form) need review. |
+| Calendly embed | /get-started | The visitor's name, contact details and chosen time go to Calendly. Calendly's script and iframe load from calendly.com and assets.calendly.com. No Google click ids or utm_* params are passed in. | Calendly account settings (BAA, data retention, notification and integration settings) need review. No CSP blocks these hosts today. |
 | Evaluation Typeform | External, linked from the three evaluation pages | Form answers go to Typeform | Same as above. The site cannot see or measure its submit. |
 | Chatbot (Jotform agent from forms.mylocalinfusion.com) | Every page, including /get-started | Whatever a visitor types into the chat | Runs on the intake page. Needs review. |
 
@@ -72,8 +72,9 @@ Changes deliberately not made in this pass, pending that review:
 - `generate_lead` and `phone_click` are sent without `send_to`, so they reach
   Google Ads only and never GA4. Delivering them to GA4 is a small code change,
   but it adds intake-page data to a second Google product, so it waits for review.
-- Typeform exposes `on-ready` and `on-started` callbacks on the embed. They are
-  not wired to any tracker, for the same reason.
+- Calendly also posts `calendly.event_type_viewed`, `calendly.date_and_time_selected`
+  and `calendly.profile_page_viewed`. They are not wired to any tracker, for the
+  same reason. Only `calendly.event_scheduled` is used.
 - No remarketing, audience, or new ad tags were added anywhere.
 
 ## Booking flow: intended versus current
@@ -82,27 +83,29 @@ Intended sequence (Woody): Get Started, book a neurologist appointment, an
 intake call to review medical history before the visit, then the neurologist
 visit by video.
 
-Current sequence: Get Started, fill out the form or call, the team calls to
-review medical history and insurance, then a visit is set up if eligible. The
-site says plainly that sending the form does not book a visit.
+Current sequence: Get Started, book a neurologist appointment in the Calendly
+embed on /get-started (or call or text), the team calls to review medical
+history and verify insurance and eligibility, then the visit happens by video.
 
-The site has an off-by-default booking slot for /get-started. Setting
-`VITE_BOOKING_URL` to an allowed https URL adds a "Book your neurologist
-appointment" button and switches the three steps to the booking-first order.
-Any other value is ignored, so a bad value cannot produce a dead button. Only
-trylocaldoctor.com and typeform.com hosts are allowed today, so a new scheduler
-host needs a code change and a review first.
+The Calendly embed (`src/CalendlyEmbed.tsx`) is always on. The earlier
+off-by-default `VITE_BOOKING_URL` slot is no longer used by /get-started.
+`resolveBookingUrl` is still in `src/landing/destinations.ts` and still tested,
+but nothing renders it. The Typeform intake form and the Eligibility section were
+removed from /get-started.
 
 ## Open dependencies
 
-1. Scheduler. Which tool, the booking URL, and whether its vendor will sign a BAA.
-   Until it exists, the booking slot stays off.
+1. Scheduler. Calendly is live on /get-started. Whether Calendly will sign a BAA
+   is still open, and the site loads its script and iframe from calendly.com
+   without any other review gate.
 2. Provider availability. The provider currently sees patients Wednesday 8am
-   to noon ET. The site does not publish those clinic hours. Visit-speed claims
-   ("in days", "within days", "next-day", and "fast answer") were removed from
-   the homepage, /get-started, how it works, the FAQ, and the landing hero
-   reassurance, facts, and the Alzheimer's doctor meta description. Phone copy
-   says the phone is answered on weekdays.
+   to noon ET. The homepage ("in days", "fast, credible answer"), /how-it-works
+   ("same-week appointment", "every Wednesday") and the booking-page copy now carry
+   speed and availability claims on purpose, and the Playwright guard against
+   them was removed. The landing pages (hero reassurance, facts, and the
+   Alzheimer's doctor meta description) and the FAQ still avoid them. Phone copy
+   says the phone is answered on weekdays. Keep the Calendly availability in
+   line with what the copy promises.
 3. Evaluation form completion signal. If a "Form completed" count is wanted for
    the evaluation pages, Eric would need to set up a completion signal in
    Typeform (for example a thank-you redirect to a trylocaldoctor.com page that

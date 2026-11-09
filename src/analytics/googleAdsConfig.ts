@@ -122,6 +122,14 @@ export function isTypeformSubmitMessage(origin: string, data: unknown): boolean 
   return (data as { type?: unknown }).type === 'form-submit'
 }
 
+// Calendly posts { event: 'calendly.event_scheduled', payload } from its iframe after a booking.
+// Only the event name is read. The payload (invitee and event details) is ignored on purpose.
+export function isCalendlyScheduledMessage(origin: string, data: unknown): boolean {
+  if (origin !== 'https://calendly.com') return false
+  if (!data || typeof data !== 'object') return false
+  return (data as { event?: unknown }).event === 'calendly.event_scheduled'
+}
+
 export function leadTrackingCalls(adsId: string, leadLabel: string | undefined, pathname: string): GtagArgs[] {
   return eventCalls('generate_lead', adsId, leadLabel, pathname)
 }

@@ -26,7 +26,7 @@ If a branch/PR deploy is still `CANCELED` with `errorLink = Ignored Build Step`,
 
 - Claude export: `../local-doctor-mvp-export/Local Doctor MVP Website Files/`
 - Temporary domain direction: `trylocaldoctor.com`
-- Production intake form: Typeform live embed `01M64J1XGXT19BH7GGWPKJ243K`
+- Production scheduler on `/get-started`: Calendly inline embed, `https://calendly.com/local-doctor/virtualvisit` (`src/CalendlyEmbed.tsx`). The old Typeform live embed `01M64J1XGXT19BH7GGWPKJ243K` is no longer on the site. The three evaluation pages still link out to the external evaluation Typeform.
 
 ## What It Includes
 
@@ -34,7 +34,7 @@ If a branch/PR deploy is still `CANCELED` with `errorLink = Ignored Build Step`,
 - Treatment page for Leqembi/Kisunla, with hedged drug-effect language
 - How-it-works page mapped to the 13-step patient journey
 - Provider referral page
-- Get-started page with embedded Typeform intake form and call scheduler
+- Get-started page with an embedded Calendly scheduler, a "what to expect" and "what to have handy" column, a call or text line, and four FAQs
 - FAQ, resources, and pilot plan pages
 - Vercel SPA rewrites for direct route loading
 
@@ -53,8 +53,8 @@ Eight search-intent pages live in `src/landing/`: `/dementia-evaluation`, `/alzh
 
 - Copy is in `landingContent.ts`. Titles and descriptions are in `landingMeta.ts`. Claims must come from existing site or compliance copy: no credentials, wait times, prices, outcome rates, or diagnosis/eligibility/medication promises, and no links to the LIV practice domain.
 - `npm run build` also writes `dist/<slug>/index.html` with that page's title, description, canonical, and Open Graph tags (`vite.config.ts`). The app bundle is the same; Vercel serves these files before the SPA rewrite. The same build writes `dist/sitemap.xml` (`src/siteMap.ts`) for `/`, `/get-started`, the intent pages, and the other public routes. `vercel.json` keeps `/sitemap.xml` and `/robots.txt` out of the SPA rewrite and serves the sitemap as `application/xml`. `public/robots.txt` points at `https://trylocaldoctor.com/sitemap.xml`.
-- Each intent page has its own primary button label (for example **See an Alzheimer's Doctor** or **Book Your Evaluation**). Those buttons go to `/get-started` through `src/landing/destinations.ts`, except on `/dementia-evaluation`, `/alzheimers-evaluation` and `/memory-evaluation`, where the **Start Evaluation** buttons (hero, mid-page, closing, and the two paths on `/memory-evaluation`) open the evaluation Typeform, `https://localdoctor.typeform.com/evaluation`, in the same tab (the `evaluationForm` funnel). The homepage **Get Started** label is separate. The hero reassurance line and facts panel use these claims only: board-certified neurologist, Maryland video visits, insurance accepted, no referral needed, and phone answered on weekdays. They do not promise a visit in days or a next-day appointment. The only phone link is the clinic number, which the Ads phone conversion already tracks. `/dementia-test-online` stays informational: its button says **Talk to a Memory Doctor** and the page still says no online test is offered.
-- Tracking on every intent page and `/get-started`: Ads `AW-18413556843`, GA4 `G-PR7CJ8TK79`, CTA `cta_click` sent to both GA4 and the Ads tag (page path, `cta_location`, `cta_label`; not an Ads conversion), phone `phone_click` plus Ads conversion, Typeform lead conversion on submit only. SPA navigation keeps `gclid` / `utm_*` into `/get-started`, and the Typeform embed uses `data-tf-transitive-search-params` so those values can fill hidden fields when the form defines them.
+- Each intent page has its own primary button label (for example **See an Alzheimer's Doctor** or **Book Your Evaluation**). Those buttons go to `/get-started` through `src/landing/destinations.ts`, except on `/dementia-evaluation`, `/alzheimers-evaluation` and `/memory-evaluation`, where the **Start Evaluation** buttons (hero, mid-page, closing, and the two paths on `/memory-evaluation`) open the evaluation Typeform, `https://localdoctor.typeform.com/evaluation`, in the same tab (the `evaluationForm` funnel). The homepage hero button label (**Book a Neurologist today**) is separate. The hero reassurance line and facts panel use these claims only: board-certified neurologist, Maryland video visits, insurance accepted, no referral needed, and phone answered on weekdays. They do not promise a visit in days or a next-day appointment. That restriction applies to the intent pages only. The homepage, `/how-it-works` and `/get-started` carry approved speed copy ("in days", "same-week appointment", visits on Wednesdays), and `tests/landing-pages.spec.ts` no longer guards against it. The only phone link is the clinic number, which the Ads phone conversion already tracks. `/dementia-test-online` stays informational: its button says **Talk to a Memory Doctor** and the page still says no online test is offered.
+- Tracking on every intent page and `/get-started`: Ads `AW-18413556843`, GA4 `G-PR7CJ8TK79`, CTA `cta_click` sent to both GA4 and the Ads tag (page path, `cta_location`, `cta_label`; not an Ads conversion), phone `phone_click` plus Ads conversion, lead conversion on a Calendly booking only. SPA navigation keeps `gclid` / `utm_*` in the URL into `/get-started`, but the Calendly embed does not receive them.
 - PostHog `eligibility_check_started` keeps `source_path` (the landing page) and adds `cta_location` (`hero`, `mid_page`, `closing`, `patient_path`, `caregiver_path`). Nothing typed by the visitor is sent.
 - `/dementia-test-online` is educational. It says no online screening tool is offered and sends people to the evaluation intake. It has no quiz and no score.
 - **Pointing a landing page at an external form:** set its funnel in `src/landing/destinations.ts` (`evaluationForm` already does this for the three evaluation pages; `evaluation` is shared by four other pages and `onlineScreening` by `/dementia-test-online`) to `{ kind: 'external', href: 'https://...' }`, or give a single page its own funnel key. Only https Typeform or trylocaldoctor.com URLs are accepted. An external click records `cta_click` and `eligibility_check_started` but does not push an in-app route, so Back returns to the landing page. An external form does not fire the Typeform lead conversion that the `/get-started` embed does, and `gclid` / `utm_*` are not appended to the link. Before pointing `onlineScreening` at a screener, revise the `/dementia-test-online` copy that says no screening is offered.
@@ -64,23 +64,23 @@ Eight search-intent pages live in `src/landing/`: `/dementia-evaluation`, `/alzh
 ## Prototype Boundaries
 
 - Claims need clinical/legal review before paid traffic.
-- Intake uses Eric's Typeform live embed; confirm the receiving workflow, privacy language, and follow-up ownership before paid traffic.
+- Booking uses a Calendly inline embed on `/get-started`. Confirm that Calendly will sign a BAA, what it stores, and who owns follow-up before paid traffic.
 - The site does not diagnose, prescribe, or guarantee eligibility or treatment.
 
 ## Google Ads conversion tracking
 
-Vite SPA, so the browser env prefix is `VITE_` (not `NEXT_PUBLIC_`). The tag is injected into `index.html` at build time, and the Vercel rewrite serves that shell for every route. `src/main.tsx` also installs the tag if a build did not, using the same script-element pattern as the Typeform embed.
+Vite SPA, so the browser env prefix is `VITE_` (not `NEXT_PUBLIC_`). The tag is injected into `index.html` at build time, and the Vercel rewrite serves that shell for every route. `src/main.tsx` also installs the tag if a build did not, using the same script-element pattern as the Calendly embed.
 
 | Env var | Purpose |
 | --- | --- |
 | `VITE_GOOGLE_ADS_ID` | Google tag id. Production builds default to `AW-18413556843` when this is unset. Set to `off` to omit the tag. A value has to be present at **build** time. |
-| `VITE_GOOGLE_ADS_LEAD_LABEL` | `KA47CJbG9LAdEOuoosxE`. Account 908-258-0886, conversion “Local Doctor - Lead Typeform”. Production builds default to this label when unset. A Typeform submit on `/get-started` sends `gtag('event', 'conversion', { send_to: 'AW-18413556843/KA47CJbG9LAdEOuoosxE' })`. |
+| `VITE_GOOGLE_ADS_LEAD_LABEL` | `KA47CJbG9LAdEOuoosxE`. Account 908-258-0886, conversion “Local Doctor - Lead Typeform” (the name predates the Calendly scheduler). Production builds default to this label when unset. A Calendly booking on `/get-started` sends `gtag('event', 'conversion', { send_to: 'AW-18413556843/KA47CJbG9LAdEOuoosxE' })`. |
 | `VITE_GOOGLE_ADS_PHONE_LABEL` | `gJr-CJnG9LAdEOuoosxE`. Account 908-258-0886, conversion “Local Doctor - Phone click”. Production builds default to this label when unset. A clinic phone click sends `gtag('event', 'conversion', { send_to: 'AW-18413556843/gJr-CJnG9LAdEOuoosxE' })`. |
 
 Event snippets (no names, emails, phone numbers, dates of birth, diagnoses, free-text answers, or Typeform response ids):
 
 - **Tag:** `gtag/js?id=AW-18413556843` and `gtag('config', 'AW-18413556843')` in the built `index.html` (`vite.config.ts`). When GA4 is enabled, that same snippet adds its `gtag('config', …)` and still loads `gtag.js` once. See Google Analytics 4 below.
-- **Lead:** `generate_lead` with `page_path` only, from the Typeform embed on `/get-started` (`data-tf-on-submit="localDoctorOnTypeformSubmit"` plus a `form-submit` message from `*.typeform.com`). When `VITE_GOOGLE_ADS_LEAD_LABEL` is set, the same action also sends the conversion above. Fired in `src/analytics/googleAds.ts`.
+- **Lead:** `generate_lead` with `page_path` only, when the Calendly embed on `/get-started` posts `calendly.event_scheduled` from `https://calendly.com`. Only the event name is read, never the invitee or event payload. The old Typeform detectors (`localDoctorOnTypeformSubmit`, `form-submit` from `*.typeform.com`) stay in the code but nothing on the site uses them now. When `VITE_GOOGLE_ADS_LEAD_LABEL` is set, the same action also sends the conversion above. Fired in `src/analytics/googleAds.ts`.
 - **Phone:** `phone_click` with `page_path` only, for clicks on `tel:` links to (240) 376-5730. When `VITE_GOOGLE_ADS_PHONE_LABEL` is set, the same click also sends the conversion above. (844) 509-1404 is recognized if a `tel:` link for it is added later; it is not on the site. The 1-800 numbers on the patient-rights page are not tracked.
 - **Page views:** the tag's first `config` hit sends a page location that keeps Google click ids (`gclid`, `gbraid`, `wbraid`, and the other ad params) and drops every other query param, including anything with `@`. Later in-app navigations send `page_view` with `page_path` only.
 
@@ -100,8 +100,8 @@ What it sends (no names, emails, phone numbers, dates of birth, diagnoses, free-
 
 - **First hit:** `gtag('config', 'G-PR7CJ8TK79', { page_location })` in the built `index.html`. `page_location` uses the Ads sanitizer: Google click ids (`gclid`, `gbraid`, `wbraid`, and the other ad params) and `utm_*` stay; every other query param is dropped, including anything with `@`.
 - **In-app navigations:** `page_view` with `send_to` set to the measurement id and `page_path` only, same rules as the Ads SPA page view. The first load does not send a second page view.
-- **Not copied from Ads:** Typeform lead and clinic phone conversions stay `gtag` calls in `src/analytics/googleAds.ts` with their Ads `send_to` labels. GA4 does not get a `generate_lead`, `phone_click`, or `conversion` event.
-- **`/get-started`:** a path-only page view is allowed. This code does not send `form_start` or `form_submit` and does not read field values. The intake form is a Typeform iframe, and the React pages do not render a `<form>`.
+- **Not copied from Ads:** the lead (Calendly booking) and clinic phone conversions stay `gtag` calls in `src/analytics/googleAds.ts` with their Ads `send_to` labels. GA4 does not get a `generate_lead`, `phone_click`, or `conversion` event.
+- **`/get-started`:** a path-only page view is allowed. This code does not send `form_start` or `form_submit` and does not read field values. The scheduler is a Calendly iframe, and the React pages do not render a `<form>`.
 
 Enhanced measurement is configured in the GA4 property, not in this repo. gtag.js has no config flag that turns those events off. In Admin → Data streams → the web stream → Enhanced measurement:
 
@@ -126,10 +126,10 @@ Both are inlined at **build** time, so set them on Vercel for Production and Pre
 What it does:
 
 - Captures pageviews (including in-app navigation), autocapture, unhandled errors, and session replay, as configured by the wizard defaults and the PostHog project settings.
-- **Sends nothing from `/get-started`**, the only page where visitors enter health details (the Typeform embed). `before_send` drops every event whose URL is that page (pageviews, autocapture, errors, replay snapshots, logs), and replay is paused while the visitor is there and resumed when they leave. Properties that remember the page (session entry URL, previous pageview, landing URL, referrer) are removed from later events.
+- **Sends nothing from `/get-started`**, the only page where visitors enter personal details (the Calendly embed). `before_send` drops every event whose URL is that page (pageviews, autocapture, errors, replay snapshots, logs), and replay is paused while the visitor is there and resumed when they leave. Properties that remember the page (session entry URL, previous pageview, landing URL, referrer) are removed from later events.
 - Uses memory-only persistence: no cookies or localStorage, so every page load is a new anonymous visitor. There is no `identify()` call.
 - Turns off the feature-flags request (`advanced_disable_flags`). That request is not covered by `before_send` and carries the landing URL, which can be `/get-started`. Feature flags, surveys, and web experiments are therefore unavailable until that is solved another way.
-- Sends one custom event, `eligibility_check_started` with `source_path`, when a visitor clicks through to `/get-started`. The Typeform submit and phone-click events stay in the Google Ads code only. PostHog autocapture records `tel:` link clicks.
+- Sends one custom event, `eligibility_check_started` with `source_path`, when a visitor clicks through to `/get-started`. The Calendly booking and phone-click events stay in the Google Ads code only. PostHog autocapture records `tel:` link clicks.
 
 Tests: `tests/posthog.spec.ts`. The Playwright dev server points PostHog at `/__posthog` on itself (`playwright.config.ts`), so test runs never reach a real project. The browser tests mask `navigator.webdriver` and the headless client hints because posthog-js ignores bots.
 

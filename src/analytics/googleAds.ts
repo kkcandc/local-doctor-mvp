@@ -1,5 +1,6 @@
 import {
   isTrackedClinicPhone,
+  isCalendlyScheduledMessage,
   isTypeformSubmitMessage,
   adsPageLocation,
   leadTrackingCalls,
@@ -68,7 +69,8 @@ export function installGoogleAds() {
   window.gtag('config', id, { page_location: adsPageLocation(window.location.href) })
 }
 
-// Typeform calls this with { formId, responseId }. Those arguments are ignored on purpose.
+// Reports the lead conversion. Typeform calls this directly with { formId, responseId }, and a
+// Calendly booking reaches it through onWindowMessage. Arguments and payloads are ignored on purpose.
 export function onTypeformSubmit() {
   const now = Date.now()
   if (now - lastLeadAt < LEAD_DEDUPE_MS) return
@@ -99,6 +101,6 @@ function onDocumentClick(event: MouseEvent) {
 }
 
 function onWindowMessage(event: MessageEvent) {
-  if (!isTypeformSubmitMessage(event.origin, event.data)) return
+  if (!isTypeformSubmitMessage(event.origin, event.data) && !isCalendlyScheduledMessage(event.origin, event.data)) return
   onTypeformSubmit()
 }

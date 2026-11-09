@@ -143,7 +143,7 @@ test('PostHog stays silent on /get-started and keeps working elsewhere', async (
   await expect.poll(() => events.some((e) => e.event === '$pageview' && e.url.endsWith('/treatments')), { timeout: 20_000 }).toBe(true)
 
   await goTo(page, '/get-started')
-  await expect(page.locator('.typeform-live-embed')).toBeVisible()
+  await expect(page.locator('.calendly-inline-widget')).toBeVisible()
   await goTo(page, '/faq')
   await expect.poll(() => events.some((e) => e.event === '$pageview' && e.url.endsWith('/faq')), { timeout: 20_000 }).toBe(true)
 
@@ -164,7 +164,7 @@ test('landing directly on /get-started sends nothing about it', async ({ page })
   const { bodies, events } = await recordPostHog(page)
 
   await page.goto('/get-started')
-  await expect(page.locator('.typeform-live-embed')).toBeVisible()
+  await expect(page.locator('.calendly-inline-widget')).toBeVisible()
   await goTo(page, '/faq')
   await expect.poll(() => events.some((e) => e.event === '$pageview' && e.url.endsWith('/faq')), { timeout: 20_000 }).toBe(true)
 

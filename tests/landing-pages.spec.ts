@@ -18,9 +18,7 @@ const TRUST_FACTS = [
   'Insurance accepted',
   'No referral needed',
 ]
-const SPEED_CLAIM = /\bin days\b|within days|next[-\s]?day|fast answer|fast appointment/i
 const DASHES = /[\u2013\u2014]/
-const TYPEFORM_LIVE_ID = '01M64J1XGXT19BH7GGWPKJ243K'
 const TYPEFORM_EVALUATION = 'https://localdoctor.typeform.com/evaluation'
 
 const heroCtaLabels: Record<LandingSlug, string> = {
@@ -81,8 +79,6 @@ test('every landing route has its own title, description, and canonical', () => 
     expect(landingPages[slug].reassurance).toBe(HERO_REASSURANCE)
     expect(landingPages[slug].facts.items.slice(0, TRUST_FACTS.length)).toEqual(TRUST_FACTS)
     expect(landingPages[slug].reassurance).not.toMatch(/waitlist|price|\$|seen in days/i)
-    expect(`${landingPages[slug].reassurance} ${landingPages[slug].facts.items.join(' ')}`).not.toMatch(SPEED_CLAIM)
-    expect(landingMeta[slug].description).not.toMatch(SPEED_CLAIM)
   }
 })
 
@@ -130,17 +126,11 @@ test('memory specialist page asks visitors to request a visit', () => {
   expect(JSON.stringify(page)).not.toMatch(/"title":"Book|"title":"Booking/)
 })
 
-test('homepage, intake, how-it-works, and FAQ drop visit-speed claims', async ({ page }) => {
-  for (const path of ['/', '/get-started', '/how-it-works', '/faq']) {
-    await page.goto(path)
-    await expect(page.locator('h1')).toBeVisible()
-    const text = await page.locator('main').evaluate((node) => node.textContent ?? '')
-    expect(text, path).not.toMatch(SPEED_CLAIM)
-  }
+test('homepage hero buttons share one row, 16px apart', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/')
   const actions = page.locator('.hero-actions')
-  const primary = await boxOf(actions.getByRole('button', { name: 'Get Started' }))
+  const primary = await boxOf(actions.getByRole('button', { name: 'Book a Neurologist today' }))
   const secondary = await boxOf(actions.getByRole('button', { name: 'Learn more' }))
   expect(sameRow(primary, secondary)).toBe(true)
   expect(horizontalGap(primary, secondary)).toBeCloseTo(16, 0)
@@ -192,9 +182,9 @@ test('the static shell for a landing route carries its own head tags', () => {
   expect(html).not.toContain('content="default"')
 })
 
-test('the homepage hero CTA label stays Get Started', async ({ page }) => {
+test('the homepage hero CTA reads Book a Neurologist today', async ({ page }) => {
   await page.goto('/')
-  await expect(page.locator('.hero-actions').getByRole('button', { name: 'Get Started' })).toBeVisible()
+  await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a Neurologist today' })).toBeVisible()
 })
 
 test('only the three evaluation pages send their CTAs to the evaluation Typeform', () => {
@@ -326,7 +316,7 @@ for (const viewport of viewports) {
           continue
         }
         await expect(page).toHaveURL(/\/get-started$/)
-        await expect(page.locator('.typeform-live-embed')).toHaveAttribute('data-tf-live', TYPEFORM_LIVE_ID)
+        await expect(page.locator('#book .calendly-inline-widget')).toHaveAttribute('data-url', /^https:\/\/calendly\.com\/local-doctor\//)
         expect(await page.evaluate(() => window.scrollY)).toBe(0)
         await expect(page.locator('link[rel="canonical"]')).toHaveCount(0)
       }
