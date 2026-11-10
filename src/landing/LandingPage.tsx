@@ -3,7 +3,7 @@ import type { MouseEvent, ReactNode } from 'react'
 import { ArrowRight, CheckCircle2, ChevronDown, Info, Phone, ShieldAlert } from 'lucide-react'
 import { publicPhone } from '../compliancePages'
 import { isPageEnabled } from '../featureFlags'
-import { pathWithAdsParams } from '../analytics/googleAdsConfig'
+import { hrefWithAdsParams, pathWithAdsParams } from '../analytics/googleAdsConfig'
 import { StickyCta } from '../StickyCta'
 import { intakePath, landingDestinations, resolveDestination, type CtaDestination } from './destinations'
 import { landingPages, relatedLabels, type LandingColumn, type LandingFaq as FaqItem, type LandingSection } from './landingContent'
@@ -15,6 +15,12 @@ const phoneHref = `tel:+1${publicPhone.replace(/\D/g, '')}`
 function intakeHref() {
   if (typeof window === 'undefined') return intakePath
   return pathWithAdsParams(intakePath, window.location.search)
+}
+
+function destinationHref(destination: CtaDestination) {
+  if (destination.kind !== 'external') return intakeHref()
+  if (typeof window === 'undefined') return destination.href
+  return hrefWithAdsParams(destination.href, window.location.search)
 }
 
 type Tone = 'white' | 'ivory'
@@ -54,7 +60,7 @@ function GetStartedLink({
   return (
     <a
       className={variant}
-      href={external ? destination.href : intakeHref()}
+      href={destinationHref(destination)}
       data-cta-location={location}
       aria-describedby={describedBy}
       onClick={(event) => {
@@ -321,7 +327,7 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
 
       <StickyCta
         label={page.ctaLabel}
-        href={destination.kind === 'external' ? destination.href : intakeHref()}
+        href={destinationHref(destination)}
         describedBy={`${slug}-reassurance`}
         anchorSelector={`.landing-page[data-landing="${slug}"] .landing-hero-actions`}
         stopSelectors={['.landing-mid-cta', '.landing-section-cta', '.landing-column-cta', '.landing-closing', '.footer']}
