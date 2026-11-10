@@ -14,7 +14,25 @@ export default defineConfig({
     // against the live calendar. Specs that need its widget script stub it with page.route.
     launchOptions: {
       args: [
-        '--host-resolver-rules=MAP forms.mylocalinfusion.com ~NOTFOUND, MAP assets.calendly.com ~NOTFOUND, MAP calendly.com ~NOTFOUND',
+        // Google collection endpoints are blocked as well, so a test run never sends a hit or a
+        // conversion to GA4 or Ads. gtag.js still loads from googletagmanager.com and builds its requests.
+        // The Typeform embed (form.typeform.com) is stubbed per test with page.route.
+        `--host-resolver-rules=${[
+          'forms.mylocalinfusion.com',
+          'assets.calendly.com',
+          'calendly.com',
+          'www.google.com',
+          'google.com',
+          'www.googleadservices.com',
+          'googleadservices.com',
+          'google-analytics.com',
+          '*.google-analytics.com',
+          'analytics.google.com',
+          '*.analytics.google.com',
+          '*.doubleclick.net',
+        ]
+          .map((host) => `MAP ${host} ~NOTFOUND`)
+          .join(', ')}`,
       ],
     },
   },

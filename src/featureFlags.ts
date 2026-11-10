@@ -12,6 +12,7 @@ const pageDefaults = {
   how: true,
   about: false,
   start: true,
+  evaluation: true,
   faq: true,
   blog: true,
   refer: true,

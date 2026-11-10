@@ -99,3 +99,8 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* The chatbot is hidden on the booking and evaluation pages (src/chatbot.ts). */
+html[data-chatbot-hidden="true"] [id^="JotformAgent-"] {
+  display: none !important;
+}

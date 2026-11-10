@@ -5,7 +5,7 @@ import { publicPhone } from '../compliancePages'
 import { isPageEnabled } from '../featureFlags'
 import { hrefWithAdsParams, pathWithAdsParams } from '../analytics/googleAdsConfig'
 import { StickyCta } from '../StickyCta'
-import { intakePath, landingDestinations, resolveDestination, type CtaDestination } from './destinations'
+import { evaluationPath, intakePath, landingDestinations, resolveDestination, type CtaDestination } from './destinations'
 import { landingPages, relatedLabels, type LandingColumn, type LandingFaq as FaqItem, type LandingSection } from './landingContent'
 import type { LandingSlug } from './landingMeta'
 import './landing.css'
@@ -18,17 +18,24 @@ function intakeHref() {
 }
 
 function destinationHref(destination: CtaDestination) {
-  if (destination.kind !== 'external') return intakeHref()
-  if (typeof window === 'undefined') return destination.href
-  return hrefWithAdsParams(destination.href, window.location.search)
+  const search = typeof window === 'undefined' ? '' : window.location.search
+  if (destination.kind === 'evaluation') return pathWithAdsParams(evaluationPath, search)
+  if (destination.kind === 'external') return hrefWithAdsParams(destination.href, search)
+  return intakeHref()
+}
+
+function internalTarget(destination: CtaDestination): CtaTarget {
+  return destination.kind === 'evaluation' ? 'evaluation' : 'start'
 }
 
 type Tone = 'white' | 'ivory'
 
+export type CtaTarget = 'start' | 'evaluation'
+
 type LandingPageProps = {
   slug: LandingSlug
-  // Internal CTAs: record the click and move to the intake route.
-  onStart: (ctaLocation: string, ctaLabel: string) => void
+  // Internal CTAs: record the click and move to /get-started or /evaluation.
+  onStart: (target: CtaTarget, ctaLocation: string, ctaLabel: string) => void
   // External CTAs: record the click only. The browser follows the link itself, so the
   // app must not push a /get-started history entry first.
   onTrackCta: (ctaLocation: string, ctaLabel: string) => void
@@ -51,7 +58,7 @@ function GetStartedLink({
   destination: CtaDestination
   location: string
   label: string
-  onStart: (ctaLocation: string, ctaLabel: string) => void
+  onStart: (target: CtaTarget, ctaLocation: string, ctaLabel: string) => void
   onTrackCta: (ctaLocation: string, ctaLabel: string) => void
   variant?: 'primary' | 'accent'
   describedBy?: string
@@ -70,7 +77,7 @@ function GetStartedLink({
         }
         if (!isPlainClick(event)) return
         event.preventDefault()
-        onStart(location, label)
+        onStart(internalTarget(destination), location, label)
       }}
     >
       {label} <ArrowRight size={20} aria-hidden="true" />
@@ -299,7 +306,11 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
         <div>
           <h2 id={`${slug}-closing-title`}>{page.closing.title}</h2>
           <p id={`${slug}-closing-copy`}>{page.closing.copy}</p>
-          <p className="landing-safety">The request form is not a test or a diagnosis. If this is a medical emergency, call 911.</p>
+          <p className="landing-safety">
+            {destination.kind === 'evaluation'
+              ? 'The evaluation form is not a test or a diagnosis. If this is a medical emergency, call 911.'
+              : 'Booking a visit is not a diagnosis. If this is a medical emergency, call 911.'}
+          </p>
         </div>
         <div className="conversion-actions">
           {cta('closing', undefined, `${slug}-closing-title ${slug}-closing-copy`)}
@@ -338,7 +349,7 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
           }
           if (!isPlainClick(event)) return
           event.preventDefault()
-          onStart('sticky_mobile', page.ctaLabel)
+          onStart(internalTarget(destination), 'sticky_mobile', page.ctaLabel)
         }}
       />
     </div>

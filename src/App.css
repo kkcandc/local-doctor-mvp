@@ -2120,3 +2120,123 @@ a.blog-card {
     padding-bottom: calc(var(--space-32) + env(safe-area-inset-bottom));
   }
 }
+
+/* /evaluation: the embedded Typeform and the short page around it. */
+.evaluation-hero {
+  padding-block: var(--space-32) var(--space-24);
+}
+
+.evaluation-hero h1 {
+  color: var(--text-heading);
+  font-size: clamp(2rem, 1.6rem + 1.6vw, 2.75rem);
+}
+
+.evaluation-hero .evaluation-trust {
+  margin: var(--space-12) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-lead);
+}
+
+.evaluation-form-section {
+  padding-top: var(--space-24);
+}
+
+.evaluation-form-frame {
+  width: 100%;
+  max-width: 880px;
+  margin-inline: auto;
+}
+
+.evaluation-form-widget {
+  width: 100%;
+  height: clamp(520px, 78vh, 760px);
+}
+
+.evaluation-form-widget iframe {
+  max-width: none;
+  border: 0;
+}
+
+.evaluation-alt {
+  display: grid;
+  gap: var(--space-12);
+  justify-items: center;
+  max-width: 880px;
+  margin: var(--space-32) auto 0;
+  text-align: center;
+}
+
+.evaluation-alt p {
+  margin: 0;
+}
+
+.evaluation-book-link,
+.evaluation-phone {
+  display: inline-flex;
+  gap: var(--space-4);
+  align-items: center;
+  min-height: 44px;
+  font-weight: var(--weight-semibold);
+}
+
+.evaluation-safety {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+}
+
+/* /get-started: trust line over the calendar, and the mobile order (short hero, calendar, photo). */
+.booking-main {
+  min-width: 0;
+}
+
+.booking-trust {
+  margin: 0 0 var(--space-16);
+  color: var(--text-secondary);
+}
+
+.start-photo-below {
+  display: block;
+  width: min(100% - 2 * var(--page-inline), 420px);
+  height: auto;
+  margin: 0 auto var(--space-48);
+  border-radius: var(--radius-xl);
+  object-fit: cover;
+}
+
+@media (max-width: 680px) {
+  .start-page .page-hero {
+    gap: var(--space-12);
+    padding-block: var(--space-24) var(--space-8);
+  }
+
+  .start-page .page-hero h1 {
+    font-size: 1.625rem;
+  }
+
+  .start-page .page-hero p:not(.eyebrow),
+  .start-page .page-hero-secondary {
+    display: none;
+  }
+
+  .start-page .section.expect-section {
+    padding-top: var(--space-16);
+  }
+
+  .start-page .expect-heading {
+    margin-bottom: var(--space-8);
+    font-size: 1.375rem;
+  }
+
+  .start-page .booking-layout {
+    margin-bottom: var(--space-32);
+  }
+
+  .start-page .booking-trust {
+    margin-bottom: var(--space-8);
+    font-size: 0.9375rem;
+  }
+
+  .evaluation-form-widget {
+    height: clamp(520px, 80svh, 720px);
+  }
+}

@@ -35,10 +35,15 @@ import {
 import { isPageEnabled, type PageFlag } from './featureFlags'
 import { noteSpaNavigation } from './analytics/googleAds'
 import { pathWithAdsParams } from './analytics/googleAdsConfig'
-import { noteGaCtaClick, noteGaSpaNavigation } from './analytics/googleAnalytics'
+import { noteGaSpaNavigation } from './analytics/googleAnalytics'
+import { trackCtaClick as sendCtaClick } from './analytics/tracking'
+import { syncChatbot } from './chatbot'
+import { EvaluationPage } from './EvaluationPage'
+import { evaluationMeta, startMeta } from './pageMeta'
 import { noteEligibilityStarted } from './analytics/posthog'
 import { CalendlyEmbed } from './CalendlyEmbed'
-import { LandingPage } from './landing/LandingPage'
+import { LandingPage, type CtaTarget } from './landing/LandingPage'
+import { evaluationFormSlugs } from './landing/landingContent'
 import { isLandingSlug, landingCanonical, landingMeta } from './landing/landingMeta'
 import { StickyCta } from './StickyCta'
 import './App.css'
@@ -49,6 +54,7 @@ type Route =
   | 'how'
   | 'about'
   | 'start'
+  | 'evaluation'
   | 'faq'
   | 'blog'
   | 'blogPost'
@@ -68,6 +74,8 @@ const defaultDescription =
 const defaultOgTitle = "Connect with Alzheimer's specialists and advanced treatment today"
 
 const routeMeta: Partial<Record<Route, { title: string; description: string }>> = {
+  start: startMeta,
+  evaluation: evaluationMeta,
   privacy: {
     title: 'Privacy Policy | Local Doctor',
     description: 'Privacy Policy for Local Infusion Inc. services offered through trylocaldoctor.com.',
@@ -100,6 +108,7 @@ const routePaths: Record<Exclude<Route, 'blogPost' | 'landing'>, string> = {
   how: '/how-it-works',
   about: '/about',
   start: '/get-started',
+  evaluation: '/evaluation',
   faq: '/faq',
   blog: '/blog',
   refer: '/refer-a-patient',
@@ -116,6 +125,7 @@ const pathRoutes: Record<string, Route> = {
   'how-it-works': 'how',
   about: 'about',
   'get-started': 'start',
+  evaluation: 'evaluation',
   faq: 'faq',
   blog: 'blog',
   'refer-a-patient': 'refer',
@@ -268,7 +278,7 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
       ['Who is eligible for services?', 'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. Our eligibility call is fast and simple, providing a clear answer within 15-30 minutes.'],
       ['How soon can I be seen?', 'Once you\'ve been determined eligible for our program, we schedule a virtual visit with one of our neurology specialists based on your availability.'],
       ['How long does the eligibility process take?', 'Our eligibility process is centered around a quick call that should take 15-30 minutes. Please have the patient\'s insurance details, medication list, and medical history handy to make it go smoother.'],
-      ['Do I need a referral from my current doctor?', 'No referral is needed. Start with a call or the short form, and we review eligibility and insurance with you before a visit is booked.'],
+      ['Do I need a referral from my current doctor?', 'No referral is needed. Start with a call or pick a visit time, and we review eligibility and insurance with you before the visit.'],
       ['What if I already have a diagnosis?', 'If you already have a diagnosis for mild cognitive impairment, dementia, or Alzheimer\'s disease, you may be a strong candidate for our program and it may expedite your path to treatment.'],
       ['Can I call on behalf of my spouse, parent, or loved one?', 'Absolutely! We welcome any loved one who wishes to be a part of the process and would prefer that one joins the first visit with the patient.'],
       ['What if I\'m not eligible for services?', 'If you don\'t happen to be eligible for our program yet, we will let you know transparently and why.'],
@@ -310,6 +320,11 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
     ],
   },
 ]
+
+// One booking path per page. The evaluation pages send the header button to /evaluation, every other
+// page sends it to the scheduler, so the header always matches the page's own buttons.
+const startEvaluationLabel = 'Start your evaluation'
+const seeVisitTimesLabel = 'See open visit times'
 
 const headerPhone = '(240) 376-5730'
 const headerPhoneHref = '+12403765730'
@@ -399,14 +414,18 @@ function App() {
   }, [route, routeSlug])
 
   useEffect(() => {
+    syncChatbot(window.location.pathname)
+  }, [route, routeSlug])
+
+  useEffect(() => {
     const hash = window.location.hash.replace(/^#/, '')
     if (!hash) return
     document.getElementById(hash)?.scrollIntoView()
   }, [route])
 
-  function trackCtaClick(ctaLocation?: string, ctaLabel?: string) {
+  function trackCtaClick(ctaLocation?: string, ctaLabel?: string, destinationPath?: string) {
     noteEligibilityStarted(window.location.pathname, ctaLocation)
-    noteGaCtaClick(window.location.pathname, ctaLocation, ctaLabel)
+    sendCtaClick(ctaLocation, ctaLabel, destinationPath)
   }
 
   function navigate(next: Route, slug = '', ctaLocation?: string, ctaLabel?: string, hash = '') {
@@ -415,7 +434,7 @@ function App() {
       slug = ''
       hash = ''
     }
-    if (next === 'start') trackCtaClick(ctaLocation, ctaLabel)
+    if (next === 'start' || next === 'evaluation') trackCtaClick(ctaLocation, ctaLabel, routePaths[next])
     const path = next === 'blogPost' ? `/blog/${slug}` : next === 'landing' ? `/${slug}` : routePaths[next]
     // Keep gclid and utm_* across SPA navigations so Ads can attribute the visit and
     // Typeform can read them on /get-started. Contact and health params stay dropped.
@@ -433,12 +452,15 @@ function App() {
 
   return (
     <main>
-      <Header route={route} menuOpen={menuOpen} onToggleMenu={() => setMenuOpen((open) => !open)} onNavigate={navigate} />
+      <Header route={route} routeSlug={routeSlug} menuOpen={menuOpen} onToggleMenu={() => setMenuOpen((open) => !open)} onNavigate={navigate} />
       {route === 'home' && <HomePage onNavigate={navigate} />}
       {route === 'treatments' && <TreatmentsPage onNavigate={navigate} />}
       {route === 'how' && <HowPage onNavigate={navigate} />}
       {route === 'about' && <AboutPage onNavigate={navigate} />}
       {route === 'start' && <StartPage />}
+      {route === 'evaluation' && (
+        <EvaluationPage onBookVisit={() => navigate('start', '', 'evaluation_secondary', seeVisitTimesLabel)} />
+      )}
       {route === 'faq' && <FaqPage onNavigate={navigate} />}
       {route === 'blog' && <BlogPage onNavigate={navigate} />}
       {route === 'blogPost' && <BlogPostPage slug={routeSlug} onNavigate={navigate} />}
@@ -452,7 +474,7 @@ function App() {
         <LandingPage
           key={routeSlug}
           slug={routeSlug}
-          onStart={(ctaLocation, ctaLabel) => navigate('start', '', ctaLocation, ctaLabel)}
+          onStart={(target: CtaTarget, ctaLocation, ctaLabel) => navigate(target, '', ctaLocation, ctaLabel)}
           onTrackCta={trackCtaClick}
           onOpenPath={(path) => {
             const next = readLocation(path.replace(/^\/+|\/+$/g, ''))
@@ -485,15 +507,21 @@ function BrandLink({ variant = 'color', onNavigate }: { variant?: 'color' | 'rev
 
 function Header({
   route,
+  routeSlug,
   menuOpen,
   onToggleMenu,
   onNavigate,
 }: {
   route: Route
+  routeSlug: string
   menuOpen: boolean
   onToggleMenu: () => void
   onNavigate: Navigate
 }) {
+  const evaluationFunnel = route === 'landing' && (evaluationFormSlugs as string[]).includes(routeSlug)
+  const headerCta = evaluationFunnel
+    ? { target: 'evaluation' as const, label: startEvaluationLabel }
+    : { target: 'start' as const, label: seeVisitTimesLabel }
   const navItems = enabledLinks<[Route, string]>([
     ['how', 'How it works'],
     ['treatments', 'Treatments'],
@@ -530,8 +558,8 @@ function Header({
         </nav>
         <div className="header-actions">
           <a className="header-phone" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
-          <button className="header-cta" type="button" onClick={() => onNavigate('start', '', 'header', 'Get Started')}>
-            Get Started
+          <button className="header-cta" type="button" onClick={() => onNavigate(headerCta.target, '', 'header', headerCta.label)}>
+            {headerCta.label}
           </button>
         </div>
         <a className="header-phone-mobile" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
@@ -561,7 +589,7 @@ function Header({
           <a className="mobile-nav-phone" href={`tel:${headerPhoneHref}`}>
             <span className="mobile-nav-phone-label">Call or text</span> {headerPhone}
           </a>
-          <button type="button" onClick={() => onNavigate('start', '', 'header', 'Get Started')}>Get Started</button>
+          <button type="button" onClick={() => onNavigate(headerCta.target, '', 'header', headerCta.label)}>{headerCta.label}</button>
         </nav>
       )}
     </header>
@@ -582,7 +610,7 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
               FDA-approved treatments can slow down the progression of early Alzheimer&apos;s disease. Get evaluated as early as this week by our neurologists who specialize in cognitive impairment and disease-modifying treatments.
             </p>
             <div className="hero-actions">
-              <button className="accent" type="button" onClick={() => onNavigate('start', '', 'hero', 'Get Started', 'book')}>Book a Neurologist today</button>
+              <button className="accent" type="button" onClick={() => onNavigate('start', '', 'hero', 'Book a Neurologist today', 'book')}>Book a Neurologist today</button>
               {routeEnabled('how') && <button className="secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>}
             </div>
             <div className="trust-note"><span /> Backed by a national infusion network and a focused treatment-readiness pathway.</div>
@@ -699,7 +727,7 @@ function HowPage({ onNavigate }: { onNavigate: Navigate }) {
         copy="Our trusted team of neurology specialists has over 20 years of experience in treating dementia and mild cognitive impairment."
         icon={<CalendarClock size={38} />}
         aside={{ title: 'Family and loved ones', text: 'Our preference is for loved ones to join the virtual provider visits and be a part of the process.' }}
-        onPrimary={() => onNavigate('start', '', 'hero', 'Get Started')}
+        onPrimary={() => onNavigate('start', '', 'hero', 'Book now')}
         primaryLabel="Book now"
         wideCopy
       />
@@ -804,7 +832,25 @@ function AboutPage({ onNavigate }: { onNavigate: Navigate }) {
   )
 }
 
+const startPhoto = { src: '/assets/hero-get-started.jpg', alt: 'Three generations of a family sitting together on a lakeside dock' }
+const COMPACT_QUERY = '(max-width: 980px)'
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches)
+  useEffect(() => {
+    const media = window.matchMedia(query)
+    const update = () => setMatches(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [query])
+  return matches
+}
+
 function StartPage() {
+  // On a phone the hero is short, the scheduler comes right after it, and the photo sits below.
+  const compact = useMediaQuery(COMPACT_QUERY)
+
   return (
     <div className="start-page">
       <PageHero
@@ -813,11 +859,16 @@ function StartPage() {
         copy="Everyone's situation is unique. Our neurology specialists listen to deeply understand yours and let you know if you're eligible for disease-modifying treatment."
         primaryLabel={`Call or text ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
-        secondary={{ label: 'Book now', href: '#book' }}
+        secondary={{
+          label: 'Book now',
+          href: '#book',
+          onClick: () => sendCtaClick('get_started_hero', 'Book now', routePaths.start),
+        }}
         showAside={false}
-        image={{ src: '/assets/hero-get-started.jpg', alt: 'Three generations of a family sitting together on a lakeside dock' }}
+        image={compact ? undefined : startPhoto}
       />
       <BookingSection />
+      {compact && <img className="start-photo-below" src={startPhoto.src} alt={startPhoto.alt} width={385} height={515} loading="lazy" />}
       {/* No mobile sticky bar here for now: it did not behave well while scrolling. */}
     </div>
   )
@@ -1064,6 +1115,19 @@ function usePageMeta(route: Route, slug: string) {
     const description = document.querySelector('meta[name="description"]')
     const post = route === 'blogPost' ? getBlogPost(slug) : undefined
 
+    // /evaluation stays out of search results. The built shell already carries this tag on a direct load.
+    const robots = document.querySelector('meta[name="robots"]')
+    if (route === 'evaluation') {
+      if (!robots) {
+        const tag = document.createElement('meta')
+        tag.setAttribute('name', 'robots')
+        tag.setAttribute('content', 'noindex, follow')
+        document.head.appendChild(tag)
+      }
+    } else {
+      robots?.remove()
+    }
+
     const clearSyndicationTags = () => {
       document.querySelector('link[rel="canonical"]')?.remove()
       document.getElementById('blog-article-jsonld')?.remove()
@@ -1143,7 +1207,12 @@ function BookingSection() {
     <section className="section white expect-section start-booking-section" id="book">
       <h2 className="expect-heading">Book a neurologist</h2>
       <div className="booking-layout">
-        <CalendlyEmbed />
+        <div className="booking-main">
+          <p className="booking-trust">
+            <strong>Video visit, about 1 hour.</strong> Board-certified neurologist. Insurance accepted. No referral needed.
+          </p>
+          <CalendlyEmbed />
+        </div>
         <aside className="booking-aside">
           <div>
             <h3>What to expect</h3>
@@ -1356,7 +1425,7 @@ function PageHero({
   primaryLabel: string
   onPrimary?: () => void
   href?: string
-  secondary?: { label: string; href: string }
+  secondary?: { label: string; href: string; onClick?: () => void }
   showAside?: boolean
   aside?: { title: string; text: string }
   image?: { src: string; alt: string }
@@ -1383,7 +1452,7 @@ function PageHero({
         )}
         {secondary && (
           <div className="page-hero-secondary">
-            <a className="primary" href={secondary.href}>{secondary.label} <ArrowRight size={20} aria-hidden="true" /></a>
+            <a className="primary" href={secondary.href} onClick={secondary.onClick}>{secondary.label} <ArrowRight size={20} aria-hidden="true" /></a>
           </div>
         )}
       </div>
@@ -1427,7 +1496,7 @@ function ConversionPanel({
         <p>{copy}</p>
       </div>
       <div className="conversion-actions">
-        <button className="primary" type="button" onClick={() => onNavigate('start', '', 'closing', 'Get Started')}>{ctaLabel} <ArrowRight size={20} /></button>
+        <button className="primary" type="button" onClick={() => onNavigate('start', '', 'closing', ctaLabel)}>{ctaLabel} <ArrowRight size={20} /></button>
         {secondaryLabel && secondaryRoute && routeEnabled(secondaryRoute) && (
           <button className="secondary" type="button" onClick={() => onNavigate(secondaryRoute)}>{secondaryLabel}</button>
         )}
@@ -1494,7 +1563,7 @@ function Footer({ onNavigate }: { onNavigate: Navigate }) {
       <div>
         <strong>Get started</strong>
         {startLinksBeforeEmail.map(([itemRoute, label]) => (
-          <button key={label} type="button" onClick={() => onNavigate(itemRoute)}>{label}</button>
+          <button key={label} type="button" onClick={() => onNavigate(itemRoute, '', itemRoute === 'start' ? 'footer' : undefined, itemRoute === 'start' ? label : undefined)}>{label}</button>
         ))}
         <a href={`mailto:${publicEmail}`}>Email the team</a>
         {startLinksAfterEmail.map(([itemRoute, label]) => (

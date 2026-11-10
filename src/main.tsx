@@ -7,12 +7,16 @@ import App from './App'
 import { installGoogleAds } from './analytics/googleAds'
 import { installGoogleAnalytics } from './analytics/googleAnalytics'
 import { installPostHog } from './analytics/posthog'
+import { installTracking } from './analytics/tracking'
+import { syncChatbot } from './chatbot'
 
 // Ads first. If the built HTML has no gtag snippet, Ads creates it and configs AW-…
 // and GA4 then adds its config. Reversing that would leave Ads unconfigured.
 installGoogleAds()
 installGoogleAnalytics()
+installTracking()
 installPostHog()
+syncChatbot(window.location.pathname)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

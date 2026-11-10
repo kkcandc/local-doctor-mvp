@@ -8,7 +8,7 @@
   GA4 shares the Ads gtag.js snippet and the same page_location sanitizer.
   Event payloads are page path and event name only: no names, emails, phone
   numbers, dates of birth, diagnoses, form answers, or Typeform response ids.
-  Lead and phone conversions stay in the Google Ads code.
+  Conversion events are planned in src/analytics/tracking.ts.
 */
 
 export const DEFAULT_GA_MEASUREMENT_ID = 'G-PR7CJ8TK79'
