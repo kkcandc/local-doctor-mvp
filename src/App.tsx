@@ -40,7 +40,7 @@ import { trackCtaClick as sendCtaClick } from './analytics/tracking'
 import { syncChatbot } from './chatbot'
 import { EvaluationPage } from './EvaluationPage'
 import { evaluationMeta, startMeta } from './pageMeta'
-import { noteEligibilityStarted, notePostHogNavigation } from './analytics/posthog'
+import { noteEligibilityStarted } from './analytics/posthog'
 import { CalendlyEmbed } from './CalendlyEmbed'
 import { LandingPage, type CtaTarget } from './landing/LandingPage'
 import { evaluationFormSlugs } from './landing/landingContent'
@@ -411,10 +411,6 @@ function App() {
 
   useEffect(() => {
     noteGaSpaNavigation(window.location.pathname)
-  }, [route, routeSlug])
-
-  useEffect(() => {
-    notePostHogNavigation(window.location.pathname)
   }, [route, routeSlug])
 
   useEffect(() => {

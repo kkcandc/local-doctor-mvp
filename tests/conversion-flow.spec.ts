@@ -215,16 +215,6 @@ test.describe('/evaluation', () => {
     }
   })
 
-  test('PostHog stays silent on /evaluation', async ({ page }) => {
-    await stubTypeform(page)
-    const posthog: string[] = []
-    page.on('request', (request) => {
-      if (request.url().includes('__posthog') && !request.url().includes('/static/')) posthog.push(request.url())
-    })
-    await page.goto(`/evaluation${query}`)
-    await page.waitForTimeout(1500)
-    expect(posthog).toEqual([])
-  })
 })
 
 test.describe('Calendly events on /get-started', () => {

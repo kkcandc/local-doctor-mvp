@@ -19,9 +19,9 @@ const phoneHref = `tel:+1${publicPhone.replace(/\D/g, '')}`
 
   The callbacks below take no arguments on purpose. Typeform passes a form id and a response id,
   and nothing from the form (answers, names, emails, phones, response ids) is read, logged, or
-  sent to Google, GA4 or PostHog. Only the event name is sent (src/analytics/tracking.ts).
-  PostHog is silent on this page (src/analytics/posthogConfig.ts) and the embed is marked
-  ph-no-capture.
+  sent to Google or GA4. Only the event name is sent (src/analytics/tracking.ts). PostHog runs
+  on this page the same as every other route. The form is a cross-origin iframe, so PostHog
+  cannot read what a visitor types into it.
 
   Some forms do not report a start when they have no welcome screen. onQuestionChanged covers
   that: the first question change counts as started, and the tracker sends each event once.
@@ -60,7 +60,7 @@ export function EvaluationPage({ onBookVisit }: { onBookVisit: () => void }) {
       </div>
 
       <section className="section white evaluation-form-section" aria-label="Evaluation form">
-        <div className="evaluation-form-frame ph-no-capture">
+        <div className="evaluation-form-frame">
           <Widget
             id={EVALUATION_FORM_ID}
             hidden={hidden}
