@@ -77,7 +77,7 @@ export function CalendlyEmbed() {
   return (
     <div
       ref={containerRef}
-      className="calendly-inline-widget ph-no-capture"
+      className="calendly-inline-widget"
       data-url={url}
       data-auto-load="false"
       style={{ minWidth: 320, width: '100%', height }}
