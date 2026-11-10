@@ -31,6 +31,7 @@ compliance for Local Doctor before the funnel is expanded.
 | `mid_page` | Mid-page CTA band on landing pages |
 | `patient_path`, `caregiver_path` | The two column CTAs on /memory-evaluation |
 | `closing` | Closing CTA panel |
+| `faq` | "Click here" and "Book your virtual visit here" links in FAQ answers. They open /get-started at the booking section (#book). |
 | `sticky_mobile` | Phone-only sticky bar (homepage and landing pages) |
 | `header` | Header button (desktop and the mobile menu): Start your evaluation on the evaluation pages, See open visit times elsewhere |
 | `evaluation_secondary` | See open visit times link under the form on /evaluation |

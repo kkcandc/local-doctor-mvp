@@ -1253,7 +1253,7 @@ a.blog-card:hover {
   grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
   gap: var(--space-32) var(--space-48);
   align-items: start;
-  margin-bottom: var(--space-64);
+  margin-bottom: calc(var(--space-64) + var(--space-16));
 }
 
 .booking-aside {
@@ -1391,6 +1391,16 @@ a.blog-card:hover {
   max-width: 65ch;
   margin: 0 0 var(--space-24);
   color: var(--text-secondary);
+}
+
+.faq-accordion article p a {
+  color: var(--color-primary);
+  font-weight: var(--weight-semibold);
+  text-decoration: underline;
+}
+
+.faq-accordion article p a:hover {
+  color: var(--color-primary-hover);
 }
 
 .question-band {

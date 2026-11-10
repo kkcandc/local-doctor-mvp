@@ -137,7 +137,7 @@ test.describe('how it works page', () => {
     await page.goto('/how-it-works')
     await expect(page.locator('h1')).toHaveText('A fast path you can trust from first concern to treatment.')
     await expect(page.locator('.page-hero p').last()).toHaveText(
-      'Our trusted team of neurology specialists has over 20 years of experience in treating dementia and mild cognitive impairment.',
+      "Our trusted team of neurologists and specialists have over 20 years of experience in treating Alzheimer's disease, dementia, and mild cognitive impairment. We can help you understand what you might be facing and your best options going forward.",
     )
     const hero = page.locator('.page-hero').getByRole('button', { name: 'Book now' })
     await expect(hero).toBeVisible()
@@ -206,4 +206,139 @@ test.describe('how it works page', () => {
     await steps.nth(0).getByRole('button', { name: 'Book now' }).click()
     await expect(page).toHaveURL(/\/get-started$/)
   })
+})
+
+const OUT_OF_POCKET =
+  'Provider visits with our neurology specialists will be at low to no out-of-pocket cost to you, depending on your insurance coverage. In case you need new labs and imaging exams to confirm a diagnosis or for treatment prescription, their cost will depend on the sites you use and your insurance coverage.'
+
+const SERVICES_ANSWER =
+  "Local Doctor is a virtual Alzheimer's clinic focused on accelerating access to life-changing therapies. Our initial focus is evaluation, diagnosis, treatment eligibility, treatment initiation, and required oversight of disease-modifying therapies. Whether you already have a neurologist or you're searching for one, Local Doctor is designed to help you find treatment faster. We complement your existing doctors and will work with them as needed."
+
+test.describe('FAQ page', () => {
+  // Each FAQ opens as an accordion, one at a time. Check the question, then its answer.
+  async function answerFor(page: import('@playwright/test').Page, question: string) {
+    const button = page.getByRole('button', { name: question, exact: true })
+    // The first FAQ is open on load, and clicking an open one closes it.
+    if ((await button.getAttribute('aria-expanded')) !== 'true') await button.click()
+    return page.locator('.faq-accordion article.open p')
+  }
+
+  test('the services question is first under Getting Started and open by default', async ({ page }) => {
+    await page.goto('/faq')
+    const items = page.locator('#getting-started .faq-accordion article')
+    await expect(items.first().locator('button span')).toHaveText('What services does Local Doctor provide?')
+    await expect(items.first()).toHaveClass(/open/)
+    await expect(items.first().locator('p')).toHaveText(SERVICES_ANSWER)
+    await expect(items.nth(1).locator('button span')).toHaveText('Who is eligible for services?')
+    // The same question is not repeated in another category.
+    await expect(page.getByRole('button', { name: 'What services does Local Doctor provide?' })).toHaveCount(1)
+  })
+
+  test('the How it works FAQ shows the same services answer', async ({ page }) => {
+    await page.goto('/how-it-works')
+    const item = page.locator('.mini-faq-list article').filter({ has: page.getByRole('heading', { name: 'What services does Local Doctor provide?' }) })
+    await expect(item.locator('p')).toHaveText(SERVICES_ANSWER)
+  })
+
+  test('questions and answers have the new copy', async ({ page }) => {
+    await page.goto('/faq')
+    const cases: Array<[string, string]> = [
+      [
+        'Who is eligible for services?',
+        "Adults experiencing cognitive symptoms or with dementia or Alzheimer's disease residing in Maryland are commonly strong candidates for our program. We will confirm via a quick phone call after you schedule your visit, before your appointment.",
+      ],
+      [
+        'How does the eligibility check work?',
+        "Our eligibility process is simple - we will call you after you schedule your appointment and the call should take 15-30 minutes. Please have the patient's insurance details, medication list, and medical history handy to make it go smoother.",
+      ],
+      ['How much will this cost?', OUT_OF_POCKET],
+      [
+        'Which insurance plans are currently accepted?',
+        "We accept many insurances including Medicare, Medicaid, Aetna, CareFirst, Cigna, Kaiser, and United. If you don't see your insurance on this list, we may still accept it and will confirm when we speak with you.",
+      ],
+      [
+        'How does the first visit with the provider work and how long will it be?',
+        'You will receive a visit confirmation email and reminders to your contact method of choice, including on the day of the visit, that will have the link to join the video call for the first visit. This visit should last about 1 hour. Please ensure you are in a setting with strong access to Wi-Fi or data service with a device that has video and audio capabilities. It would be valuable and preferable for you to join with a care partner or family member who is involved in your care and day-to-day life so they can help answer any questions during the evaluation by the provider. If you have any other questions about this visit just let us know when you speak to us before the appointment!',
+      ],
+      [
+        'Is everything virtual or is there any in-person component?',
+        'The clinical virtual visits happen via a video platform. MRIs, PET Scans, bloodwork, and the infusions themselves happen at in-person facilities of your choice.',
+      ],
+      [
+        'Where do infusions take place?',
+        'If treatment is clinically appropriate, infusions take place at a local infusion center that is most convenient for you.',
+      ],
+      [
+        'Who do I contact in a medical emergency?',
+        'Call 911 immediately. Local Doctor provides specialist evaluation and treatment. It does not replace emergency care. After receiving 911 or emergency services, please let us know so that our Neurologist team can stay in the loop, understand your situation, and help however they can.',
+      ],
+    ]
+    for (const [question, answer] of cases) {
+      await expect(await answerFor(page, question), question).toHaveText(answer)
+    }
+    await expect(page.getByRole('button', { name: 'How long does the eligibility process take?' })).toHaveCount(0)
+  })
+
+  test('"Who is eligible for services?" links "schedule your visit" to the booking section', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 900 })
+    await page.goto('/faq?gclid=test_gclid_123')
+    const answer = await answerFor(page, 'Who is eligible for services?')
+    const link = answer.getByRole('link', { name: 'schedule your visit' })
+    await expect(link).toHaveCount(1)
+    await expect(link).toHaveAttribute('href', '/get-started?gclid=test_gclid_123#book')
+    await link.click()
+    await expect(page).toHaveURL(/\/get-started\?gclid=test_gclid_123#book$/)
+    await expect(page.locator('#book .calendly-inline-widget')).toBeInViewport()
+  })
+
+  test('"How soon can I be seen?" links to the booking section', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 900 })
+    await page.goto('/faq?gclid=test_gclid_123')
+    const answer = await answerFor(page, 'How soon can I be seen?')
+    await expect(answer).toHaveText(
+      'You can be seen by one of our neurology specialists within days or the same week. Click here to find a time that works best for you!',
+    )
+    const link = answer.getByRole('link', { name: 'Click here' })
+    await expect(link).toHaveAttribute('href', '/get-started?gclid=test_gclid_123#book')
+    await link.click()
+    await expect(page).toHaveURL(/\/get-started\?gclid=test_gclid_123#book$/)
+    await expect(page.locator('#book .calendly-inline-widget')).toBeInViewport()
+  })
+
+  test('"Do I need a referral" links to the booking section', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 900 })
+    await page.goto('/faq')
+    const answer = await answerFor(page, 'Do I need a referral from my current doctor?')
+    await expect(answer).toHaveText(
+      'No referral is needed. Book your virtual visit here, and we will call you within a day or so to confirm your eligibility and insurance prior to the appointment.',
+    )
+    await answer.getByRole('link', { name: 'Book your virtual visit here' }).click()
+    await expect(page).toHaveURL(/\/get-started#book$/)
+    await expect(page.locator('#book .calendly-inline-widget')).toBeInViewport()
+  })
+
+  test('the "Did not find your answer?" band lists chat, email and phone', async ({ page }) => {
+    await page.goto('/faq')
+    const band = page.locator('.question-band')
+    await expect(band.locator('h2')).toHaveText('Did not find your answer?')
+    await expect(band.locator('p')).toHaveText(
+      'Our care team can help address any other question you have via the live chat option on this website, emailing hello@trylocaldoctor.com, or texting/calling (240) 376-5730.',
+    )
+  })
+})
+
+test('the How it works FAQ spells out-of-pocket with hyphens', async ({ page }) => {
+  await page.goto('/how-it-works')
+  const item = page.locator('.mini-faq-list article').filter({ has: page.getByRole('heading', { name: 'How much will this cost?' }) })
+  await expect(item.locator('p')).toHaveText(OUT_OF_POCKET)
+  expect(await page.locator('main').innerText()).not.toContain('out of pocket')
+})
+
+test('the blog hero has the new header and copy, and each post still credits Local Infusion', async ({ page }) => {
+  await page.goto('/blog')
+  await expect(page.locator('h1')).toHaveText('Our resources can help guide you along your journey.')
+  await expect(page.locator('.page-hero p').last()).toHaveText('We look forward to helping you find the best care possible.')
+  await page.locator('.blog-card').first().click()
+  await expect(page.getByText('Originally published by')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Local Infusion', exact: true })).toBeVisible()
 })
