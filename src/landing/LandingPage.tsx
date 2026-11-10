@@ -60,13 +60,13 @@ function GetStartedLink({
   label: string
   onStart: (target: CtaTarget, ctaLocation: string, ctaLabel: string) => void
   onTrackCta: (ctaLocation: string, ctaLabel: string) => void
-  variant?: 'primary' | 'accent'
+  variant?: 'primary' | 'accent' | 'text'
   describedBy?: string
 }) {
   const external = destination.kind === 'external'
   return (
     <a
-      className={variant}
+      className={variant === 'text' ? 'text-link landing-secondary-link' : variant}
       href={destinationHref(destination)}
       data-cta-location={location}
       aria-describedby={describedBy}
@@ -80,7 +80,7 @@ function GetStartedLink({
         onStart(internalTarget(destination), location, label)
       }}
     >
-      {label} <ArrowRight size={20} aria-hidden="true" />
+      {label} <ArrowRight size={variant === 'text' ? 16 : 20} aria-hidden="true" />
     </a>
   )
 }
@@ -284,6 +284,16 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
               <p className="landing-reassurance" id={`${slug}-reassurance`}>
                 {page.reassurance}
               </p>
+              {page.secondaryLink && (
+                <GetStartedLink
+                  destination={{ kind: 'intake' }}
+                  location={page.secondaryLink.location}
+                  label={page.secondaryLink.label}
+                  onStart={onStart}
+                  onTrackCta={onTrackCta}
+                  variant="text"
+                />
+              )}
             </div>
             {page.heroSecondary && (
               <a className="text-link landing-jump" href={page.heroSecondary.href}>

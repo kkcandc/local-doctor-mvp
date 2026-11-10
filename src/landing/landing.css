@@ -59,6 +59,10 @@
   line-height: 1.45;
 }
 
+.landing-secondary-link {
+  margin: 0;
+}
+
 .landing-phone svg {
   flex: 0 0 auto;
 }

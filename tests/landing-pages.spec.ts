@@ -28,6 +28,7 @@ const heroCtaLabels: Record<LandingSlug, string> = {
   'alzheimers-second-opinion': 'See open visit times',
   'dementia-test-online': 'See open visit times',
   'memory-doctor-near-me': 'See open visit times',
+  'alzheimers-blood-test': 'Request the blood test',
 }
 const evaluationSlugs: LandingSlug[] = ['dementia-evaluation', 'alzheimers-evaluation', 'memory-evaluation']
 
@@ -99,6 +100,7 @@ test('sitemap.xml and robots.txt are served as real files', async ({ request }) 
   expect(xml.startsWith('<?xml')).toBe(true)
   expect(xml).not.toContain('<html')
   expect(xml).toContain('<loc>https://trylocaldoctor.com/memory-doctor-near-me</loc>')
+  expect(xml).toContain('<loc>https://trylocaldoctor.com/alzheimers-blood-test</loc>')
   expect(xml).toContain('<loc>https://trylocaldoctor.com/get-started</loc>')
   expect(xml.match(/<loc>/g)?.length).toBe(publicSitemapPaths.length)
 
@@ -183,6 +185,72 @@ test('dementia evaluation hero uses the approved outcome copy', () => {
   )
 })
 
+const BLOOD_TEST_BANNED = /next-day|next day|\btoday\b|fast results|turnaround|lecanemab|donanemab|leqembi|kisunla|aducanumab|\$|\bprice\b|\bcost\b/i
+
+test("alzheimers blood test page states only the confirmed facts", () => {
+  const page = landingPages['alzheimers-blood-test']
+  expect(page.h1).toBe("Get an Alzheimer's blood test, reviewed by a neurologist.")
+  expect(page.subhead).toBe(
+    'Request the pTau217 blood test before a visit. A board-certified neurologist reviews the results with you.',
+  )
+  expect(page.ctaLabel).toBe('Request the blood test')
+  expect(page.secondaryLink).toEqual({ label: 'See open visit times', location: 'visit_times' })
+  expect(page.funnel).toBe('evaluationForm')
+  expect(page.faqs.map(([question]) => question)).toEqual([
+    'What is pTau217?',
+    'Can I request the blood test without a visit?',
+    "Does a blood test diagnose Alzheimer's?",
+    'What happens after results?',
+  ])
+  const copy = `${landingMeta['alzheimers-blood-test'].title} ${landingMeta['alzheimers-blood-test'].description} ${JSON.stringify(page)}`
+  expect(copy).not.toMatch(DASHES)
+  expect(copy).not.toMatch(BLOOD_TEST_BANNED)
+  expect(copy.replaceAll('Insurance accepted', '')).not.toMatch(/insurance/i)
+  expect(copy).not.toMatch(/request form|short form|the form/i)
+})
+
+test('alzheimers blood test CTAs keep allow-listed params and avoid banned claims', async ({ page }) => {
+  const search =
+    '?gclid=test_gclid_123&gbraid=GB1&wbraid=WB1&utm_source=google&utm_medium=cpc&utm_campaign=camp&utm_term=ptau217&utm_content=ad1&email=jane@example.com&phone=2403765730'
+  await page.goto(`/alzheimers-blood-test${search}`)
+  const landing = page.locator('.landing-page[data-landing="alzheimers-blood-test"]')
+  await expect(landing.locator('h1')).toHaveText("Get an Alzheimer's blood test, reviewed by a neurologist.")
+  await expect(landing.locator('.landing-subhead')).toHaveText(landingPages['alzheimers-blood-test'].subhead)
+  await expect(page.locator('.header-cta')).toHaveText('Request the blood test')
+
+  const kept = ['gclid', 'gbraid', 'wbraid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'] as const
+  const hero = landing.locator('[data-cta-location="hero"]')
+  const secondary = landing.locator('[data-cta-location="visit_times"]')
+  await expect(hero).toHaveText('Request the blood test')
+  await expect(secondary).toHaveText('See open visit times')
+  for (const [locator, pathname] of [
+    [hero, '/evaluation'],
+    [secondary, '/get-started'],
+  ] as const) {
+    const href = new URL((await locator.getAttribute('href')) ?? '', 'https://trylocaldoctor.com')
+    expect(href.pathname).toBe(pathname)
+    for (const key of kept) expect(href.searchParams.get(key), key).toBeTruthy()
+    expect(href.searchParams.get('gclid')).toBe('test_gclid_123')
+    expect(href.searchParams.get('email')).toBeNull()
+    expect(href.searchParams.get('phone')).toBeNull()
+    expect(await locator.getAttribute('href')).not.toContain('jane')
+  }
+
+  const faq = landing.locator('.landing-faq')
+  await expect(faq.locator('article.open p')).toContainText("measures a protein linked to Alzheimer's changes in the brain")
+  await faq.getByRole('button', { name: 'Can I request the blood test without a visit?' }).click()
+  await expect(faq.locator('article.open p')).toContainText('does not require seeing the neurologist first')
+  await faq.getByRole('button', { name: "Does a blood test diagnose Alzheimer's?" }).click()
+  await expect(faq.locator('article.open p')).toContainText("A blood test alone does not diagnose Alzheimer's")
+  await faq.getByRole('button', { name: 'What happens after results?' }).click()
+  await expect(faq.locator('article.open p')).toContainText('reviewed with a board-certified neurologist')
+
+  const text = await landing.innerText()
+  expect(text).not.toMatch(DASHES)
+  expect(text).not.toMatch(BLOOD_TEST_BANNED)
+  expect(text.replaceAll('Insurance accepted', '')).not.toMatch(/insurance/i)
+})
+
 test('the static shell for a landing route carries its own head tags', () => {
   const shell = `<html><head>\n    <meta\n      name="description"\n      content="default"\n    />\n    <meta property="og:title" content="default" />\n    <meta\n      property="og:description"\n      content="default"\n    />\n    <title>Default</title>\n  </head><body></body></html>`
   const html = landingHtml(shell, 'alzheimers-second-opinion')
@@ -198,13 +266,13 @@ test('the homepage hero CTA reads Book a Neurologist today', async ({ page }) =>
   await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a Neurologist today' })).toBeVisible()
 })
 
-test('only the three evaluation pages send their CTAs to the on-site evaluation form', () => {
+test('evaluation-form pages send their primary CTAs to the on-site evaluation form', () => {
   expect(landingDestinations.evaluationForm).toEqual({ kind: 'evaluation' })
   expect(resolveDestination(landingDestinations.evaluationForm)).toEqual({ kind: 'evaluation' })
   expect(landingDestinations.evaluation).toEqual({ kind: 'intake' })
   expect(landingDestinations.onlineScreening).toEqual({ kind: 'intake' })
   const formSlugs = landingSlugs.filter((slug) => expectedDestination(slug).kind === 'evaluation')
-  expect(formSlugs).toEqual(evaluationSlugs)
+  expect(formSlugs).toEqual([...evaluationSlugs, 'alzheimers-blood-test'])
   expect(isAllowedExternalHref('https://localdoctor.typeform.com/to/abc123')).toBe(true)
   expect(isAllowedExternalHref('https://form.typeform.com/to/abc123')).toBe(true)
   expect(isAllowedExternalHref('http://form.typeform.com/to/abc123')).toBe(false)
@@ -235,7 +303,14 @@ for (const viewport of viewports) {
         const ctas = landing.locator('[data-cta-location]')
         expect(await ctas.count()).toBeGreaterThanOrEqual(2)
         const destination = expectedDestination(slug)
+        const secondary = landingPages[slug].secondaryLink
         for (const cta of await ctas.all()) {
+          const location = await cta.getAttribute('data-cta-location')
+          if (secondary && location === secondary.location) {
+            await expect(cta).toHaveText(secondary.label)
+            await expect(cta).toHaveAttribute('href', '/get-started')
+            continue
+          }
           await expect(cta).toHaveText(heroCtaLabels[slug])
           if (destination.kind === 'evaluation') await expect(cta).toHaveAttribute('href', '/evaluation')
           else await expect(cta).toHaveAttribute('href', /^\/get-started/)

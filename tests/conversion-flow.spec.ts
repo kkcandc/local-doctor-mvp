@@ -62,19 +62,25 @@ test.describe('CTA destinations keep the allow-listed params', () => {
     test(`/${slug} buttons go to /evaluation and the header matches`, async ({ page }) => {
       await stubTypeform(page)
       await page.goto(`/${slug}${query}`)
-      const expectedLabel = 'Start your evaluation'
+      const pageContent = landingPages[slug]
+      const expectedLabel = pageContent.ctaLabel
+      if (!pageContent.secondaryLink) expect(expectedLabel).toBe('Start your evaluation')
       const ctas = page.locator('.landing-page [data-cta-location]')
       expect(await ctas.count()).toBeGreaterThanOrEqual(3)
-      for (const href of await ctas.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href') ?? ''))) {
-        const url = new URL(href, 'https://trylocaldoctor.com')
-        expect(url.pathname).toBe('/evaluation')
+      const links = await ctas.evaluateAll((nodes) =>
+        nodes.map((node) => ({ href: node.getAttribute('href') ?? '', location: node.getAttribute('data-cta-location') ?? '' })),
+      )
+      for (const link of links) {
+        const url = new URL(link.href, 'https://trylocaldoctor.com')
+        const expectedPath = pageContent.secondaryLink && link.location === pageContent.secondaryLink.location ? '/get-started' : '/evaluation'
+        expect(url.pathname).toBe(expectedPath)
         expect(url.origin).toBe('https://trylocaldoctor.com')
         for (const [key, value] of [['gclid', 'TEST_GCLID'], ['gbraid', 'TEST_GB'], ['wbraid', 'TEST_WB'], ['utm_source', 'google'], ['utm_medium', 'cpc'], ['utm_campaign', 'camp'], ['utm_term', 'memory'], ['utm_content', 'ad1']]) {
           expect(url.searchParams.get(key)).toBe(value)
         }
         expect(url.searchParams.get('email')).toBeNull()
-        expect(href).not.toContain('jane')
-        expect(href).not.toContain('typeform.com')
+        expect(link.href).not.toContain('jane')
+        expect(link.href).not.toContain('typeform.com')
       }
       await expect(page.locator('[data-cta-location="hero"]')).toHaveText(expectedLabel)
       await expect(page.locator('.header-cta')).toHaveText(expectedLabel)

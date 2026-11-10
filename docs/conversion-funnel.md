@@ -33,8 +33,9 @@ compliance for Local Doctor before the funnel is expanded.
 | `closing` | Closing CTA panel |
 | `faq` | "Click here" and "Book your virtual visit here" links in FAQ answers. They open /get-started at the booking section (#book). |
 | `sticky_mobile` | Phone-only sticky bar (homepage and landing pages) |
-| `header` | Header button (desktop and the mobile menu): Start your evaluation on the evaluation pages, See open visit times elsewhere |
+| `header` | Header button (desktop and the mobile menu): the landing page's primary label on evaluation-form pages (Start your evaluation, or Request the blood test on /alzheimers-blood-test), See open visit times elsewhere |
 | `evaluation_secondary` | See open visit times link under the form on /evaluation |
+| `visit_times` | See open visit times text link on /alzheimers-blood-test. Destination is /get-started. The primary buttons on that page still go to /evaluation. |
 | `get_started_hero` | Book now jump link in the /get-started hero (desktop only) |
 
 The /get-started Book now jump link logs a `cta_click` with destination `/get-started`.
@@ -50,7 +51,7 @@ answers, the visitor's concern, or who the form is for.
 | Evaluation | /dementia-evaluation, /alzheimers-evaluation, /memory-evaluation |
 | Find a doctor | /alzheimers-doctor-maryland, /memory-specialist-maryland, /memory-doctor-near-me |
 | Second opinion | /alzheimers-second-opinion |
-| Testing | /dementia-test-online |
+| Testing | /dementia-test-online, /alzheimers-blood-test |
 | Brand and organic | / and any other path |
 
 Paths such as /dementia-evaluation describe a health topic. Whether pairing that
