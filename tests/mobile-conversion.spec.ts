@@ -421,7 +421,8 @@ test.describe('/get-started booking layout', () => {
     await page.goto('/get-started')
     const { embed, aside, faq } = await layout(page)
     expect(aside.x).toBeGreaterThanOrEqual(embed.x + embed.width - 1)
-    expect(faq.y).toBeGreaterThanOrEqual(Math.max(embed.y + embed.height, aside.y + aside.height) - 1)
+    // 80px of space between the scheduler and details above and the FAQs below.
+    expect(faq.y).toBeGreaterThanOrEqual(Math.max(embed.y + embed.height, aside.y + aside.height) + 80 - 1)
     await expect(page.locator('.expect-faq article')).toHaveCount(4)
   })
 
@@ -439,7 +440,7 @@ test.describe('/get-started booking layout', () => {
     await stubCalendly(page)
     await page.goto('/get-started')
     const aside = page.locator('.booking-aside')
-    await expect(aside.locator('h3')).toHaveText(['What to expect', 'What to have handy', 'Prefer to speak to us directly?'])
+    await expect(aside.locator('h3')).toHaveText(['What to expect', 'What to have handy', 'Prefer to speak with someone now?'])
     await expect(aside.locator('ol li')).toHaveText([
       'Book your appointment for the day and time that works best for you.',
       'We will call you to review your medical history and verify your insurance and eligibility.',
