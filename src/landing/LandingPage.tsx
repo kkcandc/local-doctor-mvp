@@ -266,6 +266,7 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
           <div>
             <p className="eyebrow">{page.eyebrow}</p>
             <h1>{page.h1}</h1>
+            <p className="landing-subhead">{page.subhead}</p>
             <p className="landing-lede">{page.lede}</p>
             {page.heroNote && <p className="landing-hero-note">{page.heroNote}</p>}
             <div className="landing-hero-actions">
@@ -277,7 +278,6 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
                 {page.reassurance}
               </p>
             </div>
-            <p className="landing-cta-context">{page.ctaContext}</p>
             {page.heroSecondary && (
               <a className="text-link landing-jump" href={page.heroSecondary.href}>
                 {page.heroSecondary.label} <ArrowRight size={16} aria-hidden="true" />

@@ -27,10 +27,10 @@ export type LandingPageContent = {
   funnel: LandingFunnel
   eyebrow: string
   h1: string
+  subhead: string
   lede: string
   ctaLabel: string
   reassurance: string
-  ctaContext: string
   heroNote?: string
   heroSecondary?: { label: string; href: `#${string}` }
   facts: { title: string; items: string[] }
@@ -55,9 +55,9 @@ export const relatedLabels: Record<LandingSlug, { title: string; copy: string }>
   },
 }
 
-// No visit-speed claim. Visits are not offered next-day or "in days".
+// No visit-speed claim.
 const heroReassurance =
-  'Board-certified neurologist. Insurance accepted. No referral needed. Phone answered on weekdays.'
+  'Board-certified neurologist. Insurance accepted. No referral needed.'
 
 // Trust points on every intent hero. No visit-speed claim.
 const trustFacts = [
@@ -87,10 +87,10 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     funnel: 'evaluationForm',
     ctaLabel: 'Start Evaluation',
     reassurance: heroReassurance,
-    eyebrow: 'Dementia evaluation by telehealth',
-    h1: 'A dementia evaluation with a specialist, by video, from home.',
-    lede: 'Changes in memory, thinking, or daily function call for a clinician who looks at the whole picture. A neurology specialist sees people in Maryland by video, reviews concerns and history, and recommends what testing, if any, comes next.',
-    ctaContext: 'Start Evaluation opens our short evaluation form. Sending it does not book a visit. Our team calls first to review your medical history and insurance.',
+    eyebrow: 'Dementia evaluation',
+    h1: 'Stop wondering. Talk to a dementia specialist.',
+    subhead: "A board-certified neurologist reviews your loved one's symptoms and history by video and tells you, in plain language, what comes next.",
+    lede: "If it's memory loss, you'll know. If it's something treatable, you'll know that too. Either way you leave with a plan: what testing to do, what treatment options exist, and how to move forward. Insurance accepted, no referral needed.",
     heroSecondary: { label: 'How the evaluation works', href: '#how-it-works' },
     facts: {
       title: 'How this evaluation works',
@@ -156,10 +156,10 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     funnel: 'evaluationForm',
     ctaLabel: 'Start Evaluation',
     reassurance: heroReassurance,
-    eyebrow: "Alzheimer's evaluation online",
-    h1: "An Alzheimer's evaluation that starts with a virtual specialist visit.",
-    lede: "Worried that memory changes could be early Alzheimer's disease? A neurology specialist can review what you are noticing, your history, and any past results by video, then explain which tests would help answer the question. Visits are for people located in Maryland.",
-    ctaContext: "Start Evaluation opens our short evaluation form. It is a request for a specialist review, not an Alzheimer's test, and sending it does not book a visit.",
+    eyebrow: "Alzheimer's evaluation",
+    h1: "Stop guessing. Start an Alzheimer's evaluation.",
+    subhead: 'A board-certified neurologist reviews the symptoms and history by video and explains, in plain language, what may be going on and what comes next.',
+    lede: 'You leave with a plan: which tests may help, what treatment options may exist, and how to move forward. Insurance accepted, no referral needed.',
     heroSecondary: { label: 'How the evaluation works', href: '#how-it-works' },
     facts: {
       title: 'What to expect',
@@ -229,10 +229,10 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     funnel: 'evaluationForm',
     ctaLabel: 'Start Evaluation',
     reassurance: heroReassurance,
-    eyebrow: 'Memory evaluation from home',
-    h1: 'A memory evaluation from home, for you or someone you love.',
-    lede: 'Concerned about memory changes in yourself or a family member? Start with a virtual evaluation by a neurology specialist. You stay home for the visit, a loved one can join, and any testing is arranged at local sites only if it is needed.',
-    ctaContext: 'Start Evaluation opens a short form you can fill out for yourself or for a loved one. It is not a memory test, and sending it does not book a visit.',
+    eyebrow: 'Memory evaluation',
+    h1: 'Memory changes? Get a memory evaluation.',
+    subhead: 'A board-certified neurologist meets you or your loved one by video, reviews what has changed, and explains in plain language what comes next.',
+    lede: 'You leave with a plan: what testing may help, what else can affect memory, and how to move forward. Insurance accepted, no referral needed.',
     heroSecondary: { label: 'How the evaluation works', href: '#how-it-works' },
     facts: {
       title: 'Built for families',
@@ -326,10 +326,10 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     funnel: 'evaluation',
     ctaLabel: "See an Alzheimer's Doctor",
     reassurance: heroReassurance,
-    eyebrow: 'Serving Maryland by telehealth',
-    h1: "See an Alzheimer's doctor in Maryland, by video.",
-    lede: "Local Doctor connects people in Maryland with a neurology clinician for virtual visits about memory, dementia, and Alzheimer's concerns. There is no office to drive to. You meet by video, and labs or imaging, if they are ordered, happen at local sites near you.",
-    ctaContext: 'This opens a short request form. A team member calls to confirm eligibility and insurance before a visit is scheduled.',
+    eyebrow: 'Serving Maryland by video',
+    h1: "Talk to an Alzheimer's doctor in Maryland.",
+    subhead: 'A board-certified neurologist meets you by video from home, reviews what you are seeing, and explains in plain language what comes next.',
+    lede: 'You leave with a plan: what testing may help, what treatment options may exist, and how to move forward. Insurance accepted, no referral needed.',
     heroSecondary: { label: 'How virtual visits work', href: '#how-virtual-visits-work' },
     facts: {
       title: 'Serving Maryland, virtually',
@@ -407,10 +407,10 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     funnel: 'evaluation',
     ctaLabel: 'Talk to a Memory Specialist',
     reassurance: heroReassurance,
-    eyebrow: 'Memory specialist in Maryland',
-    h1: 'A memory specialist near you in Maryland, without the drive.',
-    lede: 'Searching for a memory specialist near you? Local Doctor offers virtual appointments with a neurology specialist for memory and dementia concerns, wherever you are in Maryland. The visit comes to you by video. Only testing, if it is ordered, happens in person at labs and imaging centers near you.',
-    ctaContext: 'This opens a short request form so our team can call you. You can also call us directly.',
+    eyebrow: 'For families in Maryland',
+    h1: 'Talk to a memory specialist in Maryland.',
+    subhead: 'A board-certified neurologist meets you by video from home, reviews memory changes, and explains in plain language what comes next.',
+    lede: 'You leave with a plan: what testing to do near you, what options may fit, and how to move forward. Insurance accepted, no referral needed.',
     facts: {
       title: 'Near you, honestly',
       items: [...trustFacts],
@@ -486,11 +486,11 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     funnel: 'evaluation',
     ctaLabel: 'Request a Second Opinion',
     reassurance: heroReassurance,
-    eyebrow: 'Second opinion',
-    h1: "A second opinion on an Alzheimer's or dementia diagnosis.",
-    lede: 'Already have a diagnosis, or a workup that left you with more questions than answers? A neurology specialist can review your records and history by video, explain what the findings show, and recommend next steps. Visits are for people located in Maryland.',
+    eyebrow: "Alzheimer's second opinion",
+    h1: 'Get a clear second look.',
+    subhead: "An Alzheimer's second opinion, by video: a board-certified neurologist reviews the diagnosis and the plan and explains, in plain language, what comes next.",
+    lede: 'You leave with a plan: what the current diagnosis may mean, what testing may still help, and how to move forward. A second look does not promise a different diagnosis. Insurance accepted, no referral needed.',
     heroNote: 'Bring prior notes and results. A neurology specialist reviews them by video.',
-    ctaContext: 'This opens a short request form. On the eligibility call, the team will ask which records you have.',
     heroSecondary: { label: 'See the records checklist', href: '#records' },
     facts: {
       title: 'A focused review',
@@ -561,10 +561,10 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     funnel: 'onlineScreening',
     ctaLabel: 'Talk to a Memory Doctor',
     reassurance: heroReassurance,
-    eyebrow: 'Online dementia tests',
-    h1: 'Online dementia tests: what they can tell you, and what comes next.',
-    lede: 'Local Doctor does not offer an online dementia test or screening quiz, and no website can diagnose dementia. This page explains how screening, evaluation, and diagnosis differ, and how to request a virtual evaluation with a clinician if you are in Maryland.',
-    ctaContext: 'This opens our intake form to request a clinician evaluation. It is not a test, it does not score memory, and it does not give a result.',
+    eyebrow: 'Not an online quiz',
+    h1: 'Skip the online dementia test.',
+    subhead: 'This is a video visit with a board-certified neurologist, not a quiz. They review symptoms and history and explain, in plain language, what comes next.',
+    lede: 'You leave with a plan: what testing may help, what else could explain the changes, and how to move forward. No quiz, no score, and no diagnosis on this page. Insurance accepted, no referral needed.',
     heroSecondary: { label: 'Screening vs. evaluation vs. diagnosis', href: '#three-steps' },
     facts: {
       title: 'There is no quiz on this page',
@@ -650,10 +650,10 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     funnel: 'evaluation',
     ctaLabel: 'See a Memory Doctor',
     reassurance: heroReassurance,
-    eyebrow: 'Near you, without the drive',
-    h1: 'A memory doctor near you, by video from home.',
-    lede: 'Searching for a memory doctor, dementia doctor, Alzheimer\'s doctor, or neurologist for memory near you? A clinician licensed in Maryland can see you by video from home, so the visit does not require a drive.',
-    ctaContext: 'This opens a short request form. A team member calls to confirm eligibility and insurance before a visit is scheduled. It is not a memory test.',
+    eyebrow: 'Memory doctor near you',
+    h1: 'See a memory doctor from home.',
+    subhead: 'Need a memory doctor near me in Maryland? The visit comes to you by video. A board-certified neurologist reviews symptoms and history and explains what comes next.',
+    lede: 'You leave with a plan: what testing to do at sites near you, what options may fit, and how to move forward. Insurance accepted, no referral needed.',
     heroSecondary: { label: 'What near you means here', href: '#what-near-you-means' },
     facts: {
       title: 'Near you, from home',

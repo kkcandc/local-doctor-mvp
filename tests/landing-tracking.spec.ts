@@ -160,8 +160,7 @@ for (const route of trackedRoutes) {
     } else {
       const landing = page.locator(`.landing-page[data-landing="${route}"]`)
       await expect(landing).toBeVisible()
-      await expect(landing.locator('.landing-reassurance')).toContainText('Board-certified neurologist. Insurance accepted. No referral needed.')
-      await expect(landing.locator('.landing-reassurance')).toContainText('Phone answered on weekdays.')
+      await expect(landing.locator('.landing-reassurance')).toHaveText('Board-certified neurologist. Insurance accepted. No referral needed.')
       await expect(landing.locator('.landing-reassurance')).toContainText('No referral needed')
 
       const hero = landing.locator('[data-cta-location="hero"]')
