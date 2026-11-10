@@ -29,6 +29,9 @@ function loadWidgetScript() {
   Height follows calendly.page_height from https://calendly.com. Loading messages of a few pixels
   are ignored (see calendlyEmbedHeightPx) so the calendar is not collapsed. The listener does not
   scroll the page, and it does not read invitee or booking details.
+
+  data-auto-load is false so widget.js does not scan this div itself. That scan rewrites the
+  element's style attribute and can put the fixed 700px height back after a resize message.
 */
 export function CalendlyEmbed() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -76,6 +79,7 @@ export function CalendlyEmbed() {
       ref={containerRef}
       className="calendly-inline-widget ph-no-capture"
       data-url={url}
+      data-auto-load="false"
       style={{ minWidth: 320, width: '100%', height }}
     />
   )

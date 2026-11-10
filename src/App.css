@@ -1237,6 +1237,12 @@ a.blog-card:hover {
   border: 0;
 }
 
+/* widget.js leaves its loading dots (z-index -1) in the widget. The embed background is
+   transparent, so those dots show through the calendar after the cookie banner is hidden. */
+.calendly-inline-widget .calendly-spinner {
+  display: none;
+}
+
 .expect-heading {
   margin-bottom: var(--space-48);
   text-align: center;

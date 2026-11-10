@@ -270,6 +270,12 @@ async function stubCalendly(page: Page) {
         frame.style.width = '100%';
         frame.style.height = '100%';
         frame.dataset.url = options.url;
+        var spinner = document.createElement('div');
+        spinner.className = 'calendly-spinner';
+        spinner.style.position = 'absolute';
+        spinner.style.zIndex = '-1';
+        spinner.textContent = 'loading';
+        options.parentElement.appendChild(spinner);
         options.parentElement.appendChild(frame);
       } };`,
     }),
@@ -314,6 +320,10 @@ test('mobile embed keeps click ids, shows calendar content, and ignores a collap
 
   const iframe = widget.locator('iframe')
   await expect(iframe).toHaveCount(1)
+  await expect(widget).toHaveAttribute('data-auto-load', 'false')
+  const spinner = widget.locator('.calendly-spinner')
+  await expect(spinner).toHaveCount(1)
+  await expect(spinner).toBeHidden()
   const contentHeight = await iframe.evaluate((node) => {
     const calendar = (node as HTMLIFrameElement).contentDocument?.getElementById('calendar')
     return calendar?.getBoundingClientRect().height ?? 0
