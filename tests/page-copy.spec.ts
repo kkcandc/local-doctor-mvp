@@ -211,6 +211,9 @@ test.describe('how it works page', () => {
 const OUT_OF_POCKET =
   'Provider visits with our neurology specialists will be at low to no out-of-pocket cost to you, depending on your insurance coverage. In case you need new labs and imaging exams to confirm a diagnosis or for treatment prescription, their cost will depend on the sites you use and your insurance coverage.'
 
+const SERVICES_ANSWER =
+  "Local Doctor is a virtual Alzheimer's clinic focused on accelerating access to life-changing therapies. Our initial focus is evaluation, diagnosis, treatment eligibility, treatment initiation, and required oversight of disease-modifying therapies. Whether you already have a neurologist or you're searching for one, Local Doctor is designed to help you find treatment faster. We complement your existing doctors and will work with them as needed."
+
 test.describe('FAQ page', () => {
   // Each FAQ opens as an accordion, one at a time. Check the question, then its answer.
   async function answerFor(page: import('@playwright/test').Page, question: string) {
@@ -219,6 +222,23 @@ test.describe('FAQ page', () => {
     if ((await button.getAttribute('aria-expanded')) !== 'true') await button.click()
     return page.locator('.faq-accordion article.open p')
   }
+
+  test('the services question is first under Getting Started and open by default', async ({ page }) => {
+    await page.goto('/faq')
+    const items = page.locator('#getting-started .faq-accordion article')
+    await expect(items.first().locator('button span')).toHaveText('What services does Local Doctor provide?')
+    await expect(items.first()).toHaveClass(/open/)
+    await expect(items.first().locator('p')).toHaveText(SERVICES_ANSWER)
+    await expect(items.nth(1).locator('button span')).toHaveText('Who is eligible for services?')
+    // The same question is not repeated in another category.
+    await expect(page.getByRole('button', { name: 'What services does Local Doctor provide?' })).toHaveCount(1)
+  })
+
+  test('the How it works FAQ shows the same services answer', async ({ page }) => {
+    await page.goto('/how-it-works')
+    const item = page.locator('.mini-faq-list article').filter({ has: page.getByRole('heading', { name: 'What services does Local Doctor provide?' }) })
+    await expect(item.locator('p')).toHaveText(SERVICES_ANSWER)
+  })
 
   test('questions and answers have the new copy', async ({ page }) => {
     await page.goto('/faq')

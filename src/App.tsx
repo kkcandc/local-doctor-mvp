@@ -243,10 +243,12 @@ const costFaqAnswer = 'Provider visits with our neurology specialists will be at
 const imagingFaqQuestion = 'Is ongoing imaging needed while on treatment? What does that entail?'
 const imagingFaqAnswer = 'Yes, while receiving Leqembi or Kisunla treatment, you will need to have ongoing brain MRIs to monitor the presence of ARIA (amyloid related imaging abnormalities). This helps ensure treatment stays safe and that side effects are monitored appropriately.'
 
+// Shown on both the How it works FAQ and the FAQ page (first under Getting Started).
+const servicesFaqQuestion = 'What services does Local Doctor provide?'
+const servicesFaqAnswer = 'Local Doctor is a virtual Alzheimer\'s clinic focused on accelerating access to life-changing therapies. Our initial focus is evaluation, diagnosis, treatment eligibility, treatment initiation, and required oversight of disease-modifying therapies. Whether you already have a neurologist or you\'re searching for one, Local Doctor is designed to help you find treatment faster. We complement your existing doctors and will work with them as needed.'
+
 const howFaqItems: Array<[string, string[]]> = [
-  ['What services does Local Doctor provide?', [
-    'Local Doctor is a virtual Alzheimer\'s clinic focused on accelerating access to life-changing therapies. Our initial focus is evaluation, diagnosis, treatment eligibility, treatment initiation, and required oversight of disease-modifying therapies. Whether you already have a neurologist or you\'re searching for one, Local Doctor is designed to help you find treatment faster. We complement your existing doctors and will work with them as needed.',
-  ]],
+  [servicesFaqQuestion, [servicesFaqAnswer]],
   ['How much will this cost?', [costFaqAnswer]],
   ['Will I be seeing an MD or NP?', [
     'Our team of neurology specialists is each board-certified and works interchangeably. Appointment matching is subject to your location, availability, and other factors.',
@@ -269,6 +271,7 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
     id: 'getting-started',
     title: 'Getting Started',
     items: [
+      [servicesFaqQuestion, servicesFaqAnswer],
       ['Who is eligible for services?', [[
         'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. We will confirm via a quick phone call after you ',
         { linkText: 'schedule your visit', hash: 'book' },
