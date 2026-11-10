@@ -10,8 +10,7 @@ import { publicSitemapPaths, siteSitemapXml } from '../src/siteMap'
 const HOME_H1 = /Treatment that slows down Alzheimer/
 const CLINIC_TEL = 'tel:+12403765730'
 const CLINIC_PHONE = '(240) 376-5730'
-const HERO_REASSURANCE =
-  'Board-certified neurologist. Insurance accepted. No referral needed. Phone answered on weekdays.'
+const HERO_REASSURANCE = 'Board-certified neurologist. Insurance accepted. No referral needed.'
 const TRUST_FACTS = [
   'Maryland video visits',
   'Board-certified neurologist',
@@ -165,10 +164,22 @@ for (const width of [1280, 1440]) {
 }
 
 test('alzheimers doctor and second opinion hero copy', () => {
-  expect(landingPages['alzheimers-doctor-maryland'].h1).toBe("See an Alzheimer's doctor in Maryland, by video.")
+  expect(landingPages['alzheimers-doctor-maryland'].h1).toBe("Talk to an Alzheimer's doctor in Maryland.")
   expect(landingMeta['alzheimers-doctor-maryland'].title).toBe("See an Alzheimer's Doctor in Maryland | Local Doctor")
+  expect(landingPages['alzheimers-second-opinion'].h1).toBe('Get a clear second look.')
   expect(landingPages['alzheimers-second-opinion'].heroNote).toBe(
     'Bring prior notes and results. A neurology specialist reviews them by video.',
+  )
+})
+
+test('dementia evaluation hero uses the approved outcome copy', () => {
+  const page = landingPages['dementia-evaluation']
+  expect(page.h1).toBe('Stop wondering. Talk to a dementia specialist.')
+  expect(page.subhead).toBe(
+    "A board-certified neurologist reviews your loved one's symptoms and history by video and tells you, in plain language, what comes next.",
+  )
+  expect(page.lede).toBe(
+    "If it's memory loss, you'll know. If it's something treatable, you'll know that too. Either way you leave with a plan: what testing to do, what treatment options exist, and how to move forward. Insurance accepted, no referral needed.",
   )
 })
 
@@ -233,6 +244,9 @@ for (const viewport of viewports) {
         const hero = landing.locator('[data-cta-location="hero"]')
         await expect(hero).toHaveAttribute('aria-describedby', `${slug}-reassurance`)
         await expect(landing.locator(`#${slug}-reassurance`)).toHaveText(HERO_REASSURANCE)
+        await expect(landing.locator('.landing-cta-context')).toHaveCount(0)
+        await expect(landing.locator('.landing-subhead')).toHaveText(landingPages[slug].subhead)
+        await expect(landing.locator('.landing-lede')).toHaveText(landingPages[slug].lede)
         const buttonRow = landing.locator('.landing-hero-buttons')
         await expect(buttonRow.locator('[data-cta-location="hero"]')).toBeVisible()
         await expect(buttonRow.locator('.landing-phone')).toHaveCount(1)
@@ -338,8 +352,9 @@ test.describe('the online dementia test page', () => {
   test('says plainly that no online screening is offered and does not pose as a test', async ({ page }) => {
     await page.goto('/dementia-test-online')
     const landing = page.locator('.landing-page')
-    await expect(landing.getByText('Local Doctor does not offer an online dementia test or screening quiz', { exact: false })).toBeVisible()
-    await expect(landing.getByText('It is not a test, it does not score memory, and it does not give a result.')).toBeVisible()
+    await expect(landing.locator('h1')).toHaveText('Skip the online dementia test.')
+    await expect(landing.locator('.landing-subhead')).toContainText('video visit with a board-certified neurologist, not a quiz')
+    await expect(landing.locator('.landing-facts')).toContainText('Local Doctor does not currently offer an online screening tool')
     await expect(landing.locator('#three-steps')).toContainText('Screening')
     await expect(landing.locator('#three-steps')).toContainText('Evaluation')
     await expect(landing.locator('#three-steps')).toContainText('Diagnosis')

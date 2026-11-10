@@ -234,11 +234,11 @@ test('evaluation pages describe the evaluation form, not the Get Started intake'
     const page = landingPages[slug]
     expect(page.funnel).toBe('evaluationForm')
     expect(page.ctaLabel).toBe('Start Evaluation')
-    expect(page.ctaContext).toMatch(/^Start Evaluation opens/)
-    expect(page.ctaContext).toContain('does not book a visit')
+    expect(page).not.toHaveProperty('ctaContext')
     expect(page.heroSecondary).toEqual({ label: 'How the evaluation works', href: '#how-it-works' })
     expect(page.sections.some((section) => section.kind === 'steps' && section.id === 'how-it-works')).toBe(true)
     const copy = JSON.stringify(page)
+    expect(copy).not.toMatch(/opens our short evaluation form|does not book a visit|Sending it does not/)
     expect(copy).not.toMatch(/Get Started form|behind Get Started|our intake form/)
   }
 })

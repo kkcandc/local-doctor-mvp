@@ -104,8 +104,8 @@ removed from /get-started.
    carry speed claims on purpose. The site no longer names the Wednesday clinic
    day anywhere. The Playwright guard against
    them was removed. The landing pages (hero reassurance, facts, and the
-   Alzheimer's doctor meta description) and the FAQ still avoid them. Phone copy
-   says the phone is answered on weekdays. Keep the Calendly availability in
+   Alzheimer's doctor meta description) and the FAQ still avoid them. The landing
+   reassurance line does not say when the phone is answered. Keep the Calendly availability in
    line with what the copy promises.
 3. Evaluation form completion signal. If a "Form completed" count is wanted for
    the evaluation pages, Eric would need to set up a completion signal in
