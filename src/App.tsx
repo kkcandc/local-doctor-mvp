@@ -269,7 +269,11 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
     id: 'getting-started',
     title: 'Getting Started',
     items: [
-      ['Who is eligible for services?', 'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. We will confirm via a quick phone call after you schedule your visit, before your appointment.'],
+      ['Who is eligible for services?', [[
+        'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. We will confirm via a quick phone call after you ',
+        { linkText: 'schedule your visit', hash: 'book' },
+        ', before your appointment.',
+      ]]],
       ['How soon can I be seen?', [[
         'You can be seen by one of our neurology specialists within days or the same week. ',
         { linkText: 'Click here', hash: 'book' },
