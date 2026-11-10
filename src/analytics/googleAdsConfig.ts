@@ -101,6 +101,21 @@ export function pathWithAdsParams(pathname: string, search = ''): string {
   return query ? `${path}?${query}` : path
 }
 
+// Append the allow-listed ad params to an external URL (the evaluation Typeform).
+// Typeform reads query params whose names match hidden fields. Existing params on
+// the destination are left as they are. Contact and health params are already dropped
+// by keptAdsSearchParams.
+export function hrefWithAdsParams(href: string, search = ''): string {
+  const query = keptAdsSearchParams(search)
+  if (!query) return href
+  const url = new URL(href)
+  const kept = new URLSearchParams(query)
+  for (const [key, value] of kept) {
+    if (!url.searchParams.has(key)) url.searchParams.append(key, value)
+  }
+  return url.toString()
+}
+
 export function adsPageLocation(href: string): string {
   const url = new URL(href, 'https://trylocaldoctor.com')
   const query = keptAdsSearchParams(url.search)

@@ -3,6 +3,7 @@ import {
   DEFAULT_GOOGLE_ADS_ID,
   DEFAULT_GOOGLE_ADS_LEAD_LABEL,
   DEFAULT_GOOGLE_ADS_PHONE_LABEL,
+  hrefWithAdsParams,
   pathWithAdsParams,
   typeformTransitiveSearchParams,
 } from '../src/analytics/googleAdsConfig'
@@ -124,7 +125,16 @@ for (const route of trackedRoutes) {
     expect(gaLocation).toContain('gclid=test_gclid_123')
 
     if (route === 'get-started') {
-      await expect(page.locator('.calendly-inline-widget')).toHaveAttribute('data-url', /^https:\/\/calendly\.com\/local-doctor\//)
+      const widget = page.locator('.calendly-inline-widget')
+      await expect(widget).toHaveAttribute('data-url', /^https:\/\/calendly\.com\/local-doctor\//)
+      const embed = new URL((await widget.getAttribute('data-url')) ?? '')
+      expect(embed.searchParams.get('hide_gdpr_banner')).toBe('1')
+      expect(embed.searchParams.get('gclid')).toBe('test_gclid_123')
+      expect(embed.searchParams.get('salesforce_uuid')).toBe('gclid:test_gclid_123')
+      expect(embed.searchParams.get('utm_source')).toBe('google')
+      expect(embed.searchParams.get('utm_medium')).toBe('cpc')
+      expect(embed.searchParams.get('utm_content')).not.toBe('test_gclid_123')
+      expect(embed.search).not.toContain('jane')
 
       // Calendly posts this from its iframe after a booking. Only the event name is read.
       await page.evaluate(() => {
@@ -161,7 +171,7 @@ for (const route of trackedRoutes) {
       if (destination.kind === 'external') {
         // The button leaves the site for an external form, which would discard this page's dataLayer.
         // Block the navigation (the click handler still runs) so the recorded events can be checked.
-        await expect(hero).toHaveAttribute('href', destination.href)
+        await expect(hero).toHaveAttribute('href', hrefWithAdsParams(destination.href, clickQuery))
         await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), true))
         await hero.click()
         await waitForGtagEvent(page, 'cta_click')

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
-import { DEFAULT_GOOGLE_ADS_ID } from '../src/analytics/googleAdsConfig'
+import { hrefWithAdsParams, DEFAULT_GOOGLE_ADS_ID } from '../src/analytics/googleAdsConfig'
+import { CALENDLY_DEFAULT_HEIGHT_PX, calendlyEmbedUrl } from '../src/calendlyUrl'
 import { DEFAULT_GA_MEASUREMENT_ID } from '../src/analytics/googleAnalyticsConfig'
 import { landingDestinations, resolveBookingUrl, resolveDestination } from '../src/landing/destinations'
 import { landingPages } from '../src/landing/landingContent'
@@ -17,7 +18,7 @@ type StickyCase = { path: string; label: string; href: string; stops: string[] }
 
 function landingHref(slug: LandingSlug) {
   const destination = resolveDestination(landingDestinations[landingPages[slug].funnel])
-  return destination.kind === 'external' ? destination.href : `/get-started${clickQuery}`
+  return destination.kind === 'external' ? hrefWithAdsParams(destination.href, clickQuery) : `/get-started${clickQuery}`
 }
 
 const stickyCases: StickyCase[] = [
@@ -252,10 +253,11 @@ test('the booking slot only accepts an allowed https URL and is off by default',
   expect(resolveBookingUrl('https://localdoctor.typeform.com/book')).toBe('https://localdoctor.typeform.com/book')
 })
 
-const CALENDLY_URL = 'https://calendly.com/local-doctor/virtualvisit?hide_event_type_details=1&primary_color=2970d6'
+const CALENDLY_URL = calendlyEmbedUrl('')
 
 // Stands in for Calendly's widget.js so tests never reach the network. Like the real script, it
 // provides Calendly.initInlineWidget. It adds one iframe per call, so a double embed is visible.
+// The srcdoc calendar has a real height so a phone-width test can measure rendered content.
 async function stubCalendly(page: Page) {
   await page.route('https://assets.calendly.com/assets/external/widget.js', (route) =>
     route.fulfill({
@@ -263,7 +265,10 @@ async function stubCalendly(page: Page) {
       contentType: 'application/javascript',
       body: `window.Calendly = { initInlineWidget: function (options) {
         var frame = document.createElement('iframe');
-        frame.src = 'about:blank';
+        frame.srcdoc = '<!doctype html><title>Select a Date & Time - Calendly</title><body style="margin:0"><div id="calendar" style="height:560px">November</div></body>';
+        frame.title = 'Select a Date & Time - Calendly';
+        frame.style.width = '100%';
+        frame.style.height = '100%';
         frame.dataset.url = options.url;
         options.parentElement.appendChild(frame);
       } };`,
@@ -279,7 +284,7 @@ test('/get-started embeds the Calendly scheduler and drops the Typeform and Elig
   const widget = page.locator('#book .calendly-inline-widget')
   await expect(widget).toHaveAttribute('data-url', CALENDLY_URL)
   await expect(widget.locator('iframe')).toHaveCount(1)
-  expect(await widget.evaluate((node) => (node as HTMLElement).style.height)).toBe('700px')
+  expect(await widget.evaluate((node) => (node as HTMLElement).style.height)).toBe(`${CALENDLY_DEFAULT_HEIGHT_PX}px`)
   await expect(page.locator('.typeform-live-embed')).toHaveCount(0)
   await expect(page.locator('script[src*="embed.typeform.com"]')).toHaveCount(0)
   await expect(page.getByText('Eligibility', { exact: true })).toHaveCount(0)
@@ -287,6 +292,94 @@ test('/get-started embeds the Calendly scheduler and drops the Typeform and Elig
   const text = await page.locator('main').innerText()
   expect(text).not.toContain('Neurologist')
   expect(text).not.toMatch(/appointment (is )?confirmed|booking confirmed|you are booked/i)
+})
+
+test('mobile embed keeps click ids, shows calendar content, and ignores a collapsed page height', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await stubCalendly(page)
+  const search = '?gclid=TEST123&gbraid=GB1&utm_source=google&utm_medium=cpc&utm_campaign=test&email=jane@example.com&phone=2403765730'
+  await page.goto(`/get-started${search}`)
+  const widget = page.locator('#book .calendly-inline-widget')
+  const embed = new URL((await widget.getAttribute('data-url')) ?? '')
+  expect(embed.searchParams.get('hide_gdpr_banner')).toBe('1')
+  expect(embed.searchParams.get('gclid')).toBe('TEST123')
+  expect(embed.searchParams.get('gbraid')).toBe('GB1')
+  expect(embed.searchParams.get('salesforce_uuid')).toBe('gclid:TEST123|gbraid:GB1')
+  expect(embed.searchParams.get('utm_source')).toBe('google')
+  expect(embed.searchParams.get('utm_medium')).toBe('cpc')
+  expect(embed.searchParams.get('utm_campaign')).toBe('test')
+  expect(embed.searchParams.get('utm_content')).not.toBe('TEST123')
+  expect(embed.search).not.toContain('jane')
+  expect(embed.search).not.toContain('2403765730')
+
+  const iframe = widget.locator('iframe')
+  await expect(iframe).toHaveCount(1)
+  const contentHeight = await iframe.evaluate((node) => {
+    const calendar = (node as HTMLIFrameElement).contentDocument?.getElementById('calendar')
+    return calendar?.getBoundingClientRect().height ?? 0
+  })
+  expect(contentHeight).toBeGreaterThan(0)
+  const box = await widget.boundingBox()
+  expect(box).not.toBeNull()
+  expect(box!.height).toBeGreaterThan(0)
+  expect(box!.width).toBeGreaterThan(0)
+  expect(box!.width).toBeLessThanOrEqual(390)
+
+  await page.evaluate(() => {
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: 'https://calendly.com',
+      data: { event: 'calendly.page_height', payload: { height: '2px' } },
+    }))
+  })
+  expect(await widget.evaluate((node) => (node as HTMLElement).style.height)).toBe(`${CALENDLY_DEFAULT_HEIGHT_PX}px`)
+
+  await page.evaluate(() => {
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: 'https://evil.example',
+      data: { event: 'calendly.page_height', payload: { height: '900px' } },
+    }))
+  })
+  expect(await widget.evaluate((node) => (node as HTMLElement).style.height)).toBe(`${CALENDLY_DEFAULT_HEIGHT_PX}px`)
+
+  await page.evaluate(() => {
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: 'https://calendly.com',
+      data: { event: 'calendly.page_height', payload: { height: '602px' } },
+    }))
+  })
+  await expect.poll(async () => widget.evaluate((node) => (node as HTMLElement).style.height)).toBe('602px')
+  const sized = await widget.boundingBox()
+  expect(sized!.height).toBeGreaterThan(400)
+  const stillThere = await iframe.evaluate((node) => {
+    const calendar = (node as HTMLIFrameElement).contentDocument?.getElementById('calendar')
+    return calendar?.getBoundingClientRect().height ?? 0
+  })
+  expect(stillThere).toBeGreaterThan(0)
+})
+
+test('evaluation landing CTAs append allow-listed params and drop contact details', async ({ page }) => {
+  const search = '?gclid=TEST123&gbraid=GB1&wbraid=WB1&utm_source=google&utm_medium=cpc&utm_campaign=test&utm_id=id9&email=jane@example.com&phone=2403765730'
+  for (const slug of ['dementia-evaluation', 'alzheimers-evaluation', 'memory-evaluation']) {
+    await page.goto(`/${slug}${search}`)
+    const hrefs = await page.locator('[data-cta-location]').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href') ?? ''))
+    expect(hrefs.length).toBeGreaterThanOrEqual(2)
+    for (const href of hrefs) {
+      const url = new URL(href)
+      expect(`${url.origin}${url.pathname}`).toBe('https://localdoctor.typeform.com/evaluation')
+      expect(url.searchParams.get('gclid')).toBe('TEST123')
+      expect(url.searchParams.get('gbraid')).toBe('GB1')
+      expect(url.searchParams.get('wbraid')).toBe('WB1')
+      expect(url.searchParams.get('utm_source')).toBe('google')
+      expect(url.searchParams.get('utm_medium')).toBe('cpc')
+      expect(url.searchParams.get('utm_campaign')).toBe('test')
+      expect(url.searchParams.get('utm_id')).toBe('id9')
+      expect(url.searchParams.get('email')).toBeNull()
+      expect(href).not.toContain('jane')
+      expect(href).not.toContain('2403765730')
+    }
+    const label = landingPages[slug].ctaLabel
+    await expect(page.locator('[data-cta-location="hero"]')).toHaveText(label)
+  }
 })
 
 test('leaving /get-started and coming back never adds a second Calendly iframe', async ({ page }) => {

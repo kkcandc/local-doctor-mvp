@@ -63,8 +63,8 @@ below.
 | Google Ads lead conversion | /get-started, on a Calendly booking | Event name and conversion label only. No invitee or appointment details. | Conversion on a clinical booking page. Needs review. |
 | Google Ads phone conversion | Any page, on clinic number click | Event name, conversion label, page path | Needs review. |
 | PostHog | Every page | Pageviews, `eligibility_check_started`, errors, and session replay outside /get-started. Events on /get-started are dropped before sending and replay pauses there. | Replay on health-topic landing pages needs review. |
-| Calendly embed | /get-started | The visitor's name, contact details and chosen time go to Calendly. Calendly's script and iframe load from calendly.com and assets.calendly.com. No Google click ids or utm_* params are passed in. | Calendly account settings (BAA, data retention, notification and integration settings) need review. No CSP blocks these hosts today. |
-| Evaluation Typeform | External, linked from the three evaluation pages | Form answers go to Typeform | Same as above. The site cannot see or measure its submit. |
+| Calendly embed | /get-started | The visitor's name, contact details and chosen time go to Calendly. Calendly's script and iframe load from calendly.com and assets.calendly.com. The embed URL passes utm_* through. gclid, gbraid, and wbraid are stored in salesforce_uuid (gclid:<value>, joined with \| if more than one is present) because Calendly records that field and does not record gclid. No form answers are added to the URL. | Calendly account settings (BAA, data retention, notification and integration settings) need review. No CSP blocks these hosts today. |
+| Evaluation Typeform | External, linked from the three evaluation pages | Form answers go to Typeform. The link appends the allow-listed ad params as query fields (Typeform hidden fields). | Same as above. The site cannot see or measure its submit. |
 | Chatbot (Jotform agent from forms.mylocalinfusion.com) | Every page, including /get-started | Whatever a visitor types into the chat | Runs on the intake page. Needs review. |
 
 Changes deliberately not made in this pass, pending that review:
