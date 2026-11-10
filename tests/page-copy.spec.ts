@@ -237,6 +237,10 @@ test.describe('FAQ page', () => {
         "We accept many insurances including Medicare, Medicaid, Aetna, CareFirst, Cigna, Kaiser, and United. If you don't see your insurance on this list, we may still accept it and will confirm when we speak with you.",
       ],
       [
+        'How does the first visit with the provider work and how long will it be?',
+        'You will receive a visit confirmation email and reminders to your contact method of choice, including on the day of the visit, that will have the link to join the video call for the first visit. This visit should last about 1 hour. Please ensure you are in a setting with strong access to Wi-Fi or data service with a device that has video and audio capabilities. It would be valuable and preferable for you to join with a care partner or family member who is involved in your care and day-to-day life so they can help answer any questions during the evaluation by the provider. If you have any other questions about this visit just let us know when you speak to us before the appointment!',
+      ],
+      [
         'Is everything virtual or is there any in-person component?',
         'The clinical virtual visits happen via a video platform. MRIs, PET Scans, bloodwork, and the infusions themselves happen at in-person facilities of your choice.',
       ],
