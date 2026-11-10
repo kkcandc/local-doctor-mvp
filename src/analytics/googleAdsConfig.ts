@@ -8,12 +8,12 @@
   Set VITE_GOOGLE_ADS_ID=off to leave the tag out of a build.
 
   The HTML snippet can also config a GA4 measurement id in the same gtag.js
-  load. Lead and phone conversions stay here; see googleAnalyticsConfig.ts.
+  load. Conversion events and their labels live in tracking.ts.
 
   Conversion labels are the short id after the slash in Google's event snippet
-  (AW-18413556843/LABEL). Production builds default to the Local Doctor labels
-  below. Event payloads are page path and event name only: no names, emails,
-  phone numbers, dates of birth, diagnoses, form answers, or Typeform response ids.
+  (AW-18413556843/LABEL). Event payloads carry an event name and allow-listed
+  page and button fields only: no names, emails, phone numbers, dates of birth,
+  diagnoses, form answers, or Typeform response ids.
 
   Account 908-258-0886. The Ads conversion action id 7887201046 is not stored
   in this repo; the code fires send_to with the label Google provides.
@@ -26,7 +26,6 @@ export const DEFAULT_GOOGLE_ADS_PHONE_LABEL = 'gJr-CJnG9LAdEOuoosxE'
 const ADS_ID = /^AW-\d{6,20}$/
 const CONVERSION_LABEL = /^[A-Za-z0-9_-]{1,64}$/
 const PAGE_PATH = /^\/[A-Za-z0-9/_-]{0,160}$/
-const CTA_LOCATION = /^[a-z_]{1,32}$/
 const CTA_LABEL = /^[A-Za-z0-9][A-Za-z0-9 '.-]{0,80}$/
 
 // Clinic numbers only. Legal-page 1-800 lines are not lead conversions.
@@ -54,7 +53,7 @@ export const ADS_CLICK_PARAMS = [
   'utm_id',
 ] as const
 
-export type GtagArgs = [command: string, nameOrId: string, params?: Record<string, string>]
+export type GtagArgs = [command: string, nameOrId: string, params?: Record<string, string | number>]
 
 export function resolveGoogleAdsId(envValue: string | undefined, enableByDefault: boolean): string | null {
   const trimmed = envValue?.trim()
@@ -71,9 +70,14 @@ export function resolveGoogleAdsPhoneLabel(envValue: string | undefined, enableB
   return resolveConversionLabel(envValue, enableByDefault, DEFAULT_GOOGLE_ADS_PHONE_LABEL)
 }
 
+// A label that was never replaced with Google's real one is a no-op, so it never reaches Ads.
+export function isPlaceholderLabel(label: string | undefined): boolean {
+  return /^PLACEHOLDER/i.test(label?.trim() ?? '')
+}
+
 export function conversionSendTo(adsId: string, label: string | undefined): string | null {
   const trimmed = label?.trim()
-  if (!trimmed || !CONVERSION_LABEL.test(trimmed)) return null
+  if (!trimmed || isPlaceholderLabel(trimmed) || !CONVERSION_LABEL.test(trimmed)) return null
   return `${adsId}/${trimmed}`
 }
 
@@ -124,33 +128,33 @@ export function adsPageLocation(href: string): string {
 
 export const typeformTransitiveSearchParams = ADS_CLICK_PARAMS.join(',')
 
+// Hidden fields passed to the embedded evaluation Typeform. The form must define fields with
+// these exact names for Typeform to store them; it ignores any it does not define.
+export const TYPEFORM_HIDDEN_FIELDS = [
+  'gclid',
+  'gbraid',
+  'wbraid',
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_term',
+  'utm_content',
+] as const
+
+export function typeformHiddenFields(search = ''): Record<string, string> {
+  const kept = new URLSearchParams(keptAdsSearchParams(search))
+  const hidden: Record<string, string> = {}
+  for (const key of TYPEFORM_HIDDEN_FIELDS) {
+    const value = kept.get(key)
+    if (value) hidden[key] = value
+  }
+  return hidden
+}
+
 export function isTrackedClinicPhone(href: string): boolean {
   const digits = href.replace(/^tel:/i, '').replace(/\D/g, '')
   const normalized = digits.length === 10 ? `1${digits}` : digits
   return TRACKED_PHONE_DIGITS.has(normalized)
-}
-
-export function isTypeformSubmitMessage(origin: string, data: unknown): boolean {
-  if (!isTypeformOrigin(origin)) return false
-  if (data === 'form-submit') return true
-  if (!data || typeof data !== 'object') return false
-  return (data as { type?: unknown }).type === 'form-submit'
-}
-
-// Calendly posts { event: 'calendly.event_scheduled', payload } from its iframe after a booking.
-// Only the event name is read. The payload (invitee and event details) is ignored on purpose.
-export function isCalendlyScheduledMessage(origin: string, data: unknown): boolean {
-  if (origin !== 'https://calendly.com') return false
-  if (!data || typeof data !== 'object') return false
-  return (data as { event?: unknown }).event === 'calendly.event_scheduled'
-}
-
-export function leadTrackingCalls(adsId: string, leadLabel: string | undefined, pathname: string): GtagArgs[] {
-  return eventCalls('generate_lead', adsId, leadLabel, pathname)
-}
-
-export function phoneTrackingCalls(adsId: string, phoneLabel: string | undefined, pathname: string): GtagArgs[] {
-  return eventCalls('phone_click', adsId, phoneLabel, pathname)
 }
 
 // Button text we chose. Anything with an email or other free text is dropped.
@@ -158,31 +162,6 @@ export function safeCtaLabel(input: string): string | null {
   const label = input.trim().replace(/\s+/g, ' ')
   if (!label || label.includes('@') || !CTA_LABEL.test(label)) return null
   return label
-}
-
-/*
-  CTA click for GA4 and Ads.
-
-  gtag.js is loaded with the Ads id. An event with no send_to is delivered only
-  to that tag (google.com/ccm/collect), so GA4 never sees cta_click. Each call
-  below names one destination. The Ads call uses the bare AW id, not AW/label,
-  so it is not a conversion. Lead and phone conversions stay separate events.
-*/
-export function ctaTrackingCalls(
-  pathname: string,
-  ctaLocation?: string,
-  options?: { gaId?: string | null; adsId?: string | null; ctaLabel?: string },
-): GtagArgs[] {
-  const params: Record<string, string> = { page_path: safePagePath(pathname) }
-  if (ctaLocation && CTA_LOCATION.test(ctaLocation)) params.cta_location = ctaLocation
-  const label = options?.ctaLabel ? safeCtaLabel(options.ctaLabel) : null
-  if (label) params.cta_label = label
-
-  const calls: GtagArgs[] = []
-  if (options?.gaId) calls.push(['event', 'cta_click', { ...params, send_to: options.gaId }])
-  if (options?.adsId) calls.push(['event', 'cta_click', { ...params, send_to: options.adsId }])
-  if (calls.length === 0) calls.push(['event', 'cta_click', params])
-  return calls
 }
 
 export function spaPageViewCall(
@@ -245,13 +224,6 @@ export function googleAdsTagHtml(id: string): string {
   return googleTagHtml(id, null) ?? ''
 }
 
-function eventCalls(eventName: string, adsId: string, label: string | undefined, pathname: string): GtagArgs[] {
-  const calls: GtagArgs[] = [['event', eventName, { page_path: safePagePath(pathname) }]]
-  const sendTo = conversionSendTo(adsId, label)
-  if (sendTo) calls.push(['event', 'conversion', { send_to: sendTo }])
-  return calls
-}
-
 function resolveConversionLabel(
   envValue: string | undefined,
   enableByDefault: boolean,
@@ -261,13 +233,4 @@ function resolveConversionLabel(
   if (trimmed === 'off' || trimmed === 'false' || trimmed === '0') return null
   if (trimmed) return CONVERSION_LABEL.test(trimmed) ? trimmed : null
   return enableByDefault ? fallback : null
-}
-
-function isTypeformOrigin(origin: string): boolean {
-  try {
-    const url = new URL(origin)
-    return url.protocol === 'https:' && (url.hostname === 'typeform.com' || url.hostname.endsWith('.typeform.com'))
-  } catch {
-    return false
-  }
 }

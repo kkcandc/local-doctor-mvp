@@ -1,8 +1,8 @@
 import { expect, test, type Page } from '@playwright/test'
-import { hrefWithAdsParams, DEFAULT_GOOGLE_ADS_ID } from '../src/analytics/googleAdsConfig'
+import { DEFAULT_GOOGLE_ADS_ID } from '../src/analytics/googleAdsConfig'
 import { CALENDLY_DEFAULT_HEIGHT_PX, calendlyEmbedUrl } from '../src/calendlyUrl'
 import { DEFAULT_GA_MEASUREMENT_ID } from '../src/analytics/googleAnalyticsConfig'
-import { landingDestinations, resolveBookingUrl, resolveDestination } from '../src/landing/destinations'
+import { resolveBookingUrl } from '../src/landing/destinations'
 import { landingPages } from '../src/landing/landingContent'
 import { landingSlugs, type LandingSlug } from '../src/landing/landingMeta'
 
@@ -10,6 +10,7 @@ const mobile = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch
 const desktop = { viewport: { width: 1366, height: 900 } }
 const clickQuery = '?gclid=test_gclid_123&utm_source=google'
 const DASHES = /[\u2013\u2014]/
+const CTA_CLICK_SEND_TO = `${DEFAULT_GOOGLE_ADS_ID}/A54CCNK03bUdEOuoosxE`
 const NEXT_DAY = /next[\s-]?day|tomorrow|same[\s-]?day/i
 // The chatbot launcher sits in the bottom right corner; the bar keeps this much room for it.
 const CHATBOT_GUTTER = 64
@@ -17,8 +18,7 @@ const CHATBOT_GUTTER = 64
 type StickyCase = { path: string; label: string; href: string; stops: string[] }
 
 function landingHref(slug: LandingSlug) {
-  const destination = resolveDestination(landingDestinations[landingPages[slug].funnel])
-  return destination.kind === 'external' ? hrefWithAdsParams(destination.href, clickQuery) : `/get-started${clickQuery}`
+  return landingPages[slug].funnel === 'evaluationForm' ? `/evaluation${clickQuery}` : `/get-started${clickQuery}`
 }
 
 const stickyCases: StickyCase[] = [
@@ -30,12 +30,6 @@ const stickyCases: StickyCase[] = [
     stops: ['.landing-mid-cta', '.landing-section-cta', '.landing-column-cta', '.landing-closing', '.footer'],
   })),
 ]
-
-async function stubTypeform(page: Page) {
-  await page.route('https://localdoctor.typeform.com/**', (route) =>
-    route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>Typeform stub</title>' }),
-  )
-}
 
 async function ctaEvents(page: Page) {
   return page.evaluate(() => {
@@ -64,7 +58,6 @@ test.describe('mobile sticky Get Started', () => {
 
   for (const item of stickyCases) {
     test(`${item.path} shows the sticky CTA, with the page label and destination, only away from other CTAs and the form`, async ({ page }) => {
-      await stubTypeform(page)
       await page.goto(`${item.path}${clickQuery}`)
       await expect(page.locator('h1')).toBeVisible()
       const sticky = page.locator('[data-sticky-cta] a')
@@ -97,7 +90,7 @@ test.describe('mobile sticky Get Started', () => {
 
   }
 
-  test('homepage sticky goes to /get-started with gclid and sends one cta_click to GA4 and Ads', async ({ page }) => {
+  test('homepage sticky goes to /get-started with gclid and sends one GA4 cta_click and one Ads conversion', async ({ page }) => {
     await page.goto(`/${clickQuery}`)
     await page.evaluate(() => window.scrollTo({ top: 1200, behavior: 'instant' }))
     const sticky = page.locator('[data-sticky-cta] a')
@@ -107,34 +100,32 @@ test.describe('mobile sticky Get Started', () => {
     await expect(page).toHaveURL(/\/get-started\?gclid=test_gclid_123&utm_source=google$/)
     const events = (await ctaEvents(page)).slice(before)
     const clicks = events.filter((event) => event.name === 'cta_click')
-    expect(clicks.map((event) => event.params.send_to).sort()).toEqual([DEFAULT_GOOGLE_ADS_ID, DEFAULT_GA_MEASUREMENT_ID].sort())
-    for (const click of clicks) {
-      expect(click.params).toMatchObject({ page_path: '/', cta_location: 'sticky_mobile', cta_label: 'Get Started' })
-    }
-    expect(events.some((event) => event.name === 'conversion')).toBe(false)
+    expect(clicks.map((event) => event.params.send_to)).toEqual([DEFAULT_GA_MEASUREMENT_ID])
+    expect(clicks[0].params).toMatchObject({ page_path: '/', cta_location: 'sticky_mobile', cta_label: 'Get Started', cta_destination: '/get-started' })
+    expect(events.filter((event) => event.name === 'conversion').map((event) => event.params.send_to)).toEqual([CTA_CLICK_SEND_TO])
   })
 
   for (const slug of ['alzheimers-doctor-maryland', 'dementia-evaluation'] as const) {
-    test(`/${slug} sticky click dispatches exactly one GA4 and one Ads cta_click`, async ({ page }) => {
-      await stubTypeform(page)
+    test(`/${slug} sticky click dispatches exactly one GA4 cta_click and one Ads conversion`, async ({ page }) => {
       await page.goto(`/${slug}${clickQuery}`)
       await page.evaluate(() => window.scrollTo({ top: 1100, behavior: 'instant' }))
       const sticky = page.locator('[data-sticky-cta] a')
       await expect(sticky).toBeVisible()
-      // Hold the page so the dataLayer can be read after an external link click.
-      await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), { capture: true, once: true }))
       const before = (await ctaEvents(page)).length
       await sticky.click()
       await page.waitForTimeout(200)
       const events = (await ctaEvents(page)).slice(before)
       const clicks = events.filter((event) => event.name === 'cta_click')
-      expect(clicks).toHaveLength(2)
-      expect(clicks.map((event) => event.params.send_to).sort()).toEqual([DEFAULT_GOOGLE_ADS_ID, DEFAULT_GA_MEASUREMENT_ID].sort())
-      for (const click of clicks) {
-        expect(click.params).toMatchObject({ page_path: `/${slug}`, cta_location: 'sticky_mobile', cta_label: landingPages[slug].ctaLabel })
-        expect(Object.keys(click.params).sort()).toEqual(['cta_label', 'cta_location', 'page_path', 'send_to'])
-      }
-      expect(events.some((event) => event.name === 'conversion')).toBe(false)
+      expect(clicks).toHaveLength(1)
+      expect(clicks[0].params.send_to).toBe(DEFAULT_GA_MEASUREMENT_ID)
+      expect(clicks[0].params).toMatchObject({
+        page_path: `/${slug}`,
+        cta_location: 'sticky_mobile',
+        cta_label: landingPages[slug].ctaLabel,
+        cta_destination: slug === 'dementia-evaluation' ? '/evaluation' : '/get-started',
+      })
+      expect(Object.keys(clicks[0].params).sort()).toEqual(['cta_destination', 'cta_label', 'cta_location', 'page_path', 'send_to'])
+      expect(events.filter((event) => event.name === 'conversion').map((event) => event.params.send_to)).toEqual([CTA_CLICK_SEND_TO])
     })
   }
 
@@ -150,7 +141,19 @@ test.describe('mobile sticky Get Started', () => {
     }
   })
 
-  test('/get-started hero Book now link scrolls to the scheduler without sending events', async ({ page }) => {
+  test('/get-started on a phone puts the scheduler near the top and hides the jump link', async ({ page }) => {
+    await page.goto(`/get-started${clickQuery}`)
+    await expect(page.locator('h1')).toBeVisible()
+    await expect(page.locator('.page-hero-secondary a')).toBeHidden()
+    const book = await page.locator('#book').boundingBox()
+    expect(book!.y, 'scheduler section starts in the first screen').toBeLessThan(500)
+    await expect(page.locator('.booking-trust')).toBeVisible()
+    const photo = await page.locator('.start-photo-below').first().boundingBox()
+    expect(photo!.y, 'photo sits below the scheduler').toBeGreaterThan(book!.y + book!.height - 1)
+  })
+
+  test('/get-started hero Book now link scrolls to the scheduler and logs one CTA click', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 900 })
     await page.goto(`/get-started${clickQuery}`)
     const heroJump = page.locator('.page-hero-secondary a')
     await expect(heroJump).toHaveText('Book now')
@@ -172,7 +175,7 @@ test.describe('mobile sticky Get Started', () => {
     const booking = await page.locator('#book').boundingBox()
     expect(booking!.y).toBeGreaterThanOrEqual(header!.y + header!.height - 1)
     const events = (await ctaEvents(page)).slice(before)
-    expect(events.filter((event) => event.name !== 'page_view')).toEqual([])
+    expect(events.filter((event) => event.name !== 'page_view' && event.name !== 'conversion').map((event) => event.name)).toEqual(['cta_click'])
   })
 })
 
@@ -181,7 +184,6 @@ test.describe('desktop', () => {
 
   for (const item of stickyCases) {
     test(`${item.path} never shows the sticky CTA on desktop`, async ({ page }) => {
-      await stubTypeform(page)
       await page.goto(item.path)
       for (const top of [1200, 2400]) {
         await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), top)
@@ -199,8 +201,7 @@ for (const [name, use] of [['desktop', desktop], ['mobile', mobile]] as const) {
 
     for (const slug of landingSlugs) {
       test(`/${slug} steps CTAs use the page label and destination`, async ({ page }) => {
-        await stubTypeform(page)
-        await page.goto(`/${slug}${clickQuery}`)
+          await page.goto(`/${slug}${clickQuery}`)
         const stepsCtas = page.locator('.landing-section-cta [data-cta-location="steps"]')
         const count = await stepsCtas.count()
         expect(count).toBe(landingPages[slug].sections.filter((section) => section.kind === 'steps').length)
@@ -218,8 +219,7 @@ for (const [name, use] of [['desktop', desktop], ['mobile', mobile]] as const) {
 
     for (const path of ['/', '/get-started', ...landingSlugs.map((slug) => `/${slug}`)]) {
       test(`${path} has no next-day or same-day text and no long dashes`, async ({ page }) => {
-        await stubTypeform(page)
-        await page.goto(path)
+          await page.goto(path)
         await expect(page.locator('h1')).toBeVisible()
         const text = await page.locator('main').innerText()
         expect(text).not.toMatch(NEXT_DAY)
@@ -233,7 +233,7 @@ test('evaluation pages describe the evaluation form, not the Get Started intake'
   for (const slug of ['dementia-evaluation', 'alzheimers-evaluation', 'memory-evaluation'] as const) {
     const page = landingPages[slug]
     expect(page.funnel).toBe('evaluationForm')
-    expect(page.ctaLabel).toBe('Start Evaluation')
+    expect(page.ctaLabel).toBe('Start your evaluation')
     expect(page).not.toHaveProperty('ctaContext')
     expect(page.heroSecondary).toEqual({ label: 'How the evaluation works', href: '#how-it-works' })
     expect(page.sections.some((section) => section.kind === 'steps' && section.id === 'how-it-works')).toBe(true)
@@ -374,8 +374,8 @@ test('evaluation landing CTAs append allow-listed params and drop contact detail
     const hrefs = await page.locator('[data-cta-location]').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href') ?? ''))
     expect(hrefs.length).toBeGreaterThanOrEqual(2)
     for (const href of hrefs) {
-      const url = new URL(href)
-      expect(`${url.origin}${url.pathname}`).toBe('https://localdoctor.typeform.com/evaluation')
+      const url = new URL(href, 'https://trylocaldoctor.com')
+      expect(url.pathname).toBe('/evaluation')
       expect(url.searchParams.get('gclid')).toBe('TEST123')
       expect(url.searchParams.get('gbraid')).toBe('GB1')
       expect(url.searchParams.get('wbraid')).toBe('WB1')

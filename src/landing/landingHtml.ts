@@ -1,4 +1,5 @@
 import { landingCanonical, landingMeta, type LandingSlug } from './landingMeta.ts'
+import type { PageShellMeta } from '../pageMeta.ts'
 
 function escapeAttr(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -24,4 +25,15 @@ export function landingHtml(indexHtml: string, slug: LandingSlug): string {
   html = setMetaContent(html, 'property', 'og:description', description)
   const tags = `    <link rel="canonical" href="${escapeAttr(url)}" />\n    <meta property="og:url" content="${escapeAttr(url)}" />\n`
   return html.replace(/\s*<\/head>/i, `\n${tags}  </head>`)
+}
+
+// Shell for a conversion page (/get-started, /evaluation). Same bundle, own title and description,
+// and a robots noindex tag when the page should stay out of search results.
+export function pageShellHtml(indexHtml: string, meta: PageShellMeta): string {
+  let html = indexHtml.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeText(meta.title)}</title>`)
+  html = setMetaContent(html, 'name', 'description', meta.description)
+  html = setMetaContent(html, 'property', 'og:title', meta.title)
+  html = setMetaContent(html, 'property', 'og:description', meta.description)
+  if (!meta.noindex) return html
+  return html.replace(/\s*<\/head>/i, '\n    <meta name="robots" content="noindex, follow" />\n  </head>')
 }

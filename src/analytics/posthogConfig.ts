@@ -3,16 +3,16 @@ import type { CaptureResult } from 'posthog-js'
 /*
   PostHog privacy rules for trylocaldoctor.com.
 
-  /get-started embeds the Typeform intake, the only page where visitors enter
-  health details. PostHog sends nothing from that page: no pageviews,
-  autocapture, exceptions, logs, or session replay.
+  /get-started (the Calendly scheduler) and /evaluation (the embedded Typeform) are the
+  pages where visitors enter personal and health details. PostHog sends nothing from
+  them: no pageviews, autocapture, exceptions, logs, or session replay.
 
   Events are dropped in before_send when their URL is an intake path. Values
   that remember an intake URL (session entry, previous pageview, initial
   landing) are removed from later events so a visit to the page does not leak.
 */
 
-const INTAKE_PATH = '/get-started'
+const INTAKE_PATHS = ['/get-started', '/evaluation']
 const URL_BASE = 'https://trylocaldoctor.com'
 
 // Properties that can carry an earlier intake URL onto a later event.
@@ -37,7 +37,7 @@ export function isIntakePath(pathOrUrl: unknown): boolean {
     return true
   }
   const normalized = pathname.toLowerCase().replace(/\/+$/, '')
-  return normalized === INTAKE_PATH || normalized.startsWith(`${INTAKE_PATH}/`)
+  return INTAKE_PATHS.some((path) => normalized === path || normalized.startsWith(`${path}/`))
 }
 
 function withoutIntakeUrls(bag: Record<string, unknown> | undefined) {

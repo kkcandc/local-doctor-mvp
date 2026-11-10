@@ -9,6 +9,9 @@ function captured(overrides: Partial<CaptureResult> & { properties: CaptureResul
 
 test('the intake path matches /get-started in any spelling and nothing else', () => {
   expect(isIntakePath('/get-started')).toBe(true)
+  expect(isIntakePath('/evaluation')).toBe(true)
+  expect(isIntakePath('https://trylocaldoctor.com/evaluation?gclid=abc')).toBe(true)
+  expect(isIntakePath('/evaluation-guide')).toBe(false)
   expect(isIntakePath('/get-started/')).toBe(true)
   expect(isIntakePath('/Get-Started?email=jane@example.com#intake')).toBe(true)
   expect(isIntakePath('/get-started/step-2')).toBe(true)

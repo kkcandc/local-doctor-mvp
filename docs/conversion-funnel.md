@@ -15,11 +15,11 @@ compliance for Local Doctor before the funnel is expanded.
 | --- | --- | --- | --- |
 | See Ad | Google Ads | Impressions | Reported by Ads. The website sends nothing for this stage. |
 | Landing page | GA4 (G-PR7CJ8TK79) | `page_view` | Sent on first load and on every in-app navigation. `page_location` keeps only the Google click ids (gclid, gbraid, wbraid, dclid, gclsrc, gad_*) and utm_* query params. |
-| Click CTA (form) | GA4 and Google Ads | `cta_click` | Params: `page_path`, `cta_location`, `cta_label`. One copy to GA4 and one to the Ads tag per click. Never a conversion. |
-| Click CTA (call) | Google Ads only | `phone_click` plus the phone conversion (label gJr-CJnG9LAdEOuoosxE) | Fires on clicks of the clinic number. Not delivered to GA4 today (see audit). |
-| Conversion through booking | Google Ads only | `generate_lead` plus the lead conversion (label KA47CJbG9LAdEOuoosxE) | Fires once per Calendly booking on /get-started, when Calendly posts `calendly.event_scheduled` (4 second dedupe). Only the event name is read. Not delivered to GA4 today (see audit). |
-| Form completed | Not available for the evaluation form | None | The three evaluation pages send visitors to the external form at localdoctor.typeform.com/evaluation. The site cannot see that submit. See dependencies. |
-| Booking completed | Google Ads only | The same `generate_lead` conversion as above | The Calendly booking is the only completion signal the site can see. Whether the visit was attended is not measured. |
+| Click CTA (booking or evaluation) | GA4 and Google Ads | `cta_click`, Ads label A54CCNK03bUdEOuoosxE | Params: `page_path`, `cta_location`, `cta_label` (real button text), `cta_destination` (`/evaluation` or `/get-started`). GA4 every click, Ads once per page session. |
+| Click CTA (call) | GA4 and Google Ads | `phone_tap` and `phone_click`, Ads label gJr-CJnG9LAdEOuoosxE | Fires on clicks of the clinic number. |
+| Micro steps | GA4 and Google Ads | `calendly_viewed` (GA4 only), `calendly_time_selected` (CqZ_CKDm17UdEOuoosxE), `evaluation_started` (r0XvCNW03bUdEOuoosxE), `engaged_visit` (DTk2CPG13bUdEOuoosxE) | Calendly and Typeform embed callbacks, plus 45 seconds and 50 percent scroll. Event names only. |
+| Form completed | GA4 and Google Ads | `evaluation_submitted`, Ads label vOMaCO613bUdEOuoosxE, 100 USD | Typeform `onSubmit` on the on-site /evaluation page. No answers, response id or contact details are read. |
+| Booking completed | GA4 and Google Ads | `visit_booked` and `generate_lead`, Ads label KA47CJbG9LAdEOuoosxE, 300 USD | Calendly `calendly.event_scheduled` only, once per page session. The Typeform submit never fires this label. Whether the visit was attended is not measured. |
 | Attended visit | Not measured | None | Needs secure, server-side data. See dependencies. |
 
 ### cta_location values
@@ -32,10 +32,11 @@ compliance for Local Doctor before the funnel is expanded.
 | `patient_path`, `caregiver_path` | The two column CTAs on /memory-evaluation |
 | `closing` | Closing CTA panel |
 | `sticky_mobile` | Phone-only sticky bar (homepage and landing pages) |
-| `header` | Get Started button in the site header (desktop and the mobile menu) |
+| `header` | Header button (desktop and the mobile menu): Start your evaluation on the evaluation pages, See open visit times elsewhere |
+| `evaluation_secondary` | See open visit times link under the form on /evaluation |
+| `get_started_hero` | Book now jump link in the /get-started hero (desktop only) |
 
-The /get-started page sends no `cta_click` events. Its "Fill out the form" links
-only scroll to the form on the same page.
+The /get-started Book now jump link logs a `cta_click` with destination `/get-started`.
 
 ### Segments
 
@@ -64,18 +65,12 @@ below.
 | Google Ads phone conversion | Any page, on clinic number click | Event name, conversion label, page path | Needs review. |
 | PostHog | Every page | Pageviews, `eligibility_check_started`, errors, and session replay outside /get-started. Events on /get-started are dropped before sending and replay pauses there. | Replay on health-topic landing pages needs review. |
 | Calendly embed | /get-started | The visitor's name, contact details and chosen time go to Calendly. Calendly's script and iframe load from calendly.com and assets.calendly.com. The embed URL passes utm_* through. gclid, gbraid, and wbraid are stored in salesforce_uuid (gclid:<value>, joined with \| if more than one is present) because Calendly records that field and does not record gclid. No form answers are added to the URL. | Calendly account settings (BAA, data retention, notification and integration settings) need review. No CSP blocks these hosts today. |
-| Evaluation Typeform | External, linked from the three evaluation pages | Form answers go to Typeform. The link appends the allow-listed ad params as query fields (Typeform hidden fields). | Same as above. The site cannot see or measure its submit. |
-| Chatbot (Jotform agent from forms.mylocalinfusion.com) | Every page, including /get-started | Whatever a visitor types into the chat | Runs on the intake page. Needs review. |
+| Evaluation Typeform | Embedded on /evaluation (`@typeform/embed-react`, form KwfqI59c) | Form answers go to Typeform. The allow-listed ad params are passed as hidden fields. The site only receives the started and submitted callbacks and never reads answers. | Same as above. |
+| Chatbot (Jotform agent from forms.mylocalinfusion.com) | Every page except /get-started and /evaluation (delayed on phones) | Whatever a visitor types into the chat | Hidden on both intake pages. Needs review elsewhere. |
 
-Changes deliberately not made in this pass, pending that review:
-
-- `generate_lead` and `phone_click` are sent without `send_to`, so they reach
-  Google Ads only and never GA4. Delivering them to GA4 is a small code change,
-  but it adds intake-page data to a second Google product, so it waits for review.
-- Calendly also posts `calendly.event_type_viewed`, `calendly.date_and_time_selected`
-  and `calendly.profile_page_viewed`. They are not wired to any tracker, for the
-  same reason. Only `calendly.event_scheduled` is used.
-- No remarketing, audience, or new ad tags were added anywhere.
+Still not done, pending that review: no enhanced conversions or user-provided
+data, no consent mode, no remarketing, audience or new ad tags. In the Google tag
+settings, automatic detection of user-provided data should stay off.
 
 ## Booking flow: intended versus current
 
@@ -107,10 +102,10 @@ removed from /get-started.
    Alzheimer's doctor meta description) and the FAQ still avoid them. The landing
    reassurance line does not say when the phone is answered. Keep the Calendly availability in
    line with what the copy promises.
-3. Evaluation form completion signal. If a "Form completed" count is wanted for
-   the evaluation pages, Eric would need to set up a completion signal in
-   Typeform (for example a thank-you redirect to a trylocaldoctor.com page that
-   carries no form answers). That needs review before it is built.
+3. Typeform setup (Eric). Add hidden fields gclid, gbraid, wbraid, utm_source,
+   utm_medium, utm_campaign, utm_term and utm_content to the evaluation form so
+   the values passed by /evaluation are stored. Change the ending screen's "Book
+   a visit now!" redirect from PatientPop to https://trylocaldoctor.com/get-started.
 4. Booked and attended visits. These live in the scheduling and clinical
    systems, not the website. Counting them needs a secure server-side export or
    offline conversion import, with no patient identifiers or appointment details

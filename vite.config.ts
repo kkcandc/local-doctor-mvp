@@ -4,7 +4,8 @@ import { googleTagHtml, resolveGoogleAdsId } from './src/analytics/googleAdsConf
 import { resolveGaMeasurementId } from './src/analytics/googleAnalyticsConfig.ts'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { landingHtml } from './src/landing/landingHtml.ts'
+import { landingHtml, pageShellHtml } from './src/landing/landingHtml.ts'
+import { pageShells } from './src/pageMeta.ts'
 import { landingSlugs } from './src/landing/landingMeta.ts'
 import { siteSitemapXml } from './src/siteMap.ts'
 
@@ -29,8 +30,8 @@ function googleTagsHtmlPlugin(adsEnv: string | undefined, gaEnv: string | undefi
   }
 }
 
-// Writes dist/<slug>/index.html for each intent landing page so its title, description,
-// and canonical are in the HTML response. Vercel serves these before the SPA rewrite.
+// Writes dist/<slug>/index.html for each intent landing page, /get-started and /evaluation so
+// the title, description, and canonical (or noindex) are in the HTML response. Vercel serves these before the SPA rewrite.
 function landingPagesHtmlPlugin(): Plugin {
   let outDir = 'dist'
   return {
@@ -45,6 +46,11 @@ function landingPagesHtmlPlugin(): Plugin {
         const dir = path.join(outDir, slug)
         await mkdir(dir, { recursive: true })
         await writeFile(path.join(dir, 'index.html'), landingHtml(indexHtml, slug))
+      }
+      for (const [slug, meta] of Object.entries(pageShells)) {
+        const dir = path.join(outDir, slug)
+        await mkdir(dir, { recursive: true })
+        await writeFile(path.join(dir, 'index.html'), pageShellHtml(indexHtml, meta))
       }
       await writeFile(path.join(outDir, 'sitemap.xml'), siteSitemapXml())
     },

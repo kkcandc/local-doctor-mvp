@@ -1,33 +1,34 @@
 /*
-  Where each landing page's Get Started button goes.
+  Where each landing page's primary button goes.
 
-  Most funnels use the existing /get-started intake (the Typeform embed).
-  evaluationForm is the exception: /dementia-evaluation, /alzheimers-evaluation
-  and /memory-evaluation send their buttons straight to the evaluation Typeform.
+  Most funnels use the /get-started scheduler (the Calendly embed). evaluationForm is the
+  exception: /dementia-evaluation, /alzheimers-evaluation and /memory-evaluation send their
+  buttons to /evaluation, which embeds the evaluation Typeform on this site so its start and
+  submit can be measured (src/EvaluationPage.tsx).
   To point another funnel at an external form, change its entry below to
-  { kind: 'external', href: 'https://...' }. To move a single page, give it its
-  own funnel key rather than flipping a shared one.
+  { kind: 'external', href: 'https://...' }. To move a single page, give it its own
+  funnel key rather than flipping a shared one.
 
   Constraints:
-  - An external form does not fire the Google Ads lead conversion; that is wired
-    to the /get-started embed only (src/analytics/googleAds.ts).
+  - An external form cannot be measured. Prefer the on-site /evaluation page.
   - /dementia-test-online states that no online screening tool is offered. Revise
     that copy in landingContent.ts before pointing onlineScreening at a screener.
-  - Only https URLs on an allowed host are accepted; anything else falls back to
-    the intake so a typo can never produce a dead or off-site button.
+  - Only https URLs on an allowed host are accepted for external forms; anything else
+    falls back to the scheduler so a typo can never produce a dead or off-site button.
 */
 
 export type LandingFunnel = 'evaluation' | 'evaluationForm' | 'onlineScreening'
 
-export type CtaDestination = { kind: 'intake' } | { kind: 'external'; href: string }
+export type CtaDestination = { kind: 'intake' } | { kind: 'evaluation' } | { kind: 'external'; href: string }
 
 export const landingDestinations: Record<LandingFunnel, CtaDestination> = {
   evaluation: { kind: 'intake' },
-  evaluationForm: { kind: 'external', href: 'https://localdoctor.typeform.com/evaluation' },
+  evaluationForm: { kind: 'evaluation' },
   onlineScreening: { kind: 'intake' },
 }
 
 export const intakePath = '/get-started'
+export const evaluationPath = '/evaluation'
 
 const allowedExternalHosts = ['trylocaldoctor.com', 'form.typeform.com', 'typeform.com']
 
