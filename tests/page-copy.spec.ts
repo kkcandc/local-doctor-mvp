@@ -259,6 +259,18 @@ test.describe('FAQ page', () => {
     await expect(page.getByRole('button', { name: 'How long does the eligibility process take?' })).toHaveCount(0)
   })
 
+  test('"Who is eligible for services?" links "schedule your visit" to the booking section', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 900 })
+    await page.goto('/faq?gclid=test_gclid_123')
+    const answer = await answerFor(page, 'Who is eligible for services?')
+    const link = answer.getByRole('link', { name: 'schedule your visit' })
+    await expect(link).toHaveCount(1)
+    await expect(link).toHaveAttribute('href', '/get-started?gclid=test_gclid_123#book')
+    await link.click()
+    await expect(page).toHaveURL(/\/get-started\?gclid=test_gclid_123#book$/)
+    await expect(page.locator('#book .calendly-inline-widget')).toBeInViewport()
+  })
+
   test('"How soon can I be seen?" links to the booking section', async ({ page }) => {
     await page.setViewportSize({ width: 1366, height: 900 })
     await page.goto('/faq?gclid=test_gclid_123')
