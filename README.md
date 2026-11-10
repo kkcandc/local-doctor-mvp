@@ -114,7 +114,7 @@ Tests: `tests/google-analytics.spec.ts`.
 
 ## PostHog analytics
 
-Browser analytics via `posthog-js`, set up with the PostHog wizard and then tightened for a healthcare site. Code is in `src/analytics/posthog.ts` (init and events) and `src/analytics/posthogConfig.ts` (the `/get-started` filter). It is separate from the Google Ads and GA4 tags above.
+Browser analytics via `posthog-js`, set up with the PostHog wizard. Code is in `src/analytics/posthog.ts` (init and events). It is separate from the Google Ads and GA4 tags above.
 
 | Env var | Purpose |
 | --- | --- |
@@ -125,11 +125,11 @@ Both are inlined at **build** time, so set them on Vercel for Production and Pre
 
 What it does:
 
-- Captures pageviews (including in-app navigation), autocapture, unhandled errors, and session replay, as configured by the wizard defaults and the PostHog project settings.
-- **Sends nothing from `/get-started`**, the only page where visitors enter personal details (the Calendly embed). `before_send` drops every event whose URL is that page (pageviews, autocapture, errors, replay snapshots, logs), and replay is paused while the visitor is there and resumed when they leave. Properties that remember the page (session entry URL, previous pageview, landing URL, referrer) are removed from later events.
+- Captures pageviews (including in-app navigation), autocapture, unhandled errors, and session replay, as configured by the wizard defaults and the PostHog project settings. It runs the same on every route, including `/get-started`.
+- `capture_pageview` is pinned to `'history_change'`: a pageview on first load and on every path change. Query-only and hash-only changes do not send one.
+- The Calendly scheduler on `/get-started` and the site-wide chatbot are separate cross-origin iframes, so PostHog cannot read what visitors type into them.
 - Uses memory-only persistence: no cookies or localStorage, so every page load is a new anonymous visitor. There is no `identify()` call.
-- Turns off the feature-flags request (`advanced_disable_flags`). That request is not covered by `before_send` and carries the landing URL, which can be `/get-started`. Feature flags, surveys, and web experiments are therefore unavailable until that is solved another way.
-- Sends one custom event, `eligibility_check_started` with `source_path`, when a visitor clicks through to `/get-started`. The Calendly booking and phone-click events stay in the Google Ads code only. PostHog autocapture records `tel:` link clicks.
+- Sends one custom event, `eligibility_check_started`, with `source_path` and the button's `cta_location` (never anything the visitor typed) when a visitor clicks a call-to-action button (`trackCtaClick` in `src/App.tsx`). The Calendly booking and phone-click events stay in the Google Ads code only. PostHog autocapture records `tel:` link clicks.
 
 Tests: `tests/posthog.spec.ts`. The Playwright dev server points PostHog at `/__posthog` on itself (`playwright.config.ts`), so test runs never reach a real project. The browser tests mask `navigator.webdriver` and the headless client hints because posthog-js ignores bots.
 

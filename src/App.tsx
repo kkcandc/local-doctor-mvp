@@ -36,7 +36,7 @@ import { isPageEnabled, type PageFlag } from './featureFlags'
 import { noteSpaNavigation } from './analytics/googleAds'
 import { pathWithAdsParams } from './analytics/googleAdsConfig'
 import { noteGaCtaClick, noteGaSpaNavigation } from './analytics/googleAnalytics'
-import { noteEligibilityStarted, notePostHogNavigation } from './analytics/posthog'
+import { noteEligibilityStarted } from './analytics/posthog'
 import { CalendlyEmbed } from './CalendlyEmbed'
 import { LandingPage } from './landing/LandingPage'
 import { isLandingSlug, landingCanonical, landingMeta } from './landing/landingMeta'
@@ -396,10 +396,6 @@ function App() {
 
   useEffect(() => {
     noteGaSpaNavigation(window.location.pathname)
-  }, [route, routeSlug])
-
-  useEffect(() => {
-    notePostHogNavigation(window.location.pathname)
   }, [route, routeSlug])
 
   useEffect(() => {
