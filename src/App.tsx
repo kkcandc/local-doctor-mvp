@@ -238,7 +238,7 @@ const journeySteps: Array<{ title: string; meta?: string; cta?: string; points: 
   },
 ]
 
-const costFaqAnswer = 'Provider visits with our neurology specialists will be at low to no out of pocket cost to you, depending on your insurance coverage. In case you need new labs and imaging exams to confirm a diagnosis or for treatment prescription, their cost will depend on the sites you use and your insurance coverage.'
+const costFaqAnswer = 'Provider visits with our neurology specialists will be at low to no out-of-pocket cost to you, depending on your insurance coverage. In case you need new labs and imaging exams to confirm a diagnosis or for treatment prescription, their cost will depend on the sites you use and your insurance coverage.'
 
 const imagingFaqQuestion = 'Is ongoing imaging needed while on treatment? What does that entail?'
 const imagingFaqAnswer = 'Yes, while receiving Leqembi or Kisunla treatment, you will need to have ongoing brain MRIs to monitor the presence of ARIA (amyloid related imaging abnormalities). This helps ensure treatment stays safe and that side effects are monitored appropriately.'
@@ -258,17 +258,29 @@ const howFaqItems: Array<[string, string[]]> = [
   [imagingFaqQuestion, [imagingFaqAnswer]],
 ]
 
-type FaqItem = [question: string, answer: string | string[]]
+// An answer is one paragraph (a string) or several. A paragraph can also be a list of parts, where
+// a part is plain text or a link to a section of /get-started (hash is the section's id).
+type FaqLink = { linkText: string; hash: string }
+type FaqParagraph = string | Array<string | FaqLink>
+type FaqItem = [question: string, answer: string | FaqParagraph[]]
 
 const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
   {
     id: 'getting-started',
     title: 'Getting Started',
     items: [
-      ['Who is eligible for services?', 'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. Our eligibility call is fast and simple, providing a clear answer within 15-30 minutes.'],
-      ['How soon can I be seen?', 'Once you\'ve been determined eligible for our program, we schedule a virtual visit with one of our neurology specialists based on your availability.'],
-      ['How long does the eligibility process take?', 'Our eligibility process is centered around a quick call that should take 15-30 minutes. Please have the patient\'s insurance details, medication list, and medical history handy to make it go smoother.'],
-      ['Do I need a referral from my current doctor?', 'No referral is needed. Start with a call or the short form, and we review eligibility and insurance with you before a visit is booked.'],
+      ['Who is eligible for services?', 'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. We will confirm via a quick phone call after you schedule your visit, before your appointment.'],
+      ['How soon can I be seen?', [[
+        'You can be seen by one of our neurology specialists within days or the same week. ',
+        { linkText: 'Click here', hash: 'book' },
+        ' to find a time that works best for you!',
+      ]]],
+      ['How does the eligibility check work?', 'Our eligibility process is simple - we will call you after you schedule your appointment and the call should take 15-30 minutes. Please have the patient\'s insurance details, medication list, and medical history handy to make it go smoother.'],
+      ['Do I need a referral from my current doctor?', [[
+        'No referral is needed. ',
+        { linkText: 'Book your virtual visit here', hash: 'book' },
+        ', and we will call you within a day or so to confirm your eligibility and insurance prior to the appointment.',
+      ]]],
       ['What if I already have a diagnosis?', 'If you already have a diagnosis for mild cognitive impairment, dementia, or Alzheimer\'s disease, you may be a strong candidate for our program and it may expedite your path to treatment.'],
       ['Can I call on behalf of my spouse, parent, or loved one?', 'Absolutely! We welcome any loved one who wishes to be a part of the process and would prefer that one joins the first visit with the patient.'],
       ['What if I\'m not eligible for services?', 'If you don\'t happen to be eligible for our program yet, we will let you know transparently and why.'],
@@ -279,7 +291,7 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
     title: 'Cost & Insurance',
     items: [
       ['How much will this cost?', costFaqAnswer],
-      ['Which insurance plans are currently accepted?', 'Medicare, Medicaid, Aetna, CareFirst, Cigna, Kaiser, and United.'],
+      ['Which insurance plans are currently accepted?', 'We accept many insurances including Medicare, Medicaid, Aetna, CareFirst, Cigna, Kaiser, and United. If you don\'t see your insurance on this list, we may still accept it and will confirm when we speak with you.'],
     ],
   },
   {
@@ -288,8 +300,8 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
     items: [
       ['How does the first visit with the provider work and how long will it be?', 'Once you\'ve been in touch with our team, they will help schedule a video call for a day and time of your choice. You will then receive a visit confirmation and visit reminders to your contact method of choice, including on the day of the visit, for you to click the link to join the video call. This visit should last about 1 hour. Ensure you are in a setting with strong access to Wi-Fi or data service with a device that has video and audio capabilities (we use something similar to FaceTime and other video calling applications).'],
       ['Will I be seeing an MD or NP?', 'Our neurology specialists are each board-certified and work interchangeably. Appointment matching is subject to your location, availability, and other factors.'],
-      ['Is everything virtual or is there any in-person component?', 'The clinical visits happen via video. Tests like MRIs and the infusions themselves happen at in-person facilities, which may include a Local Infusion center or another appropriate site.'],
-      ['Where do infusions take place?', 'If treatment is clinically appropriate, infusions take place at an appropriate local infusion center near you.'],
+      ['Is everything virtual or is there any in-person component?', 'The clinical virtual visits happen via a video platform. MRIs, PET Scans, bloodwork, and the infusions themselves happen at in-person facilities of your choice.'],
+      ['Where do infusions take place?', 'If treatment is clinically appropriate, infusions take place at a local infusion center that is most convenient for you.'],
       ['What if we only need help with daily caregiving or medication management?', 'Local Doctor is designed to accelerate access to disease-modifying treatments. We partner with services that offer ongoing caregiving-support or general medication-management service who we can refer out to if appropriate. We will work with you to guide you in the best way possible.'],
     ],
   },
@@ -306,7 +318,7 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
       ],
       ['What if the patient can\'t have an MRI or takes blood thinners?', 'These may affect your eligibility for infusion treatment, so be sure to bring them up in your conversations with us.'],
       [imagingFaqQuestion, imagingFaqAnswer],
-      ['Who do I contact in a medical emergency?', 'Call 911 immediately. Local Doctor provides specialist evaluation and treatment. It does not replace emergency care.'],
+      ['Who do I contact in a medical emergency?', 'Call 911 immediately. Local Doctor provides specialist evaluation and treatment. It does not replace emergency care. After receiving 911 or emergency services, please let us know so that our Neurologist team can stay in the loop, understand your situation, and help however they can.'],
     ],
   },
 ]
@@ -700,7 +712,7 @@ function HowPage({ onNavigate }: { onNavigate: Navigate }) {
       <PageHero
         eyebrow="How it works"
         title="A fast path you can trust from first concern to treatment."
-        copy="Our trusted team of neurology specialists has over 20 years of experience in treating dementia and mild cognitive impairment."
+        copy="Our trusted team of neurologists and specialists have over 20 years of experience in treating Alzheimer's disease, dementia, and mild cognitive impairment. We can help you understand what you might be facing and your best options going forward."
         icon={<CalendarClock size={38} />}
         aside={{ title: 'Family and loved ones', text: 'Our preference is for loved ones to join the virtual provider visits and be a part of the process.' }}
         onPrimary={() => onNavigate('start', '', 'hero', 'Get Started')}
@@ -864,6 +876,39 @@ function ReferPage({ onNavigate }: { onNavigate: Navigate }) {
   )
 }
 
+// Renders an FAQ answer. A link part opens a section of /get-started (for example #book), keeping
+// the visitor's ad click ids, and counts as a CTA click like the other Get Started buttons.
+function FaqAnswer({ answer, onNavigate }: { answer: string | FaqParagraph[]; onNavigate: Navigate }) {
+  const paragraphs = Array.isArray(answer) ? answer : [answer]
+  const search = typeof window === 'undefined' ? '' : window.location.search
+
+  return (
+    <>
+      {paragraphs.map((paragraph, index) => (
+        <p key={index}>
+          {(typeof paragraph === 'string' ? [paragraph] : paragraph).map((part, partIndex) =>
+            typeof part === 'string' ? (
+              part
+            ) : (
+              <a
+                key={partIndex}
+                href={`${pathWithAdsParams(routePaths.start, search)}#${part.hash}`}
+                onClick={(event) => {
+                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+                  event.preventDefault()
+                  onNavigate('start', '', 'faq', 'Book now', part.hash)
+                }}
+              >
+                {part.linkText}
+              </a>
+            ),
+          )}
+        </p>
+      ))}
+    </>
+  )
+}
+
 function FaqPage({ onNavigate }: { onNavigate: Navigate }) {
   const [openItem, setOpenItem] = useState('getting-started-0')
 
@@ -889,9 +934,7 @@ function FaqPage({ onNavigate }: { onNavigate: Navigate }) {
                       <span>{question}</span>
                       <ChevronDown size={18} />
                     </button>
-                    {isOpen && (Array.isArray(answer) ? answer : [answer]).map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
-                    ))}
+                    {isOpen && <FaqAnswer answer={answer} onNavigate={onNavigate} />}
                   </article>
                 )
               })}
@@ -902,7 +945,7 @@ function FaqPage({ onNavigate }: { onNavigate: Navigate }) {
       <section className="question-band">
         <div>
           <h2>Did not find your answer?</h2>
-          <p>Our care team can respond with a next step, not an automated loop.</p>
+          <p>Our care team can help address any other question you have via the live chat option on this website, emailing hello@trylocaldoctor.com, or texting/calling (240) 376-5730.</p>
         </div>
         <a className="primary" href="mailto:hello@trylocaldoctor.com">Email our team</a>
       </section>
@@ -921,8 +964,8 @@ function BlogPage({ onNavigate }: { onNavigate: Navigate }) {
     <>
       <PageHero
         eyebrow="Blog"
-        title="Alzheimer’s articles, with credit to the original publisher."
-        copy="These pieces were originally published by Local Infusion. Local Doctor republishes them so patients and caregivers can read them here, with a link back to the source."
+        title="Our resources can help guide you along your journey."
+        copy="We look forward to helping you find the best care possible."
         icon={<Sparkles size={38} />}
         onPrimary={() => onNavigate('start', '', 'hero', 'Get Started')}
         primaryLabel="Get Started"
@@ -1167,7 +1210,7 @@ function BookingSection() {
             </ul>
           </div>
           <div>
-            <h3>Prefer to speak to us directly?</h3>
+            <h3>Prefer to speak with someone now?</h3>
             <p>
               Call or text <a href={`tel:+1${publicPhone.replace(/\D/g, '')}`}>{publicPhone}</a> to speak with a member of our team
             </p>
