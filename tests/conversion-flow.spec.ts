@@ -92,7 +92,7 @@ test.describe('CTA destinations keep the allow-listed params', () => {
   }
 
   for (const slug of bookingSlugs) {
-    test(`/${slug} buttons go to /get-started and the header matches`, async ({ page }) => {
+    test(`/${slug} buttons go to /get-started and the header says Get started`, async ({ page }) => {
       await page.goto(`/${slug}${query}`)
       const label = 'See open visit times'
       expect(landingPages[slug].ctaLabel).toBe(label)
@@ -106,7 +106,8 @@ test.describe('CTA destinations keep the allow-listed params', () => {
         expect(href).not.toContain('jane')
       }
       await expect(page.locator('[data-cta-location="hero"]')).toHaveText(label)
-      await expect(page.locator('.header-cta')).toHaveText(label)
+      // The page's own buttons keep their label; the header button is a plain "Get started".
+      await expect(page.locator('.header-cta')).toHaveText('Get started')
 
       await page.locator('[data-cta-location="hero"]').click()
       await expect(page).toHaveURL(/\/get-started\?.*gclid=TEST_GCLID/)
@@ -129,10 +130,24 @@ test.describe('CTA destinations keep the allow-listed params', () => {
     await stubTypeform(page)
     for (const path of ['/', '/how-it-works', '/evaluation', '/memory-doctor-near-me']) {
       await page.goto(`${path}${query}`)
-      await expect(page.locator('.header-cta')).toHaveText('See open visit times')
+      await expect(page.locator('.header-cta')).toHaveText('Get started')
     }
     await page.locator('.header-cta').click()
     await expect(page).toHaveURL(/\/get-started\?.*gclid=TEST_GCLID/)
+    const click = ga(await events(page), 'cta_click')
+    expect(click).toHaveLength(1)
+    expect(click[0].params).toMatchObject({ cta_label: 'Get started', cta_location: 'header', cta_destination: '/get-started', page_path: '/memory-doctor-near-me' })
+  })
+
+  test('the Treatments hero button says Get started, opens the scheduler, and logs the same text', async ({ page }) => {
+    await page.goto(`/treatments${query}`)
+    const hero = page.locator('.treatment-hero').getByRole('button', { name: 'Get started' })
+    await expect(hero).toHaveText('Get started')
+    await hero.click()
+    await expect(page).toHaveURL(/\/get-started\?.*gclid=TEST_GCLID/)
+    const click = ga(await events(page), 'cta_click')
+    expect(click).toHaveLength(1)
+    expect(click[0].params).toMatchObject({ cta_label: 'Get started', cta_location: 'hero', cta_destination: '/get-started', page_path: '/treatments' })
   })
 
   test('the /get-started Book now jump logs a CTA click with the real text', async ({ page }) => {
