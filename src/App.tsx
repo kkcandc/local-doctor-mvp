@@ -340,10 +340,12 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
   },
 ]
 
-// One booking path per page. The evaluation pages send the header button to /evaluation, every other
-// page sends it to the scheduler, so the header always matches the page's own buttons.
+// One booking path per page. The evaluation pages send the header button to /evaluation and keep it
+// matching their own buttons. Every other page sends it to the scheduler under a plain "Get started",
+// while that page's own buttons (and the /evaluation booking link) can still say "See open visit times".
 const startEvaluationLabel = 'Start your evaluation'
 const seeVisitTimesLabel = 'See open visit times'
+const headerGetStartedLabel = 'Get started'
 
 const headerPhone = '(240) 376-5730'
 const headerPhoneHref = '+12403765730'
@@ -540,7 +542,7 @@ function Header({
   const evaluationFunnel = route === 'landing' && (evaluationFormSlugs as string[]).includes(routeSlug)
   const headerCta = evaluationFunnel
     ? { target: 'evaluation' as const, label: startEvaluationLabel }
-    : { target: 'start' as const, label: seeVisitTimesLabel }
+    : { target: 'start' as const, label: headerGetStartedLabel }
   const navItems = enabledLinks<[Route, string]>([
     ['how', 'How it works'],
     ['treatments', 'Treatments'],
@@ -708,7 +710,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: Navigate }) {
           <p className="eyebrow">Treatments</p>
           <h1>FDA-approved treatments for early Alzheimer's disease.</h1>
           <p>Leqembi and Kisunla are FDA-approved infusion treatments shown to slow the progression of Alzheimer&apos;s disease, not just treat its symptoms. In clinical trials they slowed decline for some patients but they are not a cure, they carry risks, and they are not right for everyone. We help you understand all of it.</p>
-          <button className="primary" type="button" onClick={() => onNavigate('start', '', 'hero', 'Get Started')}>Get Started <ArrowRight size={20} /></button>
+          <button className="primary" type="button" onClick={() => onNavigate('start', '', 'hero', 'Get started')}>Get started <ArrowRight size={20} /></button>
         </div>
         <img src="/assets/hero-leqembi-iv.webp" alt="Leqembi (lecanemab) IV infusion bag" width={1178} height={1335} fetchPriority="high" />
       </section>
