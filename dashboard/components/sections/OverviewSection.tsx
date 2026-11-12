@@ -1,19 +1,19 @@
 'use client'
 
 import { useState } from 'react'
-import { costPer, delta, timeSeries } from '@/lib/aggregate'
+import { delta, timeSeries } from '@/lib/aggregate'
 import { bucketCoverage } from '@/lib/dates'
 import { fmtCount, fmtInt, fmtMoney, fmtPct } from '@/lib/format'
 import type { DateRange } from '@/lib/types'
 import {
-  accountTotals,
   conversionActionRows,
   ga4EventCounts,
   ga4Totals,
+  overviewConversionRows,
+  overviewCostPerPrimary,
   overviewMetricRows,
+  overviewPrimaryCount,
   overviewTraffic,
-  primaryConversionCount,
-  primaryConversionsByDate,
   removedCampaignsInRange,
   type OverviewScope,
 } from '@/lib/views'
@@ -97,14 +97,12 @@ function OverviewBody({ range, prevRange, grouping }: { range: DateRange; prevRa
 
   const t = ads ? overviewTraffic(ads, range, scope) : null
   const p = ads && prevRange ? overviewTraffic(ads, prevRange, scope) : null
-  const accountNow = ads ? accountTotals(ads, range) : null
-  const accountPrev = ads && prevRange ? accountTotals(ads, prevRange) : null
   const d = (k: keyof NonNullable<typeof t>) => (t && p ? delta(Number(t[k] ?? 0), Number(p[k] ?? 0)) : null)
   const secondary = ads ? conversionActionRows(ads, range).filter((a) => !a.primary && a.count > 0).sort((a, b) => b.count - a.count) : []
-  const primaryNow = ads ? primaryConversionCount(ads, range) : 0
-  const primaryPrev = ads && prevRange ? primaryConversionCount(ads, prevRange) : null
-  const costPerPrimary = accountNow ? costPer(accountNow.cost, primaryNow) : null
-  const costPerPrimaryPrev = accountPrev && primaryPrev != null ? costPer(accountPrev.cost, primaryPrev) : null
+  const primaryNow = ads ? overviewPrimaryCount(ads, range, scope) : 0
+  const primaryPrev = ads && prevRange ? overviewPrimaryCount(ads, prevRange, scope) : null
+  const costPerPrimary = ads ? overviewCostPerPrimary(ads, range, scope) : null
+  const costPerPrimaryPrev = ads && prevRange ? overviewCostPerPrimary(ads, prevRange, scope) : null
   const removed = ads ? removedCampaignsInRange(ads, range) : []
   const callsNow = t?.phoneCalls ?? 0
   const callsPrev = p ? p.phoneCalls : null
@@ -141,7 +139,7 @@ function OverviewBody({ range, prevRange, grouping }: { range: DateRange; prevRa
   ]
 
   const trafficSeries = ads ? timeSeries(overviewMetricRows(ads, scope), range, grouping, ['cost', 'clicks'] as const) : []
-  const primaryByBucket = ads ? timeSeries(primaryConversionsByDate(ads), range, grouping, ['conversions'] as const) : []
+  const primaryByBucket = ads ? timeSeries(overviewConversionRows(ads, scope), range, grouping, ['conversions'] as const) : []
   const spendPoints = toPoints(
     trafficSeries.map((point) => ({ bucket: point.bucket, value: point.cost })),
     range,
@@ -172,14 +170,14 @@ function OverviewBody({ range, prevRange, grouping }: { range: DateRange; prevRa
             label="Primary conversions"
             value={fmtCount(primaryNow)}
             delta={primaryPrev != null ? delta(primaryNow, primaryPrev) : null}
-            hint={scope === 'enabled' ? 'All campaigns. Marked primary today' : 'Marked primary today'}
+            hint={scope === 'enabled' ? 'Enabled campaigns' : 'Marked primary today'}
           />
           <Kpi
             label="Cost / primary conv."
             value={fmtMoney(costPerPrimary, currency)}
             delta={costPerPrimary != null && costPerPrimaryPrev != null ? delta(costPerPrimary, costPerPrimaryPrev) : null}
             goodWhenUp={false}
-            hint={scope === 'enabled' ? 'All-campaign spend' : undefined}
+            hint={scope === 'enabled' ? 'Enabled campaigns' : undefined}
           />
           <Kpi
             label="Calls from ads"
@@ -229,7 +227,7 @@ function OverviewBody({ range, prevRange, grouping }: { range: DateRange; prevRa
           </div>
           {anyPartial && <p className="chart-legend-note">Lighter bars are partial weeks or months. The range starts or ends in the middle of that bucket. Hover a bar for the exact days and value.</p>}
           {scope === 'enabled' && (
-            <p className="chart-legend-note">Spend and clicks are enabled campaigns only. Primary conversions stay account-wide, on their own scale.</p>
+            <p className="chart-legend-note">Spend, clicks, primary conversions and cost per conversion are enabled campaigns only.</p>
           )}
         </>
       )}

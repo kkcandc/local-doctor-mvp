@@ -13,7 +13,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { bucketLabel, shortDate, type Grouping } from '@/lib/dates'
+import { bucketCoverage, bucketLabel, shortDate, type Grouping } from '@/lib/dates'
+import type { DateRange } from '@/lib/types'
 import { compact } from '@/lib/format'
 
 export const COLORS = ['#0f3f8c', '#0f6f96', '#e0a800', '#8cc4f5', '#22a06b', '#b45309', '#767e89', '#7c3aed']
@@ -221,5 +222,47 @@ export function MetricChart({
         </ResponsiveContainer>
       </div>
     </div>
+  )
+}
+
+export interface MetricSeries {
+  title: string
+  color: string
+  format: (n: number) => string
+  values: { bucket: string; value: number }[]
+  allowDecimals?: boolean
+  height?: number
+}
+
+/** One bar chart per series, each with its own scale. Dates sit on the last chart. */
+export function MetricCharts({ items, grouping, range }: { items: MetricSeries[]; grouping: Grouping; range: DateRange }) {
+  const charts = items.map((item) => ({
+    ...item,
+    data: item.values.map((row) => ({ ...row, ...bucketCoverage(row.bucket, grouping, range) })),
+  }))
+  const anyPartial = charts.some((chart) => chart.data.some((point) => point.partial))
+  return (
+    <>
+      <div className="chart-stack">
+        {charts.map((chart, index) => (
+          <MetricChart
+            key={chart.title}
+            title={chart.title}
+            data={chart.data}
+            color={chart.color}
+            grouping={grouping}
+            format={chart.format}
+            height={chart.height ?? 140}
+            showAxis={index === charts.length - 1}
+            allowDecimals={chart.allowDecimals}
+          />
+        ))}
+      </div>
+      {anyPartial && (
+        <p className="chart-legend-note">
+          Lighter bars are partial weeks or months. The range starts or ends in the middle of that bucket. Hover a bar for the exact days and value.
+        </p>
+      )}
+    </>
   )
 }

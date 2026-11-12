@@ -5,7 +5,7 @@ import { ratio, timeSeries } from '@/lib/aggregate'
 import { fmtInt, fmtPct } from '@/lib/format'
 import { GA4_EVENTS } from '@/lib/privacy'
 import { eventsByDay, ga4EventCounts, ga4EventRows, ga4Totals } from '@/lib/views'
-import { COLORS, TrendChart } from '../charts'
+import { COLORS, MetricCharts } from '../charts'
 import { DataTable, type Column } from '../DataTable'
 import { EVENT_LABELS, KEY_EVENTS } from '../labels'
 import { CHANNEL_OPTIONS, NotConnected, Section, Seg, useData, type Ga4Channel } from '../ui'
@@ -51,10 +51,16 @@ export function OnPageSection() {
               </span>
             </div>
             <DataTable rows={rows} columns={cols} rowKey={(r) => r.name} initialSort={{ key: 'count', dir: 'desc' }} pageSize={20} caption="On-page actions" />
-            <TrendChart
-              data={series}
+            <MetricCharts
               grouping={grouping}
-              series={KEY_EVENTS.map((name, i) => ({ key: name, label: EVENT_LABELS[name], type: 'line' as const, color: COLORS[i], format: fmtInt }))}
+              range={range}
+              items={KEY_EVENTS.map((name, i) => ({
+                title: EVENT_LABELS[name],
+                color: COLORS[i],
+                format: fmtInt,
+                height: 120,
+                values: series.map((point) => ({ bucket: point.bucket, value: point[name] })),
+              }))}
             />
           </>
         )

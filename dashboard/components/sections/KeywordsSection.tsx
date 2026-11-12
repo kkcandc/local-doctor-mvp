@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { filterRange, groupSum, ratio, timeSeries } from '@/lib/aggregate'
 import { enumLabel, fmtCount, fmtInt, fmtMoney, fmtPct } from '@/lib/format'
 import { derive, keywordBidInfo, unusedBidLine } from '@/lib/views'
-import { TrendChart } from '../charts'
+import { MetricCharts } from '../charts'
 import { DataTable, type Column } from '../DataTable'
 import { NotConnected, Section, StatusBadge, useData } from '../ui'
 
@@ -137,15 +137,26 @@ export function KeywordsSection() {
               </select>
             </div>
             <DataTable rows={rows} columns={cols} rowKey={(r) => r.key} initialSort={{ key: 'cost', dir: 'desc' }} caption="Keywords" />
-            <TrendChart
-              data={series}
+            <MetricCharts
               grouping={grouping}
-              height={220}
-              series={[
-                { key: 'cost', label: 'Keyword spend (filtered)', type: 'bar', color: '#8cc4f5', format: (n) => fmtMoney(n, currency, 0) },
-                { key: 'clicks', label: 'Clicks', type: 'line', axis: 'right', color: '#0f3f8c', format: fmtInt },
+              range={range}
+              items={[
+                {
+                  title: 'Spend',
+                  color: '#8cc4f5',
+                  format: (n) => fmtMoney(n, currency, 0),
+                  allowDecimals: true,
+                  values: series.map((point) => ({ bucket: point.bucket, value: point.cost })),
+                },
+                {
+                  title: 'Clicks',
+                  color: '#0f3f8c',
+                  format: fmtInt,
+                  values: series.map((point) => ({ bucket: point.bucket, value: point.clicks })),
+                },
               ]}
             />
+            <p className="chart-legend-note">Spend and clicks follow the keyword filters above.</p>
           </>
         )
       }}

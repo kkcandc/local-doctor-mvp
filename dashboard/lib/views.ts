@@ -55,6 +55,27 @@ export function overviewMetricRows(ads: AdsData, scope: OverviewScope): { date: 
   return ads.daily.campaigns.filter((r) => enabled.has(r.campaignId))
 }
 
+/**
+ * Primary conversions for the Overview. "all" is all_conversions of actions
+ * marked primary today. "enabled" is the Conversions column on enabled campaigns
+ * only, so cost per conversion uses the same spend and conversions as the filter.
+ */
+export function overviewPrimaryCount(ads: AdsData, range: DateRange, scope: OverviewScope): number {
+  if (scope === 'all') return primaryConversionCount(ads, range)
+  return overviewTraffic(ads, range, 'enabled').conversions
+}
+
+export function overviewCostPerPrimary(ads: AdsData, range: DateRange, scope: OverviewScope): number | null {
+  return costPer(overviewTraffic(ads, range, scope).cost, overviewPrimaryCount(ads, range, scope))
+}
+
+/** Daily primary conversions for the Overview chart, using the same scope as the KPI. */
+export function overviewConversionRows(ads: AdsData, scope: OverviewScope): { date: string; conversions: number }[] {
+  if (scope === 'all') return primaryConversionsByDate(ads)
+  const enabled = enabledCampaignIds(ads)
+  return ads.daily.campaigns.filter((r) => enabled.has(r.campaignId)).map((r) => ({ date: r.date, conversions: r.conversions }))
+}
+
 export interface RemovedCampaignContribution {
   id: string
   name: string

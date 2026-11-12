@@ -4,7 +4,7 @@ import { filterRange, groupSum, ratio, sumFields } from '@/lib/aggregate'
 import { bucketKey, bucketLabel, bucketsInRange, shortDate } from '@/lib/dates'
 import { fmtCount, fmtInt } from '@/lib/format'
 import { callsFromAds, callsFromAdsByDate, matchesChannel } from '@/lib/views'
-import { TrendChart } from '../charts'
+import { MetricCharts } from '../charts'
 import { DataTable, type Column } from '../DataTable'
 import { Kpi, Section, useData } from '../ui'
 
@@ -83,14 +83,14 @@ export function OfflineSection() {
                 hint="Rough guide, not attribution"
               />
             </div>
-            <TrendChart
-              data={rows.map((r) => ({ bucket: r.bucket, adClicks: r.adClicks ?? 0, adCalls: r.adCalls ?? 0, phoneLeads: r.phoneLeads, bookedPatients: r.bookedPatients }))}
+            <MetricCharts
               grouping={grouping}
-              series={[
-                { key: 'adClicks', label: 'Ad clicks', type: 'line', axis: 'right', color: '#8cc4f5', format: fmtInt },
-                { key: 'adCalls', label: 'Calls from ads', type: 'bar', color: '#0f6f96', format: fmtInt },
-                { key: 'phoneLeads', label: 'Phone leads', type: 'bar', color: '#e0a800', format: fmtInt },
-                { key: 'bookedPatients', label: 'Booked patients', type: 'bar', color: '#22a06b', format: fmtInt },
+              range={range}
+              items={[
+                { title: 'Ad clicks', color: '#8cc4f5', format: fmtInt, values: rows.map((r) => ({ bucket: r.bucket, value: r.adClicks ?? 0 })) },
+                { title: 'Calls from ads', color: '#0f6f96', format: fmtInt, values: rows.map((r) => ({ bucket: r.bucket, value: r.adCalls ?? 0 })) },
+                { title: 'Phone leads', color: '#e0a800', format: fmtInt, values: rows.map((r) => ({ bucket: r.bucket, value: r.phoneLeads })) },
+                { title: 'Booked patients', color: '#22a06b', format: fmtInt, values: rows.map((r) => ({ bucket: r.bucket, value: r.bookedPatients })) },
               ]}
             />
             <h3 className="subhead">By {grouping}</h3>

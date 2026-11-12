@@ -9,7 +9,10 @@ import {
   callsFromAds,
   conversionActionRows,
   keywordBidInfo,
+  overviewConversionRows,
+  overviewCostPerPrimary,
   overviewMetricRows,
+  overviewPrimaryCount,
   overviewTraffic,
   primaryConversionCount,
   removedCampaignsInRange,
@@ -176,6 +179,32 @@ describe('overview campaign scope', () => {
     expect(overviewTraffic(ads, range, 'enabled')).toMatchObject({ impressions: 30, clicks: 4, cost: 7, phoneCalls: 1 })
     expect(overviewMetricRows(ads, 'enabled').map((r) => r.clicks)).toEqual([4])
   })
+
+  it('uses enabled spend and enabled conversions for cost per primary', () => {
+    const scoped = {
+      campaigns: [
+        { id: 'md', name: 'MD Search', status: 'ENABLED', biddingStrategyType: 'TARGET_SPEND' },
+        { id: 'old', name: 'Campaign #1', status: 'REMOVED', biddingStrategyType: 'MAXIMIZE_CONVERSIONS' },
+      ],
+      conversionActions: [
+        { id: 'booked', name: 'Visit booked', category: 'DEFAULT', status: 'ENABLED', primary: true },
+      ],
+      daily: {
+        account: [{ date: '2026-08-14', impressions: 200, clicks: 50, cost: 2581, conversions: 4, allConversions: 4, phoneCalls: 0 }],
+        campaigns: [
+          { date: '2026-08-14', campaignId: 'md', impressions: 30, clicks: 4, cost: 800, conversions: 2, allConversions: 2, phoneCalls: 0 },
+          { date: '2026-08-14', campaignId: 'old', impressions: 170, clicks: 46, cost: 1781, conversions: 2, allConversions: 2, phoneCalls: 0 },
+        ],
+        conversions: [{ date: '2026-08-14', conversionActionId: 'booked', conversions: 0, allConversions: 4 }],
+      },
+    } as AdsData
+    const window = { start: '2026-08-01', end: '2026-11-01' }
+    expect(overviewPrimaryCount(scoped, window, 'all')).toBe(4)
+    expect(overviewCostPerPrimary(scoped, window, 'all')).toBe(2581 / 4)
+    expect(overviewPrimaryCount(scoped, window, 'enabled')).toBe(2)
+    expect(overviewCostPerPrimary(scoped, window, 'enabled')).toBe(400)
+    expect(overviewConversionRows(scoped, 'enabled').reduce((sum, row) => sum + row.conversions, 0)).toBe(2)
+  })
 })
 
 describe('keyword bids', () => {
@@ -267,7 +296,12 @@ describe('vercel ignore rules', () => {
     expect(src).not.toContain('effective_cpc_bid')
     expect(src).toContain("campaign.status IN ('ENABLED', 'PAUSED', 'REMOVED')")
     const charts = readFileSync(path.join(dash, 'components/charts.tsx'), 'utf8')
-    expect(charts).toContain('type="linear"')
     expect(charts).not.toContain('monotone')
+    for (const file of ['KeywordsSection.tsx', 'OfflineSection.tsx', 'LandingPagesSection.tsx', 'OnPageSection.tsx']) {
+      const section = readFileSync(path.join(dash, 'components/sections', file), 'utf8')
+      expect(section).toContain('MetricCharts')
+      expect(section).not.toContain("axis: 'right'")
+      expect(section).not.toContain("type: 'line'")
+    }
   })
 })

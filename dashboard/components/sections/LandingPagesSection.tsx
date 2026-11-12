@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { costPer, filterRange, groupSum, ratio, timeSeries } from '@/lib/aggregate'
 import { fmtCount, fmtInt, fmtMoney, fmtPct } from '@/lib/format'
 import { ga4TotalsRows, matchesChannel } from '@/lib/views'
-import { TrendChart } from '../charts'
+import { MetricCharts } from '../charts'
 import { DataTable, type Column } from '../DataTable'
 import { CHANNEL_OPTIONS, NotConnected, Section, Seg, useData, type Ga4Channel } from '../ui'
 
@@ -81,13 +81,12 @@ export function LandingPagesSection() {
             )}
             <DataTable rows={rows} columns={cols} rowKey={(r) => r.path} initialSort={{ key: ga4 ? 'sessions' : 'adClicks', dir: 'desc' }} caption="Landing pages" />
             {ga4 && (
-              <TrendChart
-                data={series}
+              <MetricCharts
                 grouping={grouping}
-                height={220}
-                series={[
-                  { key: 'sessions', label: 'Sessions', type: 'bar', color: '#8cc4f5', format: fmtInt },
-                  { key: 'engagedSessions', label: 'Engaged sessions', type: 'line', color: '#0f6f96', format: fmtInt },
+                range={range}
+                items={[
+                  { title: 'Sessions', color: '#8cc4f5', format: fmtInt, values: series.map((point) => ({ bucket: point.bucket, value: point.sessions })) },
+                  { title: 'Engaged sessions', color: '#0f6f96', format: fmtInt, values: series.map((point) => ({ bucket: point.bucket, value: point.engagedSessions })) },
                 ]}
               />
             )}
