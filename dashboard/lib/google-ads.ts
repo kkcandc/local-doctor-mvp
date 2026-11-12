@@ -364,8 +364,16 @@ async function fetchKeywords(client: AdsClient): Promise<KeywordMeta[]> {
 
 async function fetchAssets(client: AdsClient, during: string): Promise<{ assets: AssetMeta[]; daily: AssetDailyRow[] }> {
   const fields =
-    'asset.id, asset.type, asset.final_urls, asset.sitelink_asset.link_text, asset.sitelink_asset.description1, asset.sitelink_asset.description2, asset.call_asset.phone_number'
-  const types = "asset.type IN ('SITELINK', 'CALL')"
+    'asset.id, asset.type, asset.final_urls, asset.sitelink_asset.link_text, asset.sitelink_asset.description1, asset.sitelink_asset.description2, asset.call_asset.phone_number, asset.callout_asset.callout_text'
+  // Structured snippets are optional: a field the API version does not have must not drop sitelinks and callouts.
+  let snippetFields = ', asset.structured_snippet_asset.header, asset.structured_snippet_asset.values'
+  let types = "asset.type IN ('SITELINK', 'CALL', 'CALLOUT', 'STRUCTURED_SNIPPET')"
+  try {
+    await client.query(`SELECT asset.structured_snippet_asset.header FROM asset WHERE asset.type = 'STRUCTURED_SNIPPET' LIMIT 1`)
+  } catch {
+    snippetFields = ''
+    types = "asset.type IN ('SITELINK', 'CALL', 'CALLOUT')"
+  }
   const levels = [
     { level: 'customer' as const, from: 'customer_asset', extra: '', status: 'customer_asset.status', split: 'asset.id' },
     { level: 'campaign' as const, from: 'campaign_asset', extra: ', campaign.id', status: 'campaign_asset.status', split: 'campaign.id, asset.id' },
@@ -380,12 +388,14 @@ async function fetchAssets(client: AdsClient, during: string): Promise<{ assets:
   const assets: AssetMeta[] = []
   const daily: AssetDailyRow[] = []
   for (const l of levels) {
+    // Removed links stay in the snapshot. The UI shows them only when the range still has impressions.
     const meta = await client.query(
-      `SELECT ${fields}, ${l.status}${l.extra} FROM ${l.from} WHERE ${types} AND ${l.status} != 'REMOVED'`,
+      `SELECT ${fields}${snippetFields}, ${l.status}${l.extra} FROM ${l.from} WHERE ${types}`,
     )
     for (const r of meta) {
       const a = r.asset ?? {}
       const statusKey = l.from.replace(/_([a-z])/g, (_m, c: string) => c.toUpperCase())
+      const values = a.structuredSnippetAsset?.values
       assets.push({
         id: str(a.id),
         type: str(a.type),
@@ -398,6 +408,9 @@ async function fetchAssets(client: AdsClient, during: string): Promise<{ assets:
         description2: a.sitelinkAsset?.description2 || undefined,
         phoneNumber: a.callAsset?.phoneNumber || undefined,
         finalUrls: a.finalUrls?.length ? a.finalUrls.map((u: string) => pathOnly(u)) : undefined,
+        calloutText: a.calloutAsset?.calloutText || undefined,
+        snippetHeader: a.structuredSnippetAsset?.header || undefined,
+        snippetValues: Array.isArray(values) ? values.map((v: unknown) => str(v)).filter(Boolean) : undefined,
       })
     }
     // Selecting the link ids stops Google from summing one asset across every campaign it is attached to.

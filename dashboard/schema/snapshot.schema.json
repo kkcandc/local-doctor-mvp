@@ -128,13 +128,13 @@
         },
         "assets": {
           "type": "array",
-          "description": "Sitelink and call assets with the level they are linked at.",
+          "description": "Sitelink, call, callout and structured snippet assets, one entry per link. Removed links are included so a range can still show them.",
           "items": {
             "type": "object",
             "required": ["id", "type", "level"],
             "properties": {
               "id": { "$ref": "#/$defs/id" },
-              "type": { "type": "string", "description": "SITELINK or CALL." },
+              "type": { "type": "string", "description": "SITELINK, CALL, CALLOUT or STRUCTURED_SNIPPET." },
               "level": { "enum": ["customer", "campaign", "ad_group"] },
               "campaignId": { "$ref": "#/$defs/id" },
               "adGroupId": { "$ref": "#/$defs/id" },
@@ -143,7 +143,10 @@
               "description1": { "type": "string" },
               "description2": { "type": "string" },
               "phoneNumber": { "type": "string", "description": "Business number in the call asset (clinic line)." },
-              "finalUrls": { "type": "array", "items": { "type": "string" } }
+              "finalUrls": { "type": "array", "items": { "type": "string" } },
+              "calloutText": { "type": "string" },
+              "snippetHeader": { "type": "string" },
+              "snippetValues": { "type": "array", "items": { "type": "string" } }
             }
           }
         },

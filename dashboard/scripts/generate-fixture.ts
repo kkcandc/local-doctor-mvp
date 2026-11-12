@@ -138,6 +138,11 @@ const assets = [
   { id: '603', type: 'SITELINK', level: 'campaign', campaignId: '101', status: 'ENABLED', linkText: 'For caregivers', description1: 'Help a loved one start', description2: 'Guidance for families', finalUrls: ['/memory-evaluation'] },
   { id: '604', type: 'SITELINK', level: 'campaign', campaignId: '102', status: 'ENABLED', linkText: 'Book a visit', description1: 'See open visit times', description2: 'Video visits', finalUrls: ['/get-started'] },
   { id: '605', type: 'CALL', level: 'customer', status: 'ENABLED', phoneNumber: '(410) 555-0100' },
+  { id: '606', type: 'SITELINK', level: 'campaign', campaignId: '102', status: 'REMOVED', linkText: 'Old clinic page', description1: 'Example removed sitelink', description2: 'Still had impressions', finalUrls: ['/memory-specialist-maryland'] },
+  { id: '608', type: 'CALLOUT', level: 'campaign', campaignId: '101', status: 'ENABLED', calloutText: 'Virtual visits' },
+  { id: '609', type: 'CALLOUT', level: 'campaign', campaignId: '102', status: 'ENABLED', calloutText: 'Serving Maryland' },
+  { id: '610', type: 'CALLOUT', level: 'ad_group', campaignId: '102', adGroupId: '203', status: 'REMOVED', calloutText: 'Same week visits' },
+  { id: '611', type: 'STRUCTURED_SNIPPET', level: 'customer', status: 'ENABLED', snippetHeader: 'Services', snippetValues: ['Memory evaluation', 'Video visit', 'Caregiver help'] },
 ]
 
 const account: AccountDailyRow[] = []
@@ -262,6 +267,7 @@ dates.forEach((date, i) => {
       assetId: a.id,
       level: a.level as 'customer' | 'campaign' | 'ad_group',
       ...('campaignId' in a && a.campaignId ? { campaignId: a.campaignId } : {}),
+      ...('adGroupId' in a && a.adGroupId ? { adGroupId: a.adGroupId } : {}),
       impressions,
       clicks,
       cost: round2(clicks * (acct.clicks ? acct.cost / acct.clicks : 0)),

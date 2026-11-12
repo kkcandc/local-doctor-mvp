@@ -162,6 +162,10 @@ export interface AssetMeta {
   /** Business phone number shown in the call asset (clinic line, not a patient number). */
   phoneNumber?: string
   finalUrls?: string[]
+  /** Callout text. Callouts have no URL. */
+  calloutText?: string
+  snippetHeader?: string
+  snippetValues?: string[]
 }
 
 export interface ConversionActionMeta {

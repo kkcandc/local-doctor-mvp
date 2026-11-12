@@ -66,25 +66,43 @@ export function KeywordsSection() {
             key: 'bid',
             label: 'Bid / cap',
             num: true,
-            value: (r) => r.bid.keywordBid ?? r.bid.adGroupDefault ?? r.bid.maxCpcCap ?? null,
-            render: (r) => (
-              <>
-                {r.bid.keywordBid != null && (
-                  <>
-                    {fmtMoney(r.bid.keywordBid, currency)}
-                    <span className="cell-sub">Keyword bid</span>
-                  </>
-                )}
-                {r.bid.keywordBid == null && r.bid.adGroupDefault != null && (
-                  <>
-                    {fmtMoney(r.bid.adGroupDefault, currency)}
-                    <span className="cell-sub">Ad group default</span>
-                  </>
-                )}
-                {r.bid.keywordBid == null && r.bid.adGroupDefault == null && r.bid.maxCpcCap == null && '-'}
-                {r.bid.maxCpcCap != null && <span className="cell-sub">Max CPC cap {fmtMoney(r.bid.maxCpcCap, currency)}</span>}
-              </>
-            ),
+            value: (r) => (r.bid.leadWithCap ? r.bid.maxCpcCap ?? null : r.bid.keywordBid ?? r.bid.adGroupDefault ?? r.bid.maxCpcCap ?? null),
+            render: (r) =>
+              r.bid.leadWithCap ? (
+                <>
+                  {r.bid.maxCpcCap != null ? (
+                    <>
+                      {fmtMoney(r.bid.maxCpcCap, currency)}
+                      <span className="cell-sub">Max CPC cap</span>
+                    </>
+                  ) : (
+                    <>
+                      Maximize clicks
+                    </>
+                  )}
+                  {r.bid.keywordBid != null && <span className="cell-sub">Keyword bid {fmtMoney(r.bid.keywordBid, currency)}</span>}
+                  {r.bid.adGroupDefault != null && (
+                    <span className="cell-sub">Ad group default {fmtMoney(r.bid.adGroupDefault, currency)}, not used</span>
+                  )}
+                </>
+              ) : (
+                <>
+                  {r.bid.keywordBid != null && (
+                    <>
+                      {fmtMoney(r.bid.keywordBid, currency)}
+                      <span className="cell-sub">Keyword bid</span>
+                    </>
+                  )}
+                  {r.bid.keywordBid == null && r.bid.adGroupDefault != null && (
+                    <>
+                      {fmtMoney(r.bid.adGroupDefault, currency)}
+                      <span className="cell-sub">Ad group default</span>
+                    </>
+                  )}
+                  {r.bid.keywordBid == null && r.bid.adGroupDefault == null && r.bid.maxCpcCap == null && '-'}
+                  {r.bid.maxCpcCap != null && <span className="cell-sub">Max CPC cap {fmtMoney(r.bid.maxCpcCap, currency)}</span>}
+                </>
+              ),
           },
           { key: 'impressions', label: 'Impr.', num: true, render: (r) => fmtInt(r.impressions) },
           { key: 'clicks', label: 'Clicks', num: true, render: (r) => fmtInt(r.clicks) },

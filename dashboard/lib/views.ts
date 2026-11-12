@@ -106,25 +106,36 @@ export function assetLinkMetrics(rows: readonly AssetDailyRow[], range: DateRang
   return groupSum(filterRange(rows, range), (r) => assetLinkKey(r), ['impressions', 'clicks', 'cost'] as const)
 }
 
+/**
+ * Enabled and paused links always show. A removed link shows only when it still
+ * had impressions in the selected range, so a sitelink removed today is not lost.
+ */
+export function visibleAssetLinks<T extends { status?: string; impressions: number }>(rows: T[]): T[] {
+  return rows.filter((r) => (r.status ?? '').toUpperCase() !== 'REMOVED' || r.impressions > 0)
+}
+
 export interface KeywordBidInfo {
   /** Set only when the keyword itself has a CPC bid. */
   keywordBid?: number
   /** Ad group CPC, shown when the keyword has no bid of its own. */
   adGroupDefault?: number
-  /** Campaign max CPC cap (Maximize clicks), shown alongside either bid. */
+  /** Campaign max CPC cap (Maximize clicks). */
   maxCpcCap?: number
+  /** Maximize clicks: the cap is the bid that matters. The ad group default is secondary. */
+  leadWithCap: boolean
 }
 
 export function keywordBidInfo(
   keyword: { cpcBid?: number } | undefined,
   adGroup: { defaultCpcBid?: number } | undefined,
-  campaign: { maxCpcCap?: number } | undefined,
+  campaign: { maxCpcCap?: number; biddingStrategyType?: string } | undefined,
 ): KeywordBidInfo {
   const keywordBid = keyword?.cpcBid
   return {
     keywordBid,
     adGroupDefault: keywordBid == null ? adGroup?.defaultCpcBid : undefined,
     maxCpcCap: campaign?.maxCpcCap,
+    leadWithCap: campaign?.biddingStrategyType === 'TARGET_SPEND',
   }
 }
 

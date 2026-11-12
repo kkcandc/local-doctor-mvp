@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { ctr, filterRange, groupSum } from '@/lib/aggregate'
-import { assetLinkKey, assetLinkMetrics } from '@/lib/views'
+import { assetLinkKey, assetLinkMetrics, visibleAssetLinks } from '@/lib/views'
 import { enumLabel, fmtCount, fmtInt, fmtMoney, fmtPct } from '@/lib/format'
 import { DataTable, type Column } from '../DataTable'
 import { NotConnected, Section, Seg, StatusBadge, useData } from '../ui'
@@ -18,7 +18,7 @@ export function AdsSection() {
       id="ads"
       num={3}
       title="Ads (listings)"
-      description="What people see on Google: each ad's headlines and descriptions, plus the sitelinks and call button shown with them."
+      description="What people see on Google: each ad's headlines and descriptions, plus sitelinks, the call button and callouts. A removed asset stays in the list when it had impressions in this range."
       showGrouping={false}
     >
       {({ range }) => {
@@ -51,6 +51,9 @@ export function AdsSection() {
                   : adGroupName.get(a.adGroupId ?? '') ?? 'Ad group'
             return { key: `${a.id}|${a.level}|${a.campaignId ?? ''}|${a.adGroupId ?? ''}`, ...a, where, ...m, ctr: ctr(m.clicks, m.impressions) }
           })
+        const sitelinkRows = visibleAssetLinks(assetRows.filter((r) => r.type === 'SITELINK' || r.type === 'CALL'))
+        const calloutRows = visibleAssetLinks(assetRows.filter((r) => r.type === 'CALLOUT'))
+        const snippetRows = visibleAssetLinks(assetRows.filter((r) => r.type === 'STRUCTURED_SNIPPET'))
 
         const assetCols: Column<(typeof assetRows)[number]>[] = [
           {
@@ -68,6 +71,7 @@ export function AdsSection() {
             ),
           },
           { key: 'type', label: 'Type', render: (r) => <span className="badge badge-blue">{enumLabel(r.type)}</span> },
+          { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status ?? ''} /> },
           { key: 'where', label: 'Linked to' },
           { key: 'impressions', label: 'Impr.', num: true, render: (r) => fmtInt(r.impressions) },
           { key: 'clicks', label: 'Clicks', num: true, render: (r) => fmtInt(r.clicks) },
@@ -157,7 +161,52 @@ export function AdsSection() {
               </div>
             )}
             <h3 className="subhead">Sitelinks and call asset</h3>
-            <DataTable rows={assetRows} columns={assetCols} rowKey={(r) => r.key} initialSort={{ key: 'impressions', dir: 'desc' }} empty="No sitelinks or call assets found." caption="Assets" />
+            <DataTable rows={sitelinkRows} columns={assetCols} rowKey={(r) => r.key} initialSort={{ key: 'impressions', dir: 'desc' }} empty="No sitelinks or call assets found." caption="Sitelinks and call assets" />
+            <h3 className="subhead">Callouts</h3>
+            <DataTable
+              rows={calloutRows}
+              columns={[
+                { key: 'calloutText', label: 'Callout', render: (r) => <b>{r.calloutText || `Callout ${r.id}`}</b> },
+                { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status ?? ''} /> },
+                { key: 'where', label: 'Linked to' },
+                { key: 'impressions', label: 'Impr.', num: true, render: (r) => fmtInt(r.impressions) },
+                { key: 'clicks', label: 'Clicks', num: true, render: (r) => fmtInt(r.clicks) },
+                { key: 'ctr', label: 'CTR', num: true, render: (r) => fmtPct(r.ctr) },
+                { key: 'cost', label: 'Spend', num: true, render: (r) => fmtMoney(r.cost, currency) },
+              ]}
+              rowKey={(r) => r.key}
+              initialSort={{ key: 'impressions', dir: 'desc' }}
+              empty="No callouts found."
+              caption="Callouts"
+            />
+            {snippetRows.length > 0 && (
+              <>
+                <h3 className="subhead">Structured snippets</h3>
+                <DataTable
+                  rows={snippetRows}
+                  columns={[
+                    {
+                      key: 'snippetHeader',
+                      label: 'Snippet',
+                      render: (r) => (
+                        <>
+                          <b>{r.snippetHeader || 'Snippet'}</b>
+                          {r.snippetValues?.length ? <span className="cell-sub">{r.snippetValues.join(', ')}</span> : null}
+                        </>
+                      ),
+                    },
+                    { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status ?? ''} /> },
+                    { key: 'where', label: 'Linked to' },
+                    { key: 'impressions', label: 'Impr.', num: true, render: (r) => fmtInt(r.impressions) },
+                    { key: 'clicks', label: 'Clicks', num: true, render: (r) => fmtInt(r.clicks) },
+                    { key: 'cost', label: 'Spend', num: true, render: (r) => fmtMoney(r.cost, currency) },
+                  ]}
+                  rowKey={(r) => r.key}
+                  initialSort={{ key: 'impressions', dir: 'desc' }}
+                  caption="Structured snippets"
+                />
+              </>
+            )}
           </>
         )
       }}

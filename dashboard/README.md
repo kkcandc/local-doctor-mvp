@@ -21,8 +21,11 @@ week / month grouping toggle.
 2. **Campaigns**: status, bid strategy (for example Maximize clicks with a max
    CPC cap), daily budget, spend, clicks, conversions, calls.
 3. **Ads (listings)**: each ad's headlines and descriptions, a preview, and the
-   sitelinks and call asset with impressions, clicks, CTR and spend.
-4. **Keywords**: text, match type, ad group, status, bid or cap, impressions,
+   sitelinks, call asset, callouts and structured snippets. Metrics are per
+   link. A removed link stays listed, labeled Removed, when it had impressions
+   in the range.
+4. **Keywords**: text, match type, ad group, status, bid or cap (Maximize clicks
+   leads with the campaign max CPC cap), impressions,
    clicks, CPC, spend, conversions, impression share.
 5. **Search terms**: actual search terms with match source, filterable and
    sortable, as a range total or per day / week / month.

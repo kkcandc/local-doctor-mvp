@@ -66,6 +66,8 @@ const ENUM_LABELS: Record<string, string> = {
   RESPONSIVE_SEARCH_AD: 'Responsive search ad',
   SITELINK: 'Sitelink',
   CALL: 'Call',
+  CALLOUT: 'Callout',
+  STRUCTURED_SNIPPET: 'Structured snippet',
   SEARCH: 'Search',
   UNKNOWN: 'Unknown',
   UNSPECIFIED: 'Unspecified',

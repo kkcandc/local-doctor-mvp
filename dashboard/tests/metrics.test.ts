@@ -10,6 +10,7 @@ import {
   conversionActionRows,
   keywordBidInfo,
   primaryConversionCount,
+  visibleAssetLinks,
 } from '../lib/views'
 
 const range = { start: '2026-11-01', end: '2026-11-07' }
@@ -122,17 +123,41 @@ describe('primary conversions', () => {
   })
 })
 
+describe('removed asset links', () => {
+  it('keeps a removed link that had impressions and drops one that did not', () => {
+    const rows = [
+      { id: '435690817021', status: 'REMOVED', impressions: 120 },
+      { id: '435841430362', status: 'REMOVED', impressions: 80 },
+      { id: '435581476439', status: 'REMOVED', impressions: 40 },
+      { id: 'gone', status: 'REMOVED', impressions: 0 },
+      { id: 'live', status: 'ENABLED', impressions: 0 },
+    ]
+    const shown = visibleAssetLinks(rows)
+    expect(shown.map((r) => r.id)).toEqual(['435690817021', '435841430362', '435581476439', 'live'])
+    expect(shown.find((r) => r.id === '435690817021')?.status).toBe('REMOVED')
+  })
+})
+
 describe('keyword bids', () => {
   it('labels an inherited ad group bid as the default and keeps the campaign cap', () => {
     const info = keywordBidInfo(undefined, { defaultCpcBid: 0.01 }, { maxCpcCap: 6 })
     expect(info.keywordBid).toBeUndefined()
     expect(info.adGroupDefault).toBe(0.01)
     expect(info.maxCpcCap).toBe(6)
+    expect(info.leadWithCap).toBe(false)
+  })
+
+  it('leads Maximize clicks with the cap and leaves the ad group default secondary', () => {
+    const info = keywordBidInfo(undefined, { defaultCpcBid: 0.01 }, { maxCpcCap: 6, biddingStrategyType: 'TARGET_SPEND' })
+    expect(info.leadWithCap).toBe(true)
+    expect(info.maxCpcCap).toBe(6)
+    expect(info.adGroupDefault).toBe(0.01)
+    expect(info.keywordBid).toBeUndefined()
   })
 
   it('keeps a keyword bid that was set on the keyword, and still shows the cap', () => {
     const info = keywordBidInfo({ cpcBid: 4 }, { defaultCpcBid: 20 }, { maxCpcCap: 8 })
-    expect(info).toEqual({ keywordBid: 4, adGroupDefault: undefined, maxCpcCap: 8 })
+    expect(info).toEqual({ keywordBid: 4, adGroupDefault: undefined, maxCpcCap: 8, leadWithCap: false })
   })
 })
 
@@ -173,8 +198,11 @@ describe('vercel ignore rules', () => {
 
   it('fetches asset metrics per link and does not treat the effective bid as a keyword bid', () => {
     const src = readFileSync(path.join(dash, 'lib/google-ads.ts'), 'utf8')
-    expect(src).toContain('campaign.id, asset.id')
-    expect(src).toContain('campaign.id, ad_group.id, asset.id')
+    const assetFn = src.slice(src.indexOf('async function fetchAssets'), src.indexOf('function mergeLandingPages'))
+    expect(assetFn).toContain('campaign.id, asset.id')
+    expect(assetFn).toContain('campaign.id, ad_group.id, asset.id')
+    expect(assetFn).toContain('asset.callout_asset.callout_text')
+    expect(assetFn).not.toContain('REMOVED')
     expect(src).not.toContain('effective_cpc_bid')
   })
 })
