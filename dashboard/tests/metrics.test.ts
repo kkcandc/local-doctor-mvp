@@ -9,7 +9,10 @@ import {
   callsFromAds,
   conversionActionRows,
   keywordBidInfo,
+  overviewMetricRows,
+  overviewTraffic,
   primaryConversionCount,
+  removedCampaignsInRange,
   visibleAssetLinks,
 } from '../lib/views'
 
@@ -138,6 +141,41 @@ describe('removed asset links', () => {
   })
 })
 
+describe('overview campaign scope', () => {
+  const ads = {
+    campaigns: [
+      { id: 'pmax', name: 'Campaign #1', status: 'REMOVED', biddingStrategyType: 'MAXIMIZE_CONVERSIONS' },
+      { id: 'md', name: 'MD Search', status: 'ENABLED', biddingStrategyType: 'TARGET_SPEND' },
+      { id: 'paused', name: 'Brand', status: 'PAUSED', biddingStrategyType: 'MANUAL_CPC' },
+      { id: 'quiet', name: 'Empty removed', status: 'REMOVED', biddingStrategyType: 'MANUAL_CPC' },
+    ],
+    daily: {
+      account: [{ date: '2026-08-14', impressions: 200, clicks: 50, cost: 20, conversions: 0, allConversions: 0, phoneCalls: 0 }],
+      campaigns: [
+        { date: '2026-08-14', campaignId: 'pmax', impressions: 16792, clicks: 445, cost: 132, conversions: 0, allConversions: 0, phoneCalls: 0 },
+        { date: '2026-08-14', campaignId: 'md', impressions: 30, clicks: 4, cost: 7, conversions: 0, allConversions: 0, phoneCalls: 1 },
+        { date: '2026-08-14', campaignId: 'paused', impressions: 10, clicks: 1, cost: 1, conversions: 0, allConversions: 0, phoneCalls: 0 },
+        { date: '2026-08-14', campaignId: 'quiet', impressions: 0, clicks: 0, cost: 0, conversions: 0, allConversions: 0, phoneCalls: 0 },
+        { date: '2026-07-01', campaignId: 'pmax', impressions: 9, clicks: 1, cost: 1, conversions: 0, allConversions: 0, phoneCalls: 0 },
+      ],
+    },
+  } as AdsData
+
+  it('names a removed campaign that still has clicks in the range', () => {
+    const found = removedCampaignsInRange(ads, { start: '2026-08-01', end: '2026-11-01' })
+    expect(found.map((c) => c.name)).toEqual(['Campaign #1'])
+    expect(found[0]).toMatchObject({ impressions: 16792, clicks: 445, cost: 132 })
+  })
+
+  it('keeps all-campaign totals, and drops removed and paused when set to enabled', () => {
+    const range = { start: '2026-08-01', end: '2026-11-01' }
+    expect(overviewTraffic(ads, range, 'all').clicks).toBe(50)
+    expect(overviewTraffic(ads, range, 'all').phoneCalls).toBe(1)
+    expect(overviewTraffic(ads, range, 'enabled')).toMatchObject({ impressions: 30, clicks: 4, cost: 7, phoneCalls: 1 })
+    expect(overviewMetricRows(ads, 'enabled').map((r) => r.clicks)).toEqual([4])
+  })
+})
+
 describe('keyword bids', () => {
   it('labels an inherited ad group bid as the default and keeps the campaign cap', () => {
     const info = keywordBidInfo(undefined, { defaultCpcBid: 0.01 }, { maxCpcCap: 6 })
@@ -204,5 +242,9 @@ describe('vercel ignore rules', () => {
     expect(assetFn).toContain('asset.callout_asset.callout_text')
     expect(assetFn).not.toContain('REMOVED')
     expect(src).not.toContain('effective_cpc_bid')
+    expect(src).toContain("campaign.status IN ('ENABLED', 'PAUSED', 'REMOVED')")
+    const charts = readFileSync(path.join(dash, 'components/charts.tsx'), 'utf8')
+    expect(charts).toContain('type="linear"')
+    expect(charts).not.toContain('monotone')
   })
 })

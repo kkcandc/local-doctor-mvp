@@ -491,6 +491,38 @@ main {
   height: 260px;
   margin-top: 16px;
 }
+.chart-stack .chart-box {
+  margin-top: 0;
+}
+.chart-title {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink-900);
+  margin: 12px 0 0;
+}
+.chart-tip {
+  background: var(--white);
+  border: 1px solid var(--ink-100);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--ink-900);
+  box-shadow: var(--shadow);
+}
+.chart-tip-sub {
+  color: var(--ink-500);
+  font-size: 12px;
+  margin: 2px 0 4px;
+}
+.chart-note {
+  margin-top: 12px;
+  background: var(--yellow-100);
+  border: 1px solid var(--yellow-500);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--ink-900);
+}
 .chart-legend-note {
   font-size: 12px;
   color: var(--ink-500);

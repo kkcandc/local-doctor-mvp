@@ -15,8 +15,9 @@ Every section has its own date range (7, 30 or 90 days, or custom) and a day /
 week / month grouping toggle.
 
 1. **Overview**: spend, impressions, clicks, CTR, avg CPC, primary conversions,
-   cost per primary conversion, calls from ads, secondary conversion counts, a
-   trend chart, and a funnel: impressions, clicks, landing page sessions,
+   cost per primary conversion, calls from ads, secondary conversion counts,
+   separate spend / clicks / primary-conversion charts (no shared axis), and a
+   funnel: impressions, clicks, landing page sessions,
    on-page actions, evaluation started, evaluation submitted or booked, calls.
 2. **Campaigns**: status, bid strategy (for example Maximize clicks with a max
    CPC cap), daily budget, spend, clicks, conversions, calls.

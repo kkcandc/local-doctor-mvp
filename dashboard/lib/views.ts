@@ -26,6 +26,63 @@ export function accountTotals(ads: AdsData, range: DateRange) {
   return derive(sumFields(rows, [...ADS_FIELDS, 'phoneCalls'] as const))
 }
 
+export type OverviewScope = 'all' | 'enabled'
+
+/** Enabled campaigns only. Removed and paused campaigns stay out of this set. */
+function enabledCampaignIds(ads: AdsData): Set<string> {
+  return new Set(ads.campaigns.filter((c) => c.status.toUpperCase() === 'ENABLED').map((c) => c.id))
+}
+
+/**
+ * Traffic for the Overview. "all" uses the account totals (every campaign,
+ * including removed). "enabled" sums only campaigns that are enabled today.
+ * Calls always come from campaign phone_calls, because the account row often has none.
+ */
+export function overviewTraffic(ads: AdsData, range: DateRange, scope: OverviewScope) {
+  if (scope === 'all') {
+    const totals = accountTotals(ads, range)
+    return { ...totals, phoneCalls: callsFromAds(ads, range) }
+  }
+  const enabled = enabledCampaignIds(ads)
+  const rows = filterRange(ads.daily.campaigns, range).filter((r) => enabled.has(r.campaignId))
+  return derive(sumFields(rows, [...ADS_FIELDS, 'phoneCalls'] as const))
+}
+
+/** Daily spend and clicks for the Overview charts. Same scope rules as overviewTraffic. */
+export function overviewMetricRows(ads: AdsData, scope: OverviewScope): { date: string; cost: number; clicks: number }[] {
+  if (scope === 'all') return ads.daily.account
+  const enabled = enabledCampaignIds(ads)
+  return ads.daily.campaigns.filter((r) => enabled.has(r.campaignId))
+}
+
+export interface RemovedCampaignContribution {
+  id: string
+  name: string
+  impressions: number
+  clicks: number
+  cost: number
+}
+
+/** Removed campaigns that still have impressions, clicks or spend inside the range. */
+export function removedCampaignsInRange(ads: AdsData, range: DateRange): RemovedCampaignContribution[] {
+  const removed = new Map(ads.campaigns.filter((c) => c.status.toUpperCase() === 'REMOVED').map((c) => [c.id, c]))
+  const sums = groupSum(
+    filterRange(ads.daily.campaigns, range).filter((r) => removed.has(r.campaignId)),
+    (r) => r.campaignId,
+    ['impressions', 'clicks', 'cost'] as const,
+  )
+  return [...sums.entries()]
+    .filter(([, m]) => m.impressions > 0 || m.clicks > 0 || m.cost > 0)
+    .map(([id, m]) => ({
+      id,
+      name: removed.get(id)?.name || `Campaign ${id}`,
+      impressions: m.impressions,
+      clicks: m.clicks,
+      cost: m.cost,
+    }))
+    .sort((a, b) => b.clicks - a.clicks || b.cost - a.cost)
+}
+
 export interface ActionRow {
   id: string
   name: string

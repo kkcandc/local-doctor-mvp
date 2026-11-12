@@ -85,6 +85,29 @@ export function shortDate(date: string): string {
   return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`
 }
 
+/** Last calendar day of a day, ISO week (Sunday), or month bucket. */
+export function bucketEnd(key: string, grouping: Grouping): string {
+  if (grouping === 'day') return key
+  if (grouping === 'week') return addDays(key, 6)
+  const [year, month] = key.split('-').map(Number)
+  return formatDate(new Date(Date.UTC(year, month, 0)))
+}
+
+/**
+ * The days of a bucket that fall inside the range. Week and month buckets at
+ * either end are partial when the range starts or ends mid-bucket. Days are not.
+ */
+export function bucketCoverage(
+  key: string,
+  grouping: Grouping,
+  range: DateRange,
+): { coverStart: string; coverEnd: string; partial: boolean } {
+  const fullEnd = bucketEnd(key, grouping)
+  const coverStart = key < range.start ? range.start : key
+  const coverEnd = fullEnd > range.end ? range.end : fullEnd
+  return { coverStart, coverEnd, partial: grouping !== 'day' && (coverStart !== key || coverEnd !== fullEnd) }
+}
+
 export function bucketLabel(key: string, grouping: Grouping): string {
   if (grouping === 'month') {
     const d = parseDate(key)

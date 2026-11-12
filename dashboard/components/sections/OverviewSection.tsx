@@ -2,10 +2,22 @@
 
 import { useState } from 'react'
 import { costPer, delta, timeSeries } from '@/lib/aggregate'
+import { bucketCoverage } from '@/lib/dates'
 import { fmtCount, fmtInt, fmtMoney, fmtPct } from '@/lib/format'
 import type { DateRange } from '@/lib/types'
-import { accountTotals, callsFromAds, conversionActionRows, ga4EventCounts, ga4Totals, primaryConversionCount, primaryConversionsByDate } from '@/lib/views'
-import { TrendChart } from '../charts'
+import {
+  accountTotals,
+  conversionActionRows,
+  ga4EventCounts,
+  ga4Totals,
+  overviewMetricRows,
+  overviewTraffic,
+  primaryConversionCount,
+  primaryConversionsByDate,
+  removedCampaignsInRange,
+  type OverviewScope,
+} from '@/lib/views'
+import { MetricChart, type MetricPoint } from '../charts'
 import { CHANNEL_OPTIONS, Kpi, NotConnected, Section, Seg, useData, type Ga4Channel } from '../ui'
 
 interface Step {
@@ -66,23 +78,36 @@ function Funnel({ steps }: { steps: Step[] }) {
   )
 }
 
+const SCOPE_OPTIONS: { id: OverviewScope; label: string }[] = [
+  { id: 'all', label: 'All campaigns' },
+  { id: 'enabled', label: 'Enabled only' },
+]
+
+function toPoints(rows: { bucket: string; value: number }[], range: DateRange, grouping: 'day' | 'week' | 'month'): MetricPoint[] {
+  return rows.map((row) => ({ ...row, ...bucketCoverage(row.bucket, grouping, range) }))
+}
+
 function OverviewBody({ range, prevRange, grouping }: { range: DateRange; prevRange: DateRange | null; grouping: 'day' | 'week' | 'month' }) {
   const { snapshot, currency } = useData()
   const [channel, setChannel] = useState<Ga4Channel>('paid')
+  const [scope, setScope] = useState<OverviewScope>('all')
   const { ads, ga4 } = snapshot
 
   if (!ads && !ga4) return <NotConnected source="Google Ads" />
 
-  const t = ads ? accountTotals(ads, range) : null
-  const p = ads && prevRange ? accountTotals(ads, prevRange) : null
+  const t = ads ? overviewTraffic(ads, range, scope) : null
+  const p = ads && prevRange ? overviewTraffic(ads, prevRange, scope) : null
+  const accountNow = ads ? accountTotals(ads, range) : null
+  const accountPrev = ads && prevRange ? accountTotals(ads, prevRange) : null
   const d = (k: keyof NonNullable<typeof t>) => (t && p ? delta(Number(t[k] ?? 0), Number(p[k] ?? 0)) : null)
   const secondary = ads ? conversionActionRows(ads, range).filter((a) => !a.primary && a.count > 0).sort((a, b) => b.count - a.count) : []
   const primaryNow = ads ? primaryConversionCount(ads, range) : 0
   const primaryPrev = ads && prevRange ? primaryConversionCount(ads, prevRange) : null
-  const costPerPrimary = t ? costPer(t.cost, primaryNow) : null
-  const costPerPrimaryPrev = p && primaryPrev != null ? costPer(p.cost, primaryPrev) : null
-  const callsNow = ads ? callsFromAds(ads, range) : 0
-  const callsPrev = ads && prevRange ? callsFromAds(ads, prevRange) : null
+  const costPerPrimary = accountNow ? costPer(accountNow.cost, primaryNow) : null
+  const costPerPrimaryPrev = accountPrev && primaryPrev != null ? costPer(accountPrev.cost, primaryPrev) : null
+  const removed = ads ? removedCampaignsInRange(ads, range) : []
+  const callsNow = t?.phoneCalls ?? 0
+  const callsPrev = p ? p.phoneCalls : null
 
   const sessions = ga4 ? ga4Totals(ga4, range, channel) : null
   const events = ga4 ? ga4EventCounts(ga4, range, channel) : null
@@ -115,27 +140,53 @@ function OverviewBody({ range, prevRange, grouping }: { range: DateRange; prevRa
     },
   ]
 
-  const spend = ads ? timeSeries(ads.daily.account, range, grouping, ['cost', 'clicks'] as const) : []
+  const trafficSeries = ads ? timeSeries(overviewMetricRows(ads, scope), range, grouping, ['cost', 'clicks'] as const) : []
   const primaryByBucket = ads ? timeSeries(primaryConversionsByDate(ads), range, grouping, ['conversions'] as const) : []
-  const series = spend.map((point, i) => ({ ...point, conversions: primaryByBucket[i]?.conversions ?? 0 }))
+  const spendPoints = toPoints(
+    trafficSeries.map((point) => ({ bucket: point.bucket, value: point.cost })),
+    range,
+    grouping,
+  )
+  const clickPoints = toPoints(
+    trafficSeries.map((point) => ({ bucket: point.bucket, value: point.clicks })),
+    range,
+    grouping,
+  )
+  const conversionPoints = toPoints(
+    primaryByBucket.map((point) => ({ bucket: point.bucket, value: point.conversions })),
+    range,
+    grouping,
+  )
+  const anyPartial = spendPoints.some((point) => point.partial)
 
   return (
     <>
       {t ? (
         <div className="kpis">
-          <Kpi label="Spend" value={fmtMoney(t.cost, currency)} delta={d('cost')} goodWhenUp={false} />
+          <Kpi label="Spend" value={fmtMoney(t.cost, currency)} delta={d('cost')} goodWhenUp={false} hint={scope === 'enabled' ? 'Enabled campaigns' : undefined} />
           <Kpi label="Impressions" value={fmtInt(t.impressions)} delta={d('impressions')} />
           <Kpi label="Clicks" value={fmtInt(t.clicks)} delta={d('clicks')} />
           <Kpi label="CTR" value={fmtPct(t.ctr)} delta={d('ctr')} />
           <Kpi label="Avg CPC" value={fmtMoney(t.cpc, currency)} delta={d('cpc')} goodWhenUp={false} />
-          <Kpi label="Primary conversions" value={fmtCount(primaryNow)} delta={primaryPrev != null ? delta(primaryNow, primaryPrev) : null} hint="Marked primary today" />
+          <Kpi
+            label="Primary conversions"
+            value={fmtCount(primaryNow)}
+            delta={primaryPrev != null ? delta(primaryNow, primaryPrev) : null}
+            hint={scope === 'enabled' ? 'All campaigns. Marked primary today' : 'Marked primary today'}
+          />
           <Kpi
             label="Cost / primary conv."
             value={fmtMoney(costPerPrimary, currency)}
             delta={costPerPrimary != null && costPerPrimaryPrev != null ? delta(costPerPrimary, costPerPrimaryPrev) : null}
             goodWhenUp={false}
+            hint={scope === 'enabled' ? 'All-campaign spend' : undefined}
           />
-          <Kpi label="Calls from ads" value={fmtInt(callsNow)} delta={callsPrev != null ? delta(callsNow, callsPrev) : null} hint="Campaign call metrics" />
+          <Kpi
+            label="Calls from ads"
+            value={fmtInt(callsNow)}
+            delta={callsPrev != null ? delta(callsNow, callsPrev) : null}
+            hint={scope === 'enabled' ? 'Enabled campaigns' : 'Campaign call metrics'}
+          />
         </div>
       ) : (
         <NotConnected source="Google Ads" />
@@ -155,15 +206,32 @@ function OverviewBody({ range, prevRange, grouping }: { range: DateRange; prevRa
       )}
 
       {ads && (
-        <TrendChart
-          data={series}
-          grouping={grouping}
-          series={[
-            { key: 'cost', label: 'Spend', type: 'bar', color: '#8cc4f5', format: (n) => fmtMoney(n, currency, 0) },
-            { key: 'clicks', label: 'Clicks', type: 'line', axis: 'right', color: '#0f3f8c', format: fmtInt },
-            { key: 'conversions', label: 'Primary conversions', type: 'line', axis: 'right', color: '#e0a800', format: fmtCount },
-          ]}
-        />
+        <>
+          <div className="section-head" style={{ marginTop: 8, marginBottom: 0 }}>
+            <h3 className="subhead" style={{ margin: 0 }}>
+              Trend
+            </h3>
+            <Seg label="Campaigns in the trend" value={scope} options={SCOPE_OPTIONS} onChange={setScope} />
+          </div>
+          {removed.length > 0 && (
+            <p className="chart-note">
+              {scope === 'enabled' ? 'Hidden by Enabled only. ' : 'Included in this range. '}
+              {removed
+                .map((c) => `${c.name} (removed): ${fmtInt(c.impressions)} impressions, ${fmtInt(c.clicks)} clicks, ${fmtMoney(c.cost, currency)}`)
+                .join('; ')}
+              .
+            </p>
+          )}
+          <div className="chart-stack">
+            <MetricChart title="Spend" data={spendPoints} color="#8cc4f5" grouping={grouping} format={(n) => fmtMoney(n, currency, 0)} showAxis={false} allowDecimals />
+            <MetricChart title="Clicks" data={clickPoints} color="#0f3f8c" grouping={grouping} format={fmtInt} showAxis={false} />
+            <MetricChart title="Primary conversions" data={conversionPoints} color="#e0a800" grouping={grouping} format={fmtCount} height={120} allowDecimals />
+          </div>
+          {anyPartial && <p className="chart-legend-note">Lighter bars are partial weeks or months. The range starts or ends in the middle of that bucket. Hover a bar for the exact days and value.</p>}
+          {scope === 'enabled' && (
+            <p className="chart-legend-note">Spend and clicks are enabled campaigns only. Primary conversions stay account-wide, on their own scale.</p>
+          )}
+        </>
       )}
 
       <div className="section-head" style={{ marginTop: 24, marginBottom: 8 }}>
@@ -183,7 +251,7 @@ function OverviewBody({ range, prevRange, grouping }: { range: DateRange; prevRa
 
 export function OverviewSection() {
   return (
-    <Section id="overview" num={1} title="Overview" description="Spend, traffic and the funnel. Primary conversions add up actions marked primary today. Calls from ads are campaign call metrics, not a conversion action.">
+    <Section id="overview" num={1} title="Overview" description="Spend, clicks and primary conversions are separate charts, each with its own scale. Primary conversions add up actions marked primary today. Calls from ads are campaign call metrics, not a conversion action.">
       {(ctx) => <OverviewBody {...ctx} />}
     </Section>
   )

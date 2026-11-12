@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { cpc, ctr, delta, filterRange, groupSum, ratio, sumFields, timeSeries } from '../lib/aggregate'
-import { addDays, bucketKey, bucketLabel, bucketsInRange, daysBetween, isValidDate, previousRange, resolveRange } from '../lib/dates'
+import { addDays, bucketCoverage, bucketEnd, bucketKey, bucketLabel, bucketsInRange, daysBetween, isValidDate, previousRange, resolveRange } from '../lib/dates'
 import { spendRollup } from '../lib/views'
 import exampleSnapshot from '../fixtures/example-snapshot.json'
 import type { Snapshot } from '../lib/types'
@@ -82,6 +82,17 @@ describe('aggregation', () => {
       { bucket: '2026-11-02', clicks: 4, cost: 8 },
       { bucket: '2026-11-09', clicks: 5, cost: 10 },
     ])
+  })
+
+  it('marks only the first and last week or month buckets as partial', () => {
+    const range = { start: '2026-10-31', end: '2026-11-09' }
+    expect(bucketEnd('2026-10-26', 'week')).toBe('2026-11-01')
+    expect(bucketEnd('2026-11-01', 'month')).toBe('2026-11-30')
+    expect(bucketCoverage('2026-10-26', 'week', range)).toEqual({ coverStart: '2026-10-31', coverEnd: '2026-11-01', partial: true })
+    expect(bucketCoverage('2026-11-02', 'week', range)).toEqual({ coverStart: '2026-11-02', coverEnd: '2026-11-08', partial: false })
+    expect(bucketCoverage('2026-11-09', 'week', range)).toEqual({ coverStart: '2026-11-09', coverEnd: '2026-11-09', partial: true })
+    expect(bucketCoverage('2026-10-01', 'month', { start: '2026-10-15', end: '2026-11-02' }).partial).toBe(true)
+    expect(bucketCoverage('2026-11-03', 'day', range).partial).toBe(false)
   })
 
   it('fills empty buckets with zero', () => {

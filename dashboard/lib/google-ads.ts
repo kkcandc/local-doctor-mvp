@@ -144,6 +144,8 @@ export async function fetchAds(creds: AdsCredentials, range: DateRange): Promise
       async () =>
         (
           await client.queryFirst([
+            `SELECT campaign.id, segments.date, ${BASE_METRICS}, metrics.phone_calls FROM campaign WHERE ${during} AND ${CAMPAIGN_STATUSES}`,
+            `SELECT campaign.id, segments.date, ${BASE_METRICS} FROM campaign WHERE ${during} AND ${CAMPAIGN_STATUSES}`,
             `SELECT campaign.id, segments.date, ${BASE_METRICS}, metrics.phone_calls FROM campaign WHERE ${during}`,
             `SELECT campaign.id, segments.date, ${BASE_METRICS} FROM campaign WHERE ${during}`,
           ])
@@ -303,10 +305,15 @@ export async function fetchAds(creds: AdsCredentials, range: DateRange): Promise
   }
 }
 
+/** Google omits REMOVED campaigns unless the status filter asks for them. */
+const CAMPAIGN_STATUSES = "campaign.status IN ('ENABLED', 'PAUSED', 'REMOVED')"
+
 async function fetchCampaigns(client: AdsClient): Promise<CampaignMeta[]> {
   const common =
     'campaign.id, campaign.name, campaign.status, campaign.bidding_strategy_type, campaign.advertising_channel_type, campaign_budget.amount_micros'
   const rows = await client.queryFirst([
+    `SELECT ${common}, campaign.target_spend.cpc_bid_ceiling_micros FROM campaign WHERE ${CAMPAIGN_STATUSES}`,
+    `SELECT ${common} FROM campaign WHERE ${CAMPAIGN_STATUSES}`,
     `SELECT ${common}, campaign.target_spend.cpc_bid_ceiling_micros FROM campaign`,
     `SELECT ${common} FROM campaign`,
   ])

@@ -2,7 +2,9 @@
 
 import {
   Bar,
+  BarChart,
   CartesianGrid,
+  Cell,
   ComposedChart,
   Legend,
   Line,
@@ -11,7 +13,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { bucketLabel, type Grouping } from '@/lib/dates'
+import { bucketLabel, shortDate, type Grouping } from '@/lib/dates'
 import { compact } from '@/lib/format'
 
 export const COLORS = ['#0f3f8c', '#0f6f96', '#e0a800', '#8cc4f5', '#22a06b', '#b45309', '#767e89', '#7c3aed']
@@ -91,7 +93,7 @@ export function TrendChart({
               <Line
                 key={s.key}
                 yAxisId={s.axis ?? 'left'}
-                type="monotone"
+                type="linear"
                 dataKey={s.key}
                 name={s.label}
                 stroke={s.color ?? COLORS[i % COLORS.length]}
@@ -115,6 +117,109 @@ export function TrendChart({
           )}
         </ComposedChart>
       </ResponsiveContainer>
+    </div>
+  )
+}
+
+export interface MetricPoint {
+  bucket: string
+  value: number
+  partial?: boolean
+  coverStart?: string
+  coverEnd?: string
+}
+
+function MetricTip({
+  active,
+  payload,
+  label,
+  grouping,
+  format,
+  name,
+}: {
+  active?: boolean
+  payload?: { value?: number; payload?: MetricPoint }[]
+  label?: string | number
+  grouping: Grouping
+  format: (n: number) => string
+  name: string
+}) {
+  if (!active || !payload?.length || label == null) return null
+  const row = payload[0]?.payload
+  return (
+    <div className="chart-tip">
+      <div>
+        {bucketLabel(String(label), grouping)}
+        {row?.partial ? ' (partial)' : ''}
+      </div>
+      {row?.partial && row.coverStart && row.coverEnd && (
+        <div className="chart-tip-sub">
+          {shortDate(row.coverStart)} - {shortDate(row.coverEnd)}
+        </div>
+      )}
+      <div>
+        {name}: <b>{format(Number(payload[0]?.value ?? 0))}</b>
+      </div>
+    </div>
+  )
+}
+
+/** One metric, one axis, straight bars. Partial buckets are drawn lighter. */
+export function MetricChart({
+  title,
+  data,
+  color,
+  grouping,
+  format,
+  height = 150,
+  showAxis = true,
+  allowDecimals = false,
+}: {
+  title: string
+  data: MetricPoint[]
+  color: string
+  grouping: Grouping
+  format: (n: number) => string
+  height?: number
+  showAxis?: boolean
+  allowDecimals?: boolean
+}) {
+  return (
+    <div>
+      <h3 className="chart-title">{title}</h3>
+      <div className="chart-box" style={{ height }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid stroke="#e7e9ec" vertical={false} />
+            <XAxis
+              dataKey="bucket"
+              tick={showAxis ? { fontSize: 11, fill: '#767e89' } : false}
+              tickFormatter={(v: string) => bucketLabel(v, grouping).replace('Wk of ', '')}
+              tickLine={false}
+              axisLine={{ stroke: '#d5d9df' }}
+              minTickGap={16}
+              height={showAxis ? 24 : 4}
+            />
+            <YAxis
+              allowDecimals={allowDecimals}
+              tick={{ fontSize: 11, fill: '#767e89' }}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(n: number) => format(n)}
+              width={56}
+            />
+            <Tooltip
+              content={<MetricTip grouping={grouping} format={format} name={title} />}
+              cursor={{ fill: 'rgba(15, 63, 140, 0.06)' }}
+            />
+            <Bar dataKey="value" maxBarSize={32} radius={[3, 3, 0, 0]} isAnimationActive={false}>
+              {data.map((d) => (
+                <Cell key={d.bucket} fill={color} fillOpacity={d.partial ? 0.38 : 1} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 }
