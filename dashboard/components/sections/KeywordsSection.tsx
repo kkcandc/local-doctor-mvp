@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { filterRange, groupSum, ratio, timeSeries } from '@/lib/aggregate'
 import { enumLabel, fmtCount, fmtInt, fmtMoney, fmtPct } from '@/lib/format'
-import { derive, keywordBidInfo } from '@/lib/views'
+import { derive, keywordBidInfo, unusedBidLine } from '@/lib/views'
 import { TrendChart } from '../charts'
 import { DataTable, type Column } from '../DataTable'
 import { NotConnected, Section, StatusBadge, useData } from '../ui'
@@ -80,9 +80,11 @@ export function KeywordsSection() {
                       Maximize clicks
                     </>
                   )}
-                  {r.bid.keywordBid != null && <span className="cell-sub">Keyword bid {fmtMoney(r.bid.keywordBid, currency)}</span>}
+                  {r.bid.keywordBid != null && (
+                    <span className="cell-sub">{unusedBidLine('Keyword bid', fmtMoney(r.bid.keywordBid, currency))}</span>
+                  )}
                   {r.bid.adGroupDefault != null && (
-                    <span className="cell-sub">Ad group default {fmtMoney(r.bid.adGroupDefault, currency)}, not used</span>
+                    <span className="cell-sub">{unusedBidLine('Ad group default', fmtMoney(r.bid.adGroupDefault, currency))}</span>
                   )}
                 </>
               ) : (

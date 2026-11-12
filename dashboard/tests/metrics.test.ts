@@ -13,8 +13,10 @@ import {
   overviewTraffic,
   primaryConversionCount,
   removedCampaignsInRange,
+  unusedBidLine,
   visibleAssetLinks,
 } from '../lib/views'
+import { refreshCooldownMessage } from '../lib/refresh-message'
 
 const range = { start: '2026-11-01', end: '2026-11-07' }
 
@@ -191,11 +193,32 @@ describe('keyword bids', () => {
     expect(info.maxCpcCap).toBe(6)
     expect(info.adGroupDefault).toBe(0.01)
     expect(info.keywordBid).toBeUndefined()
+    expect(unusedBidLine('Ad group default', '$0.01')).toBe('Ad group default $0.01, not used')
+  })
+
+  it('marks a keyword bid unused under Maximize clicks, since only the cap applies', () => {
+    const info = keywordBidInfo({ cpcBid: 12.8 }, { defaultCpcBid: 0.01 }, { maxCpcCap: 6, biddingStrategyType: 'TARGET_SPEND' })
+    expect(info.leadWithCap).toBe(true)
+    expect(info.keywordBid).toBe(12.8)
+    expect(info.adGroupDefault).toBeUndefined()
+    expect(unusedBidLine('Keyword bid', '$12.80')).toBe('Keyword bid $12.80, not used')
   })
 
   it('keeps a keyword bid that was set on the keyword, and still shows the cap', () => {
     const info = keywordBidInfo({ cpcBid: 4 }, { defaultCpcBid: 20 }, { maxCpcCap: 8 })
     expect(info).toEqual({ keywordBid: 4, adGroupDefault: undefined, maxCpcCap: 8, leadWithCap: false })
+  })
+})
+
+describe('refresh cooldown message', () => {
+  it('says how long ago the refresh was and how long to wait', () => {
+    const ten = 10 * 60 * 1000
+    expect(refreshCooldownMessage(3 * 60 * 1000, ten)).toEqual({
+      error: 'Refreshed 3 min ago, try again in 7 min.',
+      retryAfterSeconds: 7 * 60,
+    })
+    expect(refreshCooldownMessage(30 * 1000, ten).error).toBe('Refreshed just now, try again in 10 min.')
+    expect(refreshCooldownMessage(9 * 60 * 1000 + 1000, ten).error).toBe('Refreshed 9 min ago, try again in 1 min.')
   })
 })
 

@@ -26,7 +26,8 @@ week / month grouping toggle.
    link. A removed link stays listed, labeled Removed, when it had impressions
    in the range.
 4. **Keywords**: text, match type, ad group, status, bid or cap (Maximize clicks
-   leads with the campaign max CPC cap), impressions,
+   leads with the campaign max CPC cap; keyword bids and ad group defaults are
+   marked not used), impressions,
    clicks, CPC, spend, conversions, impression share.
 5. **Search terms**: actual search terms with match source, filterable and
    sortable, as a range total or per day / week / month.

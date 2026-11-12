@@ -178,8 +178,13 @@ export interface KeywordBidInfo {
   adGroupDefault?: number
   /** Campaign max CPC cap (Maximize clicks). */
   maxCpcCap?: number
-  /** Maximize clicks: the cap is the bid that matters. The ad group default is secondary. */
+  /** Maximize clicks: only the campaign cap applies. Keyword bids and ad group defaults are not used. */
   leadWithCap: boolean
+}
+
+/** Secondary line under a Maximize clicks cap. The amount is already formatted. */
+export function unusedBidLine(label: 'Keyword bid' | 'Ad group default', amount: string): string {
+  return `${label} ${amount}, not used`
 }
 
 export function keywordBidInfo(

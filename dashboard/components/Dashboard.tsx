@@ -72,6 +72,7 @@ export function Dashboard({
   const router = useRouter()
   const [refreshing, setRefreshing] = useState(false)
   const [refreshMsg, setRefreshMsg] = useState<string | null>(null)
+  const [refreshTone, setRefreshTone] = useState<'info' | 'ok' | 'warn'>('info')
 
   const data = useMemo<DashboardData>(
     () => ({
@@ -87,21 +88,30 @@ export function Dashboard({
 
   async function refresh() {
     setRefreshing(true)
+    setRefreshTone('info')
     setRefreshMsg('Pulling fresh data, this can take a minute...')
     try {
       const res = await fetch('/api/refresh', { method: 'POST' })
-      const body = (await res.json().catch(() => ({}))) as { error?: string }
+      const body = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string }
       if (res.status === 401) {
         router.push('/login')
         return
       }
-      if (!res.ok) {
-        setRefreshMsg(body.error ?? `Refresh failed (${res.status}).`)
-      } else {
-        setRefreshMsg('Updated.')
-        router.refresh()
+      if (res.status === 429) {
+        setRefreshTone('warn')
+        setRefreshMsg(body.error || 'Refreshed recently, try again in a few minutes.')
+        return
       }
+      if (!res.ok || body.ok === false) {
+        setRefreshTone('warn')
+        setRefreshMsg(body.error ?? `Refresh failed (${res.status}).`)
+        return
+      }
+      setRefreshTone('ok')
+      setRefreshMsg('Updated.')
+      router.refresh()
     } catch {
+      setRefreshTone('warn')
       setRefreshMsg('Refresh failed: network error.')
     } finally {
       setRefreshing(false)
@@ -121,7 +131,7 @@ export function Dashboard({
           </div>
           <div className="topbar-actions">
             {refreshMsg && (
-              <span className="refresh-msg" role="status">
+              <span className={`refresh-msg is-${refreshTone}`} role="status">
                 {refreshMsg}
               </span>
             )}

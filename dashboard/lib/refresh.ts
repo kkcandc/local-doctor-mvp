@@ -3,6 +3,7 @@ import { addDays } from './dates'
 import { adsCredentials, ga4Credentials, lookbackDays } from './env'
 import { fetchAds } from './google-ads'
 import { fetchGa4 } from './ga4'
+import { refreshCooldownMessage } from './refresh-message'
 import { readJson, StorageConflictError, writeJson } from './storage'
 import type { DateRange, Snapshot, SourceStatus } from './types'
 
@@ -39,12 +40,13 @@ export async function runRefresh(trigger: 'cron' | 'manual'): Promise<RefreshRes
   const now = Date.now()
   if (trigger === 'manual' && state.lastStartedAt) {
     const elapsed = now - Date.parse(state.lastStartedAt)
-    if (elapsed < MANUAL_REFRESH_COOLDOWN_MS) {
+    if (Number.isFinite(elapsed) && elapsed >= 0 && elapsed < MANUAL_REFRESH_COOLDOWN_MS) {
+      const wait = refreshCooldownMessage(elapsed, MANUAL_REFRESH_COOLDOWN_MS)
       return {
         ok: false,
         status: 429,
-        error: 'Data was refreshed less than 10 minutes ago. Try again shortly.',
-        retryAfterSeconds: Math.ceil((MANUAL_REFRESH_COOLDOWN_MS - elapsed) / 1000),
+        error: wait.error,
+        retryAfterSeconds: wait.retryAfterSeconds,
       }
     }
   }
