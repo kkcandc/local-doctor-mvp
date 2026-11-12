@@ -33,6 +33,8 @@ export type LandingPageContent = {
   reassurance: string
   heroNote?: string
   heroSecondary?: { label: string; href: `#${string}` }
+  // Optional text link beside the primary button. Intake goes to /get-started. location is a cta_click slot.
+  secondaryLink?: { label: string; location: string }
   facts: { title: string; items: string[] }
   sections: LandingSection[]
   faqTitle: string
@@ -52,6 +54,10 @@ export const relatedLabels: Record<LandingSlug, { title: string; copy: string }>
   'memory-doctor-near-me': {
     title: 'Memory doctor near you',
     copy: 'A Maryland doctor can see you by video from home, so the visit does not require a drive.',
+  },
+  'alzheimers-blood-test': {
+    title: "Alzheimer's blood test",
+    copy: 'The pTau217 blood test, requested before a visit and reviewed with a neurologist.',
   },
 }
 
@@ -727,6 +733,105 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     ],
     closing: { title: 'See a memory doctor without leaving home.', copy: 'Pick an open visit time or call our team. We confirm eligibility and insurance with you before the visit.' },
     related: ['memory-specialist-maryland', 'alzheimers-doctor-maryland', 'memory-evaluation'],
+  },
+
+  'alzheimers-blood-test': {
+    slug: 'alzheimers-blood-test',
+    funnel: 'evaluationForm',
+    ctaLabel: 'Request the blood test',
+    secondaryLink: { label: 'See open visit times', location: 'visit_times' },
+    reassurance: heroReassurance,
+    eyebrow: "Alzheimer's blood test",
+    h1: "Get an Alzheimer's blood test, reviewed by a neurologist.",
+    subhead: 'Request the pTau217 blood test before a visit. A board-certified neurologist reviews the results with you.',
+    lede: "Local Doctor offers the pTau217 blood test. It measures a protein linked to Alzheimer's changes in the brain. You can request it before a visit, and it does not require seeing the neurologist first. A blood test alone does not diagnose Alzheimer's.",
+    heroSecondary: { label: 'How the blood test request works', href: '#how-it-works' },
+    facts: {
+      title: 'How this works',
+      items: [...trustFacts, 'pTau217 blood test', 'Request it before a visit'],
+    },
+    sections: [
+      {
+        kind: 'cards',
+        eyebrow: 'What people search for',
+        title: 'A blood test for Alzheimer\'s.',
+        intro: 'People look this up in different words: blood test for Alzheimer\'s, Alzheimer\'s blood test, pTau217 blood test, Alzheimer\'s test, test for Alzheimer\'s, or dementia test. Local Doctor offers the pTau217 blood test.',
+        columns: 2,
+        items: [
+          {
+            title: 'Blood test for Alzheimer\'s',
+            copy: 'Local Doctor offers the pTau217 blood test. It measures a protein linked to Alzheimer\'s changes in the brain.',
+          },
+          {
+            title: 'Is there a blood test for Alzheimer\'s?',
+            copy: 'Yes. You can request the pTau217 blood test before a visit. It does not require seeing the neurologist first.',
+          },
+          {
+            title: 'pTau217 blood test',
+            copy: 'pTau217 is the blood test Local Doctor offers. Results are reviewed with a neurologist.',
+          },
+          {
+            title: 'Alzheimer\'s test, or a dementia test',
+            copy: 'If you are looking for an Alzheimer\'s test, a test for Alzheimer\'s, or a dementia test, this is the pTau217 blood test. A blood test alone does not diagnose Alzheimer\'s.',
+          },
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'note',
+        title: 'A blood test alone does not diagnose Alzheimer\'s.',
+        copy: 'The pTau217 blood test measures a protein linked to Alzheimer\'s changes in the brain. Results are reviewed with a neurologist. The result is not, by itself, a diagnosis.',
+      },
+      {
+        kind: 'steps',
+        id: 'how-it-works',
+        eyebrow: 'How it works',
+        title: 'From a request to a review with a neurologist.',
+        steps: [
+          {
+            title: 'Request the blood test',
+            copy: 'You can request the pTau217 blood test before a visit. It does not require seeing the neurologist first.',
+          },
+          {
+            title: 'What the test measures',
+            copy: 'The pTau217 blood test measures a protein linked to Alzheimer\'s changes in the brain.',
+          },
+          {
+            title: 'Results reviewed with a neurologist',
+            copy: 'A board-certified neurologist reviews the results with you by video. A blood test alone does not diagnose Alzheimer\'s.',
+          },
+        ],
+      },
+      {
+        kind: 'midCta',
+        title: 'Request the pTau217 blood test.',
+        copy: 'You can request it before a visit. It does not require seeing the neurologist first.',
+      },
+    ],
+    faqTitle: "Alzheimer's blood test questions.",
+    faqs: [
+      [
+        'What is pTau217?',
+        "pTau217 is the blood test Local Doctor offers. It measures a protein linked to Alzheimer's changes in the brain. Results are reviewed with a neurologist.",
+      ],
+      [
+        'Can I request the blood test without a visit?',
+        'Yes. You can request the pTau217 blood test before a visit. It does not require seeing the neurologist first.',
+      ],
+      [
+        "Does a blood test diagnose Alzheimer's?",
+        "No. A blood test alone does not diagnose Alzheimer's. The pTau217 blood test measures a protein linked to Alzheimer's changes in the brain, and results are reviewed with a neurologist.",
+      ],
+      [
+        'What happens after results?',
+        'Results are reviewed with a board-certified neurologist. Local Doctor care is by video.',
+      ],
+    ],
+    closing: {
+      title: "Request an Alzheimer's blood test.",
+      copy: "The pTau217 blood test measures a protein linked to Alzheimer's changes in the brain. Results are reviewed with a neurologist. A blood test alone does not diagnose Alzheimer's.",
+    },
+    related: ['alzheimers-evaluation', 'dementia-evaluation', 'dementia-test-online'],
   },
 }
 

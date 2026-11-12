@@ -17,6 +17,7 @@ export const landingSlugs = [
   'alzheimers-second-opinion',
   'dementia-test-online',
   'memory-doctor-near-me',
+  'alzheimers-blood-test',
 ] as const
 
 export type LandingSlug = (typeof landingSlugs)[number]
@@ -63,6 +64,11 @@ export const landingMeta: Record<LandingSlug, LandingMeta> = {
     title: 'Memory Doctor Near You in Maryland | Local Doctor',
     description:
       'Looking for a memory doctor, dementia doctor, or neurologist for memory near you? A Maryland clinician can see you by video from home, so you do not have to drive.',
+  },
+  'alzheimers-blood-test': {
+    title: "Alzheimer's Blood Test (pTau217) | Local Doctor",
+    description:
+      "The pTau217 blood test measures a protein linked to Alzheimer's changes in the brain. Request it before a visit. Results are reviewed with a neurologist.",
   },
 }
 

@@ -43,7 +43,7 @@ import { evaluationMeta, startMeta } from './pageMeta'
 import { noteEligibilityStarted } from './analytics/posthog'
 import { CalendlyEmbed } from './CalendlyEmbed'
 import { LandingPage, type CtaTarget } from './landing/LandingPage'
-import { evaluationFormSlugs } from './landing/landingContent'
+import { landingPages } from './landing/landingContent'
 import { isLandingSlug, landingCanonical, landingMeta } from './landing/landingMeta'
 import { StickyCta } from './StickyCta'
 import './App.css'
@@ -340,10 +340,10 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
   },
 ]
 
-// One booking path per page. The evaluation pages send the header button to /evaluation and keep it
-// matching their own buttons. Every other page sends it to the scheduler under a plain "Get started",
-// while that page's own buttons (and the /evaluation booking link) can still say "See open visit times".
-const startEvaluationLabel = 'Start your evaluation'
+// Evaluation-form landing pages send the header button to /evaluation with that page's primary
+// label (Start your evaluation, or Request the blood test). Every other page sends it to the
+// scheduler under "Get started". Booking-page buttons, and the link on /evaluation, still say
+// "See open visit times".
 const seeVisitTimesLabel = 'See open visit times'
 const headerGetStartedLabel = 'Get started'
 
@@ -539,9 +539,9 @@ function Header({
   onToggleMenu: () => void
   onNavigate: Navigate
 }) {
-  const evaluationFunnel = route === 'landing' && (evaluationFormSlugs as string[]).includes(routeSlug)
-  const headerCta = evaluationFunnel
-    ? { target: 'evaluation' as const, label: startEvaluationLabel }
+  const landingPage = route === 'landing' && isLandingSlug(routeSlug) ? landingPages[routeSlug] : null
+  const headerCta = landingPage?.funnel === 'evaluationForm'
+    ? { target: 'evaluation' as const, label: landingPage.ctaLabel }
     : { target: 'start' as const, label: headerGetStartedLabel }
   const navItems = enabledLinks<[Route, string]>([
     ['how', 'How it works'],

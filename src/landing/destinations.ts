@@ -2,9 +2,10 @@
   Where each landing page's primary button goes.
 
   Most funnels use the /get-started scheduler (the Calendly embed). evaluationForm is the
-  exception: /dementia-evaluation, /alzheimers-evaluation and /memory-evaluation send their
-  buttons to /evaluation, which embeds the evaluation Typeform on this site so its start and
-  submit can be measured (src/EvaluationPage.tsx).
+  exception: /dementia-evaluation, /alzheimers-evaluation, /memory-evaluation and
+  /alzheimers-blood-test send their primary buttons to /evaluation, which embeds the evaluation
+  Typeform on this site so its start and submit can be measured (src/EvaluationPage.tsx).
+  /alzheimers-blood-test also has a secondary "See open visit times" link to /get-started.
   To point another funnel at an external form, change its entry below to
   { kind: 'external', href: 'https://...' }. To move a single page, give it its own
   funnel key rather than flipping a shared one.

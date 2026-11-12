@@ -83,6 +83,31 @@ test('built landing shells keep the Ads and GA4 tags from the shared snippet', (
   }
 })
 
+test('/alzheimers-blood-test secondary link keeps ad params and logs See open visit times', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.dataLayer = window.dataLayer || []
+    window.gtag = function gtag(...args: unknown[]) {
+      window.dataLayer?.push(args)
+    }
+  })
+  await page.goto(`/alzheimers-blood-test${clickQuery}`)
+  const secondary = page.locator('[data-cta-location="visit_times"]')
+  await expect(secondary).toHaveText('See open visit times')
+  await expect(secondary).toHaveAttribute('href', /^\/get-started\?.*gclid=test_gclid_123/)
+  await secondary.click()
+  await expect(page).toHaveURL(/\/get-started\?/)
+  expect(page.url()).toContain('gclid=test_gclid_123')
+  expect(page.url()).toContain('utm_source=google')
+  expect(page.url()).not.toContain('jane@')
+  await waitForGtagEvent(page, 'cta_click')
+  expectCtaClickSent(await gtagEntries(page), {
+    page_path: '/alzheimers-blood-test',
+    cta_location: 'visit_times',
+    cta_label: 'See open visit times',
+    cta_destination: '/get-started',
+  })
+})
+
 test('CTA URLs keep gclid and drop contact params', () => {
   expect(pathWithAdsParams('/get-started', clickQuery)).toBe(
     '/get-started?gclid=test_gclid_123&utm_source=google&utm_medium=cpc',
