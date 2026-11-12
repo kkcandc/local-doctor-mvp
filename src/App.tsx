@@ -341,8 +341,11 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
 ]
 
 // Evaluation-form landing pages send the header button to /evaluation with that page's primary
-// label. Every other page sends it to the scheduler.
+// label (Start your evaluation, or Request the blood test). Every other page sends it to the
+// scheduler under "Get started". Booking-page buttons, and the link on /evaluation, still say
+// "See open visit times".
 const seeVisitTimesLabel = 'See open visit times'
+const headerGetStartedLabel = 'Get started'
 
 const headerPhone = '(240) 376-5730'
 const headerPhoneHref = '+12403765730'
@@ -539,7 +542,7 @@ function Header({
   const landingPage = route === 'landing' && isLandingSlug(routeSlug) ? landingPages[routeSlug] : null
   const headerCta = landingPage?.funnel === 'evaluationForm'
     ? { target: 'evaluation' as const, label: landingPage.ctaLabel }
-    : { target: 'start' as const, label: seeVisitTimesLabel }
+    : { target: 'start' as const, label: headerGetStartedLabel }
   const navItems = enabledLinks<[Route, string]>([
     ['how', 'How it works'],
     ['treatments', 'Treatments'],
@@ -707,7 +710,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: Navigate }) {
           <p className="eyebrow">Treatments</p>
           <h1>FDA-approved treatments for early Alzheimer's disease.</h1>
           <p>Leqembi and Kisunla are FDA-approved infusion treatments shown to slow the progression of Alzheimer&apos;s disease, not just treat its symptoms. In clinical trials they slowed decline for some patients but they are not a cure, they carry risks, and they are not right for everyone. We help you understand all of it.</p>
-          <button className="primary" type="button" onClick={() => onNavigate('start', '', 'hero', 'Get Started')}>Get Started <ArrowRight size={20} /></button>
+          <button className="primary" type="button" onClick={() => onNavigate('start', '', 'hero', 'Get started')}>Get started <ArrowRight size={20} /></button>
         </div>
         <img src="/assets/hero-leqembi-iv.webp" alt="Leqembi (lecanemab) IV infusion bag" width={1178} height={1335} fetchPriority="high" />
       </section>

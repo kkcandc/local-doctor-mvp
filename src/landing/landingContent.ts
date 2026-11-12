@@ -812,7 +812,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     faqs: [
       [
         'What is pTau217?',
-        "The pTau217 blood test is a test Local Doctor offers. It measures a protein linked to Alzheimer's changes in the brain. Results are reviewed with a neurologist. A blood test alone does not diagnose Alzheimer's.",
+        "pTau217 is the blood test Local Doctor offers. It measures a protein linked to Alzheimer's changes in the brain. Results are reviewed with a neurologist.",
       ],
       [
         'Can I request the blood test without a visit?',
@@ -824,7 +824,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
       ],
       [
         'What happens after results?',
-        "Results are reviewed with a board-certified neurologist. Local Doctor care is by video. A blood test alone does not diagnose Alzheimer's.",
+        'Results are reviewed with a board-certified neurologist. Local Doctor care is by video.',
       ],
     ],
     closing: {
