@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { filterRange, groupSum, ratio, timeSeries } from '@/lib/aggregate'
 import { enumLabel, fmtCount, fmtInt, fmtMoney, fmtPct } from '@/lib/format'
-import { derive } from '@/lib/views'
+import { derive, keywordBidInfo } from '@/lib/views'
 import { TrendChart } from '../charts'
 import { DataTable, type Column } from '../DataTable'
 import { NotConnected, Section, StatusBadge, useData } from '../ui'
@@ -37,11 +37,7 @@ export function KeywordsSection() {
           const c = campaigns.get(k?.campaignId ?? g?.campaignId ?? '')
           const s = sums.get(key) ?? { impressions: 0, clicks: 0, cost: 0, conversions: 0, allConversions: 0, eligibleImpressions: 0 }
           const sh = shareImpr.get(key)
-          let bid: { value?: number; label: string } = { label: '-' }
-          if (k?.cpcBid != null) bid = { value: k.cpcBid, label: 'Keyword bid' }
-          else if (g?.defaultCpcBid != null && c?.biddingStrategyType === 'MANUAL_CPC') bid = { value: g.defaultCpcBid, label: 'Ad group bid' }
-          else if (c?.maxCpcCap != null) bid = { value: c.maxCpcCap, label: 'Campaign max CPC cap' }
-          else if (c) bid = { label: enumLabel(c.biddingStrategyType) }
+          const bid = keywordBidInfo(k, g, c)
           return {
             key,
             criterionId,
@@ -70,11 +66,23 @@ export function KeywordsSection() {
             key: 'bid',
             label: 'Bid / cap',
             num: true,
-            value: (r) => r.bid.value ?? null,
+            value: (r) => r.bid.keywordBid ?? r.bid.adGroupDefault ?? r.bid.maxCpcCap ?? null,
             render: (r) => (
               <>
-                {r.bid.value != null ? fmtMoney(r.bid.value, currency) : '-'}
-                <span className="cell-sub">{r.bid.label}</span>
+                {r.bid.keywordBid != null && (
+                  <>
+                    {fmtMoney(r.bid.keywordBid, currency)}
+                    <span className="cell-sub">Keyword bid</span>
+                  </>
+                )}
+                {r.bid.keywordBid == null && r.bid.adGroupDefault != null && (
+                  <>
+                    {fmtMoney(r.bid.adGroupDefault, currency)}
+                    <span className="cell-sub">Ad group default</span>
+                  </>
+                )}
+                {r.bid.keywordBid == null && r.bid.adGroupDefault == null && r.bid.maxCpcCap == null && '-'}
+                {r.bid.maxCpcCap != null && <span className="cell-sub">Max CPC cap {fmtMoney(r.bid.maxCpcCap, currency)}</span>}
               </>
             ),
           },

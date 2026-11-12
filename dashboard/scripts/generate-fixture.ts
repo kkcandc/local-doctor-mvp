@@ -257,7 +257,15 @@ dates.forEach((date, i) => {
     const share = a.type === 'CALL' ? 0.5 : 0.18 + rand() * 0.1
     const impressions = Math.round(acct.impressions * share)
     const clicks = a.type === 'CALL' ? acct.phoneCalls : binomial(Math.round(acct.clicks * 0.4), 0.25)
-    assetDaily.push({ date, assetId: a.id, impressions, clicks, cost: round2(clicks * (acct.clicks ? acct.cost / acct.clicks : 0)) })
+    assetDaily.push({
+      date,
+      assetId: a.id,
+      level: a.level as 'customer' | 'campaign' | 'ad_group',
+      ...('campaignId' in a && a.campaignId ? { campaignId: a.campaignId } : {}),
+      impressions,
+      clicks,
+      cost: round2(clicks * (acct.clicks ? acct.cost / acct.clicks : 0)),
+    })
   }
 
   // GA4: paid sessions track ad clicks, plus organic and direct traffic.

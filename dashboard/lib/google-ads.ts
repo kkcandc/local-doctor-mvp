@@ -345,7 +345,7 @@ async function fetchAdsMeta(client: AdsClient): Promise<AdMeta[]> {
 
 async function fetchKeywords(client: AdsClient): Promise<KeywordMeta[]> {
   const rows = await client.query(
-    "SELECT ad_group_criterion.criterion_id, ad_group_criterion.keyword.text, ad_group_criterion.keyword.match_type, ad_group_criterion.status, ad_group_criterion.cpc_bid_micros, ad_group_criterion.effective_cpc_bid_micros, ad_group.id, campaign.id FROM ad_group_criterion WHERE ad_group_criterion.type = 'KEYWORD' AND ad_group_criterion.negative = FALSE",
+    "SELECT ad_group_criterion.criterion_id, ad_group_criterion.keyword.text, ad_group_criterion.keyword.match_type, ad_group_criterion.status, ad_group_criterion.cpc_bid_micros, ad_group.id, campaign.id FROM ad_group_criterion WHERE ad_group_criterion.type = 'KEYWORD' AND ad_group_criterion.negative = FALSE",
   )
   return rows.map((r) => {
     const c = r.adGroupCriterion ?? {}
@@ -356,7 +356,8 @@ async function fetchKeywords(client: AdsClient): Promise<KeywordMeta[]> {
       text: str(c.keyword?.text),
       matchType: str(c.keyword?.matchType),
       status: str(c.status),
-      cpcBid: optMicros(c.cpcBidMicros) ?? optMicros(c.effectiveCpcBidMicros),
+      // Own bid only. An inherited ad group bid is not stored here.
+      cpcBid: optMicros(c.cpcBidMicros),
     }
   })
 }
@@ -366,9 +367,15 @@ async function fetchAssets(client: AdsClient, during: string): Promise<{ assets:
     'asset.id, asset.type, asset.final_urls, asset.sitelink_asset.link_text, asset.sitelink_asset.description1, asset.sitelink_asset.description2, asset.call_asset.phone_number'
   const types = "asset.type IN ('SITELINK', 'CALL')"
   const levels = [
-    { level: 'customer' as const, from: 'customer_asset', extra: '', status: 'customer_asset.status' },
-    { level: 'campaign' as const, from: 'campaign_asset', extra: ', campaign.id', status: 'campaign_asset.status' },
-    { level: 'ad_group' as const, from: 'ad_group_asset', extra: ', ad_group.id, campaign.id', status: 'ad_group_asset.status' },
+    { level: 'customer' as const, from: 'customer_asset', extra: '', status: 'customer_asset.status', split: 'asset.id' },
+    { level: 'campaign' as const, from: 'campaign_asset', extra: ', campaign.id', status: 'campaign_asset.status', split: 'campaign.id, asset.id' },
+    {
+      level: 'ad_group' as const,
+      from: 'ad_group_asset',
+      extra: ', ad_group.id, campaign.id',
+      status: 'ad_group_asset.status',
+      split: 'campaign.id, ad_group.id, asset.id',
+    },
   ]
   const assets: AssetMeta[] = []
   const daily: AssetDailyRow[] = []
@@ -393,13 +400,17 @@ async function fetchAssets(client: AdsClient, during: string): Promise<{ assets:
         finalUrls: a.finalUrls?.length ? a.finalUrls.map((u: string) => pathOnly(u)) : undefined,
       })
     }
+    // Selecting the link ids stops Google from summing one asset across every campaign it is attached to.
     const metrics = await client.query(
-      `SELECT asset.id, segments.date, metrics.impressions, metrics.clicks, metrics.cost_micros FROM ${l.from} WHERE ${types} AND ${during}`,
+      `SELECT ${l.split}, segments.date, metrics.impressions, metrics.clicks, metrics.cost_micros FROM ${l.from} WHERE ${types} AND ${during}`,
     )
     for (const r of metrics) {
       daily.push({
         date: str(r.segments?.date),
         assetId: str(r.asset?.id),
+        level: l.level,
+        campaignId: r.campaign?.id ? str(r.campaign.id) : undefined,
+        adGroupId: r.adGroup?.id ? str(r.adGroup.id) : undefined,
         impressions: num(r.metrics?.impressions),
         clicks: num(r.metrics?.clicks),
         cost: micros(r.metrics?.costMicros),

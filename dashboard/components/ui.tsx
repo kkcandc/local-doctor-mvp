@@ -180,11 +180,8 @@ export function Kpi({
     <div className="kpi">
       <div className="kpi-label">{label}</div>
       <div className="kpi-value">{value}</div>
-      {delta != null ? (
-        <div className={`kpi-delta ${cls}`}>{fmtDelta(delta)} vs previous period</div>
-      ) : hint ? (
-        <div className="kpi-hint">{hint}</div>
-      ) : null}
+      {delta != null && <div className={`kpi-delta ${cls}`}>{fmtDelta(delta)} vs previous period</div>}
+      {hint && <div className="kpi-hint">{hint}</div>}
     </div>
   )
 }

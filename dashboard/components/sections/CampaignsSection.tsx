@@ -12,7 +12,7 @@ export function CampaignsSection() {
   const { snapshot, currency } = useData()
   const ads = snapshot.ads
   return (
-    <Section id="campaigns" num={2} title="Campaigns" description="Status, bidding and budget for each campaign, with results for the selected range.">
+    <Section id="campaigns" num={2} title="Campaigns" description="Status, bidding and budget for each campaign. Conv. is Google's Conversions column, which can differ from the Overview primary total.">
       {({ range, grouping }) => {
         if (!ads) return <NotConnected source="Google Ads" />
         const fields = [...ADS_FIELDS, 'phoneCalls'] as const

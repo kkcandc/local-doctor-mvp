@@ -19,7 +19,7 @@ export function ConversionsSection() {
       id="conversions"
       num={8}
       title="Conversions"
-      description="Primary actions are the ones Google bids toward. Secondary actions are tracked for insight only. Rate is the share of ad clicks (Ads) or sessions (GA4) that led to each action."
+      description="Primary means the action is marked primary for the goal today. Every count is all conversions for that action, including ones Google leaves out of the Conversions column. Rate is the share of ad clicks (Ads) or sessions (GA4)."
     >
       {({ range, grouping }) => {
         if (!ads && !ga4) return <NotConnected source="Google Ads" />
@@ -43,7 +43,7 @@ export function ConversionsSection() {
           for (const r of filterRange(ads.daily.conversions, range)) {
             if (!primary.some((p) => p.id === r.conversionActionId)) continue
             const pt = byBucket.get(bucketKey(r.date, grouping))
-            if (pt) pt[`a${r.conversionActionId}`] = ((pt[`a${r.conversionActionId}`] as number) ?? 0) + r.conversions
+            if (pt) pt[`a${r.conversionActionId}`] = ((pt[`a${r.conversionActionId}`] as number) ?? 0) + r.allConversions
           }
         }
         const chartData = [...byBucket.values()].map((p) => {

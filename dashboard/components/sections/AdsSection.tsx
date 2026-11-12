@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ctr, filterRange, groupSum } from '@/lib/aggregate'
+import { assetLinkKey, assetLinkMetrics } from '@/lib/views'
 import { enumLabel, fmtCount, fmtInt, fmtMoney, fmtPct } from '@/lib/format'
 import { DataTable, type Column } from '../DataTable'
 import { NotConnected, Section, Seg, StatusBadge, useData } from '../ui'
@@ -31,7 +32,7 @@ export function AdsSection() {
           .filter((a) => show === 'all' || a.status === 'ENABLED' || a.m.impressions > 0)
           .sort((a, b) => b.m.impressions - a.m.impressions)
 
-        const assetSums = groupSum(filterRange(ads.daily.assets, range), (r) => r.assetId, ['impressions', 'clicks', 'cost'] as const)
+        const assetSums = assetLinkMetrics(ads.daily.assets, range)
         const seen = new Set<string>()
         const assetRows = ads.assets
           .filter((a) => {
@@ -41,7 +42,7 @@ export function AdsSection() {
             return true
           })
           .map((a) => {
-            const m = assetSums.get(a.id) ?? { impressions: 0, clicks: 0, cost: 0 }
+            const m = assetSums.get(assetLinkKey(a)) ?? { impressions: 0, clicks: 0, cost: 0 }
             const where =
               a.level === 'customer'
                 ? 'Whole account'

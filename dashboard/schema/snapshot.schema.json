@@ -251,10 +251,13 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "required": ["date", "assetId", "impressions", "clicks", "cost"],
+                "required": ["date", "assetId", "level", "impressions", "clicks", "cost"],
                 "properties": {
                   "date": { "$ref": "#/$defs/date" },
                   "assetId": { "$ref": "#/$defs/id" },
+                  "level": { "enum": ["customer", "campaign", "ad_group"], "description": "The link these metrics belong to. One asset on two campaigns is two rows, not one total repeated." },
+                  "campaignId": { "$ref": "#/$defs/id" },
+                  "adGroupId": { "$ref": "#/$defs/id" },
                   "impressions": { "$ref": "#/$defs/count" },
                   "clicks": { "$ref": "#/$defs/count" },
                   "cost": { "$ref": "#/$defs/money" }

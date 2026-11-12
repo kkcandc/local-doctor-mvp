@@ -3,7 +3,7 @@
 import { filterRange, groupSum, ratio, sumFields } from '@/lib/aggregate'
 import { bucketKey, bucketLabel, bucketsInRange, shortDate } from '@/lib/dates'
 import { fmtCount, fmtInt } from '@/lib/format'
-import { matchesChannel } from '@/lib/views'
+import { callsFromAds, callsFromAdsByDate, matchesChannel } from '@/lib/views'
 import { TrendChart } from '../charts'
 import { DataTable, type Column } from '../DataTable'
 import { Kpi, Section, useData } from '../ui'
@@ -33,7 +33,8 @@ export function OfflineSection() {
         const buckets = bucketsInRange(range, grouping)
         const entries = filterRange(offline, range)
         const off = groupSum(entries, (e) => bucketKey(e.date, grouping), ['phoneLeads', 'bookedPatients'] as const)
-        const adSums = ads ? groupSum(filterRange(ads.daily.account, range), (r) => bucketKey(r.date, grouping), ['clicks', 'phoneCalls'] as const) : null
+        const adClicksByBucket = ads ? groupSum(filterRange(ads.daily.account, range), (r) => bucketKey(r.date, grouping), ['clicks'] as const) : null
+        const adCallsByBucket = ads ? groupSum(filterRange(callsFromAdsByDate(ads), range), (r) => bucketKey(r.date, grouping), ['phoneCalls'] as const) : null
         const taps = ga4
           ? groupSum(
               filterRange(ga4.daily.events, range).filter((r) => r.eventName === 'phone_tap' && matchesChannel(r.channel, 'paid')),
@@ -44,15 +45,16 @@ export function OfflineSection() {
         const entryDays = new Set(entries.map((e) => e.date))
         const rows = buckets.map((b) => ({
           bucket: b,
-          adClicks: adSums ? adSums.get(b)?.clicks ?? 0 : null,
-          adCalls: adSums ? adSums.get(b)?.phoneCalls ?? 0 : null,
+          adClicks: adClicksByBucket ? adClicksByBucket.get(b)?.clicks ?? 0 : null,
+          adCalls: adCallsByBucket ? adCallsByBucket.get(b)?.phoneCalls ?? 0 : null,
           phoneTaps: taps ? taps.get(b)?.eventCount ?? 0 : null,
           phoneLeads: off.get(b)?.phoneLeads ?? 0,
           bookedPatients: off.get(b)?.bookedPatients ?? 0,
           daysEntered: entries.filter((e) => bucketKey(e.date, grouping) === b).length,
         }))
         const totals = sumFields(entries, ['phoneLeads', 'bookedPatients'] as const)
-        const adTotals = ads ? sumFields(filterRange(ads.daily.account, range), ['clicks', 'phoneCalls'] as const) : null
+        const adClickTotal = ads ? sumFields(filterRange(ads.daily.account, range), ['clicks'] as const).clicks : null
+        const adCallTotal = ads ? callsFromAds(ads, range) : null
         const cols: Column<(typeof rows)[number]>[] = [
           { key: 'bucket', label: grouping === 'day' ? 'Day' : grouping === 'week' ? 'Week' : 'Month', render: (r) => bucketLabel(r.bucket, grouping) },
           { key: 'adClicks', label: 'Ad clicks', num: true, render: (r) => fmtInt(r.adClicks) },
@@ -73,11 +75,11 @@ export function OfflineSection() {
             <div className="kpis">
               <Kpi label="Phone leads" value={fmtInt(totals.phoneLeads)} hint={`${entries.length} days entered`} />
               <Kpi label="Booked patients" value={fmtInt(totals.bookedPatients)} />
-              <Kpi label="Ad clicks" value={adTotals ? fmtInt(adTotals.clicks) : '-'} />
-              <Kpi label="Calls from ads" value={adTotals ? fmtInt(adTotals.phoneCalls) : '-'} />
+              <Kpi label="Ad clicks" value={adClickTotal != null ? fmtInt(adClickTotal) : '-'} />
+              <Kpi label="Calls from ads" value={adCallTotal != null ? fmtInt(adCallTotal) : '-'} hint="Campaign call metrics" />
               <Kpi
                 label="Booked per 100 ad clicks"
-                value={adTotals ? fmtCount(((ratio(totals.bookedPatients, adTotals.clicks) ?? 0) * 100)) : '-'}
+                value={adClickTotal != null ? fmtCount(((ratio(totals.bookedPatients, adClickTotal) ?? 0) * 100)) : '-'}
                 hint="Rough guide, not attribution"
               />
             </div>

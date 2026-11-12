@@ -179,10 +179,23 @@ All values live in env vars only. Nothing secret is committed. See
 4. The dashboard is then reachable at the project's default
    `<project>.vercel.app` URL.
 
-`dashboard/vercel.json` sets an ignored build step
-(`git diff --quiet HEAD^ HEAD -- .`) so pushes that only change the marketing
-site do not rebuild the dashboard. Manual redeploys from the Vercel UI still
-build.
+Two Vercel projects, two ignore rules. They do not share one:
+
+- **Marketing site** (repo root `vercel.json`): `ignoreCommand` is `exit 1`.
+  Vercel treats exit 1 as "do not skip", so that project builds on every push.
+  Leave this as it is.
+- **Dashboard** (`dashboard/vercel.json`): `scripts/vercel-ignore.sh` exits 0
+  (skip) only when `dashboard/` did not change, and exits 1 (build) when it
+  did. The pathspec is `:/dashboard`, which is from the repo root, so the check
+  is the same whether Vercel runs the command from the repo root or from the
+  `dashboard/` root directory. A git error (for example no parent commit) also
+  exits 1, so the build proceeds. Manual redeploys from the Vercel UI still
+  build. If the project has an Ignored Build Step typed into the Vercel UI, that
+  overrides this file: leave the UI on its default so this command is the one
+  that runs.
+
+A push that only changes the marketing site rebuilds the marketing site and
+skips the dashboard. A push that changes `dashboard/` builds the dashboard.
 
 If Vercel Deployment Protection (Vercel Authentication) is on for production, the
 team needs Vercel accounts on top of the dashboard password. Turning it on only

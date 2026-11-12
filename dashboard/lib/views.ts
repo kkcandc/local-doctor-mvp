@@ -2,6 +2,7 @@ import { costPer, cpc, ctr, filterRange, groupSum, ratio, sumFields } from './ag
 import type {
   AdsData,
   AdsMetrics,
+  AssetDailyRow,
   DateRange,
   Ga4Data,
   Ga4EventDailyRow,
@@ -29,33 +30,102 @@ export interface ActionRow {
   id: string
   name: string
   category: string
+  /** True when the action is primary_for_goal right now. */
   primary: boolean
-  /** Primary actions use the Conversions column, secondary use All conversions. */
+  /** all_conversions for this action, whether or not it is primary. */
   count: number
   rateOfClicks: number | null
   costPerAction: number | null
 }
 
+/**
+ * One row per conversion action. The count is always all_conversions.
+ * "Primary" follows primary_for_goal today, not Google's Conversions column
+ * (that column can still include an action after it was switched to secondary).
+ */
 export function conversionActionRows(ads: AdsData, range: DateRange): ActionRow[] {
   const totals = accountTotals(ads, range)
-  const sums = groupSum(filterRange(ads.daily.conversions, range), (r) => r.conversionActionId, ['conversions', 'allConversions'] as const)
+  const sums = groupSum(filterRange(ads.daily.conversions, range), (r) => r.conversionActionId, ['allConversions'] as const)
   const meta = new Map(ads.conversionActions.map((a) => [a.id, a]))
   const ids = new Set([...meta.keys(), ...sums.keys()])
   return [...ids].map((id) => {
     const m = meta.get(id)
-    const s = sums.get(id) ?? { conversions: 0, allConversions: 0 }
-    const primary = m?.primary ?? s.conversions > 0
-    const count = primary ? s.conversions : s.allConversions
+    const count = sums.get(id)?.allConversions ?? 0
     return {
       id,
       name: m?.name ?? `Conversion action ${id}`,
       category: m?.category ?? 'UNKNOWN',
-      primary,
+      primary: m?.primary ?? false,
       count,
       rateOfClicks: ratio(count, totals.clicks),
       costPerAction: costPer(totals.cost, count),
     }
   })
+}
+
+/** Sum of all_conversions over actions that are primary_for_goal today. */
+export function primaryConversionCount(ads: AdsData, range: DateRange): number {
+  return conversionActionRows(ads, range)
+    .filter((a) => a.primary)
+    .reduce((sum, a) => sum + a.count, 0)
+}
+
+/** Daily all_conversions for actions that are primary_for_goal today, for the trend chart. */
+export function primaryConversionsByDate(ads: AdsData): { date: string; conversions: number }[] {
+  const primary = new Set(ads.conversionActions.filter((a) => a.primary).map((a) => a.id))
+  const grouped = groupSum(
+    ads.daily.conversions.filter((r) => primary.has(r.conversionActionId)),
+    (r) => r.date,
+    ['allConversions'] as const,
+  )
+  return [...grouped.entries()].map(([date, v]) => ({ date, conversions: v.allConversions }))
+}
+
+/** Calls from call assets, summed from campaign metrics.phone_calls. Not a conversion action. */
+export function callsFromAds(ads: AdsData, range: DateRange): number {
+  return sumFields(filterRange(ads.daily.campaigns, range), ['phoneCalls'] as const).phoneCalls
+}
+
+export function callsFromAdsByDate(ads: AdsData): { date: string; phoneCalls: number }[] {
+  const grouped = groupSum(ads.daily.campaigns, (r) => r.date, ['phoneCalls'] as const)
+  return [...grouped.entries()].map(([date, v]) => ({ date, phoneCalls: v.phoneCalls }))
+}
+
+/** Same asset linked to two campaigns (or ad groups) must not share one metric total. */
+export function assetLinkKey(row: {
+  assetId?: string
+  id?: string
+  level: string
+  campaignId?: string
+  adGroupId?: string
+}): string {
+  return [row.assetId ?? row.id ?? '', row.level, row.campaignId ?? '', row.adGroupId ?? ''].join('|')
+}
+
+export function assetLinkMetrics(rows: readonly AssetDailyRow[], range: DateRange) {
+  return groupSum(filterRange(rows, range), (r) => assetLinkKey(r), ['impressions', 'clicks', 'cost'] as const)
+}
+
+export interface KeywordBidInfo {
+  /** Set only when the keyword itself has a CPC bid. */
+  keywordBid?: number
+  /** Ad group CPC, shown when the keyword has no bid of its own. */
+  adGroupDefault?: number
+  /** Campaign max CPC cap (Maximize clicks), shown alongside either bid. */
+  maxCpcCap?: number
+}
+
+export function keywordBidInfo(
+  keyword: { cpcBid?: number } | undefined,
+  adGroup: { defaultCpcBid?: number } | undefined,
+  campaign: { maxCpcCap?: number } | undefined,
+): KeywordBidInfo {
+  const keywordBid = keyword?.cpcBid
+  return {
+    keywordBid,
+    adGroupDefault: keywordBid == null ? adGroup?.defaultCpcBid : undefined,
+    maxCpcCap: campaign?.maxCpcCap,
+  }
 }
 
 export function matchesChannel(channel: string, filter: 'paid' | 'all') {

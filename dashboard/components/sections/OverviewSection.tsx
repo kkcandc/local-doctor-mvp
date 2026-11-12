@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { delta, timeSeries } from '@/lib/aggregate'
+import { costPer, delta, timeSeries } from '@/lib/aggregate'
 import { fmtCount, fmtInt, fmtMoney, fmtPct } from '@/lib/format'
 import type { DateRange } from '@/lib/types'
-import { accountTotals, conversionActionRows, ga4EventCounts, ga4Totals } from '@/lib/views'
+import { accountTotals, callsFromAds, conversionActionRows, ga4EventCounts, ga4Totals, primaryConversionCount, primaryConversionsByDate } from '@/lib/views'
 import { TrendChart } from '../charts'
 import { CHANNEL_OPTIONS, Kpi, NotConnected, Section, Seg, useData, type Ga4Channel } from '../ui'
 
@@ -77,13 +77,19 @@ function OverviewBody({ range, prevRange, grouping }: { range: DateRange; prevRa
   const p = ads && prevRange ? accountTotals(ads, prevRange) : null
   const d = (k: keyof NonNullable<typeof t>) => (t && p ? delta(Number(t[k] ?? 0), Number(p[k] ?? 0)) : null)
   const secondary = ads ? conversionActionRows(ads, range).filter((a) => !a.primary && a.count > 0).sort((a, b) => b.count - a.count) : []
+  const primaryNow = ads ? primaryConversionCount(ads, range) : 0
+  const primaryPrev = ads && prevRange ? primaryConversionCount(ads, prevRange) : null
+  const costPerPrimary = t ? costPer(t.cost, primaryNow) : null
+  const costPerPrimaryPrev = p && primaryPrev != null ? costPer(p.cost, primaryPrev) : null
+  const callsNow = ads ? callsFromAds(ads, range) : 0
+  const callsPrev = ads && prevRange ? callsFromAds(ads, prevRange) : null
 
   const sessions = ga4 ? ga4Totals(ga4, range, channel) : null
   const events = ga4 ? ga4EventCounts(ga4, range, channel) : null
   const ev = (n: string) => (events ? events[n] ?? 0 : null)
   const onPage = events ? (ev('cta_click') ?? 0) + (ev('phone_tap') ?? 0) : null
   const submitted = events ? (ev('evaluation_submitted') ?? 0) + (ev('visit_booked') ?? 0) : null
-  const adCalls = t?.phoneCalls ?? 0
+  const adCalls = callsNow
   const calls = ads || events ? adCalls + (ev('phone_tap') ?? 0) : null
 
   const steps: Step[] = [
@@ -109,7 +115,9 @@ function OverviewBody({ range, prevRange, grouping }: { range: DateRange; prevRa
     },
   ]
 
-  const series = ads ? timeSeries(ads.daily.account, range, grouping, ['cost', 'clicks', 'conversions'] as const) : []
+  const spend = ads ? timeSeries(ads.daily.account, range, grouping, ['cost', 'clicks'] as const) : []
+  const primaryByBucket = ads ? timeSeries(primaryConversionsByDate(ads), range, grouping, ['conversions'] as const) : []
+  const series = spend.map((point, i) => ({ ...point, conversions: primaryByBucket[i]?.conversions ?? 0 }))
 
   return (
     <>
@@ -120,14 +128,14 @@ function OverviewBody({ range, prevRange, grouping }: { range: DateRange; prevRa
           <Kpi label="Clicks" value={fmtInt(t.clicks)} delta={d('clicks')} />
           <Kpi label="CTR" value={fmtPct(t.ctr)} delta={d('ctr')} />
           <Kpi label="Avg CPC" value={fmtMoney(t.cpc, currency)} delta={d('cpc')} goodWhenUp={false} />
-          <Kpi label="Primary conversions" value={fmtCount(t.conversions)} delta={d('conversions')} />
+          <Kpi label="Primary conversions" value={fmtCount(primaryNow)} delta={primaryPrev != null ? delta(primaryNow, primaryPrev) : null} hint="Marked primary today" />
           <Kpi
             label="Cost / primary conv."
-            value={fmtMoney(t.costPerConversion, currency)}
-            delta={d('costPerConversion')}
+            value={fmtMoney(costPerPrimary, currency)}
+            delta={costPerPrimary != null && costPerPrimaryPrev != null ? delta(costPerPrimary, costPerPrimaryPrev) : null}
             goodWhenUp={false}
           />
-          <Kpi label="Calls from ads" value={fmtInt(t.phoneCalls)} delta={d('phoneCalls')} />
+          <Kpi label="Calls from ads" value={fmtInt(callsNow)} delta={callsPrev != null ? delta(callsNow, callsPrev) : null} hint="Campaign call metrics" />
         </div>
       ) : (
         <NotConnected source="Google Ads" />
@@ -175,7 +183,7 @@ function OverviewBody({ range, prevRange, grouping }: { range: DateRange; prevRa
 
 export function OverviewSection() {
   return (
-    <Section id="overview" num={1} title="Overview" description="Spend, traffic and conversions at a glance, with the full funnel from impression to call.">
+    <Section id="overview" num={1} title="Overview" description="Spend, traffic and the funnel. Primary conversions add up actions marked primary today. Calls from ads are campaign call metrics, not a conversion action.">
       {(ctx) => <OverviewBody {...ctx} />}
     </Section>
   )

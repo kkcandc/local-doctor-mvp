@@ -94,6 +94,10 @@ export interface ConversionDailyRow {
 export interface AssetDailyRow {
   date: string
   assetId: string
+  /** Which link these metrics belong to. The same asset on two campaigns is two rows. */
+  level: 'customer' | 'campaign' | 'ad_group'
+  campaignId?: string
+  adGroupId?: string
   impressions: number
   clicks: number
   cost: number
@@ -140,6 +144,7 @@ export interface KeywordMeta {
   text: string
   matchType: string
   status: string
+  /** The keyword's own CPC bid. Omitted when it inherits the ad group bid. */
   cpcBid?: number
 }
 
