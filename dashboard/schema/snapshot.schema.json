@@ -1,0 +1,316 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local-doctor-dashboard/schema/snapshot.schema.json",
+  "title": "Local Doctor marketing dashboard snapshot (v1)",
+  "description": "Normalized snapshot written by the refresh job to Vercel Blob at dashboard/snapshot.json. Every *DailyRow is one calendar day in the Google Ads account time zone, so any date range and any day / week / month grouping can be computed from it. Aggregate counts only: no user-level data, click ids (gclid, gbraid, wbraid), IP addresses, names, emails, phone numbers of patients, or form answers. URLs are stored as paths with the query string removed. TypeScript mirror: lib/types.ts.",
+  "type": "object",
+  "required": ["schemaVersion", "generatedAt", "isExample", "range", "sources", "ads", "ga4"],
+  "properties": {
+    "_comment": { "type": "string", "description": "Free text. The fixture uses it to say the data is EXAMPLE data." },
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "isExample": { "type": "boolean", "description": "True only for fixtures/example-snapshot.json. The UI shows an Example data banner." },
+    "range": { "$ref": "#/$defs/dateRange", "description": "Days covered by the daily rows (inclusive). Ends yesterday in the account time zone." },
+    "sources": {
+      "type": "object",
+      "required": ["ads", "ga4"],
+      "properties": {
+        "ads": { "$ref": "#/$defs/sourceStatus" },
+        "ga4": { "$ref": "#/$defs/sourceStatus" }
+      }
+    },
+    "ads": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/adsData" }], "description": "Null when Google Ads is not connected." },
+    "ga4": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/ga4Data" }], "description": "Null when GA4 is not connected." }
+  },
+  "$defs": {
+    "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "id": { "type": "string", "description": "Google numeric id as a string." },
+    "count": { "type": "number", "minimum": 0 },
+    "money": { "type": "number", "description": "Account currency units (Google micros divided by 1,000,000)." },
+    "dateRange": {
+      "type": "object",
+      "required": ["start", "end"],
+      "properties": { "start": { "$ref": "#/$defs/date" }, "end": { "$ref": "#/$defs/date" } }
+    },
+    "sourceStatus": {
+      "type": "object",
+      "required": ["state"],
+      "properties": {
+        "state": { "enum": ["ok", "not_configured", "error"] },
+        "message": { "type": "string", "description": "Missing env var names, API error text, or partial-fetch warnings. Never secrets." },
+        "lastSuccessAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "adsMetrics": {
+      "type": "object",
+      "required": ["date", "impressions", "clicks", "cost", "conversions", "allConversions"],
+      "properties": {
+        "date": { "$ref": "#/$defs/date" },
+        "impressions": { "$ref": "#/$defs/count" },
+        "clicks": { "$ref": "#/$defs/count" },
+        "cost": { "$ref": "#/$defs/money" },
+        "conversions": { "$ref": "#/$defs/count", "description": "Primary (biddable) conversions: the Conversions column." },
+        "allConversions": { "$ref": "#/$defs/count", "description": "Primary plus secondary conversions." }
+      }
+    },
+    "adsData": {
+      "type": "object",
+      "required": ["customerId", "currency", "timeZone", "campaigns", "adGroups", "ads", "keywords", "assets", "conversionActions", "daily"],
+      "properties": {
+        "customerId": { "$ref": "#/$defs/id" },
+        "accountName": { "type": "string" },
+        "currency": { "type": "string", "description": "ISO 4217, e.g. USD." },
+        "timeZone": { "type": "string", "description": "IANA zone, e.g. America/New_York." },
+        "campaigns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "status", "biddingStrategyType"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "name": { "type": "string" },
+              "status": { "type": "string", "description": "ENABLED, PAUSED or REMOVED." },
+              "biddingStrategyType": { "type": "string", "description": "Google enum. TARGET_SPEND is Maximize clicks." },
+              "maxCpcCap": { "$ref": "#/$defs/money", "description": "Maximize clicks max CPC bid limit." },
+              "dailyBudget": { "$ref": "#/$defs/money" },
+              "channelType": { "type": "string" }
+            }
+          }
+        },
+        "adGroups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "campaignId", "name", "status"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "campaignId": { "$ref": "#/$defs/id" },
+              "name": { "type": "string" },
+              "status": { "type": "string" },
+              "defaultCpcBid": { "$ref": "#/$defs/money" }
+            }
+          }
+        },
+        "ads": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "adGroupId", "campaignId", "status", "type", "headlines", "descriptions", "finalUrls"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "adGroupId": { "$ref": "#/$defs/id" },
+              "campaignId": { "$ref": "#/$defs/id" },
+              "status": { "type": "string" },
+              "type": { "type": "string" },
+              "headlines": { "type": "array", "items": { "type": "string" } },
+              "descriptions": { "type": "array", "items": { "type": "string" } },
+              "finalUrls": { "type": "array", "items": { "type": "string" }, "description": "Paths only." },
+              "path1": { "type": "string" },
+              "path2": { "type": "string" }
+            }
+          }
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["criterionId", "adGroupId", "campaignId", "text", "matchType", "status"],
+            "properties": {
+              "criterionId": { "$ref": "#/$defs/id" },
+              "adGroupId": { "$ref": "#/$defs/id" },
+              "campaignId": { "$ref": "#/$defs/id" },
+              "text": { "type": "string" },
+              "matchType": { "type": "string" },
+              "status": { "type": "string" },
+              "cpcBid": { "$ref": "#/$defs/money" }
+            }
+          }
+        },
+        "assets": {
+          "type": "array",
+          "description": "Sitelink and call assets with the level they are linked at.",
+          "items": {
+            "type": "object",
+            "required": ["id", "type", "level"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "type": { "type": "string", "description": "SITELINK or CALL." },
+              "level": { "enum": ["customer", "campaign", "ad_group"] },
+              "campaignId": { "$ref": "#/$defs/id" },
+              "adGroupId": { "$ref": "#/$defs/id" },
+              "status": { "type": "string" },
+              "linkText": { "type": "string" },
+              "description1": { "type": "string" },
+              "description2": { "type": "string" },
+              "phoneNumber": { "type": "string", "description": "Business number in the call asset (clinic line)." },
+              "finalUrls": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "conversionActions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "category", "status", "primary"],
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "name": { "type": "string" },
+              "category": { "type": "string" },
+              "status": { "type": "string" },
+              "primary": { "type": "boolean", "description": "primary_for_goal: counts toward Conversions and bidding." },
+              "origin": { "type": "string" }
+            }
+          }
+        },
+        "daily": {
+          "type": "object",
+          "required": ["account", "campaigns", "adGroups", "ads", "keywords", "searchTerms", "landingPages", "conversions", "assets"],
+          "properties": {
+            "account": {
+              "type": "array",
+              "items": {
+                "allOf": [{ "$ref": "#/$defs/adsMetrics" }],
+                "required": ["phoneCalls"],
+                "properties": { "phoneCalls": { "$ref": "#/$defs/count", "description": "Calls from call assets." } }
+              }
+            },
+            "campaigns": {
+              "type": "array",
+              "items": {
+                "allOf": [{ "$ref": "#/$defs/adsMetrics" }],
+                "required": ["campaignId", "phoneCalls"],
+                "properties": { "campaignId": { "$ref": "#/$defs/id" }, "phoneCalls": { "$ref": "#/$defs/count" } }
+              }
+            },
+            "adGroups": {
+              "type": "array",
+              "items": {
+                "allOf": [{ "$ref": "#/$defs/adsMetrics" }],
+                "required": ["campaignId", "adGroupId"],
+                "properties": { "campaignId": { "$ref": "#/$defs/id" }, "adGroupId": { "$ref": "#/$defs/id" } }
+              }
+            },
+            "ads": {
+              "type": "array",
+              "items": {
+                "allOf": [{ "$ref": "#/$defs/adsMetrics" }],
+                "required": ["adGroupId", "adId"],
+                "properties": { "adGroupId": { "$ref": "#/$defs/id" }, "adId": { "$ref": "#/$defs/id" } }
+              }
+            },
+            "keywords": {
+              "type": "array",
+              "items": {
+                "allOf": [{ "$ref": "#/$defs/adsMetrics" }],
+                "required": ["adGroupId", "criterionId"],
+                "properties": {
+                  "adGroupId": { "$ref": "#/$defs/id" },
+                  "criterionId": { "$ref": "#/$defs/id" },
+                  "eligibleImpressions": {
+                    "type": "number",
+                    "description": "impressions / search_impression_share for the day. Impression share for any range = sum(impressions) / sum(eligibleImpressions), over rows that have this field."
+                  }
+                }
+              }
+            },
+            "searchTerms": {
+              "type": "array",
+              "items": {
+                "allOf": [{ "$ref": "#/$defs/adsMetrics" }],
+                "required": ["searchTerm", "matchSource", "campaignId", "adGroupId"],
+                "properties": {
+                  "searchTerm": { "type": "string", "description": "Aggregate search query text reported by Google." },
+                  "matchSource": { "type": "string", "description": "segments.search_term_match_source, or search_term_match_type on API versions without it." },
+                  "campaignId": { "$ref": "#/$defs/id" },
+                  "adGroupId": { "$ref": "#/$defs/id" }
+                }
+              }
+            },
+            "landingPages": {
+              "type": "array",
+              "items": {
+                "allOf": [{ "$ref": "#/$defs/adsMetrics" }],
+                "required": ["path"],
+                "properties": { "path": { "type": "string", "description": "From landing_page_view.unexpanded_final_url, path only." } }
+              }
+            },
+            "conversions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["date", "conversionActionId", "conversions", "allConversions"],
+                "properties": {
+                  "date": { "$ref": "#/$defs/date" },
+                  "conversionActionId": { "$ref": "#/$defs/id" },
+                  "conversions": { "$ref": "#/$defs/count" },
+                  "allConversions": { "$ref": "#/$defs/count" }
+                }
+              }
+            },
+            "assets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["date", "assetId", "impressions", "clicks", "cost"],
+                "properties": {
+                  "date": { "$ref": "#/$defs/date" },
+                  "assetId": { "$ref": "#/$defs/id" },
+                  "impressions": { "$ref": "#/$defs/count" },
+                  "clicks": { "$ref": "#/$defs/count" },
+                  "cost": { "$ref": "#/$defs/money" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ga4Totals": {
+      "type": "object",
+      "required": ["date", "channel", "sessions", "engagedSessions", "keyEvents"],
+      "properties": {
+        "date": { "$ref": "#/$defs/date" },
+        "channel": { "type": "string", "description": "GA4 sessionDefaultChannelGroup, e.g. Paid Search." },
+        "sessions": { "$ref": "#/$defs/count" },
+        "engagedSessions": { "$ref": "#/$defs/count" },
+        "keyEvents": { "$ref": "#/$defs/count" }
+      }
+    },
+    "ga4Data": {
+      "type": "object",
+      "required": ["propertyId", "daily"],
+      "properties": {
+        "propertyId": { "type": "string" },
+        "daily": {
+          "type": "object",
+          "required": ["totals", "landingPages", "events"],
+          "properties": {
+            "totals": { "type": "array", "items": { "$ref": "#/$defs/ga4Totals" } },
+            "landingPages": {
+              "type": "array",
+              "items": {
+                "allOf": [{ "$ref": "#/$defs/ga4Totals" }],
+                "required": ["path"],
+                "properties": { "path": { "type": "string", "description": "GA4 landingPage dimension, path only." } }
+              }
+            },
+            "events": {
+              "type": "array",
+              "description": "Allow-listed event names only (lib/privacy.ts GA4_EVENTS). Event parameters are never pulled.",
+              "items": {
+                "type": "object",
+                "required": ["date", "channel", "eventName", "eventCount"],
+                "properties": {
+                  "date": { "$ref": "#/$defs/date" },
+                  "channel": { "type": "string" },
+                  "eventName": { "type": "string" },
+                  "eventCount": { "$ref": "#/$defs/count" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
