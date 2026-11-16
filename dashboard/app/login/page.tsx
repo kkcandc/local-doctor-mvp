@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 const ERRORS: Record<string, string> = {
   invalid: 'That password is not right. Try again.',
-  locked: 'The dashboard is locked because DASHBOARD_PASSWORD is not set on the server.',
+  locked: 'Sign-in for Refresh now is unavailable because DASHBOARD_PASSWORD is not set on the server.',
 }
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
@@ -17,7 +17,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <div className="center-page">
       <form className="card" method="post" action="/api/login">
         <h1>Local Doctor marketing</h1>
-        <p>Team dashboard. Enter the shared password to continue.</p>
+        <p>The dashboard is public. Sign in only if you need to refresh the data.</p>
         {error && (
           <div className="form-error" role="alert">
             {error}

@@ -1,15 +1,19 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { SESSION_COOKIE, verifySessionToken } from '@/lib/auth'
 import { isValidDate } from '@/lib/dates'
 import { deleteEntry, readOfflineLeads, upsertEntry, validateEntry } from '@/lib/offline'
 import { StorageUnavailableError } from '@/lib/storage'
 
 export const dynamic = 'force-dynamic'
 
-/** Optional second password just for the entry form. When unset, the dashboard session is enough. */
-function entryAllowed(request: NextRequest): boolean {
+/**
+ * Writes need the offline entry password when it is set. If it is not set, a
+ * dashboard session is required so a public site cannot be edited by anyone.
+ */
+async function writeAllowed(request: NextRequest): Promise<boolean> {
   const required = process.env.OFFLINE_ENTRY_PASSWORD
-  if (!required) return true
-  return request.headers.get('x-entry-password') === required
+  if (required) return request.headers.get('x-entry-password') === required
+  return verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value)
 }
 
 function today(): string {
@@ -27,7 +31,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!entryAllowed(request)) return NextResponse.json({ error: 'Entry password is incorrect.' }, { status: 403 })
+  if (!(await writeAllowed(request))) return NextResponse.json({ error: 'Entry password is incorrect.' }, { status: 403 })
   const body = (await request.json().catch(() => null)) as Record<string, unknown> | null
   if (!body) return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
   const result = validateEntry(
@@ -43,7 +47,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  if (!entryAllowed(request)) return NextResponse.json({ error: 'Entry password is incorrect.' }, { status: 403 })
+  if (!(await writeAllowed(request))) return NextResponse.json({ error: 'Entry password is incorrect.' }, { status: 403 })
   const date = request.nextUrl.searchParams.get('date') ?? ''
   if (!isValidDate(date)) return NextResponse.json({ error: 'Date must be YYYY-MM-DD.' }, { status: 400 })
   try {

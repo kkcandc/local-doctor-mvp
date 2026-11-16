@@ -65,34 +65,40 @@ describe('proxy (auth middleware)', () => {
   })
   afterEach(() => vi.unstubAllEnvs())
 
-  it('redirects pages to /login without a session, keeping the target', async () => {
-    const res = await proxy(req('/entry'))
-    expect(res.status).toBe(307)
-    const loc = new URL(res.headers.get('location')!)
-    expect(loc.pathname).toBe('/login')
-    expect(loc.searchParams.get('next')).toBe('/entry')
-    expect(res.headers.get('x-robots-tag')).toContain('noindex')
+  it('lets pages through without a session, and still sets noindex', async () => {
+    for (const path of ['/', '/entry']) {
+      const res = await proxy(req(path))
+      expect(res.headers.get('x-middleware-next')).toBe('1')
+      expect(res.headers.get('x-robots-tag')).toContain('noindex')
+    }
   })
 
-  it('returns 401 JSON for API routes without a session', async () => {
-    for (const path of ['/api/refresh', '/api/offline-leads']) {
+  it('returns 401 JSON for Refresh now and logout without a session', async () => {
+    for (const path of ['/api/refresh', '/api/logout']) {
       const res = await proxy(req(path))
       expect(res.status).toBe(401)
       expect(await res.json()).toEqual({ error: 'Not signed in' })
     }
   })
 
-  it('rejects a forged cookie', async () => {
-    const res = await proxy(req('/', 'v1.9999999999.forged'))
-    expect(res.status).toBe(307)
+  it('lets the offline-leads API through the proxy (writes are checked in the route)', async () => {
+    const res = await proxy(req('/api/offline-leads'))
+    expect(res.headers.get('x-middleware-next')).toBe('1')
   })
 
-  it('lets a valid session through', async () => {
+  it('does not block a page when the cookie is forged; only session APIs care', async () => {
+    const page = await proxy(req('/', 'v1.9999999999.forged'))
+    expect(page.headers.get('x-middleware-next')).toBe('1')
+    const api = await proxy(req('/api/refresh', 'v1.9999999999.forged'))
+    expect(api.status).toBe(401)
+  })
+
+  it('lets a valid session through to Refresh now', async () => {
     const token = await createSessionToken(env)
     const page = await proxy(req('/', token))
     expect(page.headers.get('x-middleware-next')).toBe('1')
     expect(page.headers.get('x-robots-tag')).toContain('noindex')
-    const api = await proxy(req('/api/offline-leads', token))
+    const api = await proxy(req('/api/refresh', token))
     expect(api.headers.get('x-middleware-next')).toBe('1')
   })
 
@@ -103,10 +109,11 @@ describe('proxy (auth middleware)', () => {
     }
   })
 
-  it('fails closed when DASHBOARD_PASSWORD is missing', async () => {
+  it('keeps pages public when DASHBOARD_PASSWORD is missing, and blocks Refresh now', async () => {
     vi.stubEnv('DASHBOARD_PASSWORD', '')
     const token = await createSessionToken(env)
-    expect((await proxy(req('/', token))).status).toBe(307)
+    const page = await proxy(req('/', token))
+    expect(page.headers.get('x-middleware-next')).toBe('1')
     expect((await proxy(req('/api/refresh', token))).status).toBe(503)
   })
 })

@@ -62,12 +62,14 @@ export function Dashboard({
   storage,
   offline,
   offlineIsExample = false,
+  signedIn = false,
 }: {
   snapshot: Snapshot
   exampleReason?: string
   storage: StorageMode
   offline: OfflineEntry[]
   offlineIsExample?: boolean
+  signedIn?: boolean
 }) {
   const router = useRouter()
   const [refreshing, setRefreshing] = useState(false)
@@ -141,11 +143,17 @@ export function Dashboard({
             <a className="btn btn-ghost-dark" href="/entry">
               Enter leads
             </a>
-            <form method="post" action="/api/logout">
-              <button className="btn btn-ghost-dark" type="submit">
-                Sign out
-              </button>
-            </form>
+            {signedIn ? (
+              <form method="post" action="/api/logout">
+                <button className="btn btn-ghost-dark" type="submit">
+                  Sign out
+                </button>
+              </form>
+            ) : (
+              <a className="btn btn-ghost-dark" href="/login">
+                Sign in
+              </a>
+            )}
           </div>
         </div>
       </header>

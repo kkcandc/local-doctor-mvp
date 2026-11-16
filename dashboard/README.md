@@ -1,6 +1,6 @@
 # Local Doctor marketing dashboard
 
-A small, password-protected Next.js app that shows how marketing is doing for
+A small Next.js app that shows how marketing is doing for
 Local Doctor (trylocaldoctor.com): Google Ads, GA4 and offline lead counts in one
 place. It lives in `dashboard/` and deploys as its own Vercel project. It does not
 touch the marketing site in the repo root.
@@ -135,15 +135,19 @@ the Marketplace would be the next step.
 
 ## Access
 
-- One shared password (`DASHBOARD_PASSWORD`) gates every page and API route via
-  `proxy.ts` (Next.js 16's name for middleware).
-- Signing in sets an httpOnly, `SameSite=Lax`, `Secure` (in production) cookie
-  signed with HMAC-SHA256. It lasts 30 days. Changing `DASHBOARD_PASSWORD`
-  signs everyone out.
-- If `DASHBOARD_PASSWORD` is not set, the app fails closed: everything stays
-  locked.
-- `OFFLINE_ENTRY_PASSWORD` (optional) adds a second password just for saving
-  offline numbers, if you want only Eric to be able to edit them.
+- The dashboard pages are public. Anyone with the URL can view the aggregate
+  numbers. `proxy.ts` (Next.js 16's name for middleware) does not require a
+  login for pages.
+- `DASHBOARD_PASSWORD` is optional. It is only used to sign in at `/login` so a
+  teammate can press **Refresh now** (`POST /api/refresh`). Signing in sets an
+  httpOnly, `SameSite=Lax`, `Secure` (in production) cookie signed with
+  HMAC-SHA256. It lasts 30 days. Changing `DASHBOARD_PASSWORD` signs everyone
+  out.
+- If `DASHBOARD_PASSWORD` is not set, the pages stay public and Refresh now
+  stays locked. The daily cron still runs with `CRON_SECRET`.
+- `OFFLINE_ENTRY_PASSWORD` (optional) is required to save offline numbers. If it
+  is not set, a signed-in dashboard session is required instead, so a public
+  site cannot be edited by anyone.
 - Every response has `X-Robots-Tag: noindex, nofollow`, pages have a robots meta
   tag, and `/robots.txt` disallows everything.
 
@@ -151,7 +155,7 @@ the Marketplace would be the next step.
 
 | Variable | Required | What it is |
 | --- | --- | --- |
-| `DASHBOARD_PASSWORD` | Yes | Shared password for the dashboard. |
+| `DASHBOARD_PASSWORD` | No | Shared password to sign in and use Refresh now. Pages work without it. |
 | `SESSION_SECRET` | Recommended | Long random string mixed into the cookie signature. |
 | `OFFLINE_ENTRY_PASSWORD` | No | Extra password required to save offline lead numbers. |
 | `CRON_SECRET` | Yes on Vercel | Long random string. Vercel Cron sends it as a bearer token. |
@@ -179,10 +183,10 @@ All values live in env vars only. Nothing secret is committed. See
 1. In Vercel, **Add New > Project**, import this GitHub repo.
 2. Set **Root Directory** to `dashboard`. Framework preset: Next.js (detected).
    Leave build and install commands as default.
-3. Deploy. Without env vars it shows the login page and stays locked until
-   `DASHBOARD_PASSWORD` is set.
-4. The dashboard is then reachable at the project's default
-   `<project>.vercel.app` URL.
+3. Deploy. Pages are public at the project's default `<project>.vercel.app`
+   URL. Set `DASHBOARD_PASSWORD` if teammates should be able to sign in and
+   press Refresh now.
+4. The dashboard is then reachable at that URL with no login.
 
 Two Vercel projects, two ignore rules. They do not share one:
 
@@ -203,8 +207,9 @@ A push that only changes the marketing site rebuilds the marketing site and
 skips the dashboard. A push that changes `dashboard/` builds the dashboard.
 
 If Vercel Deployment Protection (Vercel Authentication) is on for production, the
-team needs Vercel accounts on top of the dashboard password. Turning it on only
-for previews is a reasonable middle ground; cron runs against production.
+team needs Vercel accounts to view the site. Turning it on only for previews is
+a reasonable middle ground; cron runs against production. This project keeps it
+on for previews only, so production stays public.
 
 ### 2. Connect storage
 
@@ -248,7 +253,7 @@ Generate random secrets with `openssl rand -base64 32`.
 
 ### 6. First pull and cron
 
-- Sign in and press **Refresh now**, or wait for the daily cron at 06:00 UTC.
+- Sign in at `/login` and press **Refresh now**, or wait for the daily cron at 06:00 UTC.
 - Check **Settings > Cron Jobs** in Vercel to see the schedule and run history.
   Crons only run on the production deployment.
 - The status strip under the header shows each source as Connected, Not connected
@@ -259,7 +264,7 @@ Generate random secrets with `openssl rand -base64 32`.
 ```bash
 cd dashboard
 npm install
-cp .env.example .env.local   # set DASHBOARD_PASSWORD at least
+cp .env.example .env.local   # pages work without a password; set one to test Refresh now
 npm run dev                  # http://localhost:3000
 ```
 

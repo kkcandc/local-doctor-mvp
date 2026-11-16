@@ -1,8 +1,11 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { isAuthConfigured, SESSION_COOKIE, verifySessionToken } from './lib/auth'
 
-/** Reachable without a session. The cron route checks CRON_SECRET itself. */
+/** Always reachable without a session. The cron route checks CRON_SECRET itself. */
 const PUBLIC_PATHS = new Set(['/login', '/api/login', '/robots.txt', '/api/cron/refresh'])
+
+/** Only these APIs still need a signed-in session. Pages are public. */
+const SESSION_API_PATHS = new Set(['/api/refresh', '/api/logout'])
 
 export const NOINDEX = 'noindex, nofollow, noarchive'
 
@@ -12,31 +15,22 @@ function withNoindex(res: NextResponse): NextResponse {
 }
 
 export async function proxy(request: NextRequest): Promise<NextResponse> {
-  const { pathname, search } = request.nextUrl
-  const isApi = pathname.startsWith('/api/')
+  const { pathname } = request.nextUrl
 
-  if (PUBLIC_PATHS.has(pathname)) return withNoindex(NextResponse.next())
+  if (PUBLIC_PATHS.has(pathname) || !SESSION_API_PATHS.has(pathname)) {
+    return withNoindex(NextResponse.next())
+  }
 
   if (!isAuthConfigured()) {
-    if (isApi) {
-      return withNoindex(NextResponse.json({ error: 'Dashboard is locked: DASHBOARD_PASSWORD is not set.' }, { status: 503 }))
-    }
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    url.search = ''
-    return withNoindex(NextResponse.redirect(url))
+    return withNoindex(
+      NextResponse.json({ error: 'Refresh sign-in is unavailable: DASHBOARD_PASSWORD is not set.' }, { status: 503 }),
+    )
   }
 
   const ok = await verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value)
   if (ok) return withNoindex(NextResponse.next())
 
-  if (isApi) return withNoindex(NextResponse.json({ error: 'Not signed in' }, { status: 401 }))
-
-  const url = request.nextUrl.clone()
-  url.pathname = '/login'
-  url.search = ''
-  if (pathname !== '/') url.searchParams.set('next', `${pathname}${search}`)
-  return withNoindex(NextResponse.redirect(url))
+  return withNoindex(NextResponse.json({ error: 'Not signed in' }, { status: 401 }))
 }
 
 export const config = {
