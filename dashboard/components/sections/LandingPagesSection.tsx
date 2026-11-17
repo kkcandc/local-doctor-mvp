@@ -15,7 +15,7 @@ export function LandingPagesSection() {
   return (
     <Section
       id="landing-pages"
-      num={6}
+      num={7}
       title="Landing pages"
       description="Where visitors land. Sessions and engagement come from GA4; ad clicks, spend and conversions come from the Google Ads landing page report."
     >

@@ -7,6 +7,7 @@ import type { StorageMode } from '@/lib/storage'
 import type { OfflineEntry, Snapshot, SourceStatus } from '@/lib/types'
 import { AdsSection } from './sections/AdsSection'
 import { CampaignsSection } from './sections/CampaignsSection'
+import { FunnelSection } from './sections/FunnelSection'
 import { ConversionsSection } from './sections/ConversionsSection'
 import { KeywordsSection } from './sections/KeywordsSection'
 import { LandingPagesSection } from './sections/LandingPagesSection'
@@ -19,6 +20,7 @@ import { DataProvider, type DashboardData } from './ui'
 
 const NAV = [
   ['overview', 'Overview'],
+  ['funnel', 'Conversion funnel'],
   ['campaigns', 'Campaigns'],
   ['ads', 'Ads'],
   ['keywords', 'Keywords'],
@@ -195,6 +197,7 @@ export function Dashboard({
 
       <main className="wrap">
         <OverviewSection />
+        <FunnelSection />
         <CampaignsSection />
         <AdsSection />
         <KeywordsSection />

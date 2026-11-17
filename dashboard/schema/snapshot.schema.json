@@ -271,6 +271,16 @@
         }
       }
     },
+    "ga4Event": {
+      "type": "object",
+      "required": ["date", "channel", "eventName", "eventCount"],
+      "properties": {
+        "date": { "$ref": "#/$defs/date" },
+        "channel": { "type": "string" },
+        "eventName": { "type": "string" },
+        "eventCount": { "$ref": "#/$defs/count" }
+      }
+    },
     "ga4Totals": {
       "type": "object",
       "required": ["date", "channel", "sessions", "engagedSessions", "keyEvents"],
@@ -303,15 +313,33 @@
             "events": {
               "type": "array",
               "description": "Allow-listed event names only (lib/privacy.ts GA4_EVENTS). Event parameters are never pulled.",
+              "items": { "$ref": "#/$defs/ga4Event" }
+            },
+            "campaigns": {
+              "type": "array",
+              "description": "Optional. Daily sessions by sessionCampaignName, added when the property can return that dimension.",
               "items": {
-                "type": "object",
-                "required": ["date", "channel", "eventName", "eventCount"],
-                "properties": {
-                  "date": { "$ref": "#/$defs/date" },
-                  "channel": { "type": "string" },
-                  "eventName": { "type": "string" },
-                  "eventCount": { "$ref": "#/$defs/count" }
-                }
+                "allOf": [{ "$ref": "#/$defs/ga4Totals" }],
+                "required": ["campaignName"],
+                "properties": { "campaignName": { "type": "string" } }
+              }
+            },
+            "eventsByLandingPage": {
+              "type": "array",
+              "description": "Optional. Allow-listed events broken down by landing page path.",
+              "items": {
+                "allOf": [{ "$ref": "#/$defs/ga4Event" }],
+                "required": ["path"],
+                "properties": { "path": { "type": "string", "description": "Path only, no query string." } }
+              }
+            },
+            "eventsByCampaign": {
+              "type": "array",
+              "description": "Optional. Allow-listed events broken down by sessionCampaignName.",
+              "items": {
+                "allOf": [{ "$ref": "#/$defs/ga4Event" }],
+                "required": ["campaignName"],
+                "properties": { "campaignName": { "type": "string" } }
               }
             }
           }

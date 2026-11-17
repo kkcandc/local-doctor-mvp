@@ -223,12 +223,32 @@ export interface Ga4EventDailyRow {
   eventCount: number
 }
 
+export interface Ga4CampaignDailyRow extends Ga4TotalsDailyRow {
+  /** GA4 sessionCampaignName. Matched to Ads campaign names when possible. */
+  campaignName: string
+}
+
+export interface Ga4EventByLandingPageDailyRow extends Ga4EventDailyRow {
+  /** Path only, no query string. */
+  path: string
+}
+
+export interface Ga4EventByCampaignDailyRow extends Ga4EventDailyRow {
+  campaignName: string
+}
+
 export interface Ga4Data {
   propertyId: string
   daily: {
     totals: Ga4TotalsDailyRow[]
     landingPages: Ga4LandingPageDailyRow[]
     events: Ga4EventDailyRow[]
+    /** Present after a refresh that could read sessionCampaignName. */
+    campaigns?: Ga4CampaignDailyRow[]
+    /** Allow-listed events broken down by landing page path. */
+    eventsByLandingPage?: Ga4EventByLandingPageDailyRow[]
+    /** Allow-listed events broken down by sessionCampaignName. */
+    eventsByCampaign?: Ga4EventByCampaignDailyRow[]
   }
 }
 

@@ -23,7 +23,7 @@ export function RollupSection() {
   return (
     <Section
       id="rollup"
-      num={9}
+      num={10}
       title="Spend roll-up"
       description="Spend at each level: account, campaign, ad group and keyword. Expand a row to drill down. Shares are of total account spend."
     >

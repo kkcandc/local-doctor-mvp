@@ -17,7 +17,7 @@ export function OnPageSection() {
   return (
     <Section
       id="on-page"
-      num={7}
+      num={8}
       title="On-page actions"
       description="What visitors do on the site, from GA4 events. Rate per session is the event count divided by sessions in the same traffic group."
     >

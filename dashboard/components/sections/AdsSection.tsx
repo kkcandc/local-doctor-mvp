@@ -16,7 +16,7 @@ export function AdsSection() {
   return (
     <Section
       id="ads"
-      num={3}
+      num={4}
       title="Ads (listings)"
       description="What people see on Google: each ad's headlines and descriptions, plus sitelinks, the call button and callouts. A removed asset stays in the list when it had impressions in this range."
       showGrouping={false}

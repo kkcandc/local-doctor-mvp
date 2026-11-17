@@ -17,7 +17,7 @@ export function ConversionsSection() {
   return (
     <Section
       id="conversions"
-      num={8}
+      num={9}
       title="Conversions"
       description="Primary means the action is marked primary for the goal today. Every count is all conversions for that action, including ones Google leaves out of the Conversions column. Rate is the share of ad clicks (Ads) or sessions (GA4)."
     >

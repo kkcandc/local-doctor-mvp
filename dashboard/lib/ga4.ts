@@ -2,7 +2,16 @@ import 'server-only'
 import type { Ga4Credentials } from './env'
 import { accessTokenFromServiceAccount } from './google-auth'
 import { GA4_EVENTS, pathOnly } from './privacy'
-import type { DateRange, Ga4Data, Ga4EventDailyRow, Ga4LandingPageDailyRow, Ga4TotalsDailyRow } from './types'
+import type {
+  DateRange,
+  Ga4CampaignDailyRow,
+  Ga4Data,
+  Ga4EventByCampaignDailyRow,
+  Ga4EventByLandingPageDailyRow,
+  Ga4EventDailyRow,
+  Ga4LandingPageDailyRow,
+  Ga4TotalsDailyRow,
+} from './types'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -126,5 +135,88 @@ export async function fetchGa4(creds: Ga4Credentials, range: DateRange): Promise
     warnings.push(`GA4 events: ${err instanceof Error ? err.message : String(err)}`)
   }
 
-  return { data: { propertyId: creds.propertyId, daily: { totals, landingPages, events } }, warnings }
+  let campaigns: Ga4CampaignDailyRow[] | undefined
+  try {
+    const raw = await runReport(token, creds.propertyId, range, {
+      dimensions: ['date', 'sessionDefaultChannelGroup', 'sessionCampaignName'],
+      metrics: ['sessions', 'engagedSessions', keyMetric],
+    })
+    const merged = new Map<string, Ga4CampaignDailyRow>()
+    for (const { dims, mets } of raw) {
+      const row: Ga4CampaignDailyRow = {
+        date: ga4Date(dims[0]),
+        channel: dims[1] || '(not set)',
+        campaignName: dims[2] || '(not set)',
+        sessions: mets[0],
+        engagedSessions: mets[1],
+        keyEvents: mets[2],
+      }
+      const key = `${row.date}|${row.channel}|${row.campaignName}`
+      const prev = merged.get(key)
+      if (prev) {
+        prev.sessions += row.sessions
+        prev.engagedSessions += row.engagedSessions
+        prev.keyEvents += row.keyEvents
+      } else merged.set(key, row)
+    }
+    campaigns = [...merged.values()]
+  } catch (err) {
+    warnings.push(`GA4 campaigns: ${err instanceof Error ? err.message : String(err)}`)
+  }
+
+  let eventsByLandingPage: Ga4EventByLandingPageDailyRow[] | undefined
+  try {
+    const raw = await runReport(token, creds.propertyId, range, {
+      dimensions: ['date', 'sessionDefaultChannelGroup', 'landingPage', 'eventName'],
+      metrics: ['eventCount'],
+      dimensionFilter: {
+        filter: { fieldName: 'eventName', inListFilter: { values: [...GA4_EVENTS], caseSensitive: true } },
+      },
+    })
+    const merged = new Map<string, Ga4EventByLandingPageDailyRow>()
+    for (const { dims, mets } of raw) {
+      const row: Ga4EventByLandingPageDailyRow = {
+        date: ga4Date(dims[0]),
+        channel: dims[1] || '(not set)',
+        path: pathOnly(dims[2]),
+        eventName: dims[3],
+        eventCount: mets[0],
+      }
+      const key = `${row.date}|${row.channel}|${row.path}|${row.eventName}`
+      const prev = merged.get(key)
+      if (prev) prev.eventCount += row.eventCount
+      else merged.set(key, row)
+    }
+    eventsByLandingPage = [...merged.values()]
+  } catch (err) {
+    warnings.push(`GA4 events by landing page: ${err instanceof Error ? err.message : String(err)}`)
+  }
+
+  let eventsByCampaign: Ga4EventByCampaignDailyRow[] | undefined
+  try {
+    const raw = await runReport(token, creds.propertyId, range, {
+      dimensions: ['date', 'sessionDefaultChannelGroup', 'sessionCampaignName', 'eventName'],
+      metrics: ['eventCount'],
+      dimensionFilter: {
+        filter: { fieldName: 'eventName', inListFilter: { values: [...GA4_EVENTS], caseSensitive: true } },
+      },
+    })
+    eventsByCampaign = raw.map(({ dims, mets }) => ({
+      date: ga4Date(dims[0]),
+      channel: dims[1] || '(not set)',
+      campaignName: dims[2] || '(not set)',
+      eventName: dims[3],
+      eventCount: mets[0],
+    }))
+  } catch (err) {
+    warnings.push(`GA4 events by campaign: ${err instanceof Error ? err.message : String(err)}`)
+  }
+
+  return {
+    data: {
+      propertyId: creds.propertyId,
+      daily: { totals, landingPages, events, campaigns, eventsByLandingPage, eventsByCampaign },
+    },
+    warnings,
+  }
 }
