@@ -406,7 +406,8 @@ for (const viewport of viewports) {
         await expect(page).toHaveURL(/\/get-started$/)
         await expect(page.locator('#book .calendly-inline-widget')).toHaveAttribute('data-url', /^https:\/\/calendly\.com\/local-doctor\//)
         expect(await page.evaluate(() => window.scrollY)).toBe(0)
-        await expect(page.locator('link[rel="canonical"]')).toHaveCount(0)
+        await expect(page.locator('link[rel="canonical"]')).toHaveCount(1)
+        await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://trylocaldoctor.com/get-started')
       }
     })
 
