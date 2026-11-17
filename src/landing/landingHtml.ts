@@ -1,5 +1,14 @@
 import { landingCanonical, landingMeta, type LandingSlug } from './landingMeta.ts'
-import type { PageShellMeta } from '../pageMeta.ts'
+
+export type StaticHead = {
+  title: string
+  description: string
+  og?: { title: string; description: string }
+  ogUrl?: string
+  canonical?: string
+  noindex?: boolean
+  jsonLd?: Record<string, unknown>
+}
 
 function escapeAttr(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -14,26 +23,36 @@ function setMetaContent(html: string, attr: 'name' | 'property', key: string, co
   return html.replace(pattern, `$1${escapeAttr(content)}$2`)
 }
 
-// Rewrites the built index.html into the shell for one landing route. The app still
-// boots the same bundle; only the head tags differ so they are right before JS runs.
-export function landingHtml(indexHtml: string, slug: LandingSlug): string {
-  const { title, description } = landingMeta[slug]
-  const url = landingCanonical(slug)
-  let html = indexHtml.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeText(title)}</title>`)
-  html = setMetaContent(html, 'name', 'description', description)
-  html = setMetaContent(html, 'property', 'og:title', title)
-  html = setMetaContent(html, 'property', 'og:description', description)
-  const tags = `    <link rel="canonical" href="${escapeAttr(url)}" />\n    <meta property="og:url" content="${escapeAttr(url)}" />\n`
+// Rewrites the built index.html head for one route: title, description, Open Graph, and
+// canonical, robots, and JSON-LD tags when the route has them. extraHead goes in as is.
+export function staticPageHtml(indexHtml: string, head: StaticHead, extraHead = ''): string {
+  let html = indexHtml.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeText(head.title)}</title>`)
+  html = setMetaContent(html, 'name', 'description', head.description)
+  if (head.og) {
+    html = setMetaContent(html, 'property', 'og:title', head.og.title)
+    html = setMetaContent(html, 'property', 'og:description', head.og.description)
+  }
+  let tags = ''
+  if (head.canonical) tags += `    <link rel="canonical" href="${escapeAttr(head.canonical)}" />\n`
+  if (head.ogUrl) tags += `    <meta property="og:url" content="${escapeAttr(head.ogUrl)}" />\n`
+  if (head.noindex) tags += '    <meta name="robots" content="noindex, follow" />\n'
+  if (head.jsonLd) {
+    // The id matches the tag usePageMeta updates, so the app reuses it instead of adding a second one.
+    const json = JSON.stringify(head.jsonLd).replace(/</g, '\\u003c')
+    tags += `    <script id="blog-article-jsonld" type="application/ld+json">${json}</script>\n`
+  }
+  tags += extraHead
+  if (!tags) return html
   return html.replace(/\s*<\/head>/i, `\n${tags}  </head>`)
 }
 
-// Shell for a conversion page (/get-started, /evaluation). Same bundle, own title and description,
-// and a robots noindex tag when the page should stay out of search results.
-export function pageShellHtml(indexHtml: string, meta: PageShellMeta): string {
-  let html = indexHtml.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeText(meta.title)}</title>`)
-  html = setMetaContent(html, 'name', 'description', meta.description)
-  html = setMetaContent(html, 'property', 'og:title', meta.title)
-  html = setMetaContent(html, 'property', 'og:description', meta.description)
-  if (!meta.noindex) return html
-  return html.replace(/\s*<\/head>/i, '\n    <meta name="robots" content="noindex, follow" />\n  </head>')
+export function landingHead(slug: LandingSlug): StaticHead {
+  const meta = landingMeta[slug]
+  const url = landingCanonical(slug)
+  return { ...meta, og: meta, ogUrl: url, canonical: url }
+}
+
+// The head of one landing route, so the title, description, and canonical are right before JS runs.
+export function landingHtml(indexHtml: string, slug: LandingSlug): string {
+  return staticPageHtml(indexHtml, landingHead(slug))
 }

@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle2, ChevronDown, Info, Phone, ShieldAlert } from 
 import { publicPhone } from '../compliancePages'
 import { isPageEnabled } from '../featureFlags'
 import { hrefWithAdsParams, pathWithAdsParams } from '../analytics/googleAdsConfig'
+import { useLocationSearch } from '../hydration'
 import { StickyCta } from '../StickyCta'
 import { evaluationPath, intakePath, landingDestinations, resolveDestination, type CtaDestination } from './destinations'
 import { landingPages, relatedLabels, type LandingColumn, type LandingFaq as FaqItem, type LandingSection } from './landingContent'
@@ -12,16 +13,10 @@ import './landing.css'
 
 const phoneHref = `tel:+1${publicPhone.replace(/\D/g, '')}`
 
-function intakeHref() {
-  if (typeof window === 'undefined') return intakePath
-  return pathWithAdsParams(intakePath, window.location.search)
-}
-
-function destinationHref(destination: CtaDestination) {
-  const search = typeof window === 'undefined' ? '' : window.location.search
+function destinationHref(destination: CtaDestination, search: string) {
   if (destination.kind === 'evaluation') return pathWithAdsParams(evaluationPath, search)
   if (destination.kind === 'external') return hrefWithAdsParams(destination.href, search)
-  return intakeHref()
+  return pathWithAdsParams(intakePath, search)
 }
 
 function internalTarget(destination: CtaDestination): CtaTarget {
@@ -64,10 +59,11 @@ function GetStartedLink({
   describedBy?: string
 }) {
   const external = destination.kind === 'external'
+  const search = useLocationSearch()
   return (
     <a
       className={variant === 'text' ? 'text-link landing-secondary-link' : variant}
-      href={destinationHref(destination)}
+      href={destinationHref(destination, search)}
       data-cta-location={location}
       aria-describedby={describedBy}
       onClick={(event) => {
@@ -146,6 +142,7 @@ function sectionTones(sections: LandingSection[]): { tones: Tone[]; next: Tone }
 
 export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPageProps) {
   const page = landingPages[slug]
+  const search = useLocationSearch()
   const destination = resolveDestination(landingDestinations[page.funnel])
   const { tones, next: faqTone } = sectionTones(page.sections)
   const cta = (location: string, variant?: 'primary' | 'accent', describedBy?: string) => (
@@ -348,7 +345,7 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
 
       <StickyCta
         label={page.ctaLabel}
-        href={destinationHref(destination)}
+        href={destinationHref(destination, search)}
         describedBy={`${slug}-reassurance`}
         anchorSelector={`.landing-page[data-landing="${slug}"] .landing-hero-actions`}
         stopSelectors={['.landing-mid-cta', '.landing-section-cta', '.landing-column-cta', '.landing-closing', '.footer']}

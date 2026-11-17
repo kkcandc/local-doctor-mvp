@@ -70,7 +70,7 @@
   "rewrites": [
     {
       "source": "/((?!sitemap\\.xml$|robots\\.txt$).*)",
-      "destination": "/index.html"
+      "destination": "/app-shell.html"
     }
   ],
   "ignoreCommand": "exit 1"

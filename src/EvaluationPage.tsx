@@ -7,6 +7,7 @@ import { publicPhone } from './compliancePages'
 import { EVALUATION_FORM_ID } from './evaluationForm'
 import { pathWithAdsParams, typeformHiddenFields } from './analytics/googleAdsConfig'
 import { trackEvaluationStarted, trackEvaluationSubmitted } from './analytics/tracking'
+import { useHydrated, useLocationSearch } from './hydration'
 
 const phoneHref = `tel:+1${publicPhone.replace(/\D/g, '')}`
 
@@ -39,7 +40,10 @@ function onSubmit() {
 }
 
 export function EvaluationPage({ onBookVisit }: { onBookVisit: () => void }) {
-  const search = typeof window === 'undefined' ? '' : window.location.search
+  // The widget builds its iframe from the hidden fields when it mounts, so it waits for
+  // hydration: the prerendered HTML has no query params to give it.
+  const hydrated = useHydrated()
+  const search = useLocationSearch()
   const hidden = useMemo(() => typeformHiddenFields(search), [search])
   const bookingHref = pathWithAdsParams('/get-started', search)
 
@@ -61,16 +65,20 @@ export function EvaluationPage({ onBookVisit }: { onBookVisit: () => void }) {
 
       <section className="section white evaluation-form-section" aria-label="Evaluation form">
         <div className="evaluation-form-frame">
-          <Widget
-            id={EVALUATION_FORM_ID}
-            hidden={hidden}
-            inlineOnMobile
-            autoFocus={false}
-            onStarted={onStarted}
-            onQuestionChanged={onQuestionChanged}
-            onSubmit={onSubmit}
-            className="evaluation-form-widget"
-          />
+          {hydrated ? (
+            <Widget
+              id={EVALUATION_FORM_ID}
+              hidden={hidden}
+              inlineOnMobile
+              autoFocus={false}
+              onStarted={onStarted}
+              onQuestionChanged={onQuestionChanged}
+              onSubmit={onSubmit}
+              className="evaluation-form-widget"
+            />
+          ) : (
+            <div className="evaluation-form-widget" />
+          )}
         </div>
         <div className="evaluation-alt">
           <p>

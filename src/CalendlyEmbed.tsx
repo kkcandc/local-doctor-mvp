@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { CALENDLY_DEFAULT_HEIGHT_PX, calendlyEmbedHeightPx, calendlyEmbedUrl } from './calendlyUrl'
+import { useHydrated, useLocationSearch } from './hydration'
 
 const calendlyScriptSrc = 'https://assets.calendly.com/assets/external/widget.js'
 
@@ -36,12 +37,14 @@ function loadWidgetScript() {
 export function CalendlyEmbed() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [height, setHeight] = useState(CALENDLY_DEFAULT_HEIGHT_PX)
-  const search = typeof window === 'undefined' ? '' : window.location.search
+  // Waits for hydration so the scheduler starts with the visitor's utm params, which the prerendered HTML does not have.
+  const hydrated = useHydrated()
+  const search = useLocationSearch()
   const url = calendlyEmbedUrl(search)
 
   useEffect(() => {
     const container = containerRef.current
-    if (!container) return
+    if (!container || !hydrated) return
 
     function onMessage(event: MessageEvent) {
       if (event.origin !== 'https://calendly.com') return
@@ -72,7 +75,7 @@ export function CalendlyEmbed() {
       script?.removeEventListener('load', mount)
       window.removeEventListener('message', onMessage)
     }
-  }, [url])
+  }, [url, hydrated])
 
   return (
     <div
