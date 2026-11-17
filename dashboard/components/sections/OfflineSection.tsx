@@ -17,7 +17,7 @@ export function OfflineSection() {
   return (
     <Section
       id="offline"
-      num={10}
+      num={11}
       title="Offline leads"
       anchor={lastEntry && lastEntry > anchor ? lastEntry : anchor}
       minDate={firstEntry && firstEntry < minDate ? firstEntry : minDate}

@@ -15,7 +15,7 @@ export function KeywordsSection() {
   const [campaign, setCampaign] = useState('')
   const [match, setMatch] = useState('')
   return (
-    <Section id="keywords" num={4} title="Keywords" description="Keywords we bid on, with bids or caps, results and impression share (share of eligible searches where our ad showed).">
+    <Section id="keywords" num={5} title="Keywords" description="Keywords we bid on, with bids or caps, results and impression share (share of eligible searches where our ad showed).">
       {({ range, grouping }) => {
         if (!ads) return <NotConnected source="Google Ads" />
         const fields = ['impressions', 'clicks', 'cost', 'conversions', 'allConversions', 'eligibleImpressions'] as const

@@ -5,6 +5,7 @@ import { fetchAds } from './google-ads'
 import { fetchGa4 } from './ga4'
 import { refreshCooldownMessage } from './refresh-message'
 import { readJson, StorageConflictError, writeJson } from './storage'
+import { formatGa4RefreshMessage } from './funnel'
 import type { DateRange, Snapshot, SourceStatus } from './types'
 
 export const SNAPSHOT_FILE = 'snapshot.json'
@@ -101,8 +102,8 @@ export async function runRefresh(trigger: 'cron' | 'manual'): Promise<RefreshRes
   let ga4: Snapshot['ga4'] = null
   if (!ga4Outcome) {
     ga4Status = ga4Cfg.error
-      ? { state: 'error', message: ga4Cfg.error }
-      : { state: 'not_configured', message: `Missing env vars: ${ga4Cfg.missing.join(', ')}` }
+      ? { state: 'error', message: formatGa4RefreshMessage('parse', ga4Cfg.error) }
+      : { state: 'not_configured', message: formatGa4RefreshMessage('missing', ga4Cfg.missing.join(', ')) }
   } else if (ga4Outcome.ok) {
     ga4 = ga4Outcome.data
     ga4Status = {
@@ -112,7 +113,11 @@ export async function runRefresh(trigger: 'cron' | 'manual'): Promise<RefreshRes
     }
   } else {
     ga4 = previous?.ga4 ?? null
-    ga4Status = { state: 'error', message: ga4Outcome.error, lastSuccessAt: previous?.sources.ga4.lastSuccessAt }
+    ga4Status = {
+      state: 'error',
+      message: formatGa4RefreshMessage('api', ga4Outcome.error),
+      lastSuccessAt: previous?.sources.ga4.lastSuccessAt,
+    }
   }
 
   const snapshot: Snapshot = {

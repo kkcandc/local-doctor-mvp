@@ -18,7 +18,7 @@ export function SearchTermsSection() {
   return (
     <Section
       id="search-terms"
-      num={5}
+      num={6}
       title="Search terms"
       description="What people actually typed before clicking or seeing our ad, and how Google matched it. Switch to By period to see each term per day, week or month."
     >

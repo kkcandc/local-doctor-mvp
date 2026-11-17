@@ -187,10 +187,15 @@ export function Kpi({
 }
 
 export function NotConnected({ source, detail }: { source: 'Google Ads' | 'GA4'; detail?: string }) {
+  const title = source === 'GA4' ? 'GA4 not yet authorized' : 'Google Ads not connected yet'
+  const fallback =
+    source === 'GA4'
+      ? 'Landing page sessions, engaged sessions and on-site events appear here once the service account can read GA4 property 562274971.'
+      : 'This section fills in once Google Ads credentials are added and the next refresh runs.'
   return (
     <div className="not-connected" role="status">
-      <h3>{source} not connected yet</h3>
-      <p>{detail ?? `This section fills in once ${source} credentials are added and the next refresh runs.`}</p>
+      <h3>{title}</h3>
+      <p>{detail ?? fallback}</p>
     </div>
   )
 }

@@ -575,8 +575,20 @@ main {
 .funnel-bar.ga4 {
   background: linear-gradient(90deg, var(--harbor-600), #3b9cc4);
 }
+.funnel-bar.offline {
+  background: linear-gradient(90deg, #5a6b3b, #8aa05a);
+}
+.funnel-bar.ads {
+  background: linear-gradient(90deg, var(--blue-700), var(--blue-500));
+}
 .funnel-bar.off {
   background: repeating-linear-gradient(45deg, var(--ink-100), var(--ink-100) 6px, var(--page) 6px, var(--page) 12px);
+}
+.funnel-row.branch .funnel-label {
+  padding-left: 12px;
+}
+.funnel-row.branch .funnel-label small::after {
+  content: " (side branch)";
 }
 .funnel-value {
   margin-left: 10px;

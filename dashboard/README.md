@@ -16,37 +16,42 @@ week / month grouping toggle.
 
 1. **Overview**: spend, impressions, clicks, CTR, avg CPC, primary conversions,
    cost per primary conversion, calls from ads, secondary conversion counts,
-   separate spend / clicks / primary-conversion charts (no shared axis), and a
-   funnel: impressions, clicks, landing page sessions,
-   on-page actions, evaluation started, evaluation submitted or booked, calls.
-2. **Campaigns**: status, bid strategy (for example Maximize clicks with a max
+   and separate spend / clicks / primary-conversion charts (no shared axis).
+2. **Conversion funnel**: ad impressions, clicks, GA4 landing page sessions,
+   engaged sessions, CTA clicks, phone clicks, Typeform starts and submits,
+   lead events, Ads primary and secondary conversions, and manual booked counts
+   when the clinic has entered them. Each step shows a conversion rate (main
+   path only) and cost per step. Tables break the same metrics down by campaign
+   and landing page where the data allows. If GA4 is not yet authorized, those
+   steps show a clear placeholder and Ads data keeps working.
+3. **Campaigns**: status, bid strategy (for example Maximize clicks with a max
    CPC cap), daily budget, spend, clicks, conversions, calls.
-3. **Ads (listings)**: each ad's headlines and descriptions, a preview, and the
+4. **Ads (listings)**: each ad's headlines and descriptions, a preview, and the
    sitelinks, call asset, callouts and structured snippets. Metrics are per
    link. A removed link stays listed, labeled Removed, when it had impressions
    in the range.
-4. **Keywords**: text, match type, ad group, status, bid or cap (Maximize clicks
+5. **Keywords**: text, match type, ad group, status, bid or cap (Maximize clicks
    leads with the campaign max CPC cap; keyword bids and ad group defaults are
    marked not used), impressions,
    clicks, CPC, spend, conversions, impression share.
-5. **Search terms**: actual search terms with match source, filterable and
+6. **Search terms**: actual search terms with match source, filterable and
    sortable, as a range total or per day / week / month.
-6. **Landing pages**: GA4 sessions, engaged sessions and key events next to the
+7. **Landing pages**: GA4 sessions, engaged sessions and key events next to the
    Ads landing page report (clicks, spend, conversions).
-7. **On-page actions**: GA4 events (`cta_click`, `phone_tap`,
+8. **On-page actions**: GA4 events (`cta_click`, `phone_tap`,
    `evaluation_started`, `evaluation_submitted`, `visit_booked` and others) with
    counts and rate per session.
-8. **Conversions**: primary (biddable) and secondary Ads conversion actions with
+9. **Conversions**: primary (biddable) and secondary Ads conversion actions with
    counts, % of clicks and cost per action, plus GA4 conversion events as % of
    sessions.
-9. **Spend roll-up**: account, campaign, ad group and keyword spend in an
+10. **Spend roll-up**: account, campaign, ad group and keyword spend in an
    expandable tree.
-10. **Offline leads**: daily phone lead and booked patient counts entered by the
+11. **Offline leads**: daily phone lead and booked patient counts entered by the
     clinic team, next to ad clicks, calls from ads and site phone taps.
 
-GA4 sections have a "Paid search / All traffic" switch. If GA4 is not connected
-those sections say "GA4 not connected yet" and the Ads sections keep working (and
-the other way round).
+GA4 sections have a "Paid search / All traffic" switch. If GA4 is not yet
+authorized, those sections say "GA4 not yet authorized" and the Ads sections keep
+working (and the other way round).
 
 ## Privacy rules (hard)
 
