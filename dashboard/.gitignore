@@ -1,0 +1,11 @@
+node_modules
+.next
+out
+next-env.d.ts
+*.tsbuildinfo
+.vercel
+.env
+.env.local
+.env.*.local
+# Local dev storage fallback (used when BLOB_READ_WRITE_TOKEN is not set)
+.data
