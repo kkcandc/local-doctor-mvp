@@ -119,6 +119,12 @@ describe('GA4 authorization copy', () => {
     expect(status.message).toContain('Viewer')
   })
 
+  it('mentions both credential options when GA4 is not set up', () => {
+    const message = formatGa4RefreshMessage('missing', 'GA4_SERVICE_ACCOUNT_JSON (or GA4_OAUTH_CLIENT_ID)')
+    expect(message).toContain('GA4 not yet authorized')
+    expect(message).toContain('OAuth refresh token')
+  })
+
   it('rewrites a permission error into a Viewer request', () => {
     const message = formatGa4RefreshMessage('api', 'User does not have sufficient permissions for this property')
     expect(message.startsWith('GA4 not yet authorized')).toBe(true)

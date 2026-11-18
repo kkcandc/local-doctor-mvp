@@ -10,11 +10,9 @@ export interface AdsCredentials {
   apiVersion: string
 }
 
-export interface Ga4Credentials {
-  propertyId: string
-  clientEmail: string
-  privateKey: string
-}
+export type Ga4Credentials =
+  | { kind: 'service_account'; propertyId: string; clientEmail: string; privateKey: string }
+  | { kind: 'oauth'; propertyId: string; clientId: string; clientSecret: string; refreshToken: string }
 
 const ADS_VARS = [
   'GOOGLE_ADS_DEVELOPER_TOKEN',
@@ -44,8 +42,26 @@ export function adsCredentials(env: NodeJS.ProcessEnv = process.env): { creds: A
 }
 
 export function ga4Credentials(env: NodeJS.ProcessEnv = process.env): { creds: Ga4Credentials | null; missing: string[]; error?: string } {
-  const missing = ['GA4_PROPERTY_ID', 'GA4_SERVICE_ACCOUNT_JSON'].filter((k) => !env[k]?.trim())
-  if (missing.length) return { creds: null, missing }
+  if (!env.GA4_PROPERTY_ID?.trim()) return { creds: null, missing: ['GA4_PROPERTY_ID'] }
+  // OAuth refresh token (user-authorized, analytics.readonly) wins when all three vars are set.
+  const oauthClientId = env.GA4_OAUTH_CLIENT_ID?.trim()
+  const oauthClientSecret = env.GA4_OAUTH_CLIENT_SECRET?.trim()
+  const oauthRefreshToken = env.GA4_OAUTH_REFRESH_TOKEN?.trim()
+  if (oauthClientId && oauthClientSecret && oauthRefreshToken) {
+    return {
+      missing: [],
+      creds: {
+        kind: 'oauth',
+        propertyId: digits(env.GA4_PROPERTY_ID),
+        clientId: oauthClientId,
+        clientSecret: oauthClientSecret,
+        refreshToken: oauthRefreshToken,
+      },
+    }
+  }
+  if (!env.GA4_SERVICE_ACCOUNT_JSON?.trim()) {
+    return { creds: null, missing: ['GA4_SERVICE_ACCOUNT_JSON (or GA4_OAUTH_CLIENT_ID, GA4_OAUTH_CLIENT_SECRET and GA4_OAUTH_REFRESH_TOKEN)'] }
+  }
   let raw = env.GA4_SERVICE_ACCOUNT_JSON!.trim()
   // Accept base64 too, since some dashboards mangle multi-line JSON.
   if (!raw.startsWith('{')) {
@@ -63,6 +79,7 @@ export function ga4Credentials(env: NodeJS.ProcessEnv = process.env): { creds: G
     return {
       missing: [],
       creds: {
+        kind: 'service_account',
         propertyId: digits(env.GA4_PROPERTY_ID),
         clientEmail: parsed.client_email,
         privateKey: parsed.private_key.replace(/\\n/g, '\n'),
