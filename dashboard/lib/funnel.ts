@@ -80,7 +80,7 @@ export interface LandingPageFunnelRow {
   leads: number | null
 }
 
-const UNAUTHORIZED_RE = /not yet authorized|permission|403|unauthorized|access denied|does not have sufficient permissions|caller does not have|missing env vars:.*GA4_SERVICE_ACCOUNT/i
+const UNAUTHORIZED_RE = /not yet authorized|permission|403|unauthorized|access denied|does not have sufficient permissions|caller does not have|missing env vars:.*GA4_(SERVICE_ACCOUNT|OAUTH)/i
 
 export function isGa4Unauthorized(status: SourceStatus | undefined): boolean {
   if (!status) return true
@@ -91,12 +91,12 @@ export function isGa4Unauthorized(status: SourceStatus | undefined): boolean {
 
 /** Message stored on the snapshot when a GA4 refresh cannot run or is refused. */
 export function formatGa4RefreshMessage(kind: 'missing' | 'parse' | 'api', detail: string): string {
-  if (kind === 'missing' && /GA4_SERVICE_ACCOUNT/.test(detail)) {
-    return 'GA4 not yet authorized. The service account key is not set yet. After it is added, Eric needs to grant that account Viewer access on GA4 property 562274971.'
+  if (kind === 'missing' && /GA4_(SERVICE_ACCOUNT|OAUTH)/.test(detail)) {
+    return 'GA4 not yet authorized. GA4 credentials are not set yet (a service account key or an OAuth refresh token). After they are added, the connected Google account needs Viewer access on GA4 property 562274971.'
   }
   if (kind === 'missing') return `Missing env vars: ${detail}`
   if (kind === 'api' && UNAUTHORIZED_RE.test(detail)) {
-    return `GA4 not yet authorized. The service account cannot read this property yet. Ask Eric to add it as a Viewer on GA4 property 562274971. (${detail})`
+    return `GA4 not yet authorized. The connected Google account or service account cannot read this property yet. Ask Eric to add it as a Viewer on GA4 property 562274971. (${detail})`
   }
   return detail
 }
@@ -105,14 +105,14 @@ export function formatGa4RefreshMessage(kind: 'missing' | 'parse' | 'api', detai
 export function ga4UnauthorizedMessage(status: SourceStatus | undefined): string {
   const msg = status?.message?.trim()
   if (msg && UNAUTHORIZED_RE.test(msg) && /Viewer|property|service account/i.test(msg)) return msg
-  if (msg && /Missing env vars:.*GA4_SERVICE_ACCOUNT/i.test(msg)) {
-    return 'GA4 not yet authorized. The service account key is not set yet. After it is added, Eric needs to grant that account Viewer access on GA4 property 562274971.'
+  if (msg && /Missing env vars:.*GA4_(SERVICE_ACCOUNT|OAUTH)/i.test(msg)) {
+    return 'GA4 not yet authorized. GA4 credentials are not set yet (a service account key or an OAuth refresh token). After they are added, the connected Google account needs Viewer access on GA4 property 562274971.'
   }
   if (status?.state === 'error' && msg && UNAUTHORIZED_RE.test(msg)) {
-    return `GA4 not yet authorized. The service account cannot read this property yet. Ask Eric to add it as a Viewer on GA4 property 562274971. (${msg})`
+    return `GA4 not yet authorized. The connected Google account or service account cannot read this property yet. Ask Eric to add it as a Viewer on GA4 property 562274971. (${msg})`
   }
   if (status?.state === 'error' && msg) return msg
-  return 'GA4 not yet authorized. Landing page sessions, engaged sessions and on-site events appear here once the service account can read GA4 property 562274971.'
+  return 'GA4 not yet authorized. Landing page sessions, engaged sessions and on-site events appear here once the connected Google account can read GA4 property 562274971.'
 }
 
 /** Normalize a campaign name so Ads and GA4 labels can be matched. */

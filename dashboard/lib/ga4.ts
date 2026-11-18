@@ -1,6 +1,6 @@
 import 'server-only'
 import type { Ga4Credentials } from './env'
-import { accessTokenFromServiceAccount } from './google-auth'
+import { accessTokenFromServiceAccount, cachedAccessTokenFromRefreshToken } from './google-auth'
 import { GA4_EVENTS, pathOnly } from './privacy'
 import type {
   DateRange,
@@ -58,7 +58,10 @@ async function runReport(token: string, propertyId: string, range: DateRange, re
 }
 
 export async function fetchGa4(creds: Ga4Credentials, range: DateRange): Promise<{ data: Ga4Data; warnings: string[] }> {
-  const token = await accessTokenFromServiceAccount(creds.clientEmail, creds.privateKey, SCOPE)
+  const token =
+    creds.kind === 'oauth'
+      ? await cachedAccessTokenFromRefreshToken(creds.clientId, creds.clientSecret, creds.refreshToken)
+      : await accessTokenFromServiceAccount(creds.clientEmail, creds.privateKey, SCOPE)
   const warnings: string[] = []
 
   // keyEvents replaced conversions in GA4. Fall back for older properties.

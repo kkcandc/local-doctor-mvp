@@ -173,7 +173,10 @@ the Marketplace would be the next step.
 | `GOOGLE_ADS_CUSTOMER_ID` | For Ads | Advertiser account, digits only: `9082580886`. |
 | `GOOGLE_ADS_API_VERSION` | No | Defaults to `v26`. Bump when Google sunsets it. |
 | `GA4_PROPERTY_ID` | For GA4 | `562274971`. |
-| `GA4_SERVICE_ACCOUNT_JSON` | For GA4 | Service account key JSON (one line), or the same JSON base64-encoded. |
+| `GA4_SERVICE_ACCOUNT_JSON` | For GA4 (or the three OAuth vars) | Service account key JSON (one line), or the same JSON base64-encoded. |
+| `GA4_OAUTH_CLIENT_ID` | Alternative | OAuth client ID. With the next two vars, used instead of the service account. |
+| `GA4_OAUTH_CLIENT_SECRET` | Alternative | OAuth client secret. |
+| `GA4_OAUTH_REFRESH_TOKEN` | Alternative | Refresh token for a Google user who can view the property, scope `analytics.readonly`. |
 | `SNAPSHOT_LOOKBACK_DAYS` | No | Days of history per refresh, 7 to 730. Default 400. |
 | `DASHBOARD_TIMEZONE` | No | Fallback time zone for "yesterday". Default `America/New_York`. |
 | `USE_EXAMPLE_DATA` | No | `1` forces the example data. |
