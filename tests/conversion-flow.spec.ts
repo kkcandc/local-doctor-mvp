@@ -59,7 +59,7 @@ async function postFromCalendly(page: Page, event: string, origin = 'https://cal
 
 test.describe('CTA destinations keep the allow-listed params', () => {
   for (const slug of evaluationSlugs) {
-    test(`/${slug} buttons go to /evaluation and the header matches`, async ({ page }) => {
+    test(`/${slug} buttons go to /get-started (not the /evaluation quiz) and the header matches`, async ({ page }) => {
       await stubTypeform(page)
       await page.goto(`/${slug}${query}`)
       const pageContent = landingPages[slug]
@@ -72,8 +72,7 @@ test.describe('CTA destinations keep the allow-listed params', () => {
       )
       for (const link of links) {
         const url = new URL(link.href, 'https://trylocaldoctor.com')
-        const expectedPath = pageContent.secondaryLink && link.location === pageContent.secondaryLink.location ? '/get-started' : '/evaluation'
-        expect(url.pathname).toBe(expectedPath)
+        expect(url.pathname).toBe('/get-started')
         expect(url.origin).toBe('https://trylocaldoctor.com')
         for (const [key, value] of [['gclid', 'TEST_GCLID'], ['gbraid', 'TEST_GB'], ['wbraid', 'TEST_WB'], ['utm_source', 'google'], ['utm_medium', 'cpc'], ['utm_campaign', 'camp'], ['utm_term', 'memory'], ['utm_content', 'ad1']]) {
           expect(url.searchParams.get(key)).toBe(value)
@@ -86,13 +85,13 @@ test.describe('CTA destinations keep the allow-listed params', () => {
       await expect(page.locator('.header-cta')).toHaveText(expectedLabel)
 
       await page.locator('[data-cta-location="hero"]').click()
-      await expect(page).toHaveURL(/\/evaluation\?/)
+      await expect(page).toHaveURL(/\/get-started\?/)
       expect(page.url()).toContain('gclid=TEST_GCLID')
       expect(page.url()).not.toContain('jane')
       const sent = await events(page)
       const click = ga(sent, 'cta_click')
       expect(click).toHaveLength(1)
-      expect(click[0].params).toMatchObject({ cta_label: expectedLabel, cta_location: 'hero', cta_destination: '/evaluation', page_path: `/${slug}` })
+      expect(click[0].params).toMatchObject({ cta_label: expectedLabel, cta_location: 'hero', cta_destination: '/get-started', page_path: `/${slug}` })
       expect(conversions(sent)).toEqual([{ send_to: `${adsId}/A54CCNK03bUdEOuoosxE` }])
     })
   }
