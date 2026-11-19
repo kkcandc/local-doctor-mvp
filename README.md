@@ -36,7 +36,7 @@ If a branch/PR deploy is still `CANCELED` with `errorLink = Ignored Build Step`,
 - Provider referral page
 - Get-started page with an embedded Calendly scheduler, a "what to expect" and "what to have handy" column, a call or text line, and four FAQs
 - FAQ, resources, and pilot plan pages
-- Vercel SPA rewrites for direct route loading
+- Prerendered HTML for every public route (see Prerendered HTML below), with the SPA shell as the fallback for any other path
 
 ## Page Feature Flags
 
@@ -52,7 +52,7 @@ Every page has a visibility flag in `src/featureFlags.ts`. A disabled page is re
 Nine search-intent pages live in `src/landing/`: `/dementia-evaluation`, `/alzheimers-evaluation`, `/memory-evaluation`, `/alzheimers-doctor-maryland`, `/memory-specialist-maryland`, `/alzheimers-second-opinion`, `/dementia-test-online`, `/memory-doctor-near-me`, and `/alzheimers-blood-test`.
 
 - Copy is in `landingContent.ts`. Titles and descriptions are in `landingMeta.ts`. Claims must come from existing site or compliance copy: no credentials, wait times, prices, outcome rates, or diagnosis/eligibility/medication promises, and no links to the LIV practice domain.
-- `npm run build` also writes `dist/<slug>/index.html` with that page's title, description, canonical, and Open Graph tags (`vite.config.ts`). The app bundle is the same; Vercel serves these files before the SPA rewrite. The same build writes `dist/sitemap.xml` (`src/siteMap.ts`) for `/`, `/get-started`, the intent pages, and the other public routes. `vercel.json` keeps `/sitemap.xml` and `/robots.txt` out of the SPA rewrite and serves the sitemap as `application/xml`. `public/robots.txt` points at `https://trylocaldoctor.com/sitemap.xml`.
+- `npm run build` prerenders each of these to `dist/<slug>/index.html` with the full page, its title, description, canonical, and Open Graph tags (see Prerendered HTML below). Vercel serves these files before the SPA rewrite. The same build writes `dist/sitemap.xml` (`src/siteMap.ts`) for `/`, `/get-started`, the intent pages, and the other public routes. `vercel.json` keeps `/sitemap.xml` and `/robots.txt` out of the SPA rewrite and serves the sitemap as `application/xml`. `public/robots.txt` points at `https://trylocaldoctor.com/sitemap.xml`.
 - Evaluation pages (`/dementia-evaluation`, `/alzheimers-evaluation`, `/memory-evaluation`) use the label **Start your evaluation** and send every button (hero, steps, mid-page, closing, sticky, and the two paths on `/memory-evaluation`) to `/evaluation`. `/alzheimers-blood-test` uses **Request the blood test** for those same primary buttons and also sends them to `/evaluation`. It adds a secondary text link, **See open visit times**, to `/get-started`. The other five intent pages use **See open visit times** and go to `/get-started`. Allow-listed params (`gclid`, `gbraid`, `wbraid`, `utm_*`) are kept on both; email, phone and other params are dropped. The header button uses each evaluation-form page's primary label (**Start your evaluation**, or **Request the blood test** on `/alzheimers-blood-test`) and says **Get started** everywhere else (`headerGetStartedLabel` in `src/App.tsx`). On the five booking pages that header no longer matches the page's own **See open visit times** buttons (`seeVisitTimesLabel`, which the `/evaluation` booking link also uses). The Treatments hero button says **Get started**. The homepage hero label (**Book a Neurologist today**) and the homepage sticky **Get Started** are unchanged. The hero reassurance line and facts panel use these claims only: board-certified neurologist, Maryland video visits, insurance accepted, and no referral needed. They do not promise a visit in days or a next-day appointment. That restriction applies to the intent pages only. The homepage, `/how-it-works` and `/get-started` carry approved speed copy, and `tests/landing-pages.spec.ts` no longer guards against it. The only phone link is the clinic number. `/dementia-test-online` stays informational: it says no online test is offered.
 - Tracking on every intent page, `/get-started` and `/evaluation`: see Google Ads conversion tracking below. All events come from `src/analytics/tracking.ts`. SPA navigation keeps `gclid` / `utm_*` in the URL into `/get-started` and `/evaluation`. The Calendly embed receives the utm params, and the click id is written to Calendly's `salesforce_uuid` field (`src/calendlyUrl.ts`). The Typeform embed receives them as hidden fields.
 - PostHog `eligibility_check_started` keeps `source_path` (the landing page) and adds `cta_location` (`hero`, `mid_page`, `closing`, `patient_path`, `caregiver_path`, `visit_times`). Nothing typed by the visitor is sent.
@@ -60,6 +60,19 @@ Nine search-intent pages live in `src/landing/`: `/dementia-evaluation`, `/alzhe
 - **Changing where a landing page sends visitors:** set its funnel in `src/landing/destinations.ts` (`evaluationForm` is `{ kind: 'evaluation' }`, the on-site `/evaluation` page; `evaluation` is shared by four other pages and `onlineScreening` by `/dementia-test-online`). An `{ kind: 'external', href }` destination is still supported (https Typeform or trylocaldoctor.com only), but an external click cannot report a completion back to Google.
 - Flag: `landingPages` in `src/featureFlags.ts` (`VITE_PAGE_LANDINGPAGES`).
 - Tests: `tests/landing-pages.spec.ts` (desktop and mobile). `SCREENSHOT_DIR=... npx playwright test tests/landing-pages.spec.ts -g capture` saves screenshots.
+
+## Prerendered HTML
+
+`npm run build` renders every public route to static HTML at build time, so the first response already has the page text, H1, title, description, and canonical. Google's ads crawler and any visitor without JavaScript see the full page. The app then hydrates that HTML, so the Typeform embed, the `/evaluation` flow, and all tracking work as before.
+
+- Steps: `vite build` (client, with a manifest), `vite build --ssr src/entry-server.tsx` (to `dist-server/`), then `node scripts/prerender.mjs`, which writes `dist/<path>/index.html` per route and keeps the empty shell as `dist/app-shell.html`.
+- Routes: every enabled page in `src/routes.ts` (`prerenderLocations`), each blog post, and each intent landing page. A page that is off in `src/featureFlags.ts` (Meet the Team today) is not prerendered and still redirects to `/`.
+- Head tags for each route come from `pageHead()` in `src/pageHead.ts`, which `usePageMeta` in `App.tsx` also uses after in-app navigation. Titles and descriptions live in `src/pageMeta.ts` and `src/landing/landingMeta.ts`.
+- `vercel.json` rewrites any path without a prerendered file to `/app-shell.html`, which renders in the browser as before.
+- Hydration rules: the first render in the browser must match the HTML. Anything that depends on the visitor's URL or screen (query params, `matchMedia`) uses the hooks in `src/hydration.ts`, which return the build-time value during hydration and the real one right after. Do not read `window` while rendering.
+- A CTA tapped before the app hydrates still carries `gclid` / `utm_*` to `/get-started` and `/evaluation` (`src/earlyClicks.ts`).
+- Code splitting: the Typeform page (`src/EvaluationPage.tsx`), the legal documents (`src/legal/LegalPages.tsx`), and `posthog-js` load in their own chunks (`src/routePages.ts`, `src/analytics/posthog.ts`). The prerendered HTML links a route's chunk and CSS so it loads in parallel.
+- Tests: `npm run test:prerender` builds, serves `dist` the way Vercel does (`scripts/serve-dist.mjs`), and runs the whole suite plus `tests-prerender/` against it. `npm run test:e2e` still runs against the dev server.
 
 ## Prototype Boundaries
 
@@ -69,7 +82,7 @@ Nine search-intent pages live in `src/landing/`: `/dementia-evaluation`, `/alzhe
 
 ## Google Ads conversion tracking
 
-Vite SPA, so the browser env prefix is `VITE_` (not `NEXT_PUBLIC_`). The tag is injected into `index.html` at build time, and the Vercel rewrite serves that shell for every route. `src/main.tsx` also installs the tag if a build did not, using the same script-element pattern as the Calendly embed.
+Vite SPA, so the browser env prefix is `VITE_` (not `NEXT_PUBLIC_`). The tag is injected into `index.html` at build time, and every prerendered page and the SPA fallback shell are built from that file. `src/main.tsx` also installs the tag if a build did not, using the same script-element pattern as the Calendly embed.
 
 | Env var | Purpose |
 | --- | --- |

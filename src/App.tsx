@@ -25,116 +25,29 @@ import {
   ContactPage,
   ConsentPage,
   LegalIdentity,
-  PatientRightsPage,
-  PrivacyPage,
   ProviderRoster,
-  TermsPage,
   publicPhone,
   publicEmail,
 } from './compliancePages'
-import { isPageEnabled, type PageFlag } from './featureFlags'
 import { noteSpaNavigation } from './analytics/googleAds'
 import { pathWithAdsParams } from './analytics/googleAdsConfig'
 import { noteGaSpaNavigation } from './analytics/googleAnalytics'
 import { trackCtaClick as sendCtaClick } from './analytics/tracking'
 import { syncChatbot } from './chatbot'
-import { EvaluationPage } from './EvaluationPage'
-import { evaluationMeta, startMeta } from './pageMeta'
+import { useLocationSearch, useMediaQuery } from './hydration'
+import { defaultMeta } from './pageMeta'
+import { pageHead } from './pageHead'
 import { noteEligibilityStarted } from './analytics/posthog'
 import { CalendlyEmbed } from './CalendlyEmbed'
 import { LandingPage, type CtaTarget } from './landing/LandingPage'
 import { landingPages } from './landing/landingContent'
-import { isLandingSlug, landingCanonical, landingMeta } from './landing/landingMeta'
+import { isLandingSlug } from './landing/landingMeta'
+import { EvaluationPage, PatientRightsPage, PrivacyPage, TermsPage } from './routePages'
+import { initialLocation, readLocation, routeEnabled, routePaths, type Route } from './routes'
 import { StickyCta } from './StickyCta'
 import './App.css'
 
-type Route =
-  | 'home'
-  | 'treatments'
-  | 'how'
-  | 'about'
-  | 'start'
-  | 'evaluation'
-  | 'faq'
-  | 'blog'
-  | 'blogPost'
-  | 'refer'
-  | 'privacy'
-  | 'terms'
-  | 'patientRights'
-  | 'consent'
-  | 'contact'
-  | 'landing'
-
 type Navigate = (next: Route, slug?: string, ctaLocation?: string, ctaLabel?: string, hash?: string) => void
-
-const defaultTitle = "Local Doctor | Alzheimer's Treatment Eligibility Review"
-const defaultDescription =
-  "Local Doctor is a virtual Alzheimer's specialty clinic for treatment eligibility review, records, testing, insurance questions, and local follow-through for people who may qualify."
-const defaultOgTitle = "Connect with Alzheimer's specialists and advanced treatment today"
-
-const routeMeta: Partial<Record<Route, { title: string; description: string }>> = {
-  start: startMeta,
-  evaluation: evaluationMeta,
-  privacy: {
-    title: 'Privacy Policy | Local Doctor',
-    description: 'Privacy Policy for Local Infusion Inc. services offered through trylocaldoctor.com.',
-  },
-  terms: {
-    title: 'Terms of Use | Local Doctor',
-    description: 'Terms of Use for the Local Doctor platform operated by Local Infusion, Inc.',
-  },
-  patientRights: {
-    title: 'Patient Rights, Notices, and Notice of Privacy Practice | Local Doctor',
-    description: 'Patient rights, nondiscrimination and good faith estimate notices, and the Notice of Privacy Practices.',
-  },
-  consent: {
-    title: 'Telehealth Consent | Local Doctor',
-    description: 'What a Local Doctor virtual visit is, the risks and alternatives, and how telehealth consent is collected.',
-  },
-  contact: {
-    title: 'Contact | Local Doctor',
-    description: 'Contact Local Doctor for the legal entity, physical address, and licensed provider.',
-  },
-  about: {
-    title: 'Meet the Team | Local Doctor',
-    description: 'Care team roles, the company that operates Local Doctor, and the licensed providers who may see patients.',
-  },
-}
-
-const routePaths: Record<Exclude<Route, 'blogPost' | 'landing'>, string> = {
-  home: '/',
-  treatments: '/treatments',
-  how: '/how-it-works',
-  about: '/about',
-  start: '/get-started',
-  evaluation: '/evaluation',
-  faq: '/faq',
-  blog: '/blog',
-  refer: '/refer-a-patient',
-  privacy: '/privacy',
-  terms: '/terms',
-  patientRights: '/patient-rights',
-  consent: '/telehealth-consent',
-  contact: '/contact',
-}
-
-const pathRoutes: Record<string, Route> = {
-  '': 'home',
-  treatments: 'treatments',
-  'how-it-works': 'how',
-  about: 'about',
-  'get-started': 'start',
-  evaluation: 'evaluation',
-  faq: 'faq',
-  blog: 'blog',
-  'refer-a-patient': 'refer',
-  privacy: 'privacy',
-  terms: 'terms',
-  'patient-rights': 'patientRights',
-  'telehealth-consent': 'consent',
-  contact: 'contact',
-}
 
 const valueProps = [
   {
@@ -350,32 +263,19 @@ const headerGetStartedLabel = 'Get started'
 const headerPhone = '(240) 376-5730'
 const headerPhoneHref = '+12403765730'
 
-function routeEnabled(route: Route) {
-  const flag: PageFlag = route === 'blogPost' ? 'blog' : route === 'landing' ? 'landingPages' : route
-  return isPageEnabled(flag)
-}
-
 function enabledLinks<T extends readonly [Route, ...unknown[]]>(links: T[]) {
   return links.filter(([route]) => routeEnabled(route))
 }
 
-function normalizePath() {
-  return window.location.pathname.replace(/^\/+|\/+$/g, '')
+function normalizePath(pathname = window.location.pathname) {
+  return pathname.replace(/^\/+|\/+$/g, '')
 }
 
-function readLocation(path = normalizePath()): { route: Route; slug: string } {
-  if (isLandingSlug(path)) return { route: 'landing', slug: path }
-  if (path === 'blog') return { route: 'blog', slug: '' }
-  if (path.startsWith('blog/')) {
-    const slug = decodeURIComponent(path.slice('blog/'.length).split('/')[0] ?? '')
-    return { route: slug ? 'blogPost' : 'blog', slug }
-  }
-  return { route: pathRoutes[path as keyof typeof routePaths] ?? 'home', slug: '' }
-}
-
-function App() {
-  const [route, setRoute] = useState<Route>('home')
-  const [routeSlug, setRouteSlug] = useState('')
+// pathname is set when prerendering. In the browser the app reads window.location.
+function App({ pathname }: { pathname?: string }) {
+  const [initial] = useState(() => initialLocation(normalizePath(pathname)))
+  const [route, setRoute] = useState<Route>(initial.route)
+  const [routeSlug, setRouteSlug] = useState(initial.slug)
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrollRequest, setScrollRequest] = useState(0)
 
@@ -397,7 +297,7 @@ function App() {
       if (path === 'privacy' && window.location.hash === '#notice') {
         window.history.replaceState({}, '', '/patient-rights#notice-of-privacy-practices')
       }
-      let next = readLocation()
+      let next = readLocation(normalizePath())
       if (!routeEnabled(next.route)) {
         window.history.replaceState({}, '', '/')
         next = { route: 'home', slug: '' }
@@ -618,6 +518,8 @@ function Header({
 }
 
 function HomePage({ onNavigate }: { onNavigate: Navigate }) {
+  const search = useLocationSearch()
+
   return (
     <>
       <section className="hero">
@@ -689,7 +591,7 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
       />
       <StickyCta
         label="Get Started"
-        href={pathWithAdsParams(routePaths.start, typeof window === 'undefined' ? '' : window.location.search)}
+        href={pathWithAdsParams(routePaths.start, search)}
         anchorSelector=".hero .hero-actions"
         stopSelectors={['.conversion-panel', '.footer']}
         onClick={(event) => {
@@ -856,20 +758,10 @@ function AboutPage({ onNavigate }: { onNavigate: Navigate }) {
 const startPhoto = { src: '/assets/hero-get-started.jpg', alt: 'Three generations of a family sitting together on a lakeside dock' }
 const COMPACT_QUERY = '(max-width: 980px)'
 
-function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches)
-  useEffect(() => {
-    const media = window.matchMedia(query)
-    const update = () => setMatches(media.matches)
-    update()
-    media.addEventListener('change', update)
-    return () => media.removeEventListener('change', update)
-  }, [query])
-  return matches
-}
-
 function StartPage() {
   // On a phone the hero is short, the scheduler comes right after it, and the photo sits below.
+  // The prerendered HTML cannot know the viewport (compact is null), so it carries both photos
+  // and CSS at the same breakpoint hides the one that does not apply until the app takes over.
   const compact = useMediaQuery(COMPACT_QUERY)
 
   return (
@@ -889,7 +781,7 @@ function StartPage() {
         image={compact ? undefined : startPhoto}
       />
       <BookingSection />
-      {compact && <img className="start-photo-below" src={startPhoto.src} alt={startPhoto.alt} width={385} height={515} loading="lazy" />}
+      {compact !== false && <img className="start-photo-below" src={startPhoto.src} alt={startPhoto.alt} width={385} height={515} loading="lazy" />}
       {/* No mobile sticky bar here for now: it did not behave well while scrolling. */}
     </div>
   )
@@ -936,7 +828,7 @@ function ReferPage({ onNavigate }: { onNavigate: Navigate }) {
 // the visitor's ad click ids, and counts as a CTA click like the other Get Started buttons.
 function FaqAnswer({ answer, onNavigate }: { answer: string | FaqParagraph[]; onNavigate: Navigate }) {
   const paragraphs = Array.isArray(answer) ? answer : [answer]
-  const search = typeof window === 'undefined' ? '' : window.location.search
+  const search = useLocationSearch()
 
   return (
     <>
@@ -1162,14 +1054,43 @@ function setOpenGraph({ title, description, url }: { title: string; description:
   ogUrl.setAttribute('content', url)
 }
 
+function setCanonical(url?: string) {
+  let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+  if (!url) {
+    canonical?.remove()
+    return
+  }
+  if (!canonical) {
+    canonical = document.createElement('link')
+    canonical.rel = 'canonical'
+    document.head.appendChild(canonical)
+  }
+  canonical.href = url
+}
+
+function setJsonLd(data?: Record<string, unknown>) {
+  let jsonLd = document.getElementById('blog-article-jsonld')
+  if (!data) {
+    jsonLd?.remove()
+    return
+  }
+  if (!jsonLd) {
+    jsonLd = document.createElement('script')
+    jsonLd.id = 'blog-article-jsonld'
+    jsonLd.setAttribute('type', 'application/ld+json')
+    document.head.appendChild(jsonLd)
+  }
+  jsonLd.textContent = JSON.stringify(data)
+}
+
 function usePageMeta(route: Route, slug: string) {
   useEffect(() => {
+    const head = pageHead({ route, slug })
     const description = document.querySelector('meta[name="description"]')
-    const post = route === 'blogPost' ? getBlogPost(slug) : undefined
 
-    // /evaluation stays out of search results. The built shell already carries this tag on a direct load.
+    // /evaluation stays out of search results. The prerendered HTML already carries this tag on a direct load.
     const robots = document.querySelector('meta[name="robots"]')
-    if (route === 'evaluation') {
+    if (head.noindex) {
       if (!robots) {
         const tag = document.createElement('meta')
         tag.setAttribute('name', 'robots')
@@ -1180,76 +1101,18 @@ function usePageMeta(route: Route, slug: string) {
       robots?.remove()
     }
 
-    const clearSyndicationTags = () => {
-      document.querySelector('link[rel="canonical"]')?.remove()
-      document.getElementById('blog-article-jsonld')?.remove()
-    }
-
-    if (post) {
-      document.title = `${post.title} | Local Doctor`
-      description?.setAttribute('content', post.excerpt)
-      let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')
-      if (!canonical) {
-        canonical = document.createElement('link')
-        canonical.rel = 'canonical'
-        document.head.appendChild(canonical)
-      }
-      canonical.href = post.originalUrl
-
-      let jsonLd = document.getElementById('blog-article-jsonld')
-      if (!jsonLd) {
-        jsonLd = document.createElement('script')
-        jsonLd.id = 'blog-article-jsonld'
-        jsonLd.setAttribute('type', 'application/ld+json')
-        document.head.appendChild(jsonLd)
-      }
-      jsonLd.textContent = JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        headline: post.title,
-        description: post.excerpt,
-        datePublished: post.published,
-        dateModified: post.updated,
-        author: { '@type': 'Person', name: post.author },
-        publisher: {
-          '@type': 'Organization',
-          name: 'Local Infusion',
-          url: 'https://mylocalinfusion.com/',
-        },
-        isBasedOn: post.originalUrl,
-        sameAs: post.originalUrl,
-        mainEntityOfPage: post.originalUrl,
-      })
-    } else if (route === 'blog') {
-      clearSyndicationTags()
-      document.title = 'Blog | Local Doctor'
-      description?.setAttribute(
-        'content',
-        'Alzheimer’s articles originally published by Local Infusion and republished by Local Doctor with attribution and a link to each source.',
-      )
-    } else if (route === 'landing' && isLandingSlug(slug)) {
-      clearSyndicationTags()
-      const meta = landingMeta[slug]
-      const url = landingCanonical(slug)
-      document.title = meta.title
-      description?.setAttribute('content', meta.description)
-      const canonical = document.createElement('link')
-      canonical.rel = 'canonical'
-      canonical.href = url
-      document.head.appendChild(canonical)
-      setOpenGraph({ title: meta.title, description: meta.description, url })
-    } else {
-      clearSyndicationTags()
-      const meta = routeMeta[route]
-      document.title = meta?.title ?? defaultTitle
-      description?.setAttribute('content', meta?.description ?? defaultDescription)
-    }
+    document.title = head.title
+    description?.setAttribute('content', head.description)
+    setCanonical(head.canonical)
+    setJsonLd(head.jsonLd)
+    if (route === 'landing') setOpenGraph({ title: head.title, description: head.description, url: head.ogUrl })
 
     return () => {
-      clearSyndicationTags()
-      setOpenGraph({ title: defaultOgTitle, description: defaultDescription })
-      document.title = defaultTitle
-      description?.setAttribute('content', defaultDescription)
+      setCanonical()
+      setJsonLd()
+      setOpenGraph({ title: defaultMeta.ogTitle, description: defaultMeta.description })
+      document.title = defaultMeta.title
+      description?.setAttribute('content', defaultMeta.description)
     }
   }, [route, slug])
 }
@@ -1632,7 +1495,7 @@ function Footer({ onNavigate }: { onNavigate: Navigate }) {
         <p>
           Leqembi and Kisunla are FDA-approved to help slow the progression of early Alzheimer&apos;s disease in people who qualify. Individual results vary, and these treatments are not a cure. Local Doctor provides specialist evaluation and care coordination; it does not replace emergency care. If you are experiencing a medical emergency, call 911.
         </p>
-        <p className="footer-copy">© {new Date().getFullYear()} Local Doctor. All rights reserved.</p>
+        <p className="footer-copy" suppressHydrationWarning>© {new Date().getFullYear()} Local Doctor. All rights reserved.</p>
       </div>
     </footer>
   )

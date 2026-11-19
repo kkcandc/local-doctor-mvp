@@ -2,15 +2,12 @@ import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { googleTagHtml, resolveGoogleAdsId } from './src/analytics/googleAdsConfig.ts'
 import { resolveGaMeasurementId } from './src/analytics/googleAnalyticsConfig.ts'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { landingHtml, pageShellHtml } from './src/landing/landingHtml.ts'
-import { pageShells } from './src/pageMeta.ts'
-import { landingSlugs } from './src/landing/landingMeta.ts'
 import { siteSitemapXml } from './src/siteMap.ts'
 
 // Injects the Google tag (Ads and GA4) into the SPA shell for production builds.
-// Every route is rewritten to index.html, so one snippet covers the site.
+// Every prerendered route and the SPA fallback shell are built from index.html, so one snippet covers the site.
 function googleTagsHtmlPlugin(adsEnv: string | undefined, gaEnv: string | undefined): Plugin {
   return {
     name: 'local-doctor-google-tags',
@@ -30,28 +27,20 @@ function googleTagsHtmlPlugin(adsEnv: string | undefined, gaEnv: string | undefi
   }
 }
 
-// Writes dist/<slug>/index.html for each intent landing page, /get-started and /evaluation so
-// the title, description, and canonical (or noindex) are in the HTML response. Vercel serves these before the SPA rewrite.
-function landingPagesHtmlPlugin(): Plugin {
+// Writes dist/sitemap.xml. The per-route HTML files are written after this build by
+// scripts/prerender.mjs, which renders each public route into its own dist/<path>/index.html.
+function sitemapBuildPlugin(): Plugin {
   let outDir = 'dist'
+  let ssr = false
   return {
-    name: 'local-doctor-landing-pages',
+    name: 'local-doctor-sitemap',
     apply: 'build',
     configResolved(config) {
       outDir = path.resolve(config.root, config.build.outDir)
+      ssr = Boolean(config.build.ssr)
     },
     async writeBundle() {
-      const indexHtml = await readFile(path.join(outDir, 'index.html'), 'utf8')
-      for (const slug of landingSlugs) {
-        const dir = path.join(outDir, slug)
-        await mkdir(dir, { recursive: true })
-        await writeFile(path.join(dir, 'index.html'), landingHtml(indexHtml, slug))
-      }
-      for (const [slug, meta] of Object.entries(pageShells)) {
-        const dir = path.join(outDir, slug)
-        await mkdir(dir, { recursive: true })
-        await writeFile(path.join(dir, 'index.html'), pageShellHtml(indexHtml, meta))
-      }
+      if (ssr) return
       await writeFile(path.join(outDir, 'sitemap.xml'), siteSitemapXml())
     },
   }
@@ -75,9 +64,13 @@ function sitemapDevPlugin(): Plugin {
   }
 }
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, isSsrBuild }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
   return {
-    plugins: [react(), googleTagsHtmlPlugin(env.VITE_GOOGLE_ADS_ID, env.VITE_GA_MEASUREMENT_ID), sitemapDevPlugin(), landingPagesHtmlPlugin()],
+    plugins: [react(), googleTagsHtmlPlugin(env.VITE_GOOGLE_ADS_ID, env.VITE_GA_MEASUREMENT_ID), sitemapDevPlugin(), sitemapBuildPlugin()],
+    // The prerender reads the manifest to link each route's lazy chunk and its CSS, then deletes it.
+    build: isSsrBuild ? {} : { manifest: true },
+    // The Typeform embed is CommonJS with no named ESM exports, so the server build bundles it.
+    ssr: { noExternal: ['@typeform/embed-react', '@typeform/embed'] },
   }
 })

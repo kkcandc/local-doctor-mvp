@@ -2213,6 +2213,19 @@ a.blog-card {
   object-fit: cover;
 }
 
+/* The prerendered /get-started has both photos until the app picks one (COMPACT_QUERY in App.tsx). */
+@media (max-width: 980px) {
+  .start-page .page-hero-image {
+    display: none;
+  }
+}
+
+@media (min-width: 981px) {
+  .start-photo-below {
+    display: none;
+  }
+}
+
 @media (max-width: 680px) {
   .start-page .page-hero {
     gap: var(--space-12);
