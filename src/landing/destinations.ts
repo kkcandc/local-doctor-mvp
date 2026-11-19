@@ -1,11 +1,12 @@
 /*
   Where each landing page's primary button goes.
 
-  Most funnels use the /get-started scheduler (the Calendly embed). evaluationForm is the
-  exception: /dementia-evaluation, /alzheimers-evaluation, /memory-evaluation and
-  /alzheimers-blood-test send their primary buttons to /evaluation, which embeds the evaluation
-  Typeform on this site so its start and submit can be measured (src/EvaluationPage.tsx).
-  /alzheimers-blood-test also has a secondary "See open visit times" link to /get-started.
+  Every funnel uses the /get-started scheduler (the Calendly embed). evaluationForm
+  (/dementia-evaluation, /alzheimers-evaluation, /memory-evaluation and /alzheimers-blood-test)
+  used to send its buttons to /evaluation, the scored evaluation Typeform. It now goes straight
+  to the scheduler so a visitor reaches open times without a quiz first, and gives contact
+  details once, in Calendly. The /evaluation route still exists (src/EvaluationPage.tsx); no
+  landing button points at it. To send a funnel back there, set it to { kind: 'evaluation' }.
   To point another funnel at an external form, change its entry below to
   { kind: 'external', href: 'https://...' }. To move a single page, give it its own
   funnel key rather than flipping a shared one.
@@ -24,7 +25,7 @@ export type CtaDestination = { kind: 'intake' } | { kind: 'evaluation' } | { kin
 
 export const landingDestinations: Record<LandingFunnel, CtaDestination> = {
   evaluation: { kind: 'intake' },
-  evaluationForm: { kind: 'evaluation' },
+  evaluationForm: { kind: 'intake' },
   onlineScreening: { kind: 'intake' },
 }
 

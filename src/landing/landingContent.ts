@@ -120,9 +120,9 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
         kind: 'steps',
         id: 'how-it-works',
         eyebrow: 'How it works',
-        title: 'From a short form to a clear next step.',
+        title: 'From a booked visit to a clear next step.',
         steps: [
-          { title: 'Send a request', copy: 'Fill out the short form, or call us. Either way, a team member follows up with you by phone.' },
+          { title: 'Book a visit', copy: 'Pick an open visit time, or call us. Either way, a team member follows up with you by phone.' },
           { title: 'Eligibility call', copy: 'We go over current concerns, daily activities, medical history, medications, and insurance, and confirm whether a specialist visit fits your needs.' },
           { title: 'Video visit with a specialist', copy: 'Plan for about an hour. You and a loved one share concerns and history, and the specialist explains their clinical summary and recommended plan.' },
           { title: 'Local testing, only if ordered', copy: 'If the plan includes new tests, you schedule them with a local lab (Quest or LabCorp) or imaging center.' },
@@ -149,11 +149,11 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
       ['Is this a dementia test?', 'No. A test or screening is one tool. An evaluation is a clinician reviewing your symptoms, history, medications, and any prior results, then recommending what to do next. The evaluation form is not a diagnosis, and it does not replace a visit with a neurologist.'],
       ['Do I need to live in Maryland?', 'You need to be located in Maryland during the visit, because the clinician must be licensed in the state where the patient is. Virtual visits are not available in other states at this time.'],
       ['Is there an office I go to?', 'No. Local Doctor is a virtual practice and visits happen by video. If labs or imaging are ordered, those are done in person at a local lab or imaging center.'],
-      ['Do I need a referral from my doctor?', 'No referral is needed. Start with the short form or call our team, and we review eligibility and insurance with you before a visit is booked.'],
+      ['Do I need a referral from my doctor?', 'No referral is needed. Pick an open visit time or call our team, and we review eligibility and insurance with you before the visit.'],
       ['Will I get a prescription?', 'Not from this website. If a medication is ever appropriate, that decision is made by the evaluating clinician after the evaluation and follows the law of the state where you are located.'],
       ['Who do I contact in a medical emergency?', 'Call 911 immediately. Local Doctor provides specialist evaluation and does not replace emergency care.'],
     ],
-    closing: { title: 'Ready to request a dementia evaluation?', copy: 'Start with the short form or call our team. We review eligibility and insurance with you first.' },
+    closing: { title: 'Ready to request a dementia evaluation?', copy: 'Pick an open visit time or call our team. We review eligibility and insurance with you before the visit.' },
     related: ['alzheimers-evaluation', 'memory-evaluation', 'alzheimers-second-opinion'],
   },
 
@@ -197,7 +197,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
         eyebrow: 'How it works',
         title: "The path through an Alzheimer's evaluation.",
         steps: [
-          { title: 'Request a review', copy: 'Send the short form or call us, and a team member follows up by phone.' },
+          { title: 'Book a visit', copy: 'Pick an open visit time or call us, and a team member follows up by phone.' },
           { title: 'Eligibility call', copy: 'We confirm insurance and whether your needs fit a visit with our neurology team.' },
           { title: 'Specialist video visit', copy: 'About an hour. The specialist shares a clinical summary and a plan, which may include orders for labs, genetic testing, or imaging.' },
           { title: 'Results and options', copy: 'After local testing, a follow-up visit covers what the results show and the paths that fit you, including referrals to other care.' },
@@ -835,7 +835,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
   },
 }
 
-// Pages whose primary button opens the on-site evaluation form (/evaluation) instead of the scheduler.
+// Pages on the evaluationForm funnel. Their buttons now go to the scheduler (see destinations.ts).
 export const evaluationFormSlugs: LandingSlug[] = (Object.keys(landingPages) as LandingSlug[]).filter(
   (slug) => landingPages[slug].funnel === 'evaluationForm',
 )
