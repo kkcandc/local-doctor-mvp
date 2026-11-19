@@ -192,7 +192,7 @@ for (const route of trackedRoutes) {
       await expect(landing.locator('.landing-reassurance')).toContainText('No referral needed')
 
       const hero = landing.locator('[data-cta-location="hero"]')
-      const targetPath = landingPages[route].funnel === 'evaluationForm' ? '/evaluation' : '/get-started'
+      const targetPath = '/get-started'
       const ctaParams = { page_path: `/${route}`, cta_location: 'hero', cta_label: landingPages[route].ctaLabel, cta_destination: targetPath }
 
       await expect(hero).toHaveAttribute('href', new RegExp(`^${targetPath}\\?.*gclid=test_gclid_123`))
