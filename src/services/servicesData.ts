@@ -1,6 +1,6 @@
 /*
   The services listed on /services. Plain data with no React imports, so the page and the tests
-  read the same list.
+  read the same list. Cards appear in the order of this array.
 
   Prices are the wording from the approved design, shown as written. Like all claims on the site
   they need clinical and legal review before paid traffic (see README, Prototype Boundaries).
@@ -31,14 +31,6 @@ const ivBag = '/assets/hero-leqembi-iv.webp'
 
 export const services: Service[] = [
   {
-    name: 'Brain MRI',
-    type: 'Test',
-    price: 'Price after visit',
-    image: '/assets/services/mri.jpg',
-    fit: 'cover',
-    keywords: 'scan imaging magnetic resonance radiology',
-  },
-  {
     name: 'Memory evaluation',
     type: 'Visit',
     price: 'from $0',
@@ -47,12 +39,12 @@ export const services: Service[] = [
     keywords: 'forgetful memory loss video',
   },
   {
-    name: 'Leqembi',
+    name: 'Leqembi (lecanemab)',
     type: 'Treatment',
     price: 'Price after visit',
     image: ivBag,
     fit: 'contain',
-    keywords: 'lecanemab amyloid infusion anti-amyloid drug',
+    keywords: 'amyloid infusion anti-amyloid drug',
   },
   {
     name: "Alzheimer's blood test",
@@ -79,36 +71,12 @@ export const services: Service[] = [
     keywords: 'memory cognitive decline',
   },
   {
-    name: 'Kisunla',
-    type: 'Treatment',
-    price: 'Price after visit',
-    image: ivBag,
-    fit: 'contain',
-    keywords: 'donanemab amyloid infusion anti-amyloid drug',
-  },
-  {
-    name: 'Visit with a Neurologist doctor',
+    name: 'Visit with a neurologist doctor',
     type: 'Visit',
     price: 'from $0',
     image: '/assets/services/neurologist.jpg',
     fit: 'cover',
     keywords: 'neurology specialist consult',
-  },
-  {
-    name: 'Cognitive evaluation',
-    type: 'Visit',
-    price: 'from $0',
-    image: '/assets/services/cognitive.jpg',
-    fit: 'cover',
-    keywords: 'thinking reasoning screen',
-  },
-  {
-    name: "Alzheimer's genetic testing",
-    type: 'Test',
-    price: 'Price after visit',
-    image: '/assets/services/genetic-test.jpg',
-    fit: 'cover',
-    keywords: 'apoe gene dna',
   },
   {
     name: 'Brain fog evaluation',
@@ -119,12 +87,44 @@ export const services: Service[] = [
     keywords: 'fog fatigue thinking',
   },
   {
+    name: "Alzheimer's genetic testing",
+    type: 'Test',
+    price: 'Price after visit',
+    image: '/assets/services/genetic-test.jpg',
+    fit: 'cover',
+    keywords: 'apoe gene dna',
+  },
+  {
+    name: 'Cognitive evaluation',
+    type: 'Visit',
+    price: 'from $0',
+    image: '/assets/services/cognitive.jpg',
+    fit: 'cover',
+    keywords: 'thinking reasoning screen',
+  },
+  {
+    name: 'Kisunla',
+    type: 'Treatment',
+    price: 'Price after visit',
+    image: ivBag,
+    fit: 'contain',
+    keywords: 'donanemab amyloid infusion anti-amyloid drug',
+  },
+  {
     name: "Alzheimer's evaluation",
     type: 'Visit',
     price: 'from $0',
     image: '/assets/services/alzheimers.jpg',
     fit: 'cover',
     keywords: 'diagnosis dementia memory',
+  },
+  {
+    name: 'Brain MRI',
+    type: 'Test',
+    price: 'Price after visit',
+    image: '/assets/services/mri.jpg',
+    fit: 'cover',
+    keywords: 'scan imaging magnetic resonance radiology',
   },
 ]
 

@@ -63,6 +63,20 @@ test.describe('on a desktop screen', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(heading)
     await expect(cards(page)).toHaveCount(12)
     await expect(page.locator('.services-count')).toHaveText('12 services')
+    await expect(cardNames(page)).toHaveText([
+      'Memory evaluation',
+      'Leqembi (lecanemab)',
+      "Alzheimer's blood test",
+      'Concentration difficulty',
+      'Dementia evaluation',
+      'Visit with a neurologist doctor',
+      'Brain fog evaluation',
+      "Alzheimer's genetic testing",
+      'Cognitive evaluation',
+      'Kisunla',
+      "Alzheimer's evaluation",
+      'Brain MRI',
+    ])
     await expect(page.getByRole('button', { name: 'Visits 7' })).toHaveAttribute('aria-pressed', 'false')
     await expect(page.getByRole('button', { name: 'Treatments 2' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Tests 3' })).toBeVisible()
@@ -85,7 +99,7 @@ test.describe('on a desktop screen', () => {
 
     await chip.click()
     await expect(chip).toHaveAttribute('aria-pressed', 'true')
-    await expect(cardNames(page)).toHaveText(['Leqembi', 'Kisunla'])
+    await expect(cardNames(page)).toHaveText(['Leqembi (lecanemab)', 'Kisunla'])
     await expect(page.locator('.services-count')).toHaveText('2 services · Treatments')
 
     await page.getByRole('button', { name: 'Tests 3' }).click()
@@ -109,8 +123,11 @@ test.describe('on a desktop screen', () => {
     await search(page).fill('apoe')
     await expect(cardNames(page)).toHaveText(["Alzheimer's genetic testing"])
 
+    await search(page).fill('lecanemab')
+    await expect(cardNames(page)).toHaveText(['Leqembi (lecanemab)'])
+
     await search(page).fill('  treatments ')
-    await expect(cardNames(page)).toHaveText(['Leqembi', 'Kisunla'])
+    await expect(cardNames(page)).toHaveText(['Leqembi (lecanemab)', 'Kisunla'])
 
     // Search and the type chip both have to match.
     await search(page).fill('amyloid')
