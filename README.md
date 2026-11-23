@@ -31,6 +31,7 @@ If a branch/PR deploy is still `CANCELED` with `errorLink = Ignored Build Step`,
 ## What It Includes
 
 - Patient-facing home page with intent-path routing
+- Services page with a searchable, filterable grid of visits, tests, and treatments (see Services Page below)
 - Treatment page for Leqembi/Kisunla, with hedged drug-effect language
 - How-it-works page mapped to the 13-step patient journey
 - Provider referral page
@@ -60,6 +61,16 @@ Nine search-intent pages live in `src/landing/`: `/dementia-evaluation`, `/alzhe
 - **Changing where a landing page sends visitors:** set its funnel in `src/landing/destinations.ts` (`evaluationForm` is `{ kind: 'evaluation' }`, the on-site `/evaluation` page; `evaluation` is shared by four other pages and `onlineScreening` by `/dementia-test-online`). An `{ kind: 'external', href }` destination is still supported (https Typeform or trylocaldoctor.com only), but an external click cannot report a completion back to Google.
 - Flag: `landingPages` in `src/featureFlags.ts` (`VITE_PAGE_LANDINGPAGES`).
 - Tests: `tests/landing-pages.spec.ts` (desktop and mobile). `SCREENSHOT_DIR=... npx playwright test tests/landing-pages.spec.ts -g capture` saves screenshots.
+
+## Services Page
+
+`/services` (`src/services/`) lists every visit, test, and treatment as a card, with a search box and Visits / Treatments / Tests filters. Its header and footer links sit between How it works and Treatments.
+
+- The list, prices, photos, and hidden search keywords are in `src/services/servicesData.ts`. Photos are in `public/assets/services/`; the Leqembi and Kisunla cards share `public/assets/hero-leqembi-iv.webp`.
+- Prices and "with or without insurance" are the wording from the approved design. Like every other claim they need clinical and legal review before paid traffic.
+- Individual service pages do not exist yet, so every **Book now** opens `/get-started` and logs `cta_click` with location `service_card` (the closing buttons use `services_closing`, and the no-results button `services_empty`). To send a card to its own page later, build that route (`src/routes.ts`, `src/pageMeta.ts`, `src/siteMap.ts`) and give the card its own link in `src/services/ServicesPage.tsx`, where `bookingHref` is built.
+- Search and filter state is local to the page and starts empty, so the prerendered HTML and the hydrated page match.
+- Flag: `services` in `src/featureFlags.ts` (`VITE_PAGE_SERVICES`). Tests: `tests/services-page.spec.ts`.
 
 ## Prerendered HTML
 

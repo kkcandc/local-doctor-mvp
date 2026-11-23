@@ -44,6 +44,7 @@ import { landingPages } from './landing/landingContent'
 import { isLandingSlug } from './landing/landingMeta'
 import { EvaluationPage, PatientRightsPage, PrivacyPage, TermsPage } from './routePages'
 import { initialLocation, readLocation, routeEnabled, routePaths, type Route } from './routes'
+import { ServicesPage } from './services/ServicesPage'
 import { StickyCta } from './StickyCta'
 import './App.css'
 
@@ -375,6 +376,7 @@ function App({ pathname }: { pathname?: string }) {
     <main>
       <Header route={route} routeSlug={routeSlug} menuOpen={menuOpen} onToggleMenu={() => setMenuOpen((open) => !open)} onNavigate={navigate} />
       {route === 'home' && <HomePage onNavigate={navigate} />}
+      {route === 'services' && <ServicesPage onStart={(ctaLocation, ctaLabel) => navigate('start', '', ctaLocation, ctaLabel)} />}
       {route === 'treatments' && <TreatmentsPage onNavigate={navigate} />}
       {route === 'how' && <HowPage onNavigate={navigate} />}
       {route === 'about' && <AboutPage onNavigate={navigate} />}
@@ -445,6 +447,7 @@ function Header({
     : { target: 'start' as const, label: headerGetStartedLabel }
   const navItems = enabledLinks<[Route, string]>([
     ['how', 'How it works'],
+    ['services', 'Services'],
     ['treatments', 'Treatments'],
   ])
   const aboutItems = enabledLinks<[Route, string]>([
@@ -1443,6 +1446,7 @@ function Footer({ onNavigate }: { onNavigate: Navigate }) {
   const exploreLinks = enabledLinks<[Route, string]>([
     ['home', 'Home'],
     ['how', 'How it works'],
+    ['services', 'Services'],
     ['treatments', 'Treatments'],
     ['about', 'Meet the Team'],
     ['blog', 'Blog'],

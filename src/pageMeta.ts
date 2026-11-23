@@ -36,6 +36,11 @@ export const routeMeta: Partial<Record<string, PageShellMeta>> = {
   start: startMeta,
   evaluation: evaluationMeta,
   blog: blogMeta,
+  services: {
+    title: 'Memory and brain health services | Local Doctor',
+    description:
+      'Browse evaluations, tests, and treatments for memory and brain health, coordinated by one specialist team at Local Doctor.',
+  },
   privacy: {
     title: 'Privacy Policy | Local Doctor',
     description: 'Privacy Policy for Local Infusion Inc. services offered through trylocaldoctor.com.',

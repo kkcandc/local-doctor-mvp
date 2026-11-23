@@ -8,6 +8,7 @@ import { landingSlugs, siteOrigin } from './landing/landingMeta.ts'
 
 const contentPaths = [
   '/',
+  '/services',
   '/treatments',
   '/how-it-works',
   '/get-started',

@@ -4,6 +4,7 @@ import { isLandingSlug, landingSlugs } from './landing/landingMeta'
 
 export type Route =
   | 'home'
+  | 'services'
   | 'treatments'
   | 'how'
   | 'about'
@@ -24,6 +25,7 @@ export type RouteLocation = { route: Route; slug: string }
 
 export const routePaths: Record<Exclude<Route, 'blogPost' | 'landing'>, string> = {
   home: '/',
+  services: '/services',
   treatments: '/treatments',
   how: '/how-it-works',
   about: '/about',
@@ -41,6 +43,7 @@ export const routePaths: Record<Exclude<Route, 'blogPost' | 'landing'>, string> 
 
 const pathRoutes: Record<string, Route> = {
   '': 'home',
+  services: 'services',
   treatments: 'treatments',
   'how-it-works': 'how',
   about: 'about',

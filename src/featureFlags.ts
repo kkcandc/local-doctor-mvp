@@ -8,6 +8,7 @@
 */
 const pageDefaults = {
   home: true,
+  services: true,
   treatments: true,
   how: true,
   about: false,
