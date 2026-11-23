@@ -49,11 +49,13 @@ export const relatedLabels: Record<LandingSlug, { title: string; copy: string }>
   'memory-evaluation': { title: 'Memory evaluation from home', copy: 'Paths for the person noticing changes and for worried family.' },
   'alzheimers-doctor-maryland': { title: 'Doctors serving Maryland', copy: 'Who you meet, how licensing works, and what stays local.' },
   'memory-specialist-maryland': { title: 'Memory specialist near you', copy: 'What happens by video and what happens at sites near you.' },
+  'alzheimers-doctor-virginia': { title: 'Doctors serving Virginia', copy: 'Who you meet, how licensing works, and what stays local.' },
+  'memory-specialist-virginia': { title: 'Memory specialist near you in Virginia', copy: 'What happens by video and what happens at sites near you.' },
   'alzheimers-second-opinion': { title: 'Second opinion', copy: 'A records-based review of an existing diagnosis or workup.' },
   'dementia-test-online': { title: 'Online dementia tests', copy: 'Screening, evaluation, and diagnosis, explained plainly.' },
   'memory-doctor-near-me': {
     title: 'Memory doctor near you',
-    copy: 'A Maryland doctor can see you by video from home, so the visit does not require a drive.',
+    copy: 'A clinician licensed in MD or VA can see you by video from home, so the visit does not require a drive.',
   },
   'alzheimers-blood-test': {
     title: "Alzheimer's blood test",
@@ -67,7 +69,21 @@ const heroReassurance =
 
 // Trust points on every intent hero. No visit-speed claim.
 const trustFacts = [
+  'MD & VA video visits',
+  'Board-certified neurologist',
+  'Insurance accepted',
+  'No referral needed',
+]
+
+const mdTrustFacts = [
   'Maryland video visits',
+  'Board-certified neurologist',
+  'Insurance accepted',
+  'No referral needed',
+]
+
+const vaTrustFacts = [
+  'Virginia video visits',
   'Board-certified neurologist',
   'Insurance accepted',
   'No referral needed',
@@ -147,7 +163,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     faqTitle: 'Dementia evaluation questions.',
     faqs: [
       ['Is this a dementia test?', 'No. A test or screening is one tool. An evaluation is a clinician reviewing your symptoms, history, medications, and any prior results, then recommending what to do next. The evaluation form is not a diagnosis, and it does not replace a visit with a neurologist.'],
-      ['Do I need to live in Maryland?', 'You need to be located in Maryland during the visit, because the clinician must be licensed in the state where the patient is. Virtual visits are not available in other states at this time.'],
+      ['Which states do you serve?', 'You need to be located in Maryland or Virginia during the visit, because the clinician must be licensed in the state where the patient is. Virtual visits are not available in other states at this time.'],
       ['Is there an office I go to?', 'No. Local Doctor is a virtual practice and visits happen by video. If labs or imaging are ordered, those are done in person at a local lab or imaging center.'],
       ['Do I need a referral from my doctor?', 'No referral is needed. Start with the short form or call our team, and we review eligibility and insurance with you before a visit is booked.'],
       ['Will I get a prescription?', 'Not from this website. If a medication is ever appropriate, that decision is made by the evaluating clinician after the evaluation and follows the law of the state where you are located.'],
@@ -339,7 +355,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     heroSecondary: { label: 'How virtual visits work', href: '#how-virtual-visits-work' },
     facts: {
       title: 'Serving Maryland, virtually',
-      items: [...trustFacts],
+      items: [...mdTrustFacts],
     },
     sections: [
       {
@@ -419,7 +435,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     lede: 'You leave with a plan: what testing to do near you, what options may fit, and how to move forward. Insurance accepted, no referral needed.',
     facts: {
       title: 'Near you, honestly',
-      items: [...trustFacts],
+      items: [...mdTrustFacts],
     },
     sections: [
       {
@@ -485,6 +501,166 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     ],
     closing: { title: 'See a memory specialist without leaving home.', copy: 'Book a virtual visit, or call our team with questions first.' },
     related: ['memory-doctor-near-me', 'alzheimers-doctor-maryland', 'memory-evaluation', 'dementia-evaluation'],
+  },
+
+  'alzheimers-doctor-virginia': {
+    slug: 'alzheimers-doctor-virginia',
+    funnel: 'evaluation',
+    ctaLabel: 'See open visit times',
+    reassurance: heroReassurance,
+    eyebrow: 'Serving Virginia by video',
+    h1: "Talk to an Alzheimer's doctor in Virginia.",
+    subhead: 'A board-certified neurologist meets you by video from home, reviews what you are seeing, and explains in plain language what comes next.',
+    lede: 'You leave with a plan: what testing may help, what treatment options may exist, and how to move forward. Insurance accepted, no referral needed.',
+    heroSecondary: { label: 'How virtual visits work', href: '#how-virtual-visits-work' },
+    facts: {
+      title: 'Serving Virginia, virtually',
+      items: [...vaTrustFacts],
+    },
+    sections: [
+      {
+        kind: 'cards',
+        id: 'how-virtual-visits-work',
+        eyebrow: 'How virtual visits work',
+        title: 'What "serving Virginia" means here.',
+        columns: 4,
+        items: [
+          { title: 'Virtual, not a local office', copy: 'Local Doctor does not run walk-in clinics in Virginia cities. Specialist visits happen by live video.' },
+          { title: 'Licensed where you are', copy: 'The clinician must be licensed in the state where you are during the visit, so you need to be in Virginia for it.' },
+          { title: 'Testing close to home', copy: 'If labs or imaging are ordered, you schedule them at a local lab such as Quest or LabCorp, or a local imaging center.' },
+          { title: 'Alongside your doctors', copy: 'Our specialists do not replace your primary care doctor or other providers, and work with them as needed.' },
+        ],
+      },
+      {
+        kind: 'providers',
+        eyebrow: 'Who you will meet',
+        title: 'A board-certified neurologist licensed in Virginia.',
+        copy: 'The clinicians who may see patients are listed by name, specialty, and state license on our Contact page, together with the company that operates Local Doctor.',
+      },
+      {
+        kind: 'split',
+        eyebrow: 'Is this the right fit?',
+        title: 'Who this pathway is built for.',
+        columns: [
+          {
+            title: 'Often a good fit',
+            items: [
+              'Memory or thinking changes that need a specialist look',
+              "A diagnosis of mild cognitive impairment, dementia, or Alzheimer's you want reviewed",
+              'Questions about whether further testing or treatment options apply',
+            ],
+          },
+          {
+            title: 'Other care may fit better',
+            items: [
+              'Sudden or emergency symptoms: call 911',
+              'Day-to-day caregiving or medication management as the main need',
+              'Moderate or severe dementia as the primary concern',
+            ],
+          },
+        ],
+      },
+      {
+        kind: 'steps',
+        eyebrow: 'Getting started',
+        title: 'Four steps, mostly from home.',
+        steps: [
+          { title: 'Pick a time or call', copy: 'Choose an open visit time on our calendar, or call us.' },
+          { title: 'Eligibility call', copy: 'Our team calls to verify your insurance and review your history before the visit.' },
+          { title: 'Video visit', copy: 'About an hour with the specialist. A loved one is welcome to join.' },
+          { title: 'Local testing and follow-up', copy: 'Any ordered tests happen at local sites, then a follow-up visit covers results and options.' },
+        ],
+      },
+    ],
+    faqTitle: 'Questions about seeing a doctor through Local Doctor.',
+    faqs: [
+      ['Is Local Doctor a clinic I can visit in person?', 'No. Local Doctor is a virtual practice. Visits are by video. Only labs, imaging, and any treatment that is appropriate happen in person, at local sites.'],
+      ['Which parts of Virginia do you serve?', 'Virtual visits are available when the patient is located in Virginia at the time of the visit. Lab and imaging appointments, if needed, are scheduled at sites near you.'],
+      ['When are visits offered?', 'The scheduling calendar shows the open visit times. Pick one that works for you, and our team calls to review your history and insurance before the visit.'],
+      ['Do you take my insurance?', 'The team verifies your insurance during the eligibility call and walks through your coverage before you commit to anything.'],
+      ['Will this replace my neurologist or primary care doctor?', 'No. Think of our team as an extension of your current doctors. Your existing provider relationships stay in place.'],
+    ],
+    closing: { title: 'Talk with a specialist serving Virginia.', copy: 'Pick an open visit time or call our team. We confirm eligibility and insurance with you before the visit.' },
+    related: ['memory-specialist-virginia', 'memory-doctor-near-me', 'alzheimers-evaluation', 'alzheimers-second-opinion'],
+  },
+
+  'memory-specialist-virginia': {
+    slug: 'memory-specialist-virginia',
+    funnel: 'evaluation',
+    ctaLabel: 'See open visit times',
+    reassurance: heroReassurance,
+    eyebrow: 'For families in Virginia',
+    h1: 'Talk to a memory specialist in Virginia.',
+    subhead: 'A board-certified neurologist meets you by video from home, reviews memory changes, and explains in plain language what comes next.',
+    lede: 'You leave with a plan: what testing to do near you, what options may fit, and how to move forward. Insurance accepted, no referral needed.',
+    facts: {
+      title: 'Near you, honestly',
+      items: [...vaTrustFacts],
+    },
+    sections: [
+      {
+        kind: 'split',
+        eyebrow: 'Online and nearby',
+        title: 'What happens by video, and what happens near you.',
+        columns: [
+          {
+            title: 'By phone or video',
+            items: [
+              'The eligibility call with our team',
+              'Your visit with the neurology specialist, about an hour',
+              'Your follow-up visit to review results and options',
+            ],
+          },
+          {
+            title: 'In person, near you',
+            items: [
+              'Blood work at a local Quest or LabCorp location, if ordered',
+              'MRI or other imaging at a local imaging center, if ordered',
+              'Treatment at a local site, only if it is appropriate and you choose it',
+            ],
+          },
+        ],
+      },
+      {
+        kind: 'cards',
+        eyebrow: 'Getting ready for a video visit',
+        title: 'A few things make the visit go smoothly.',
+        columns: 4,
+        items: [
+          { title: 'A device with video and audio', copy: 'A phone, tablet, or computer with a working camera and microphone.' },
+          { title: 'A strong connection', copy: 'Reliable Wi-Fi or data service so the video stays clear.' },
+          { title: 'A private, quiet room', copy: 'Somewhere you can talk openly without being overheard.' },
+          { title: 'Someone you trust', copy: 'A family member or care partner, if you would like one to join.' },
+        ],
+      },
+      {
+        kind: 'callout',
+        tone: 'note',
+        title: 'Looking for memory care housing or a day program?',
+        copy: 'Local Doctor is a medical evaluation service, not a memory-care community, assisted living facility, or adult day program. If day-to-day care is what your family needs, the team can suggest other resources when appropriate.',
+      },
+      {
+        kind: 'steps',
+        eyebrow: 'How to start',
+        title: 'Booking a virtual memory visit.',
+        steps: [
+          { title: 'Pick a time or call', copy: 'Choose an open visit time on our calendar, or call us.' },
+          { title: 'Eligibility call', copy: 'Our team calls to review concerns, history, medications, and insurance before the visit.' },
+          { title: 'Join your video visit', copy: 'You get a confirmation and reminders with the link to join.' },
+        ],
+      },
+      { kind: 'midCta', title: 'Book a visit with a memory specialist.', copy: 'Pick an open time on our calendar. Our team calls to review your history and insurance before the visit.' },
+    ],
+    faqTitle: 'Memory specialist questions.',
+    faqs: [
+      ['Is there a Local Doctor office near me?', 'No. Local Doctor is a virtual practice. Your specialist visit happens by video from home, and only ordered tests take place in person at sites near you.'],
+      ['What kind of specialist will I see?', 'A board-certified neurologist licensed in Virginia. The clinicians who may see patients are listed on our Contact page.'],
+      ['Do I have to travel for tests?', 'Only if tests are ordered. Labs and imaging are scheduled at local sites, such as a Quest or LabCorp location or an imaging center near you.'],
+      ['Can I call instead of booking online?', 'Yes. Call or text our team at the number on this page and we will take it from there.'],
+      ['Do you accept insurance?', 'The team verifies your insurance during the eligibility call, before the visit, so you know where you stand.'],
+    ],
+    closing: { title: 'See a memory specialist without leaving home.', copy: 'Book a virtual visit, or call our team with questions first.' },
+    related: ['memory-doctor-near-me', 'alzheimers-doctor-virginia', 'memory-evaluation', 'dementia-evaluation'],
   },
 
   'alzheimers-second-opinion': {
@@ -645,7 +821,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
       ['Is booking a visit a dementia test?', 'No. Booking only picks a visit time. It does not score memory, and it does not give a result or a diagnosis.'],
       ['Should I take a free online test first?', 'You do not need one to request an evaluation. If you have already taken one, you can mention it during the eligibility call. Whatever the score, a clinician is the right person to interpret it.'],
       ['Does an evaluation mean I will be diagnosed with dementia?', 'No. An evaluation may point to a different cause, recommend more testing, or find that no further workup is needed.'],
-      ['What if I am not in Maryland?', 'Virtual visits are available only when the patient is located in Maryland during the visit.'],
+      ['Which states do you serve?', 'Virtual visits are available only when the patient is located in Maryland or Virginia during the visit.'],
     ],
     closing: { title: 'Want a clinician to look at your concerns?', copy: 'Book a virtual evaluation visit. Our team calls to review eligibility and insurance before the visit. No test, score, or diagnosis happens on this website.' },
     related: ['memory-evaluation', 'dementia-evaluation', 'alzheimers-evaluation'],
@@ -658,7 +834,7 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     reassurance: heroReassurance,
     eyebrow: 'Memory doctor near you',
     h1: 'See a memory doctor from home.',
-    subhead: 'Need a memory doctor near me in Maryland? The visit comes to you by video. A board-certified neurologist reviews symptoms and history and explains what comes next.',
+    subhead: 'Need a memory doctor near me in Maryland or Virginia? The visit comes to you by video. A board-certified neurologist reviews symptoms and history and explains what comes next.',
     lede: 'You leave with a plan: what testing to do at sites near you, what options may fit, and how to move forward. Insurance accepted, no referral needed.',
     heroSecondary: { label: 'What near you means here', href: '#what-near-you-means' },
     facts: {
@@ -671,13 +847,13 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
         id: 'what-near-you-means',
         eyebrow: 'Why people search near me',
         title: 'Convenient means the visit comes to you.',
-        intro: 'Near me is about not having to travel for the appointment. For this visit, you stay home. You need to be located in Maryland during the video visit, because the clinician must be licensed in the state where the patient is.',
+        intro: 'Near me is about not having to travel for the appointment. For this visit, you stay home. You need to be located in Maryland or Virginia during the video visit, because the clinician must be licensed in the state where the patient is.',
         columns: 2,
         items: [
           { title: 'Memory doctor near me', copy: 'A neurology clinician reviews memory changes with you by video. You do not drive to an office for that visit.' },
           { title: 'Dementia doctor near me', copy: 'The same virtual visit covers dementia concerns, your history, and what testing, if any, should come next.' },
           { title: "Alzheimer's doctor near me", copy: "Questions about Alzheimer's start with a specialist visit by video. Further testing is ordered only when the clinician thinks it will help." },
-          { title: 'Neurologist for memory near me', copy: 'You meet a neurology clinician licensed in Maryland. Local Doctor does not run a walk-in clinic in your city.' },
+          { title: 'Neurologist for memory near me', copy: 'You meet a neurology clinician licensed in your state (Maryland or Virginia). Local Doctor does not run a walk-in clinic in your city.' },
         ],
       },
       {
@@ -725,9 +901,9 @@ export const landingPages: Record<LandingSlug, LandingPageContent> = {
     faqTitle: 'Memory doctor near you questions.',
     faqs: [
       ['Is there a memory doctor office near me?', 'No. Local Doctor is a virtual practice. Your specialist visit happens by video from home. Only ordered tests take place in person, at labs or imaging centers near you.'],
-      ['Do I have to be in Maryland?', 'Yes. You need to be located in Maryland during the visit, because the clinician must be licensed in the state where the patient is. Virtual visits are not available in other states at this time.'],
+      ['Which states do you serve?', 'You need to be located in Maryland or Virginia during the visit, because the clinician must be licensed in the state where the patient is. Virtual visits are not available in other states at this time.'],
       ['Will I have to drive at all?', 'Not for the visit with the specialist. If labs or imaging are ordered, those appointments are at local sites, such as a Quest or LabCorp location or an imaging center near you.'],
-      ['What kind of doctor will I see?', 'A board-certified neurologist licensed in Maryland. The clinicians who may see patients are listed on our Contact page.'],
+      ['What kind of doctor will I see?', 'A board-certified neurologist licensed in Maryland and Virginia. The clinicians who may see patients are listed on our Contact page.'],
       ['Do I need a referral?', 'No referral is needed. Pick a visit time or call our team, and we review eligibility and insurance with you before the visit.'],
       ['Can a family member join?', 'Yes. A spouse, adult child, or other loved one can book the visit and join the video visit with the patient.'],
     ],

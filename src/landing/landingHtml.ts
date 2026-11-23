@@ -1,3 +1,4 @@
+import { clinicPhoneForLanding, isVirginiaLandingSlug } from '../clinicPhones.ts'
 import { landingCanonical, landingMeta, type LandingSlug } from './landingMeta.ts'
 
 export type StaticHead = {
@@ -49,7 +50,19 @@ export function staticPageHtml(indexHtml: string, head: StaticHead, extraHead = 
 export function landingHead(slug: LandingSlug): StaticHead {
   const meta = landingMeta[slug]
   const url = landingCanonical(slug)
-  return { ...meta, og: meta, ogUrl: url, canonical: url }
+  const head: StaticHead = { ...meta, og: meta, ogUrl: url, canonical: url }
+  if (isVirginiaLandingSlug(slug)) {
+    const phone = clinicPhoneForLanding(slug)
+    head.jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'MedicalClinic',
+      name: 'Local Doctor',
+      url,
+      telephone: phone.telephone,
+      areaServed: { '@type': 'AdministrativeArea', name: 'Virginia' },
+    }
+  }
+  return head
 }
 
 // The head of one landing route, so the title, description, and canonical are right before JS runs.

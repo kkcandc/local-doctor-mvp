@@ -21,6 +21,7 @@ import {
   medicalDisclaimer,
   type BlogBlock,
 } from './blogPosts'
+import { clinicPhoneForLanding } from './clinicPhones'
 import {
   ContactPage,
   ConsentPage,
@@ -57,7 +58,7 @@ const valueProps = [
   },
   {
     title: 'Visits from home',
-    copy: 'The specialist visit happens by video from home in Maryland, instead of a trip to an in-person neurologist.',
+    copy: 'The specialist visit happens by video from home in Maryland or Virginia, instead of a trip to an in-person neurologist.',
     icon: CalendarClock,
   },
   {
@@ -75,7 +76,7 @@ const treatmentRows = [
 ]
 
 const fitChecks = [
-  'You are located in Maryland.',
+  'You are located in Maryland or Virginia.',
   'A family member or care partner can participate in planning when needed.',
   'There is a diagnosis already, or cognitive changes serious enough to justify specialist review.',
   'You are looking for an answer on infusion treatment-readiness, not purely general memory-care advice.',
@@ -196,7 +197,7 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
     items: [
       [servicesFaqQuestion, servicesFaqAnswer],
       ['Who is eligible for services?', [[
-        'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. We will confirm via a quick phone call after you ',
+        'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland or Virginia are commonly strong candidates for our program. We will confirm via a quick phone call after you ',
         { linkText: 'schedule your visit', hash: 'book' },
         ', before your appointment.',
       ]]],
@@ -259,9 +260,6 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
 // "See open visit times".
 const seeVisitTimesLabel = 'See open visit times'
 const headerGetStartedLabel = 'Get started'
-
-const headerPhone = '(240) 376-5730'
-const headerPhoneHref = '+12403765730'
 
 function enabledLinks<T extends readonly [Route, ...unknown[]]>(links: T[]) {
   return links.filter(([route]) => routeEnabled(route))
@@ -403,7 +401,7 @@ function App({ pathname }: { pathname?: string }) {
           }}
         />
       )}
-      <Footer onNavigate={navigate} />
+      <Footer route={route} routeSlug={routeSlug} onNavigate={navigate} />
     </main>
   )
 }
@@ -440,6 +438,7 @@ function Header({
   onNavigate: Navigate
 }) {
   const landingPage = route === 'landing' && isLandingSlug(routeSlug) ? landingPages[routeSlug] : null
+  const phone = clinicPhoneForLanding(route === 'landing' ? routeSlug : undefined)
   const headerCta = landingPage?.funnel === 'evaluationForm'
     ? { target: 'evaluation' as const, label: landingPage.ctaLabel }
     : { target: 'start' as const, label: headerGetStartedLabel }
@@ -478,12 +477,12 @@ function Header({
           )}
         </nav>
         <div className="header-actions">
-          <a className="header-phone" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
+          <a className="header-phone" href={phone.href}>{phone.display}</a>
           <button className="header-cta" type="button" onClick={() => onNavigate(headerCta.target, '', 'header', headerCta.label)}>
             {headerCta.label}
           </button>
         </div>
-        <a className="header-phone-mobile" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
+        <a className="header-phone-mobile" href={phone.href}>{phone.display}</a>
         <button
           className="menu-button"
           type="button"
@@ -507,8 +506,8 @@ function Header({
               {label}
             </button>
           ))}
-          <a className="mobile-nav-phone" href={`tel:${headerPhoneHref}`}>
-            <span className="mobile-nav-phone-label">Call or text</span> {headerPhone}
+          <a className="mobile-nav-phone" href={phone.href}>
+            <span className="mobile-nav-phone-label">Call or text</span> {phone.display}
           </a>
           <button type="button" onClick={() => onNavigate(headerCta.target, '', 'header', headerCta.label)}>{headerCta.label}</button>
         </nav>
@@ -1439,7 +1438,17 @@ function Metric({ value, label, tone }: { value: string; label: string; tone?: '
   )
 }
 
-function Footer({ onNavigate }: { onNavigate: Navigate }) {
+function Footer({
+  route,
+  routeSlug,
+  onNavigate,
+}: {
+  route: Route
+  routeSlug: string
+  onNavigate: Navigate
+}) {
+  const phone = clinicPhoneForLanding(route === 'landing' ? routeSlug : undefined)
+
   const exploreLinks = enabledLinks<[Route, string]>([
     ['home', 'Home'],
     ['how', 'How it works'],
@@ -1466,7 +1475,7 @@ function Footer({ onNavigate }: { onNavigate: Navigate }) {
       <div>
         <BrandLink variant="reverse" onNavigate={onNavigate} />
         <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation and treatment.</p>
-        <p className="footer-identity">Phone: {publicPhone}</p>
+        <p className="footer-identity">Phone: {phone.display}</p>
         <p className="footer-identity">Email: {publicEmail}</p>
       </div>
       <div>

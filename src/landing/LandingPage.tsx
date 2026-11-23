@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
 import { ArrowRight, CheckCircle2, ChevronDown, Info, Phone, ShieldAlert } from 'lucide-react'
-import { publicPhone } from '../compliancePages'
+import { clinicPhoneForLanding } from '../clinicPhones'
 import { isPageEnabled } from '../featureFlags'
 import { hrefWithAdsParams, pathWithAdsParams } from '../analytics/googleAdsConfig'
 import { useLocationSearch } from '../hydration'
@@ -10,8 +10,6 @@ import { evaluationPath, intakePath, landingDestinations, resolveDestination, ty
 import { landingPages, relatedLabels, type LandingColumn, type LandingFaq as FaqItem, type LandingSection } from './landingContent'
 import type { LandingSlug } from './landingMeta'
 import './landing.css'
-
-const phoneHref = `tel:+1${publicPhone.replace(/\D/g, '')}`
 
 function destinationHref(destination: CtaDestination, search: string) {
   if (destination.kind === 'evaluation') return pathWithAdsParams(evaluationPath, search)
@@ -107,10 +105,11 @@ function InternalLink({
   )
 }
 
-function PhoneLink() {
+function PhoneLink({ slug }: { slug: LandingSlug }) {
+  const phone = clinicPhoneForLanding(slug)
   return (
-    <a className="secondary landing-phone" href={phoneHref}>
-      <Phone size={18} aria-hidden="true" /> Call {publicPhone}
+    <a className="secondary landing-phone" href={phone.href}>
+      <Phone size={18} aria-hidden="true" /> Call {phone.display}
     </a>
   )
 }
@@ -276,7 +275,7 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
             <div className="landing-hero-actions">
               <div className="landing-hero-buttons">
                 {cta('hero', undefined, `${slug}-reassurance`)}
-                <PhoneLink />
+                <PhoneLink slug={slug} />
               </div>
               <p className="landing-reassurance" id={`${slug}-reassurance`}>
                 {page.reassurance}
@@ -321,7 +320,7 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
         </div>
         <div className="conversion-actions">
           {cta('closing', undefined, `${slug}-closing-title ${slug}-closing-copy`)}
-          <PhoneLink />
+          <PhoneLink slug={slug} />
         </div>
       </section>
 
