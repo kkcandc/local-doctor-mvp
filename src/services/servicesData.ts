@@ -103,12 +103,12 @@ export const services: Service[] = [
     keywords: 'thinking reasoning screen',
   },
   {
-    name: 'Kisunla',
+    name: 'Kisunla (donanemab)',
     type: 'Treatment',
     price: 'Price after visit',
     image: ivBag,
     fit: 'contain',
-    keywords: 'donanemab amyloid infusion anti-amyloid drug',
+    keywords: 'amyloid infusion anti-amyloid drug',
   },
   {
     name: "Alzheimer's evaluation",

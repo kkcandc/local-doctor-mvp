@@ -73,7 +73,7 @@ test.describe('on a desktop screen', () => {
       'Brain fog evaluation',
       "Alzheimer's genetic testing",
       'Cognitive evaluation',
-      'Kisunla',
+      'Kisunla (donanemab)',
       "Alzheimer's evaluation",
       'Brain MRI',
     ])
@@ -99,7 +99,7 @@ test.describe('on a desktop screen', () => {
 
     await chip.click()
     await expect(chip).toHaveAttribute('aria-pressed', 'true')
-    await expect(cardNames(page)).toHaveText(['Leqembi (lecanemab)', 'Kisunla'])
+    await expect(cardNames(page)).toHaveText(['Leqembi (lecanemab)', 'Kisunla (donanemab)'])
     await expect(page.locator('.services-count')).toHaveText('2 services · Treatments')
 
     await page.getByRole('button', { name: 'Tests 3' }).click()
@@ -126,8 +126,11 @@ test.describe('on a desktop screen', () => {
     await search(page).fill('lecanemab')
     await expect(cardNames(page)).toHaveText(['Leqembi (lecanemab)'])
 
+    await search(page).fill('donanemab')
+    await expect(cardNames(page)).toHaveText(['Kisunla (donanemab)'])
+
     await search(page).fill('  treatments ')
-    await expect(cardNames(page)).toHaveText(['Leqembi (lecanemab)', 'Kisunla'])
+    await expect(cardNames(page)).toHaveText(['Leqembi (lecanemab)', 'Kisunla (donanemab)'])
 
     // Search and the type chip both have to match.
     await search(page).fill('amyloid')
