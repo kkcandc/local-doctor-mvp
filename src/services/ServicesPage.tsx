@@ -178,7 +178,7 @@ function ServiceCard({
 }) {
   return (
     <a className="services-card" {...link}>
-      <div className="services-card-media" data-fit={service.fit}>
+      <div className="services-card-media" data-fit={service.fit} style={service.frame ? { background: service.frame } : undefined}>
         {/* The name sits right below, so the photo adds nothing for a screen reader. The frame fixes the shape, so the 4:3 size here only reserves space. */}
         <img src={service.image} alt="" width={720} height={540} loading={eager ? 'eager' : 'lazy'} decoding="async" />
         <span className="services-card-type">{service.type}</span>

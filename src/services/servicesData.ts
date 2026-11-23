@@ -20,6 +20,10 @@ export type Service = {
   image: string
   // 'contain' for the IV bag, a cut-out on a plain background. 'cover' for photographs.
   fit: 'cover' | 'contain'
+  // The backdrop color of a 'contain' image, so the bars beside the picture do not show an edge.
+  // The card and the page both use it. Without one, the stylesheet's pale blue (the Leqembi bag's
+  // backdrop) applies.
+  frame?: string
   // Extra words the search matches besides the name and type. Never shown on the page.
   keywords: string
 }
@@ -114,11 +118,10 @@ export const services: Service[] = [
     slug: 'kisunla',
     type: 'Treatment',
     price: 'Price after visit',
-    // Stand-in photo until a donanemab image is supplied: the only drug image on the site is the
-    // Leqembi bag, and its label reads LECANEMAB. To swap it in, replace this file (or change the
-    // path) and set fit to 'contain' if the new image is a cut-out on a plain background.
+    // The donanemab IV bag (its backdrop is a uniform #b8d8f2, darker than the Leqembi bag's).
     image: '/assets/services/kisunla.webp',
-    fit: 'cover',
+    fit: 'contain',
+    frame: '#b8d8f2',
     keywords: 'amyloid infusion anti-amyloid drug',
   },
   {

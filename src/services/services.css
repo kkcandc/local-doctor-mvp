@@ -181,7 +181,8 @@
 
 /*
   The IV bag photo is a cut-out on a pale blue background. The frame takes that color (sampled from
-  the photo, not a brand color) so the bars beside the contained image do not show an edge.
+  the photo, not a brand color) so the bars beside the contained image do not show an edge. A service
+  with a different backdrop sets its own color through frame in servicesData.ts, which overrides this.
 */
 .services-card-media[data-fit='contain'] {
   background: #e0efff;

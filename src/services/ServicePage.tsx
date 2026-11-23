@@ -26,8 +26,9 @@ type Tone = 'ivory' | 'sunken' | 'deep'
 
 type ServicePageProps = {
   slug: ServicePageSlug
-  // Records the click and moves to /get-started (App.tsx navigate).
-  onStart: (ctaLocation: string, ctaLabel: string) => void
+  // Records the click and moves to /get-started (App.tsx navigate), scrolling to the section whose
+  // id is hash when there is one (the page's bookingHash).
+  onStart: (ctaLocation: string, ctaLabel: string, hash?: string) => void
   // Opens another page on this site, such as /services or a sibling service page.
   onOpenPath: (path: string) => void
 }
@@ -61,7 +62,9 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
   const search = useLocationSearch()
   const [openFaq, setOpenFaq] = useState(0)
 
-  const bookingHref = pathWithAdsParams(intakePath, search)
+  // Some pages send their booking buttons straight to a section of /get-started (the calendar).
+  const bookingHash = servicePages[slug].bookingHash
+  const bookingHref = `${pathWithAdsParams(intakePath, search)}${bookingHash ? `#${bookingHash}` : ''}`
   const tones = assignTones([
     'options',
     'steps',
@@ -82,7 +85,7 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
       onClick: (event: MouseEvent) => {
         if (!isPlainClick(event)) return
         event.preventDefault()
-        onStart(location, label)
+        onStart(location, label, bookingHash)
       },
     }
   }
@@ -120,7 +123,7 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
           <ArrowLeft size={18} aria-hidden="true" /> All services
         </a>
         <div className="sp-hero-grid">
-          <div className="sp-media" data-fit={service.fit}>
+          <div className="sp-media" data-fit={service.fit} style={service.frame ? { background: service.frame } : undefined}>
             <img src={service.image} alt={content.imageAlt} width={1000} height={800} fetchPriority="high" decoding="async" />
           </div>
           <div className="sp-hero-copy">
@@ -422,7 +425,7 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
         onClick={(event) => {
           if (!isPlainClick(event)) return
           event.preventDefault()
-          onStart('sticky_mobile', bookLabel)
+          onStart('sticky_mobile', bookLabel, bookingHash)
         }}
       />
     </div>

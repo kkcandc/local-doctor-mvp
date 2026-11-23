@@ -80,12 +80,16 @@ test.describe('on a desktop screen', () => {
           const button = page.locator(`${root(slug)} [data-cta-location="${location}"]`)
           await expect(button).toHaveText(label)
           const href = (await button.getAttribute('href')) ?? ''
+          // A page with a bookingHash sends every one of its booking buttons to that section.
+          const hash = content.bookingHash ? `#${content.bookingHash}` : ''
           expect(new URL(href, 'https://trylocaldoctor.com').pathname).toBe('/get-started')
+          expect(new URL(href, 'https://trylocaldoctor.com').hash).toBe(hash)
           expect(href).toContain('gclid=TEST_GCLID')
           expect(href).not.toContain('jane')
 
           await button.click()
           await expect(page).toHaveURL(/\/get-started\?.*gclid=TEST_GCLID/)
+          expect(new URL(page.url()).hash).toBe(hash)
           expect(page.url()).not.toContain('jane')
           const click = ga(await events(page), 'cta_click')
           expect(click, location).toHaveLength(1)
@@ -140,6 +144,30 @@ test.describe('on a desktop screen', () => {
       })
     })
   }
+
+  test('Memory evaluation Book now opens the calendar section of /get-started and scrolls to it', async ({ page }) => {
+    await page.goto(`/services/memory-evaluation${query}`)
+    await page.locator('.service-page [data-cta-location="service_hero"]').click()
+    await expect(page).toHaveURL(/\/get-started\?.*gclid=TEST_GCLID.*#book$/)
+    expect(page.url()).not.toContain('jane')
+    // The page scrolls (smoothly) to the section. In the live site it settles just under the sticky
+    // header; here the calendar widget is blocked, so the page is short and stops a little lower. Either
+    // way the section ends up in the top part of the screen, where opening /get-started plain leaves it
+    // below the first screen (about 680px down).
+    await expect.poll(() => page.locator('#book').evaluate((section) => Math.round(section.getBoundingClientRect().top))).toBeLessThan(300)
+    await expect(page.locator('#book')).toBeInViewport()
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+    // It is still counted as a booking click on /get-started.
+    expect(ga(await events(page), 'cta_click')[0].params).toMatchObject({ cta_location: 'service_hero', cta_destination: '/get-started' })
+  })
+
+  test('the Leqembi and Kisunla booking buttons still open the top of /get-started', async ({ page }) => {
+    for (const slug of drugSlugs) {
+      await page.goto(`/services/${slug}`)
+      const href = (await page.locator(`${root(slug)} [data-cta-location="service_hero"]`).getAttribute('href')) ?? ''
+      expect(new URL(href, 'https://trylocaldoctor.com').hash).toBe('')
+    }
+  })
 
   test('the Memory evaluation FAQ links to the Leqembi page', async ({ page }) => {
     await page.goto('/services/memory-evaluation')
@@ -201,16 +229,31 @@ test.describe('on a desktop screen', () => {
     })
   }
 
-  test('the Kisunla page does not show the Leqembi IV bag, whose label reads LECANEMAB', async ({ page }) => {
+  test('the Kisunla page shows its own IV bag, not the Leqembi one whose label reads LECANEMAB', async ({ page }) => {
     await page.goto('/services/kisunla')
-    expect(await page.locator(`${root('kisunla')} .sp-media img`).getAttribute('src')).not.toContain('hero-leqembi-iv')
+    const hero = page.locator(`${root('kisunla')} .sp-media img`)
+    const src = (await hero.getAttribute('src')) ?? ''
+    expect(src).toContain('/assets/services/kisunla')
+    expect(src).not.toContain('hero-leqembi-iv')
+    await expect(hero).toHaveAttribute('alt', 'Kisunla (donanemab) IV infusion bag')
   })
 
-  test('the Leqembi hero shows the whole IV bag on a plain frame', async ({ page }) => {
-    await page.goto('/services/leqembi')
-    await expect(page.locator(`${root('leqembi')} .sp-media`)).toHaveAttribute('data-fit', 'contain')
-    await expect(page.locator(`${root('leqembi')} .sp-media img`)).toHaveCSS('object-fit', 'contain')
-  })
+  // Each bag is a cut-out on its own plain backdrop, shown whole. The frame behind it has to match
+  // that backdrop on the card and on the page, or the bars beside the picture show an edge.
+  const frames: Record<string, string> = { leqembi: 'rgb(224, 239, 255)', kisunla: 'rgb(184, 216, 242)' }
+  for (const slug of drugSlugs) {
+    test(`the ${slug} IV bag is shown whole on a frame that matches its picture, on the card and the page`, async ({ page }) => {
+      await page.goto('/services')
+      const card = page.locator('.services-card').filter({ hasText: serviceBySlug(slug).name })
+      await expect(card.locator('.services-card-media')).toHaveAttribute('data-fit', 'contain')
+      await expect(card.locator('.services-card-media')).toHaveCSS('background-color', frames[slug])
+
+      await page.goto(`/services/${slug}`)
+      await expect(page.locator(`${root(slug)} .sp-media`)).toHaveAttribute('data-fit', 'contain')
+      await expect(page.locator(`${root(slug)} .sp-media`)).toHaveCSS('background-color', frames[slug])
+      await expect(page.locator(`${root(slug)} .sp-media img`)).toHaveCSS('object-fit', 'contain')
+    })
+  }
 
   test('every service page is in the sitemap', () => {
     for (const slug of servicePageSlugs) expect(publicSitemapPaths).toContain(`/services/${slug}`)
@@ -260,6 +303,10 @@ test.describe('on a phone', () => {
       await justBelow(page.locator(`${root(slug)} .sp-trust`))
       await expect(bar).toBeVisible()
       await expect(bar.getByRole('link', { name: 'Book now' })).toHaveAttribute('href', /gclid=TEST_GCLID/)
+      // The bar goes where the page's other booking buttons go, including a section of /get-started.
+      const stickyHref = (await bar.getByRole('link', { name: 'Book now' }).getAttribute('href')) ?? ''
+      const bookingHash = servicePages[slug].bookingHash
+      expect(new URL(stickyHref, 'https://trylocaldoctor.com').hash).toBe(bookingHash ? `#${bookingHash}` : '')
 
       await page.locator(`${root(slug)} .sp-help`).evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }))
       await expect(bar).toHaveCount(0)

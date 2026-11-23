@@ -36,6 +36,9 @@ export type ServicePageContent = {
   highlights: string[]
   // Optional text link under the hero button. Scrolls to the options section.
   heroSecondaryLabel?: string
+  // The id of the section of /get-started that this page's booking buttons open (without the #),
+  // such as 'book' for the calendar. Without one, they open the top of /get-started.
+  bookingHash?: string
   meta: { title: string; description: string }
   options: {
     eyebrow: string
@@ -196,6 +199,7 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
     title: 'Memory evaluation',
     eyebrow: 'Virtual visit',
     imageAlt: 'A smiling older woman outdoors',
+    bookingHash: 'book',
     lede: "Occasional forgetfulness is a normal part of life, but ongoing or worsening memory changes are worth talking through with a specialist. This visit helps you understand what's typical, what isn't, and what to do next.",
     highlights: [
       '1:1 video visit with a clinician experienced in cognitive health',
@@ -355,7 +359,7 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
     title: 'Kisunla',
     generic: 'donanemab-azbt · FDA-approved',
     eyebrow: 'Treatment',
-    imageAlt: 'An older woman and her friends walking together outdoors',
+    imageAlt: 'Kisunla (donanemab) IV infusion bag',
     lede: "An FDA-approved treatment that goes after amyloid, a driver of early Alzheimer's, rather than only managing symptoms. Here's what it does, who it's for, and how we keep you safe.",
     highlights: [
       'IV infusion every four weeks',

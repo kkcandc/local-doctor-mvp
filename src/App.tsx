@@ -391,7 +391,7 @@ function App({ pathname }: { pathname?: string }) {
         <ServicePage
           key={routeSlug}
           slug={routeSlug}
-          onStart={(ctaLocation, ctaLabel) => navigate('start', '', ctaLocation, ctaLabel)}
+          onStart={(ctaLocation, ctaLabel, hash) => navigate('start', '', ctaLocation, ctaLabel, hash)}
           onOpenPath={openPath}
         />
       )}
