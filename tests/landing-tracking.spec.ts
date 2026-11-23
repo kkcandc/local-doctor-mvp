@@ -219,7 +219,10 @@ for (const route of trackedRoutes) {
 
     // Phone conversion from the clinic tel link on the page (landing hero or site header).
     await page.goto(`/${route}${clickQuery}`)
-    const phone = page.locator(`a[href="tel:+12403765730"]`).first()
+    const phoneHref = route === 'alzheimers-doctor-virginia' || route === 'memory-specialist-virginia'
+      ? 'tel:+15716095338'
+      : 'tel:+12403765730'
+    const phone = page.locator(`a[href="${phoneHref}"]`).first()
     await expect(phone).toBeVisible()
     await phone.click()
     await waitForGtagEvent(page, 'phone_click')

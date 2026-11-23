@@ -8,8 +8,18 @@ import { landingCanonical, landingMeta, landingSlugs, siteOrigin, type LandingSl
 import { publicSitemapPaths, siteSitemapXml } from '../src/siteMap'
 
 const HOME_H1 = /Treatment that slows down Alzheimer/
-const CLINIC_TEL = 'tel:+12403765730'
-const CLINIC_PHONE = '(240) 376-5730'
+const MARYLAND_TEL = 'tel:+12403765730'
+const MARYLAND_PHONE = '(240) 376-5730'
+const VIRGINIA_TEL = 'tel:+15716095338'
+const VIRGINIA_PHONE = '(571) 609-5338'
+const VIRGINIA_SLUGS = ['alzheimers-doctor-virginia', 'memory-specialist-virginia'] as const
+
+function clinicPhoneForSlug(slug: LandingSlug) {
+  if ((VIRGINIA_SLUGS as readonly string[]).includes(slug)) {
+    return { tel: VIRGINIA_TEL, display: VIRGINIA_PHONE, telephone: '+1-571-609-5338' }
+  }
+  return { tel: MARYLAND_TEL, display: MARYLAND_PHONE, telephone: '+1-240-376-5730' }
+}
 const HERO_REASSURANCE = 'Board-certified neurologist. Insurance accepted. No referral needed.'
 const TRUST_FACTS_BY_SLUG: Partial<Record<LandingSlug, string[]>> = {
   'alzheimers-doctor-maryland': [
@@ -358,13 +368,30 @@ for (const viewport of viewports) {
         await expect(buttonRow.locator('[data-cta-location="hero"]')).toBeVisible()
         await expect(buttonRow.locator('.landing-phone')).toHaveCount(1)
         await expect(buttonRow.locator('.landing-reassurance')).toHaveCount(0)
+        const expectedPhone = clinicPhoneForSlug(slug)
         const phone = landing.locator('.landing-phone').first()
         await expect(phone).toBeVisible()
-        await expect(phone).toContainText(CLINIC_PHONE)
+        await expect(phone).toContainText(expectedPhone.display)
+        await expect(phone).toHaveAttribute('href', expectedPhone.tel)
 
         const tels = await landing.locator('a[href^="tel:"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')))
         expect(tels.length).toBeGreaterThan(0)
-        expect(new Set(tels)).toEqual(new Set([CLINIC_TEL]))
+        expect(new Set(tels)).toEqual(new Set([expectedPhone.tel]))
+
+        await expect(page.locator('.header-phone')).toHaveText(expectedPhone.display)
+        await expect(page.locator('.header-phone')).toHaveAttribute('href', expectedPhone.tel)
+        await expect(page.locator('.footer-identity').first()).toHaveText(`Phone: ${expectedPhone.display}`)
+
+        const jsonLd = page.locator('script#blog-article-jsonld')
+        if ((VIRGINIA_SLUGS as readonly string[]).includes(slug)) {
+          await expect(jsonLd).toHaveCount(1)
+          const data = JSON.parse((await jsonLd.textContent()) ?? '{}') as { telephone?: string; areaServed?: { name?: string } }
+          expect(data.telephone).toBe(expectedPhone.telephone)
+          expect(data.areaServed?.name).toBe('Virginia')
+          expect(JSON.stringify(data)).not.toContain('240')
+        } else {
+          await expect(jsonLd).toHaveCount(0)
+        }
 
         const hrefs = await page.locator('a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href') ?? ''))
         expect(hrefs.filter((href) => /livspecialtycare/i.test(href))).toEqual([])

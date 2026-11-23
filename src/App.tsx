@@ -21,6 +21,7 @@ import {
   medicalDisclaimer,
   type BlogBlock,
 } from './blogPosts'
+import { clinicPhoneForLanding } from './clinicPhones'
 import {
   ContactPage,
   ConsentPage,
@@ -260,9 +261,6 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
 const seeVisitTimesLabel = 'See open visit times'
 const headerGetStartedLabel = 'Get started'
 
-const headerPhone = '(240) 376-5730'
-const headerPhoneHref = '+12403765730'
-
 function enabledLinks<T extends readonly [Route, ...unknown[]]>(links: T[]) {
   return links.filter(([route]) => routeEnabled(route))
 }
@@ -403,7 +401,7 @@ function App({ pathname }: { pathname?: string }) {
           }}
         />
       )}
-      <Footer onNavigate={navigate} />
+      <Footer route={route} routeSlug={routeSlug} onNavigate={navigate} />
     </main>
   )
 }
@@ -440,6 +438,7 @@ function Header({
   onNavigate: Navigate
 }) {
   const landingPage = route === 'landing' && isLandingSlug(routeSlug) ? landingPages[routeSlug] : null
+  const phone = clinicPhoneForLanding(route === 'landing' ? routeSlug : undefined)
   const headerCta = landingPage?.funnel === 'evaluationForm'
     ? { target: 'evaluation' as const, label: landingPage.ctaLabel }
     : { target: 'start' as const, label: headerGetStartedLabel }
@@ -478,12 +477,12 @@ function Header({
           )}
         </nav>
         <div className="header-actions">
-          <a className="header-phone" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
+          <a className="header-phone" href={phone.href}>{phone.display}</a>
           <button className="header-cta" type="button" onClick={() => onNavigate(headerCta.target, '', 'header', headerCta.label)}>
             {headerCta.label}
           </button>
         </div>
-        <a className="header-phone-mobile" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
+        <a className="header-phone-mobile" href={phone.href}>{phone.display}</a>
         <button
           className="menu-button"
           type="button"
@@ -507,8 +506,8 @@ function Header({
               {label}
             </button>
           ))}
-          <a className="mobile-nav-phone" href={`tel:${headerPhoneHref}`}>
-            <span className="mobile-nav-phone-label">Call or text</span> {headerPhone}
+          <a className="mobile-nav-phone" href={phone.href}>
+            <span className="mobile-nav-phone-label">Call or text</span> {phone.display}
           </a>
           <button type="button" onClick={() => onNavigate(headerCta.target, '', 'header', headerCta.label)}>{headerCta.label}</button>
         </nav>
@@ -1439,7 +1438,17 @@ function Metric({ value, label, tone }: { value: string; label: string; tone?: '
   )
 }
 
-function Footer({ onNavigate }: { onNavigate: Navigate }) {
+function Footer({
+  route,
+  routeSlug,
+  onNavigate,
+}: {
+  route: Route
+  routeSlug: string
+  onNavigate: Navigate
+}) {
+  const phone = clinicPhoneForLanding(route === 'landing' ? routeSlug : undefined)
+
   const exploreLinks = enabledLinks<[Route, string]>([
     ['home', 'Home'],
     ['how', 'How it works'],
@@ -1466,7 +1475,7 @@ function Footer({ onNavigate }: { onNavigate: Navigate }) {
       <div>
         <BrandLink variant="reverse" onNavigate={onNavigate} />
         <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation and treatment.</p>
-        <p className="footer-identity">Phone: {publicPhone}</p>
+        <p className="footer-identity">Phone: {phone.display}</p>
         <p className="footer-identity">Email: {publicEmail}</p>
       </div>
       <div>

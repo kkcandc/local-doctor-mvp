@@ -32,6 +32,7 @@ const CTA_LABEL = /^[A-Za-z0-9][A-Za-z0-9 '.-]{0,80}$/
 // (844) 509-1404 is included so a future tel: link is tracked; it is not on the site today.
 const TRACKED_PHONE_DIGITS = new Set([
   '12403765730',
+  '15716095338',
   '18445091404',
 ])
 
