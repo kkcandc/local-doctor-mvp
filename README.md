@@ -32,6 +32,7 @@ If a branch/PR deploy is still `CANCELED` with `errorLink = Ignored Build Step`,
 
 - Patient-facing home page with intent-path routing
 - Services page with a searchable, filterable grid of visits, tests, and treatments (see Services Page below)
+- An individual page for Memory evaluation, Leqembi, and Kisunla, one shared layout (see Service Pages below)
 - Treatment page for Leqembi/Kisunla, with hedged drug-effect language
 - How-it-works page mapped to the 13-step patient journey
 - Provider referral page
@@ -66,11 +67,27 @@ Nine search-intent pages live in `src/landing/`: `/dementia-evaluation`, `/alzhe
 
 `/services` (`src/services/`) lists every visit, test, and treatment as a card, with a search box and Visits / Treatments / Tests filters. Its header and footer links sit between How it works and Treatments.
 
-- The list, prices, photos, and hidden search keywords are in `src/services/servicesData.ts`. Photos are in `public/assets/services/`; the Leqembi and Kisunla cards share `public/assets/hero-leqembi-iv.webp`.
+- The list, prices, photos, and hidden search keywords are in `src/services/servicesData.ts`. Photos are in `public/assets/services/`; the Leqembi card uses `public/assets/hero-leqembi-iv.webp`.
 - Prices and "with or without insurance" are the wording from the approved design. Like every other claim they need clinical and legal review before paid traffic.
-- Individual service pages do not exist yet, so every **Book now** opens `/get-started` and logs `cta_click` with location `service_card` (the closing buttons use `services_closing`, and the no-results button `services_empty`). To send a card to its own page later, build that route (`src/routes.ts`, `src/pageMeta.ts`, `src/siteMap.ts`) and give the card its own link in `src/services/ServicesPage.tsx`, where `bookingHref` is built.
+- A card for a service that has its own page (a `slug` in `servicesData.ts`) opens that page and says **Learn more**; it logs no click, because it is not a booking. Every other card still says **Book now**, opens `/get-started`, and logs `cta_click` with location `service_card` (the closing buttons use `services_closing`, and the no-results button `services_empty`).
 - Search and filter state is local to the page and starts empty, so the prerendered HTML and the hydrated page match.
 - Flag: `services` in `src/featureFlags.ts` (`VITE_PAGE_SERVICES`). Tests: `tests/services-page.spec.ts`.
+
+## Service Pages
+
+Each service has its own page at `/services/<slug>`: `/services/memory-evaluation`, `/services/leqembi`, and `/services/kisunla` so far. They read like a consumer product page: a hero with the service photo, price, and a **Book now** button, then the visit or treatment options, what to expect, who it is for, FAQ, and a sticky **Book now** bar on phones. Every booking button goes to `/get-started` (the scheduler).
+
+- **One layout, content as data.** `src/services/ServicePage.tsx` is the only layout. Each page's words are one entry in `src/services/servicePages.ts`; its name, price, and hero image come from its card in `servicesData.ts`, so the Services card and the page cannot show different pictures or prices. Treatment pages (Leqembi, Kisunla) add a drug-facts table and a safety section by filling in `details` and `safety`; the visit page leaves them out.
+- **Adding the next service:** add its slug to `servicePageSlugs`, add its entry to `servicePages`, set `slug` on its card in `servicesData.ts`, and add its name to other pages' `moreCare` lists if wanted. Routing (`src/routes.ts`), head tags (`src/pageHead.ts`), the sitemap, and prerendering pick it up from the slug list. The tests loop over the same list.
+- **Shared wording:** `availabilityLine` ("Appointments tomorrow"), `priceNote`, `regionNote` (Maryland), and `bookLabel` are exported from `servicePages.ts` and used on every page. Change them there.
+- **Drug facts come from /treatments.** Route, MRI schedule, stopping rule, and ARIA rates are written exactly as in the Treatments comparison table, and `tests/service-pages.spec.ts` compares the two so they cannot drift. The pages say treatment can stop once amyloid is minimal on PET, give no slowing percentage (only "a real, moderate slowing"), and keep the "24/7 triage line" from the design (confirm that service is staffed before paid traffic).
+- **Left out on purpose:** the mockups' sample patient reviews, "Clinician name" portrait cards, and empty "What to expect" photo slots. Nothing invented ships. Add real reviews, clinician names and photos, or step photos by extending the content type and layout when they are approved.
+- **Kisunla image:** `public/assets/services/kisunla.webp` is a stand-in (the patient-and-caregiver photo). The only drug image on the site is the Leqembi bag, whose label reads LECANEMAB, so it is not reused. To use a donanemab image, replace that file and set `fit: 'contain'` on the Kisunla card if it is a cut-out on a plain background.
+- **Tracking:** booking buttons log `cta_click` with `service_hero`, `service_options`, `service_band`, `service_help`, `service_care_team`, or `service_more_care` (a More care card for a service with no page yet), and the phone bar uses `sticky_mobile`. Links keep `gclid` and `utm_*`. Opening another service page is not a booking and logs nothing.
+- **Sticky bar:** it anchors on the whole hero, not the Book now button. On a phone the button starts below the first screen, and the bar's observer only reacts when its anchor changes visibility, so a jump that skips the button would never show it.
+- **Visit length:** the Leqembi and Kisunla intake visit says "30-60 min", while How it works and the intent pages say "about 1 hour". Align them when the real length is confirmed.
+- **Not the intent page:** `/memory-evaluation` (an ad landing page that sends to `/evaluation`) is separate from `/services/memory-evaluation` (this page, which sends to `/get-started`). Each has its own title and canonical.
+- Flag: the `services` flag also turns these pages off (a hidden service page is skipped by the prerender and redirects home). Tests: `tests/service-pages.spec.ts`.
 
 ## Prerendered HTML
 

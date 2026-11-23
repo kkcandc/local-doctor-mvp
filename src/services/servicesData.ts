@@ -6,10 +6,15 @@
   they need clinical and legal review before paid traffic (see README, Prototype Boundaries).
 */
 
+import type { ServicePageSlug } from './servicePages'
+
 export type ServiceType = 'Visit' | 'Treatment' | 'Test'
 
 export type Service = {
   name: string
+  // Set once the service has its own page at /services/<slug> (content in servicePages.ts). The
+  // card then opens that page, and the page's hero shows the same image as the card.
+  slug?: ServicePageSlug
   type: ServiceType
   price: string
   image: string
@@ -32,6 +37,7 @@ const ivBag = '/assets/hero-leqembi-iv.webp'
 export const services: Service[] = [
   {
     name: 'Memory evaluation',
+    slug: 'memory-evaluation',
     type: 'Visit',
     price: 'from $0',
     image: '/assets/services/memory.jpg',
@@ -40,6 +46,7 @@ export const services: Service[] = [
   },
   {
     name: 'Leqembi (lecanemab)',
+    slug: 'leqembi',
     type: 'Treatment',
     price: 'Price after visit',
     image: ivBag,
@@ -104,10 +111,14 @@ export const services: Service[] = [
   },
   {
     name: 'Kisunla (donanemab)',
+    slug: 'kisunla',
     type: 'Treatment',
     price: 'Price after visit',
-    image: ivBag,
-    fit: 'contain',
+    // Stand-in photo until a donanemab image is supplied: the only drug image on the site is the
+    // Leqembi bag, and its label reads LECANEMAB. To swap it in, replace this file (or change the
+    // path) and set fit to 'contain' if the new image is a cut-out on a plain background.
+    image: '/assets/services/kisunla.webp',
+    fit: 'cover',
     keywords: 'amyloid infusion anti-amyloid drug',
   },
   {
@@ -127,6 +138,16 @@ export const services: Service[] = [
     keywords: 'scan imaging magnetic resonance radiology',
   },
 ]
+
+export function serviceBySlug(slug: ServicePageSlug): Service {
+  const service = services.find((entry) => entry.slug === slug)
+  if (!service) throw new Error(`No service has the page slug "${slug}"`)
+  return service
+}
+
+export function serviceByName(name: string): Service | undefined {
+  return services.find((entry) => entry.name === name)
+}
 
 export function countByType(type: ServiceType): number {
   return services.filter((service) => service.type === type).length

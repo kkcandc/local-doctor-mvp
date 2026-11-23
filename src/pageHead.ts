@@ -3,6 +3,7 @@ import { landingHead, type StaticHead } from './landing/landingHtml'
 import { isLandingSlug, siteOrigin } from './landing/landingMeta'
 import { defaultMeta, routeMeta } from './pageMeta'
 import { pathFor, type RouteLocation } from './routes'
+import { isServicePageSlug, servicePages } from './services/servicePages'
 
 export type PageHead = StaticHead
 
@@ -44,6 +45,11 @@ export function pageHead(location: RouteLocation): PageHead {
   }
 
   if (route === 'landing' && isLandingSlug(slug)) return landingHead(slug)
+
+  if (route === 'service' && isServicePageSlug(slug)) {
+    const { meta } = servicePages[slug]
+    return { title: meta.title, description: meta.description, og: meta, canonical: `${siteOrigin}${pathFor(location)}` }
+  }
 
   const meta = routeMeta[route]
   if (!meta) return { title: defaultMeta.title, description: defaultMeta.description, canonical: `${siteOrigin}${pathFor(location)}` }

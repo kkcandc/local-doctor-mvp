@@ -1,14 +1,17 @@
 import { blogPosts } from './blogPosts.ts'
 import { landingSlugs, siteOrigin } from './landing/landingMeta.ts'
+import { servicePageSlugs } from './services/servicePages.ts'
 
 /*
   Public URLs for sitemap.xml. About is off in featureFlags, so it is not listed.
-  Intent pages come from landingSlugs so a new landing route is included automatically.
+  Intent pages come from landingSlugs, and individual service pages from servicePageSlugs, so a new
+  one is included automatically.
 */
 
 const contentPaths = [
   '/',
   '/services',
+  ...servicePageSlugs.map((slug) => `/services/${slug}`),
   '/treatments',
   '/how-it-works',
   '/get-started',

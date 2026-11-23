@@ -16,7 +16,11 @@ const eagerCards = 3
 type ServicesPageProps = {
   // Records the click and moves to /get-started (App.tsx navigate).
   onStart: (ctaLocation: string, ctaLabel: string) => void
+  // Opens a service's own page, /services/<slug> (App.tsx navigate).
+  onOpenPath: (path: string) => void
 }
+
+type CardLink = { href: string; 'data-cta-location'?: string; onClick: (event: MouseEvent) => void }
 
 function isPlainClick(event: MouseEvent) {
   return !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)
@@ -27,7 +31,7 @@ function countLabel(count: number, type: ServiceType | null, query: string) {
   return `${count} ${count === 1 ? 'service' : 'services'}${type ? ` · ${serviceTypePlurals[type]}` : ''}${text ? ` matching “${text}”` : ''}`
 }
 
-export function ServicesPage({ onStart }: ServicesPageProps) {
+export function ServicesPage({ onStart, onOpenPath }: ServicesPageProps) {
   const [query, setQuery] = useState('')
   const [type, setType] = useState<ServiceType | null>(null)
   const searchInput = useRef<HTMLInputElement>(null)
@@ -35,8 +39,8 @@ export function ServicesPage({ onStart }: ServicesPageProps) {
 
   const results = filterServices(query, type)
   const filtered = type !== null || query.trim() !== ''
-  // Individual service pages do not exist yet, so every card opens the booking page.
-  // Point a card somewhere else here once its own page is built.
+  // A card opens its service's own page once it has one (slug in servicesData.ts). Until then it
+  // opens the booking page.
   const bookingHref = pathWithAdsParams(intakePath, search)
 
   function clearAll() {
@@ -44,7 +48,18 @@ export function ServicesPage({ onStart }: ServicesPageProps) {
     setType(null)
   }
 
-  function startLink(location: string, label: string) {
+  function pageLink(path: string): CardLink {
+    return {
+      href: pathWithAdsParams(path, search),
+      onClick: (event: MouseEvent) => {
+        if (!isPlainClick(event)) return
+        event.preventDefault()
+        onOpenPath(path)
+      },
+    }
+  }
+
+  function startLink(location: string, label: string): CardLink {
     return {
       href: bookingHref,
       'data-cta-location': location,
@@ -117,7 +132,12 @@ export function ServicesPage({ onStart }: ServicesPageProps) {
           <ul className="services-grid">
             {results.map((service, index) => (
               <li key={service.name}>
-                <ServiceCard service={service} eager={index < eagerCards} link={startLink('service_card', 'Book now')} />
+                <ServiceCard
+                  service={service}
+                  eager={index < eagerCards}
+                  link={service.slug ? pageLink(`/services/${service.slug}`) : startLink('service_card', 'Book now')}
+                  actionLabel={service.slug ? 'Learn more' : 'Book now'}
+                />
               </li>
             ))}
           </ul>
@@ -149,10 +169,12 @@ function ServiceCard({
   service,
   eager,
   link,
+  actionLabel,
 }: {
   service: Service
   eager: boolean
-  link: { href: string; 'data-cta-location': string; onClick: (event: MouseEvent) => void }
+  link: CardLink
+  actionLabel: string
 }) {
   return (
     <a className="services-card" {...link}>
@@ -167,7 +189,7 @@ function ServiceCard({
           <strong>{service.price}</strong>
           <span>with or without insurance</span>
         </p>
-        <span className="primary services-card-action">Book now</span>
+        <span className="primary services-card-action">{actionLabel}</span>
       </div>
     </a>
   )

@@ -172,17 +172,38 @@ test.describe('on a desktop screen', () => {
     await expect(cards(page)).toHaveCount(12)
   })
 
-  test('cards link to /get-started with the ad params, and a click is logged', async ({ page }) => {
+  test('cards open their own page when they have one and /get-started otherwise, keeping the ad params', async ({ page }) => {
     await page.goto(`/services${query}`)
-    for (const href of await cards(page).evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href') ?? ''))) {
+    // The three services with a page of their own (see servicesData.ts); every other card books.
+    const pages: Record<string, string> = {
+      'Memory evaluation': '/services/memory-evaluation',
+      'Leqembi (lecanemab)': '/services/leqembi',
+      'Kisunla (donanemab)': '/services/kisunla',
+    }
+    for (const card of await cards(page).all()) {
+      const name = (await card.locator('h2').textContent()) ?? ''
+      const href = (await card.getAttribute('href')) ?? ''
       const url = new URL(href, 'https://trylocaldoctor.com')
-      expect(url.pathname).toBe('/get-started')
+      expect(url.pathname, name).toBe(pages[name] ?? '/get-started')
       expect(url.searchParams.get('gclid')).toBe('TEST_GCLID')
       expect(url.searchParams.get('utm_source')).toBe('google')
       expect(href).not.toContain('jane')
+      await expect(card.locator('.services-card-action')).toHaveText(pages[name] ? 'Learn more' : 'Book now')
     }
+  })
 
-    await cards(page).first().click()
+  test('a card with a page opens it without logging a booking click', async ({ page }) => {
+    await page.goto(`/services${query}`)
+    await cards(page).filter({ hasText: 'Memory evaluation' }).click()
+    await expect(page).toHaveURL(/\/services\/memory-evaluation\?.*gclid=TEST_GCLID/)
+    expect(page.url()).not.toContain('jane')
+    await expect(page.getByRole('heading', { level: 1, name: 'Memory evaluation' })).toBeVisible()
+    expect(ga(await events(page), 'cta_click')).toHaveLength(0)
+  })
+
+  test('a card without a page opens /get-started and logs the click', async ({ page }) => {
+    await page.goto(`/services${query}`)
+    await cards(page).filter({ hasText: "Alzheimer's blood test" }).click()
     await expect(page).toHaveURL(/\/get-started\?.*gclid=TEST_GCLID/)
     expect(page.url()).not.toContain('jane')
     const click = ga(await events(page), 'cta_click')

@@ -43,7 +43,9 @@ import { LandingPage, type CtaTarget } from './landing/LandingPage'
 import { landingPages } from './landing/landingContent'
 import { isLandingSlug } from './landing/landingMeta'
 import { EvaluationPage, PatientRightsPage, PrivacyPage, TermsPage } from './routePages'
-import { initialLocation, readLocation, routeEnabled, routePaths, type Route } from './routes'
+import { initialLocation, pathFor, readLocation, routeEnabled, routePaths, type Route } from './routes'
+import { ServicePage } from './services/ServicePage'
+import { isServicePageSlug } from './services/servicePages'
 import { ServicesPage } from './services/ServicesPage'
 import { StickyCta } from './StickyCta'
 import './App.css'
@@ -357,14 +359,14 @@ function App({ pathname }: { pathname?: string }) {
       hash = ''
     }
     if (next === 'start' || next === 'evaluation') trackCtaClick(ctaLocation, ctaLabel, routePaths[next])
-    const path = next === 'blogPost' ? `/blog/${slug}` : next === 'landing' ? `/${slug}` : routePaths[next]
+    const path = pathFor({ route: next, slug })
     // Keep gclid and utm_* across SPA navigations so Ads can attribute the visit and
     // Typeform can read them on /get-started. Contact and health params stay dropped.
     // An optional hash (for example #book) is added after the params. The hash effect above
     // scrolls to that element once the new page has rendered.
     const nextUrl = `${pathWithAdsParams(path, window.location.search)}${hash ? `#${hash}` : ''}`
     setRoute(next)
-    setRouteSlug(next === 'blogPost' || next === 'landing' ? slug : '')
+    setRouteSlug(next === 'blogPost' || next === 'landing' || next === 'service' ? slug : '')
     setMenuOpen(false)
     if (`${window.location.pathname}${window.location.search}` !== nextUrl) {
       window.history.pushState({}, '', nextUrl)
@@ -372,11 +374,27 @@ function App({ pathname }: { pathname?: string }) {
     setScrollRequest((count) => count + 1)
   }
 
+  // Opens a path on this site (for example /services/leqembi) as an in-app navigation.
+  function openPath(path: string) {
+    const next = readLocation(path.replace(/^\/+|\/+$/g, ''))
+    navigate(next.route, next.slug)
+  }
+
   return (
     <main>
       <Header route={route} routeSlug={routeSlug} menuOpen={menuOpen} onToggleMenu={() => setMenuOpen((open) => !open)} onNavigate={navigate} />
       {route === 'home' && <HomePage onNavigate={navigate} />}
-      {route === 'services' && <ServicesPage onStart={(ctaLocation, ctaLabel) => navigate('start', '', ctaLocation, ctaLabel)} />}
+      {route === 'services' && (
+        <ServicesPage onStart={(ctaLocation, ctaLabel) => navigate('start', '', ctaLocation, ctaLabel)} onOpenPath={openPath} />
+      )}
+      {route === 'service' && isServicePageSlug(routeSlug) && (
+        <ServicePage
+          key={routeSlug}
+          slug={routeSlug}
+          onStart={(ctaLocation, ctaLabel) => navigate('start', '', ctaLocation, ctaLabel)}
+          onOpenPath={openPath}
+        />
+      )}
       {route === 'treatments' && <TreatmentsPage onNavigate={navigate} />}
       {route === 'how' && <HowPage onNavigate={navigate} />}
       {route === 'about' && <AboutPage onNavigate={navigate} />}
@@ -399,10 +417,7 @@ function App({ pathname }: { pathname?: string }) {
           slug={routeSlug}
           onStart={(target: CtaTarget, ctaLocation, ctaLabel) => navigate(target, '', ctaLocation, ctaLabel)}
           onTrackCta={trackCtaClick}
-          onOpenPath={(path) => {
-            const next = readLocation(path.replace(/^\/+|\/+$/g, ''))
-            navigate(next.route, next.slug)
-          }}
+          onOpenPath={openPath}
         />
       )}
       <Footer onNavigate={navigate} />
@@ -463,7 +478,7 @@ function Header({
         <BrandLink onNavigate={onNavigate} />
         <nav className="desktop-nav" aria-label="Main navigation">
           {navItems.map(([itemRoute, label]) => (
-            <button className={route === itemRoute ? 'active' : ''} key={itemRoute} type="button" onClick={() => onNavigate(itemRoute)}>
+            <button className={route === itemRoute || (route === 'service' && itemRoute === 'services') ? 'active' : ''} key={itemRoute} type="button" onClick={() => onNavigate(itemRoute)}>
               {label}
             </button>
           ))}
