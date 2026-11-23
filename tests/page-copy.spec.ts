@@ -245,7 +245,7 @@ test.describe('FAQ page', () => {
     const cases: Array<[string, string]> = [
       [
         'Who is eligible for services?',
-        "Adults experiencing cognitive symptoms or with dementia or Alzheimer's disease residing in Maryland are commonly strong candidates for our program. We will confirm via a quick phone call after you schedule your visit, before your appointment.",
+        "Adults experiencing cognitive symptoms or with dementia or Alzheimer's disease residing in Maryland or Virginia are commonly strong candidates for our program. We will confirm via a quick phone call after you schedule your visit, before your appointment.",
       ],
       [
         'How does the eligibility check work?',

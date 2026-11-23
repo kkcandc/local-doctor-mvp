@@ -57,7 +57,7 @@ const valueProps = [
   },
   {
     title: 'Visits from home',
-    copy: 'The specialist visit happens by video from home in Maryland, instead of a trip to an in-person neurologist.',
+    copy: 'The specialist visit happens by video from home in Maryland or Virginia, instead of a trip to an in-person neurologist.',
     icon: CalendarClock,
   },
   {
@@ -75,7 +75,7 @@ const treatmentRows = [
 ]
 
 const fitChecks = [
-  'You are located in Maryland.',
+  'You are located in Maryland or Virginia.',
   'A family member or care partner can participate in planning when needed.',
   'There is a diagnosis already, or cognitive changes serious enough to justify specialist review.',
   'You are looking for an answer on infusion treatment-readiness, not purely general memory-care advice.',
@@ -196,7 +196,7 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
     items: [
       [servicesFaqQuestion, servicesFaqAnswer],
       ['Who is eligible for services?', [[
-        'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. We will confirm via a quick phone call after you ',
+        'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland or Virginia are commonly strong candidates for our program. We will confirm via a quick phone call after you ',
         { linkText: 'schedule your visit', hash: 'book' },
         ', before your appointment.',
       ]]],

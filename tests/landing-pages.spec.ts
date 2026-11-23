@@ -11,8 +11,34 @@ const HOME_H1 = /Treatment that slows down Alzheimer/
 const CLINIC_TEL = 'tel:+12403765730'
 const CLINIC_PHONE = '(240) 376-5730'
 const HERO_REASSURANCE = 'Board-certified neurologist. Insurance accepted. No referral needed.'
-const TRUST_FACTS = [
-  'Maryland video visits',
+const TRUST_FACTS_BY_SLUG: Partial<Record<LandingSlug, string[]>> = {
+  'alzheimers-doctor-maryland': [
+    'Maryland video visits',
+    'Board-certified neurologist',
+    'Insurance accepted',
+    'No referral needed',
+  ],
+  'memory-specialist-maryland': [
+    'Maryland video visits',
+    'Board-certified neurologist',
+    'Insurance accepted',
+    'No referral needed',
+  ],
+  'alzheimers-doctor-virginia': [
+    'Virginia video visits',
+    'Board-certified neurologist',
+    'Insurance accepted',
+    'No referral needed',
+  ],
+  'memory-specialist-virginia': [
+    'Virginia video visits',
+    'Board-certified neurologist',
+    'Insurance accepted',
+    'No referral needed',
+  ],
+}
+const SHARED_TRUST_FACTS = [
+  'MD & VA video visits',
   'Board-certified neurologist',
   'Insurance accepted',
   'No referral needed',
@@ -25,6 +51,8 @@ const heroCtaLabels: Record<LandingSlug, string> = {
   'memory-evaluation': 'Start your evaluation',
   'alzheimers-doctor-maryland': 'See open visit times',
   'memory-specialist-maryland': 'See open visit times',
+  'alzheimers-doctor-virginia': 'See open visit times',
+  'memory-specialist-virginia': 'See open visit times',
   'alzheimers-second-opinion': 'See open visit times',
   'dementia-test-online': 'See open visit times',
   'memory-doctor-near-me': 'See open visit times',
@@ -70,7 +98,8 @@ test('every landing route has its own title, description, and canonical', () => 
     expect(`${landingMeta[slug].title} ${landingMeta[slug].description}`).not.toMatch(DASHES)
     expect(landingPages[slug].ctaLabel).toBe(heroCtaLabels[slug])
     expect(landingPages[slug].reassurance).toBe(HERO_REASSURANCE)
-    expect(landingPages[slug].facts.items.slice(0, TRUST_FACTS.length)).toEqual(TRUST_FACTS)
+    const expectedFacts = TRUST_FACTS_BY_SLUG[slug] ?? SHARED_TRUST_FACTS
+    expect(landingPages[slug].facts.items.slice(0, expectedFacts.length)).toEqual(expectedFacts)
     expect(landingPages[slug].reassurance).not.toMatch(/waitlist|price|\$|seen in days/i)
   }
 })
@@ -168,6 +197,9 @@ for (const width of [1280, 1440]) {
 test('alzheimers doctor and second opinion hero copy', () => {
   expect(landingPages['alzheimers-doctor-maryland'].h1).toBe("Talk to an Alzheimer's doctor in Maryland.")
   expect(landingMeta['alzheimers-doctor-maryland'].title).toBe("See an Alzheimer's Doctor in Maryland | Local Doctor")
+  expect(landingPages['alzheimers-doctor-virginia'].h1).toBe("Talk to an Alzheimer's doctor in Virginia.")
+  expect(landingMeta['alzheimers-doctor-virginia'].title).toBe("See an Alzheimer's Doctor in Virginia | Local Doctor")
+  expect(landingPages['memory-specialist-virginia'].h1).toBe('Talk to a memory specialist in Virginia.')
   expect(landingPages['alzheimers-second-opinion'].h1).toBe('Get a clear second look.')
   expect(landingPages['alzheimers-second-opinion'].heroNote).toBe(
     'Bring prior notes and results. A neurology specialist reviews them by video.',

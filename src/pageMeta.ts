@@ -15,14 +15,14 @@ export const defaultMeta = {
 export const startMeta: PageShellMeta = {
   title: 'Book a video visit with a neurologist | Local Doctor',
   description:
-    'Pick an open time for a video visit with a board-certified neurologist licensed in Maryland. Insurance accepted. No referral needed.',
+    'Pick an open time for a video visit with a board-certified neurologist licensed in Maryland and Virginia. Insurance accepted. No referral needed.',
 }
 
 // The evaluation page is a form for people who already chose to start. It is not a search landing page.
 export const evaluationMeta: PageShellMeta = {
   title: 'Start your evaluation | Local Doctor',
   description:
-    'Answer a few questions to start an evaluation with a board-certified neurologist licensed in Maryland. Insurance accepted. No referral needed.',
+    'Answer a few questions to start an evaluation with a board-certified neurologist licensed in Maryland and Virginia. Insurance accepted. No referral needed.',
   noindex: true,
 }
 
