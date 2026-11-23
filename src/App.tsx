@@ -771,7 +771,7 @@ function StartPage() {
     <div className="start-page">
       <PageHero
         eyebrow="Get started"
-        title="Book a neurologist today to find out if treatment is right for you."
+        title="Book a consultation today to find out if treatment is right for you."
         copy="Everyone's situation is unique. Our neurology specialists listen to deeply understand yours and let you know if you're eligible for disease-modifying treatment."
         primaryLabel={`Call or text ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
@@ -1123,7 +1123,7 @@ function usePageMeta(route: Route, slug: string) {
 function BookingSection() {
   return (
     <section className="section white expect-section start-booking-section" id="book">
-      <h2 className="expect-heading">Book a neurologist</h2>
+      <h2 className="expect-heading">Book a consultation</h2>
       <div className="booking-layout">
         <div className="booking-main">
           <p className="booking-trust">

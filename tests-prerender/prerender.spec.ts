@@ -238,7 +238,7 @@ test.describe('before JavaScript runs', () => {
 
   test('/get-started on a phone shows only the photo below the scheduler', async ({ page }) => {
     await page.goto('/get-started')
-    await expect(page.locator('h1')).toHaveText('Book a neurologist today to find out if treatment is right for you.')
+    await expect(page.locator('h1')).toHaveText('Book a consultation today to find out if treatment is right for you.')
     await expect(page.locator('.page-hero-image')).toBeHidden()
     await expect(page.locator('.start-photo-below')).toBeVisible()
   })
