@@ -14,6 +14,7 @@
   "dependencies": {
     "@typeform/embed": "6.1.1",
     "@typeform/embed-react": "^5.5.0",
+    "@vercel/functions": "^3.11.3",
     "lucide-react": "^1.17.0",
     "posthog-js": "^1.407.2",
     "react": "^19.2.6",
