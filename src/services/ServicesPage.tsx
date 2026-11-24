@@ -127,7 +127,7 @@ export function ServicesPage({ onStart }: ServicesPageProps) {
             <p>Try a different word, or tell us what&apos;s going on and we&apos;ll point you to the right place.</p>
             <div className="services-actions">
               <button className="primary" type="button" onClick={clearAll}>Show all services</button>
-              <a className="secondary" {...startLink('services_empty', 'Get started')}>Get started</a>
+              <a className="secondary" {...startLink('services_empty', 'Book now')}>Book now</a>
             </div>
           </div>
         )}
@@ -137,7 +137,7 @@ export function ServicesPage({ onStart }: ServicesPageProps) {
         <h2>Not sure where to start?</h2>
         <p>A short eligibility check points you to the right visit, test, or treatment. We verify your insurance in parallel, so there are no surprises.</p>
         <div className="services-actions">
-          <a className="primary" {...startLink('services_closing', 'Get started')}>Get started <ArrowRight size={20} aria-hidden="true" /></a>
+          <a className="primary" {...startLink('services_closing', 'Book now')}>Book now <ArrowRight size={20} aria-hidden="true" /></a>
           <a className="secondary" href={phoneHref}>Call {publicPhone}</a>
         </div>
       </section>

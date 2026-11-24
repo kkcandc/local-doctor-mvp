@@ -93,6 +93,24 @@ test.describe('on a desktop screen', () => {
     await expect(blood.locator('img')).toHaveJSProperty('complete', true)
   })
 
+  test('every card, whatever its type, has a Book now button and logs it as Book now', async ({ page }) => {
+    await page.goto('/services')
+    await expect(cards(page)).toHaveCount(12)
+    await expect(page.locator('.services-card-action')).toHaveText(Array(12).fill('Book now'))
+    const locations = await cards(page).evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-cta-location')))
+    expect(locations).toEqual(Array(12).fill('service_card'))
+
+    // Visits, treatments and tests all log the same label.
+    for (const name of ['Memory evaluation', 'Kisunla (donanemab)', 'Brain MRI']) {
+      await page.goto('/services')
+      await cards(page).filter({ has: page.getByRole('heading', { name }) }).click()
+      await expect(page).toHaveURL(/\/get-started/)
+      const click = ga(await events(page), 'cta_click')
+      expect(click, name).toHaveLength(1)
+      expect(click[0].params, name).toMatchObject({ cta_label: 'Book now', cta_location: 'service_card' })
+    }
+  })
+
   test('a type chip filters the cards and toggles off again', async ({ page }) => {
     await page.goto('/services')
     const chip = page.getByRole('button', { name: 'Treatments 2' })
@@ -159,6 +177,7 @@ test.describe('on a desktop screen', () => {
     await expect(cards(page)).toHaveCount(0)
     await expect(page.getByRole('heading', { level: 2, name: 'No services match that search' })).toBeVisible()
     await expect(page.locator('.services-count')).toHaveText('0 services matching “zzzz”')
+    await expect(page.locator('.services-empty').getByRole('link', { name: 'Book now' })).toHaveAttribute('href', '/get-started')
 
     await page.getByRole('button', { name: 'Show all services' }).click()
     await expect(search(page)).toHaveValue('')
@@ -196,11 +215,11 @@ test.describe('on a desktop screen', () => {
     await expect(closing.getByRole('heading', { level: 2, name: 'Not sure where to start?' })).toBeVisible()
     await expect(closing.getByRole('link', { name: `Call ${publicPhone}` })).toHaveAttribute('href', 'tel:+12403765730')
 
-    await closing.getByRole('link', { name: 'Get started' }).click()
+    await closing.getByRole('link', { name: 'Book now' }).click()
     await expect(page).toHaveURL(/\/get-started\?.*gclid=TEST_GCLID/)
     const click = ga(await events(page), 'cta_click')
     expect(click).toHaveLength(1)
-    expect(click[0].params).toMatchObject({ cta_label: 'Get started', cta_location: 'services_closing', cta_destination: '/get-started', page_path: '/services' })
+    expect(click[0].params).toMatchObject({ cta_label: 'Book now', cta_location: 'services_closing', cta_destination: '/get-started', page_path: '/services' })
   })
 
   test('the page has no en or em dashes', async ({ page }) => {

@@ -68,7 +68,7 @@ Nine search-intent pages live in `src/landing/`: `/dementia-evaluation`, `/alzhe
 
 - The list, prices, photos, and hidden search keywords are in `src/services/servicesData.ts`. Photos are in `public/assets/services/`; the Leqembi and Kisunla cards share `public/assets/hero-leqembi-iv.webp`.
 - Prices and "with or without insurance" are the wording from the approved design. Like every other claim they need clinical and legal review before paid traffic.
-- Individual service pages do not exist yet, so every **Book now** opens `/get-started` and logs `cta_click` with location `service_card` (the closing buttons use `services_closing`, and the no-results button `services_empty`). To send a card to its own page later, build that route (`src/routes.ts`, `src/pageMeta.ts`, `src/siteMap.ts`) and give the card its own link in `src/services/ServicesPage.tsx`, where `bookingHref` is built.
+- Individual service pages do not exist yet, so every **Book now** (on the cards, in the closing section, and in the no-results message) opens `/get-started` and logs `cta_click` with the label `Book now`. The location is `service_card` for the cards, `services_closing` for the closing button, and `services_empty` for the no-results button. To send a card to its own page later, build that route (`src/routes.ts`, `src/pageMeta.ts`, `src/siteMap.ts`) and give the card its own link in `src/services/ServicesPage.tsx`, where `bookingHref` is built.
 - Search and filter state is local to the page and starts empty, so the prerendered HTML and the hydrated page match.
 - Flag: `services` in `src/featureFlags.ts` (`VITE_PAGE_SERVICES`). Tests: `tests/services-page.spec.ts`.
 
