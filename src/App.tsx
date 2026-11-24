@@ -44,6 +44,8 @@ import { LandingPage, type CtaTarget } from './landing/LandingPage'
 import { landingPages } from './landing/landingContent'
 import { isLandingSlug } from './landing/landingMeta'
 import { landingDestinations, resolveDestination } from './landing/destinations'
+import { LpPage } from './lp/LpPage'
+import { isLpVariant } from './lp/lpVariants'
 import { EvaluationPage, PatientRightsPage, PrivacyPage, TermsPage } from './routePages'
 import { initialLocation, readLocation, routeEnabled, routePaths, type Route } from './routes'
 import { StickyCta } from './StickyCta'
@@ -355,19 +357,37 @@ function App({ pathname }: { pathname?: string }) {
       hash = ''
     }
     if (next === 'start' || next === 'evaluation') trackCtaClick(ctaLocation, ctaLabel, routePaths[next])
-    const path = next === 'blogPost' ? `/blog/${slug}` : next === 'landing' ? `/${slug}` : routePaths[next]
+    const path = next === 'blogPost' ? `/blog/${slug}` : next === 'landing' ? `/${slug}` : next === 'lp' ? `/lp/${slug}` : routePaths[next]
     // Keep gclid and utm_* across SPA navigations so Ads can attribute the visit and
     // Typeform can read them on /get-started. Contact and health params stay dropped.
     // An optional hash (for example #book) is added after the params. The hash effect above
     // scrolls to that element once the new page has rendered.
     const nextUrl = `${pathWithAdsParams(path, window.location.search)}${hash ? `#${hash}` : ''}`
     setRoute(next)
-    setRouteSlug(next === 'blogPost' || next === 'landing' ? slug : '')
+    setRouteSlug(next === 'blogPost' || next === 'landing' || next === 'lp' ? slug : '')
     setMenuOpen(false)
     if (`${window.location.pathname}${window.location.search}` !== nextUrl) {
       window.history.pushState({}, '', nextUrl)
     }
     setScrollRequest((count) => count + 1)
+  }
+
+  // Landing page test variants have their own minimal header and footer and no site navigation.
+  if (route === 'lp' && isLpVariant(routeSlug)) {
+    return (
+      <main>
+        <LpPage
+          key={routeSlug}
+          variant={routeSlug}
+          onStart={(target: CtaTarget, ctaLocation, ctaLabel) => navigate(target, '', ctaLocation, ctaLabel)}
+          onTrackCta={trackCtaClick}
+          onOpenPath={(path) => {
+            const next = readLocation(path.replace(/^\/+|\/+$/g, ''))
+            navigate(next.route, next.slug)
+          }}
+        />
+      </main>
+    )
   }
 
   return (

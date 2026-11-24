@@ -4,7 +4,7 @@
   It used to be a static tag in index.html that loaded on every page. It now loads from here so
   it can stay off the booking and evaluation pages and wait on phones:
 
-  - /get-started and /evaluation: never loaded. If the visitor reaches one of them in the app
+  - /get-started, /evaluation, and the /lp/* test pages: never loaded. If the visitor reaches one of them in the app
     after the bot has loaded, it is hidden with CSS (index.css, html[data-chatbot-hidden]).
   - Phones (max-width 680px): loaded after the visitor scrolls past the hero or after 30 seconds,
     so the launcher does not cover the reassurance line under the hero buttons.
@@ -12,7 +12,7 @@
 */
 
 export const CHATBOT_SRC = 'https://forms.mylocalinfusion.com/agent/embedjs/01a1b1d2aee870008666e6dab388dee90d6f/embed.js'
-export const CHATBOT_HIDDEN_PATHS = ['/get-started', '/evaluation'] as const
+export const CHATBOT_HIDDEN_PATHS = ['/get-started', '/evaluation', '/lp'] as const
 export const CHATBOT_MOBILE_QUERY = '(max-width: 680px)'
 export const CHATBOT_MOBILE_SCROLL_PX = 700
 export const CHATBOT_MOBILE_TIMEOUT_MS = 30_000

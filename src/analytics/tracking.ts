@@ -11,6 +11,7 @@ import {
   type GtagArgs,
 } from './googleAdsConfig'
 import { resolveGaMeasurementId } from './googleAnalyticsConfig'
+import { currentLpVariant, isLpVariant } from '../lp/lpVariants'
 
 /*
   Central conversion event layer for Google Ads and GA4.
@@ -71,6 +72,8 @@ export type EventDetails = {
   ctaLocation?: string
   ctaLabel?: string
   ctaDestination?: string
+  // Landing page test variant (a, b, or c) the visitor saw this session. A single letter only.
+  lpVariant?: string
 }
 
 export type TrackingContext = {
@@ -97,6 +100,7 @@ function eventParams(event: TrackedEvent, details: EventDetails): Record<string,
     if (details.ctaDestination) params.cta_destination = safePagePath(details.ctaDestination)
   }
   if (event === 'visit_booked') params.booking_source = 'calendly'
+  if (details.lpVariant && isLpVariant(details.lpVariant)) params.lp_variant = details.lpVariant
   if (event === 'evaluation_started' || event === 'evaluation_submitted') params.form_name = 'evaluation'
   return params
 }
@@ -151,7 +155,9 @@ export function trackEvent(event: TrackedEvent, details: Partial<EventDetails> =
   if (typeof window === 'undefined' || typeof window.gtag !== 'function') return
   const context = resolveContext()
   if (!context.gaId && !context.adsId) return
-  const calls = buildTrackingCalls(event, { pathname: window.location.pathname, ...details }, context, fired)
+  const pathname = window.location.pathname
+  const lpVariant = currentLpVariant(pathname) ?? undefined
+  const calls = buildTrackingCalls(event, { pathname, lpVariant, ...details }, context, fired)
   for (const args of calls) window.gtag(...args)
 }
 

@@ -7,7 +7,14 @@ import { hrefWithAdsParams, pathWithAdsParams } from '../analytics/googleAdsConf
 import { useLocationSearch } from '../hydration'
 import { StickyCta } from '../StickyCta'
 import { evaluationPath, intakePath, landingDestinations, resolveDestination, type CtaDestination } from './destinations'
-import { landingPages, relatedLabels, type LandingColumn, type LandingFaq as FaqItem, type LandingSection } from './landingContent'
+import {
+  landingPages,
+  relatedLabels,
+  type LandingColumn,
+  type LandingFaq as FaqItem,
+  type LandingPageContent,
+  type LandingSection,
+} from './landingContent'
 import type { LandingSlug } from './landingMeta'
 import './landing.css'
 
@@ -33,6 +40,10 @@ type LandingPageProps = {
   // app must not push a /get-started history entry first.
   onTrackCta: (ctaLocation: string, ctaLabel: string) => void
   onOpenPath: (path: string) => void
+  // Optional copy that replaces landingPages[slug], used by the /lp/a test variant.
+  content?: LandingPageContent
+  // The related-pages block links away from the page. Test variants leave it out.
+  showRelated?: boolean
 }
 
 function isPlainClick(event: MouseEvent) {
@@ -139,8 +150,8 @@ function sectionTones(sections: LandingSection[]): { tones: Tone[]; next: Tone }
   return { tones, next: current }
 }
 
-export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPageProps) {
-  const page = landingPages[slug]
+export function LandingPage({ slug, onStart, onTrackCta, onOpenPath, content, showRelated = true }: LandingPageProps) {
+  const page = content ?? landingPages[slug]
   const search = useLocationSearch()
   const destination = resolveDestination(landingDestinations[page.funnel])
   const { tones, next: faqTone } = sectionTones(page.sections)
@@ -324,7 +335,7 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
         </div>
       </section>
 
-      <section className="section white compact-section landing-related" aria-labelledby={`${slug}-related`}>
+      {showRelated && <section className="section white compact-section landing-related" aria-labelledby={`${slug}-related`}>
         <h2 id={`${slug}-related`}>Related pages</h2>
         <div>
           {page.related.map((related) => (
@@ -340,7 +351,7 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
             </InternalLink>
           )}
         </div>
-      </section>
+      </section>}
 
       <StickyCta
         label={page.ctaLabel}

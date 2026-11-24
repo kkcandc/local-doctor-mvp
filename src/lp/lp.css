@@ -1,0 +1,374 @@
+/* Landing page test variants (/lp/a, /lp/b, /lp/c). */
+
+.lp-page {
+  background: var(--surface-page);
+  color: var(--text-primary);
+}
+
+.lp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.lp-logo {
+  width: clamp(112px, 32vw, 150px);
+  min-width: 0;
+  height: auto;
+}
+
+
+.lp-header-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  font-weight: var(--weight-semibold);
+  color: var(--color-primary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.lp-header-phone:hover {
+  text-decoration: underline;
+}
+
+.lp-footer {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+  border-top: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.lp-footer p {
+  margin: 0 0 10px;
+}
+
+.lp-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 12px 0;
+}
+
+.lp-footer a {
+  display: inline-block;
+  min-height: 44px;
+  line-height: 44px;
+  color: var(--text-link);
+}
+
+.lp-eyebrow {
+  margin: 0 0 12px;
+  font-size: 0.875rem;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--harbor-600);
+}
+
+/* B: calendar first */
+
+.lp-b-hero,
+.lp-b-booking,
+.lp-b-trust {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.lp-b-hero {
+  padding-top: 28px;
+  padding-bottom: 8px;
+  text-align: center;
+}
+
+.lp-b-hero h1 {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 1.4rem + 2vw, 2.75rem);
+  line-height: 1.15;
+  color: var(--text-heading);
+}
+
+.lp-b-credential {
+  margin: 0 auto;
+  max-width: 640px;
+  font-size: var(--text-lead);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.lp-b-booking {
+  padding-top: 16px;
+  padding-bottom: 24px;
+}
+
+.lp-b-booking h2 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  text-align: center;
+  color: var(--text-heading);
+}
+
+.lp-b-booking .calendly-inline-widget {
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--white);
+}
+
+.lp-b-after,
+.lp-b-call {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+}
+
+.lp-b-call a {
+  font-weight: var(--weight-semibold);
+  color: var(--text-link);
+}
+
+.lp-b-trust {
+  padding-top: 24px;
+  padding-bottom: 40px;
+}
+
+.lp-b-trust h2 {
+  margin: 0 0 16px;
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  color: var(--text-heading);
+}
+
+.lp-b-points {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lp-b-points li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: var(--text-body);
+  line-height: 1.55;
+}
+
+.lp-b-points svg {
+  flex: none;
+  margin-top: 3px;
+  color: var(--status-success);
+}
+
+/* C: simple, large text, call first. Body 22px, headline 46px and up, high contrast. */
+
+.lp-page-c {
+  background: var(--white);
+}
+
+.lp-page-c .lp-header-phone {
+  font-size: 1.1875rem;
+}
+
+.lp-c {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 20px;
+  font-size: 1.375rem;
+  line-height: 1.5;
+  color: var(--ink-900);
+}
+
+.lp-c h1 {
+  margin: 0 0 20px;
+  font-family: var(--font-body);
+  font-size: clamp(2.875rem, 2.2rem + 2.5vw, 3.75rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--blue-900);
+}
+
+.lp-c h2 {
+  margin: 0 0 20px;
+  font-family: var(--font-body);
+  font-size: clamp(2rem, 1.7rem + 1.2vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--blue-900);
+}
+
+.lp-c p {
+  margin: 0 0 20px;
+}
+
+.lp-c-hero {
+  padding: 36px 0 36px;
+}
+
+.lp-c-lead {
+  font-size: 1.5rem;
+}
+
+.lp-c-actions {
+  display: grid;
+  gap: 16px;
+  margin: 28px 0;
+}
+
+.lp-c-call,
+.lp-c-book {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 76px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  font-size: 1.625rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+}
+
+.lp-c-call {
+  background: var(--blue-700);
+  border: 3px solid var(--blue-700);
+  color: var(--white);
+}
+
+.lp-c-call:hover,
+.lp-c-call:active {
+  background: var(--blue-900);
+  border-color: var(--blue-900);
+}
+
+.lp-c-book {
+  background: var(--white);
+  border: 3px solid var(--blue-700);
+  color: var(--blue-700);
+}
+
+.lp-c-book:hover,
+.lp-c-book:active {
+  background: var(--blue-100);
+}
+
+.lp-c-call:focus-visible,
+.lp-c-book:focus-visible {
+  outline: 4px solid var(--yellow-500);
+  outline-offset: 3px;
+}
+
+.lp-c-credential {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-weight: var(--weight-semibold);
+}
+
+.lp-c-credential svg {
+  flex: none;
+  margin-top: 4px;
+  color: var(--status-success);
+}
+
+.lp-c-steps,
+.lp-c-insurance,
+.lp-c-closing {
+  padding: 36px 0;
+  border-top: 2px solid var(--ink-100);
+}
+
+.lp-c-steps ol {
+  display: grid;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lp-c-steps li {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.lp-c-steps b {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--blue-900);
+  color: var(--white);
+  font-size: 1.5rem;
+}
+
+.lp-c-steps p {
+  margin: 6px 0 0;
+}
+
+.lp-c-plans {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+}
+
+.lp-c-plans li {
+  padding: 10px 18px;
+  border: 2px solid var(--blue-700);
+  border-radius: 999px;
+  font-weight: var(--weight-semibold);
+  color: var(--blue-900);
+}
+
+.lp-page-c .lp-footer {
+  font-size: 1.125rem;
+}
+
+@media (max-width: 400px) {
+  .lp-header {
+    padding: 10px 14px;
+  }
+
+  .lp-wide-only {
+    display: none;
+  }
+
+  /* The scheduler needs the full 320px on the narrowest phones. */
+  .lp-b-booking {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .lp-b-booking h2,
+  .lp-b-after,
+  .lp-b-call {
+    padding: 0 16px;
+  }
+
+  .lp-b-booking .calendly-inline-widget {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+}
