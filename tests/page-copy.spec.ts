@@ -5,18 +5,18 @@ const YELLOW = 'rgb(255, 229, 138)'
 const DASHES = /[–—]/
 
 test.describe('home page', () => {
-  test('hero reads Finally. Today. and the CTA says Book a Neurologist today', async ({ page }) => {
+  test('hero reads Start with a neurologist. and the CTA says Book a video visit', async ({ page }) => {
     await page.goto('/')
-    await expect(page.locator('h1')).toHaveText("Treatment that slows down Alzheimer's. Finally. Today.")
-    await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a Neurologist today' })).toBeVisible()
-    await page.locator('.hero-actions').getByRole('button', { name: 'Book a Neurologist today' }).click()
+    await expect(page.locator('h1')).toHaveText("Treatment that slows down Alzheimer's. Start with a neurologist.")
+    await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a video visit' })).toBeVisible()
+    await page.locator('.hero-actions').getByRole('button', { name: 'Book a video visit' }).click()
     await expect(page).toHaveURL(/\/get-started#book$/)
   })
 
   test('the hero button lands on the booking section of Get Started, keeping ad click ids', async ({ page }) => {
     await page.setViewportSize({ width: 1366, height: 900 })
     await page.goto('/?gclid=test_gclid_123&utm_source=google')
-    await page.locator('.hero-actions').getByRole('button', { name: 'Book a Neurologist today' }).click()
+    await page.locator('.hero-actions').getByRole('button', { name: 'Book a video visit' }).click()
     await expect(page).toHaveURL(/\/get-started\?gclid=test_gclid_123&utm_source=google#book$/)
     // Wait for the scroll to finish with the section just below the sticky header.
     await expect
@@ -31,10 +31,10 @@ test.describe('home page', () => {
     await expect(page.locator('#book .calendly-inline-widget')).toBeInViewport()
   })
 
-  test('the hero copy asks to be evaluated as early as this week', async ({ page }) => {
+  test('the hero copy offers a video visit with a board-certified neurologist', async ({ page }) => {
     await page.goto('/')
     await expect(page.locator('.hero-copy > p').nth(1)).toHaveText(
-      "FDA-approved treatments can slow down the progression of early Alzheimer's disease. Get evaluated as early as this week by our neurologists who specialize in cognitive impairment and disease-modifying treatments.",
+      "FDA-approved treatments can slow down the progression of early Alzheimer's disease. Book a video visit with a board-certified neurologist who specializes in cognitive impairment and disease-modifying treatments.",
     )
   })
 
@@ -46,24 +46,24 @@ test.describe('home page', () => {
     )
   })
 
-  test('the banner shows In days, and only In days and 1,500+ are light blue', async ({ page }) => {
+  test('the banner shows From home, and only From home and 1,500+ are light blue', async ({ page }) => {
     await page.goto('/')
     const stats = page.locator('.stat-band article')
     await expect(stats).toHaveCount(4)
-    await expect(stats.locator('strong')).toHaveText(['3.5 years', '6-9 months', 'In days', '1,500+'])
-    await expect(stats.nth(2).locator('span')).toHaveText('See a board-certified neurologist in days from the comfort of your home')
+    await expect(stats.locator('strong')).toHaveText(['3.5 years', '6-9 months', 'From home', '1,500+'])
+    await expect(stats.nth(2).locator('span')).toHaveText('Video visits with a board-certified neurologist from the comfort of your home')
     const colors = await stats.locator('strong').evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).color))
     expect(colors).toEqual([YELLOW, YELLOW, LIGHT_BLUE, LIGHT_BLUE])
   })
 
-  test('the first section asks for a fast, credible answer', async ({ page }) => {
+  test('the first section asks for a clear, credible answer', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByRole('heading', { level: 2, name: "We're designed around one goal: a fast, credible answer on treatment options." })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 2, name: "We're designed around one goal: a clear, credible answer on treatment options." })).toBeVisible()
   })
 
   test('how it works shows the new header and four steps, and Book now opens Get Started', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByRole('heading', { level: 2, name: 'Real treatment in 4 easy steps and an answer in days' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 2, name: 'Real treatment in 4 easy steps' })).toBeVisible()
     const steps = page.locator('.process-grid article')
     await expect(steps.locator('h3')).toHaveText([
       'Book visit with a neurologist',
@@ -88,12 +88,12 @@ test.describe('home page', () => {
     await expect(page).toHaveURL(/\/get-started$/)
   })
 
-  test('neurologist is lower case everywhere except the hero button', async ({ page }) => {
+  test('neurologist is lower case everywhere, including the hero button', async ({ page }) => {
     await page.goto('/')
     const text = await page.locator('main').innerText()
-    expect(text.match(/Neurologist/g)).toHaveLength(1)
-    await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a Neurologist today' })).toHaveText(
-      'Book a Neurologist today',
+    expect(text).not.toContain('Neurologist')
+    await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a video visit' })).toHaveText(
+      'Book a video visit',
     )
   })
 
@@ -105,9 +105,9 @@ test.describe('home page', () => {
   test('the bottom banner asks to book a visit and its button says Book now', async ({ page }) => {
     await page.goto('/')
     const panel = page.locator('.conversion-panel')
-    await expect(panel.locator('h2')).toHaveText('Book a visit with a neurologist today.')
+    await expect(panel.locator('h2')).toHaveText('Book a video visit with a board-certified neurologist.')
     await expect(panel.locator('p:not(.eyebrow)')).toHaveText(
-      'Our neurologists are on stand-by to help you find the best treatment options and can see you as soon as this week.',
+      'Our neurologists specialize in cognitive impairment and can help you understand your treatment options. Insurance accepted, including Medicare.',
     )
     await expect(panel.getByRole('button', { name: 'Get Started' })).toHaveCount(0)
     await panel.getByRole('button', { name: 'Book now' }).click()
@@ -124,7 +124,7 @@ for (const [path, title, other] of [
     await page.goto(path)
     const panel = page.locator('.conversion-panel')
     await expect(panel.locator('h2')).toHaveText(title)
-    await expect(panel.locator('p')).toHaveText('Book your appointment today and get seen within days.')
+    await expect(panel.locator('p')).toHaveText('Book a video visit with a board-certified neurologist. Insurance accepted, including Medicare.')
     await expect(panel.getByRole('button', { name: 'Get Started' })).toHaveCount(0)
     await expect(panel.getByRole('button', { name: other })).toBeVisible()
     await panel.getByRole('button', { name: 'Book now' }).click()
@@ -135,7 +135,7 @@ for (const [path, title, other] of [
 test.describe('how it works page', () => {
   test('hero header, copy, and Book now button', async ({ page }) => {
     await page.goto('/how-it-works')
-    await expect(page.locator('h1')).toHaveText('A fast path you can trust from first concern to treatment.')
+    await expect(page.locator('h1')).toHaveText('A clear path you can trust from first concern to treatment.')
     await expect(page.locator('.page-hero p').last()).toHaveText(
       "Our trusted team of neurologists and specialists have over 20 years of experience in treating Alzheimer's disease, dementia, and mild cognitive impairment. We can help you understand what you might be facing and your best options going forward.",
     )
@@ -157,7 +157,7 @@ test.describe('how it works page', () => {
     ])
     const bullets = (index: number) => steps.nth(index).locator('.journey-points span')
     await expect(bullets(0)).toHaveText([
-      'Book your appointment today. Our neurologists are specialized in cognitive impairment and disease-modifying treatments.',
+      'Pick a time for a video visit online or by phone. Our neurologists specialize in cognitive impairment and disease-modifying treatments.',
     ])
     await expect(bullets(1)).toHaveText([
       'You and a loved one attend the visit to share your concerns, questions, and provide all information needed for the evaluation by the neurologist including medical history, medications, recent testing, and more.',
@@ -176,7 +176,7 @@ test.describe('how it works page', () => {
     const text = await page.locator('main').innerText()
     expect(text).not.toContain('Neurologist')
     expect(text).not.toMatch(/our providers/i)
-    expect(text).toContain('Our neurologists are specialized in cognitive impairment and disease-modifying treatments.')
+    expect(text).toContain('Our neurologists specialize in cognitive impairment and disease-modifying treatments.')
     expect(text).not.toContain('Wednesday')
   })
 
@@ -296,7 +296,7 @@ test.describe('FAQ page', () => {
     await page.goto('/faq?gclid=test_gclid_123')
     const answer = await answerFor(page, 'How soon can I be seen?')
     await expect(answer).toHaveText(
-      'You can be seen by one of our neurology specialists within days or the same week. Click here to find a time that works best for you!',
+      'Availability depends on our neurologists\' schedules. Click here to see current open visit times and pick the one that works best for you.',
     )
     const link = answer.getByRole('link', { name: 'Click here' })
     await expect(link).toHaveAttribute('href', '/get-started?gclid=test_gclid_123#book')

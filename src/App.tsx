@@ -131,7 +131,7 @@ const journeySteps: Array<{ title: string; meta?: string; cta?: string; points: 
     title: 'Book your appointment with a neurologist',
     cta: 'Book now',
     points: [
-      'Book your appointment today. Our neurologists are specialized in cognitive impairment and disease-modifying treatments.',
+      'Pick a time for a video visit online or by phone. Our neurologists specialize in cognitive impairment and disease-modifying treatments.',
     ],
   },
   {
@@ -202,9 +202,9 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
         ', before your appointment.',
       ]]],
       ['How soon can I be seen?', [[
-        'You can be seen by one of our neurology specialists within days or the same week. ',
+        'Availability depends on our neurologists\' schedules. ',
         { linkText: 'Click here', hash: 'book' },
-        ' to find a time that works best for you!',
+        ' to see current open visit times and pick the one that works best for you.',
       ]]],
       ['How does the eligibility check work?', 'Our eligibility process is simple - we will call you after you schedule your appointment and the call should take 15-30 minutes. Please have the patient\'s insurance details, medication list, and medical history handy to make it go smoother.'],
       ['Do I need a referral from my current doctor?', [[
@@ -527,12 +527,12 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
         <div className="hero-content">
           <div className="hero-copy">
             <p className="eyebrow">Virtual Alzheimer's specialty clinic</p>
-            <h1>Treatment that slows down Alzheimer's. <em>Finally. Today.</em></h1>
+            <h1>Treatment that slows down Alzheimer's. <em>Start with a neurologist.</em></h1>
             <p>
-              FDA-approved treatments can slow down the progression of early Alzheimer&apos;s disease. Get evaluated as early as this week by our neurologists who specialize in cognitive impairment and disease-modifying treatments.
+              FDA-approved treatments can slow down the progression of early Alzheimer&apos;s disease. Book a video visit with a board-certified neurologist who specializes in cognitive impairment and disease-modifying treatments.
             </p>
             <div className="hero-actions">
-              <button className="accent" type="button" onClick={() => onNavigate('start', '', 'hero', 'Book a Neurologist today', 'book')}>Book a Neurologist today</button>
+              <button className="accent" type="button" onClick={() => onNavigate('start', '', 'hero', 'Book a video visit', 'book')}>Book a video visit</button>
               {routeEnabled('how') && <button className="secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>}
             </div>
             <div className="trust-note"><span /> Backed by a national infusion network and a focused treatment-readiness pathway.</div>
@@ -543,12 +543,12 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
       <section className="stat-band">
         <Metric value="3.5 years" label="average gap between first symptoms and diagnosis of Alzheimer's" />
         <Metric value="6-9 months" label="typical wait for a new patient visit with a neurologist in most areas" />
-        <Metric tone="light" value="In days" label="See a board-certified neurologist in days from the comfort of your home" />
+        <Metric tone="light" value="From home" label="Video visits with a board-certified neurologist from the comfort of your home" />
         <Metric tone="light" value="1,500+" label="patients treated successfully by our infusion network" />
       </section>
 
       <section className="section ivory compact-section">
-        <SectionIntro eyebrow="Why Local Doctor" title="We're designed around one goal: a fast, credible answer on treatment options." />
+        <SectionIntro eyebrow="Why Local Doctor" title="We're designed around one goal: a clear, credible answer on treatment options." />
         <div className="value-grid">
           {valueProps.map((prop) => {
             const Icon = prop.icon
@@ -571,7 +571,7 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
 
       <section className="section white compact-section">
         <div className="section-row">
-          <SectionIntro eyebrow="How it works" title="Real treatment in 4 easy steps and an answer in days" />
+          <SectionIntro eyebrow="How it works" title="Real treatment in 4 easy steps" />
           {routeEnabled('how') && <button className="text-link" type="button" onClick={() => onNavigate('how')}>See the full process <ArrowRight size={16} /></button>}
         </div>
         <ProcessGrid onNavigate={onNavigate} />
@@ -584,8 +584,8 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
       <ConversionPanel
         onNavigate={onNavigate}
         eyebrow="Ready to make a step towards better memory care?"
-        title="Book a visit with a neurologist today."
-        copy="Our neurologists are on stand-by to help you find the best treatment options and can see you as soon as this week."
+        title="Book a video visit with a board-certified neurologist."
+        copy="Our neurologists specialize in cognitive impairment and can help you understand your treatment options. Insurance accepted, including Medicare."
         ctaLabel="Book now"
       />
       <StickyCta
@@ -635,7 +635,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: Navigate }) {
         </div>
       </section>
       <QualificationSection tone="white" />
-      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to meet with a Neurologist?" copy="Book your appointment today and get seen within days." ctaLabel="Book now" secondaryLabel="See how it works" secondaryRoute="how" compact />
+      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to meet with a Neurologist?" copy="Book a video visit with a board-certified neurologist. Insurance accepted, including Medicare." ctaLabel="Book now" secondaryLabel="See how it works" secondaryRoute="how" compact />
     </>
   )
 }
@@ -645,7 +645,7 @@ function HowPage({ onNavigate }: { onNavigate: Navigate }) {
     <>
       <PageHero
         eyebrow="How it works"
-        title="A fast path you can trust from first concern to treatment."
+        title="A clear path you can trust from first concern to treatment."
         copy="Our trusted team of neurologists and specialists have over 20 years of experience in treating Alzheimer's disease, dementia, and mild cognitive impairment. We can help you understand what you might be facing and your best options going forward."
         icon={<CalendarClock size={38} />}
         aside={{ title: 'Family and loved ones', text: 'Our preference is for loved ones to join the virtual provider visits and be a part of the process.' }}
@@ -700,7 +700,7 @@ function HowPage({ onNavigate }: { onNavigate: Navigate }) {
           ))}
         </div>
       </section>
-      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to meet with a neurologist?" copy="Book your appointment today and get seen within days." ctaLabel="Book now" secondaryLabel="See treatments" secondaryRoute="treatments" compact />
+      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to meet with a neurologist?" copy="Book a video visit with a board-certified neurologist. Insurance accepted, including Medicare." ctaLabel="Book now" secondaryLabel="See treatments" secondaryRoute="treatments" compact />
     </>
   )
 }
@@ -767,7 +767,7 @@ function StartPage() {
     <div className="start-page">
       <PageHero
         eyebrow="Get started"
-        title="Book a neurologist today to find out if treatment is right for you."
+        title="Book a video visit with a board-certified neurologist to find out if treatment is right for you."
         copy="Everyone's situation is unique. Our neurology specialists listen to deeply understand yours and let you know if you're eligible for disease-modifying treatment."
         primaryLabel={`Call or text ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
@@ -1164,7 +1164,7 @@ function StartFaq() {
       {[
         ['How does this work with my existing doctors?', 'Think of our neurology team as an extension of your current doctors. Our providers do not replace any of your existing provider relationships, and will work with them as needed.'],
         ['Can a caregiver be a part of this?', 'Yes! We have even seen maximal results when any loved one is involved in this journey.'],
-        ['What if my insurance is not covered?', 'Not a problem, we provide a transparent and low cost for your visits with our neurology team. Any other costs will be communicated transparently.'],
+        ['What if my insurance is not covered?', 'Not a problem. If we are not in network with your plan, we will tell you the cost of your visit before you book, and you can ask for a Good Faith Estimate. Any other costs will be communicated transparently.'],
         ["What if I'm not eligible?", 'If the honest answer is "not yet" we will let you know why and recommend resources that might still be helpful to address any of your concerns.'],
       ].map(([question, answer]) => (
         <article key={question}>

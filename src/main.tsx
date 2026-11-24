@@ -18,7 +18,7 @@ import { initialLocation } from './routes'
 installGoogleAds()
 installGoogleAnalytics()
 installTracking()
-installPostHog()
+afterLoad(installPostHog)
 syncChatbot(window.location.pathname)
 
 const root = document.getElementById('root')!
@@ -28,8 +28,19 @@ const app = (
   </StrictMode>
 )
 
+// Other route chunks and PostHog are not needed for the first paint. They wait until the page has
+// loaded and the browser is idle, so on a slow phone they do not compete with the page itself.
+function afterLoad(task: () => void) {
+  const idle = () => {
+    if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(task, { timeout: 3000 })
+    else setTimeout(task, 1)
+  }
+  if (document.readyState === 'complete') idle()
+  else window.addEventListener('load', idle, { once: true })
+}
+
 function preloadOtherPages() {
-  window.setTimeout(() => void preloadAllPages(), 0)
+  afterLoad(() => void preloadAllPages())
 }
 
 // Public routes are prerendered at build time (scripts/prerender.mjs), so root already holds the

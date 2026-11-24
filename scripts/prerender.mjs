@@ -45,6 +45,15 @@ function chunkTags(source) {
   ].join('')
 }
 
+// The /get-started hero photo is hidden on phones and tablets (COMPACT_QUERY in src/App.tsx is
+// max-width: 980px), so its preload only applies on wider screens. On a phone it would otherwise
+// compete with the CSS and fonts for the first paint.
+const desktopOnlyImages = ['/assets/hero-get-started.jpg']
+function desktopOnly(tag) {
+  if (!desktopOnlyImages.some((src) => tag.includes(`href="${src}"`)) || /\smedia=/.test(tag)) return tag
+  return tag.replace(/<link\b/, '<link media="(min-width: 981px)"')
+}
+
 // React emits image preload hints ahead of the markup. They are moved out of #root, and only the
 // fetchPriority="high" hero images keep one: the rest (logos, footer) load as they do today.
 function splitHoisted(html) {
@@ -52,6 +61,7 @@ function splitHoisted(html) {
   if (!match) return { hoisted: '', body: html }
   const hoisted = (match[0].match(/<link\b[^>]*?\/?>/g) ?? [])
     .filter((tag) => /fetchPriority="high"/i.test(tag))
+    .map((tag) => desktopOnly(tag))
     .map((tag) => `    ${tag.replace(/\s*\/?>$/, '>')}\n`)
     .join('')
   return { hoisted, body: html.slice(match[0].length) }
