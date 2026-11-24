@@ -2194,6 +2194,19 @@ a.blog-card {
   font-size: 0.9375rem;
 }
 
+/* Shown after the evaluation Typeform is submitted, in place of Typeform's ending screens. */
+.evaluation-next-step {
+  display: grid;
+  gap: var(--space-16);
+  justify-items: start;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.evaluation-next-step .primary {
+  display: inline-flex;
+}
+
 /* /get-started: trust line over the calendar, and the mobile order (short hero, calendar, photo). */
 .booking-main {
   min-width: 0;
