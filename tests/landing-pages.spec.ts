@@ -8,11 +8,47 @@ import { landingCanonical, landingMeta, landingSlugs, siteOrigin, type LandingSl
 import { publicSitemapPaths, siteSitemapXml } from '../src/siteMap'
 
 const HOME_H1 = /Treatment that slows down Alzheimer/
-const CLINIC_TEL = 'tel:+12403765730'
-const CLINIC_PHONE = '(240) 376-5730'
+const MARYLAND_TEL = 'tel:+12403765730'
+const MARYLAND_PHONE = '(240) 376-5730'
+const VIRGINIA_TEL = 'tel:+15716095338'
+const VIRGINIA_PHONE = '(571) 609-5338'
+const VIRGINIA_SLUGS = ['alzheimers-doctor-virginia', 'memory-specialist-virginia'] as const
+
+function clinicPhoneForSlug(slug: LandingSlug) {
+  if ((VIRGINIA_SLUGS as readonly string[]).includes(slug)) {
+    return { tel: VIRGINIA_TEL, display: VIRGINIA_PHONE, telephone: '+1-571-609-5338' }
+  }
+  return { tel: MARYLAND_TEL, display: MARYLAND_PHONE, telephone: '+1-240-376-5730' }
+}
 const HERO_REASSURANCE = 'Board-certified neurologist. Insurance accepted. No referral needed.'
-const TRUST_FACTS = [
-  'Maryland video visits',
+const TRUST_FACTS_BY_SLUG: Partial<Record<LandingSlug, string[]>> = {
+  'alzheimers-doctor-maryland': [
+    'Maryland video visits',
+    'Board-certified neurologist',
+    'Insurance accepted',
+    'No referral needed',
+  ],
+  'memory-specialist-maryland': [
+    'Maryland video visits',
+    'Board-certified neurologist',
+    'Insurance accepted',
+    'No referral needed',
+  ],
+  'alzheimers-doctor-virginia': [
+    'Virginia video visits',
+    'Board-certified neurologist',
+    'Insurance accepted',
+    'No referral needed',
+  ],
+  'memory-specialist-virginia': [
+    'Virginia video visits',
+    'Board-certified neurologist',
+    'Insurance accepted',
+    'No referral needed',
+  ],
+}
+const SHARED_TRUST_FACTS = [
+  'MD & VA video visits',
   'Board-certified neurologist',
   'Insurance accepted',
   'No referral needed',
@@ -25,6 +61,8 @@ const heroCtaLabels: Record<LandingSlug, string> = {
   'memory-evaluation': 'Start your evaluation',
   'alzheimers-doctor-maryland': 'See open visit times',
   'memory-specialist-maryland': 'See open visit times',
+  'alzheimers-doctor-virginia': 'See open visit times',
+  'memory-specialist-virginia': 'See open visit times',
   'alzheimers-second-opinion': 'See open visit times',
   'dementia-test-online': 'See open visit times',
   'memory-doctor-near-me': 'See open visit times',
@@ -70,7 +108,8 @@ test('every landing route has its own title, description, and canonical', () => 
     expect(`${landingMeta[slug].title} ${landingMeta[slug].description}`).not.toMatch(DASHES)
     expect(landingPages[slug].ctaLabel).toBe(heroCtaLabels[slug])
     expect(landingPages[slug].reassurance).toBe(HERO_REASSURANCE)
-    expect(landingPages[slug].facts.items.slice(0, TRUST_FACTS.length)).toEqual(TRUST_FACTS)
+    const expectedFacts = TRUST_FACTS_BY_SLUG[slug] ?? SHARED_TRUST_FACTS
+    expect(landingPages[slug].facts.items.slice(0, expectedFacts.length)).toEqual(expectedFacts)
     expect(landingPages[slug].reassurance).not.toMatch(/waitlist|price|\$|seen in days/i)
   }
 })
@@ -123,7 +162,7 @@ test('no landing page mentions the request form', () => {
   for (const slug of landingSlugs) {
     const text = JSON.stringify(landingPages[slug])
     expect(text, slug).not.toMatch(/request form|request online|send the request/i)
-    if (!evaluationSlugs.includes(slug)) expect(text, slug).not.toMatch(/short form|the form/i)
+    expect(text, slug).not.toMatch(/short form|the form/i)
   }
 })
 
@@ -131,7 +170,7 @@ test('homepage hero buttons share one row, 16px apart', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/')
   const actions = page.locator('.hero-actions')
-  const primary = await boxOf(actions.getByRole('button', { name: 'Book a Neurologist today' }))
+  const primary = await boxOf(actions.getByRole('button', { name: 'Book a video visit' }))
   const secondary = await boxOf(actions.getByRole('button', { name: 'Learn more' }))
   expect(sameRow(primary, secondary)).toBe(true)
   expect(horizontalGap(primary, secondary)).toBeCloseTo(16, 0)
@@ -168,6 +207,9 @@ for (const width of [1280, 1440]) {
 test('alzheimers doctor and second opinion hero copy', () => {
   expect(landingPages['alzheimers-doctor-maryland'].h1).toBe("Talk to an Alzheimer's doctor in Maryland.")
   expect(landingMeta['alzheimers-doctor-maryland'].title).toBe("See an Alzheimer's Doctor in Maryland | Local Doctor")
+  expect(landingPages['alzheimers-doctor-virginia'].h1).toBe("Talk to an Alzheimer's doctor in Virginia.")
+  expect(landingMeta['alzheimers-doctor-virginia'].title).toBe("See an Alzheimer's Doctor in Virginia | Local Doctor")
+  expect(landingPages['memory-specialist-virginia'].h1).toBe('Talk to a memory specialist in Virginia.')
   expect(landingPages['alzheimers-second-opinion'].h1).toBe('Get a clear second look.')
   expect(landingPages['alzheimers-second-opinion'].heroNote).toBe(
     'Bring prior notes and results. A neurology specialist reviews them by video.',
@@ -224,7 +266,7 @@ test('alzheimers blood test CTAs keep allow-listed params and avoid banned claim
   await expect(hero).toHaveText('Request the blood test')
   await expect(secondary).toHaveText('See open visit times')
   for (const [locator, pathname] of [
-    [hero, '/evaluation'],
+    [hero, '/get-started'],
     [secondary, '/get-started'],
   ] as const) {
     const href = new URL((await locator.getAttribute('href')) ?? '', 'https://trylocaldoctor.com')
@@ -261,18 +303,19 @@ test('the static shell for a landing route carries its own head tags', () => {
   expect(html).not.toContain('content="default"')
 })
 
-test('the homepage hero CTA reads Book a Neurologist today', async ({ page }) => {
+test('the homepage hero CTA reads Book a video visit', async ({ page }) => {
   await page.goto('/')
-  await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a Neurologist today' })).toBeVisible()
+  await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a video visit' })).toBeVisible()
 })
 
-test('evaluation-form pages send their primary CTAs to the on-site evaluation form', () => {
-  expect(landingDestinations.evaluationForm).toEqual({ kind: 'evaluation' })
-  expect(resolveDestination(landingDestinations.evaluationForm)).toEqual({ kind: 'evaluation' })
+test('evaluation-form pages send their primary CTAs to the scheduler, not the /evaluation quiz', () => {
+  expect(landingDestinations.evaluationForm).toEqual({ kind: 'intake' })
+  expect(resolveDestination(landingDestinations.evaluationForm)).toEqual({ kind: 'intake' })
   expect(landingDestinations.evaluation).toEqual({ kind: 'intake' })
   expect(landingDestinations.onlineScreening).toEqual({ kind: 'intake' })
   const formSlugs = landingSlugs.filter((slug) => expectedDestination(slug).kind === 'evaluation')
-  expect(formSlugs).toEqual([...evaluationSlugs, 'alzheimers-blood-test'])
+  expect(formSlugs).toEqual([])
+  expect(landingSlugs.filter((slug) => landingPages[slug].funnel === 'evaluationForm')).toEqual([...evaluationSlugs, 'alzheimers-blood-test'])
   expect(isAllowedExternalHref('https://localdoctor.typeform.com/to/abc123')).toBe(true)
   expect(isAllowedExternalHref('https://form.typeform.com/to/abc123')).toBe(true)
   expect(isAllowedExternalHref('http://form.typeform.com/to/abc123')).toBe(false)
@@ -326,13 +369,30 @@ for (const viewport of viewports) {
         await expect(buttonRow.locator('[data-cta-location="hero"]')).toBeVisible()
         await expect(buttonRow.locator('.landing-phone')).toHaveCount(1)
         await expect(buttonRow.locator('.landing-reassurance')).toHaveCount(0)
+        const expectedPhone = clinicPhoneForSlug(slug)
         const phone = landing.locator('.landing-phone').first()
         await expect(phone).toBeVisible()
-        await expect(phone).toContainText(CLINIC_PHONE)
+        await expect(phone).toContainText(expectedPhone.display)
+        await expect(phone).toHaveAttribute('href', expectedPhone.tel)
 
         const tels = await landing.locator('a[href^="tel:"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')))
         expect(tels.length).toBeGreaterThan(0)
-        expect(new Set(tels)).toEqual(new Set([CLINIC_TEL]))
+        expect(new Set(tels)).toEqual(new Set([expectedPhone.tel]))
+
+        await expect(page.locator('.header-phone')).toHaveText(expectedPhone.display)
+        await expect(page.locator('.header-phone')).toHaveAttribute('href', expectedPhone.tel)
+        await expect(page.locator('.footer-identity').first()).toHaveText(`Phone: ${expectedPhone.display}`)
+
+        const jsonLd = page.locator('script#blog-article-jsonld')
+        if ((VIRGINIA_SLUGS as readonly string[]).includes(slug)) {
+          await expect(jsonLd).toHaveCount(1)
+          const data = JSON.parse((await jsonLd.textContent()) ?? '{}') as { telephone?: string; areaServed?: { name?: string } }
+          expect(data.telephone).toBe(expectedPhone.telephone)
+          expect(data.areaServed?.name).toBe('Virginia')
+          expect(JSON.stringify(data)).not.toContain('240')
+        } else {
+          await expect(jsonLd).toHaveCount(0)
+        }
 
         const hrefs = await page.locator('a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href') ?? ''))
         expect(hrefs.filter((href) => /livspecialtycare/i.test(href))).toEqual([])
@@ -484,8 +544,8 @@ test.describe('CTA attribution', () => {
     const events = await recordEvents(page)
     await page.goto('/memory-evaluation')
     const cta = page.locator('[data-cta-location="caregiver_path"]')
-    await expect(cta).toHaveAttribute('href', '/evaluation')
-    // Stay on the page so the recorded events are not cut off by leaving for Typeform.
+    await expect(cta).toHaveAttribute('href', '/get-started')
+    // Stay on the page so the recorded events are not cut off by leaving for the scheduler.
     // Navigation itself is covered by the hero CTA test above.
     await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), true))
     await cta.click()

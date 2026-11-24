@@ -21,7 +21,7 @@ test('CTA click sends cta_click with its destination to GA4 g/collect and never 
   const hero = page.locator('.landing-page[data-landing="dementia-evaluation"] [data-cta-location="hero"]')
   await expect(hero).toBeVisible()
   await hero.click()
-  await expect(page).toHaveURL(/\/evaluation/)
+  await expect(page).toHaveURL(/\/get-started/)
 
   await expect
     .poll(() => hits.filter((hit) => hit.includes('/g/collect') && hit.includes(`tid=${gaId}`) && hit.includes('en=cta_click')), {
@@ -35,6 +35,6 @@ test('CTA click sends cta_click with its destination to GA4 g/collect and never 
   expect(gaHit).toContain(`ep.cta_label=${landingPages['dementia-evaluation'].ctaLabel}`)
   expect(gaHit).not.toContain(DEFAULT_GOOGLE_ADS_LEAD_LABEL)
   expect(gaHit).not.toContain(DEFAULT_GOOGLE_ADS_PHONE_LABEL)
-  expect(gaHit).toContain('ep.cta_destination=/evaluation')
+  expect(gaHit).toContain('ep.cta_destination=/get-started')
   expect(hits.join('\n')).not.toContain(DEFAULT_GOOGLE_ADS_LEAD_LABEL)
 })

@@ -226,7 +226,7 @@ test('a CTA tapped before the app hydrates still carries the ad params', async (
   await page.route(/\/assets\/index-[^/]+\.js$/, (route) => route.abort())
   await page.goto('/dementia-evaluation?gclid=EARLY_GCLID&utm_source=google&email=jane@example.com')
   await page.locator('.landing-page [data-cta-location="hero"]').click()
-  await expect(page).toHaveURL(/\/evaluation\?/)
+  await expect(page).toHaveURL(/\/get-started\?/)
   const url = new URL(page.url())
   expect(url.searchParams.get('gclid')).toBe('EARLY_GCLID')
   expect(url.searchParams.get('utm_source')).toBe('google')
@@ -238,7 +238,7 @@ test.describe('before JavaScript runs', () => {
 
   test('/get-started on a phone shows only the photo below the scheduler', async ({ page }) => {
     await page.goto('/get-started')
-    await expect(page.locator('h1')).toHaveText('Book a consultation today to find out if treatment is right for you.')
+    await expect(page.locator('h1')).toHaveText('Book a video visit with a board-certified neurologist to find out if treatment is right for you.')
     await expect(page.locator('.page-hero-image')).toBeHidden()
     await expect(page.locator('.start-photo-below')).toBeVisible()
   })

@@ -1,6 +1,7 @@
 import { blogPosts } from './blogPosts'
 import { isPageEnabled, type PageFlag } from './featureFlags'
 import { isLandingSlug, landingSlugs } from './landing/landingMeta'
+import { lpVariantFromRoutePath, lpVariants } from './lp/lpVariants'
 
 export type Route =
   | 'home'
@@ -20,10 +21,12 @@ export type Route =
   | 'consent'
   | 'contact'
   | 'landing'
+  // Paid search landing page test variants at /lp/a, /lp/b, /lp/c. The slug is the letter.
+  | 'lp'
 
 export type RouteLocation = { route: Route; slug: string }
 
-export const routePaths: Record<Exclude<Route, 'blogPost' | 'landing'>, string> = {
+export const routePaths: Record<Exclude<Route, 'blogPost' | 'landing' | 'lp'>, string> = {
   home: '/',
   services: '/services',
   treatments: '/treatments',
@@ -60,13 +63,15 @@ const pathRoutes: Record<string, Route> = {
 }
 
 export function routeEnabled(route: Route) {
-  const flag: PageFlag = route === 'blogPost' ? 'blog' : route === 'landing' ? 'landingPages' : route
+  const flag: PageFlag = route === 'blogPost' ? 'blog' : route === 'landing' || route === 'lp' ? 'landingPages' : route
   return isPageEnabled(flag)
 }
 
 // path has no leading or trailing slashes.
 export function readLocation(path: string): RouteLocation {
   if (isLandingSlug(path)) return { route: 'landing', slug: path }
+  const lpVariant = lpVariantFromRoutePath(path)
+  if (lpVariant) return { route: 'lp', slug: lpVariant }
   if (path === 'blog') return { route: 'blog', slug: '' }
   if (path.startsWith('blog/')) {
     const slug = decodeURIComponent(path.slice('blog/'.length).split('/')[0] ?? '')
@@ -85,6 +90,7 @@ export function initialLocation(path: string): RouteLocation {
 export function pathFor({ route, slug }: RouteLocation): string {
   if (route === 'blogPost') return `/blog/${slug}`
   if (route === 'landing') return `/${slug}`
+  if (route === 'lp') return `/lp/${slug}`
   return routePaths[route]
 }
 
@@ -94,5 +100,6 @@ export function prerenderLocations(): RouteLocation[] {
   const pages = (Object.keys(routePaths) as Array<keyof typeof routePaths>).map((route) => ({ route, slug: '' }))
   const posts = blogPosts.map((post) => ({ route: 'blogPost' as const, slug: post.slug }))
   const landings = landingSlugs.map((slug) => ({ route: 'landing' as const, slug }))
-  return [...pages, ...posts, ...landings].filter((location) => routeEnabled(location.route))
+  const lpTests = lpVariants.map((slug) => ({ route: 'lp' as const, slug }))
+  return [...pages, ...posts, ...landings, ...lpTests].filter((location) => routeEnabled(location.route))
 }

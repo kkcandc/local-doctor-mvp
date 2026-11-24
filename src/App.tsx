@@ -21,6 +21,7 @@ import {
   medicalDisclaimer,
   type BlogBlock,
 } from './blogPosts'
+import { clinicPhoneForLanding } from './clinicPhones'
 import {
   ContactPage,
   ConsentPage,
@@ -42,8 +43,11 @@ import { CalendlyEmbed } from './CalendlyEmbed'
 import { LandingPage, type CtaTarget } from './landing/LandingPage'
 import { landingPages } from './landing/landingContent'
 import { isLandingSlug } from './landing/landingMeta'
+import { landingDestinations, resolveDestination } from './landing/destinations'
+import { LpPage } from './lp/LpPage'
+import { isLpVariant, servedLpVariant } from './lp/lpVariants'
 import { EvaluationPage, PatientRightsPage, PrivacyPage, TermsPage } from './routePages'
-import { initialLocation, readLocation, routeEnabled, routePaths, type Route } from './routes'
+import { initialLocation, readLocation, routeEnabled, routePaths, type Route, type RouteLocation } from './routes'
 import { ServicesPage } from './services/ServicesPage'
 import { StickyCta } from './StickyCta'
 import './App.css'
@@ -58,7 +62,7 @@ const valueProps = [
   },
   {
     title: 'Visits from home',
-    copy: 'The specialist visit happens by video from home in Maryland, instead of a trip to an in-person neurologist.',
+    copy: 'The specialist visit happens by video from home in Maryland or Virginia, instead of a trip to an in-person neurologist.',
     icon: CalendarClock,
   },
   {
@@ -76,7 +80,7 @@ const treatmentRows = [
 ]
 
 const fitChecks = [
-  'You are located in Maryland.',
+  'You are located in Maryland or Virginia.',
   'A family member or care partner can participate in planning when needed.',
   'There is a diagnosis already, or cognitive changes serious enough to justify specialist review.',
   'You are looking for an answer on infusion treatment-readiness, not purely general memory-care advice.',
@@ -131,7 +135,7 @@ const journeySteps: Array<{ title: string; meta?: string; cta?: string; points: 
     title: 'Book your appointment with a neurologist',
     cta: 'Book now',
     points: [
-      'Book your appointment today. Our neurologists are specialized in cognitive impairment and disease-modifying treatments.',
+      'Pick a time for a video visit online or by phone. Our neurologists specialize in cognitive impairment and disease-modifying treatments.',
     ],
   },
   {
@@ -197,14 +201,14 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
     items: [
       [servicesFaqQuestion, servicesFaqAnswer],
       ['Who is eligible for services?', [[
-        'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland are commonly strong candidates for our program. We will confirm via a quick phone call after you ',
+        'Adults experiencing cognitive symptoms or with dementia or Alzheimer\'s disease residing in Maryland or Virginia are commonly strong candidates for our program. We will confirm via a quick phone call after you ',
         { linkText: 'schedule your visit', hash: 'book' },
         ', before your appointment.',
       ]]],
       ['How soon can I be seen?', [[
-        'You can be seen by one of our neurology specialists within days or the same week. ',
+        'Availability depends on our neurologists\' schedules. ',
         { linkText: 'Click here', hash: 'book' },
-        ' to find a time that works best for you!',
+        ' to see current open visit times and pick the one that works best for you.',
       ]]],
       ['How does the eligibility check work?', 'Our eligibility process is simple - we will call you after you schedule your appointment and the call should take 15-30 minutes. Please have the patient\'s insurance details, medication list, and medical history handy to make it go smoother.'],
       ['Do I need a referral from my current doctor?', [[
@@ -261,9 +265,6 @@ const faqCategories: { id: string; title: string; items: FaqItem[] }[] = [
 const seeVisitTimesLabel = 'See open visit times'
 const headerGetStartedLabel = 'Get started'
 
-const headerPhone = '(240) 376-5730'
-const headerPhoneHref = '+12403765730'
-
 function enabledLinks<T extends readonly [Route, ...unknown[]]>(links: T[]) {
   return links.filter(([route]) => routeEnabled(route))
 }
@@ -272,9 +273,32 @@ function normalizePath(pathname = window.location.pathname) {
   return pathname.replace(/^\/+|\/+$/g, '')
 }
 
+/*
+  Set when the middleware served a test variant at an Evaluation URL (src/lp/split.ts): the HTML is
+  /lp/<letter> but the address bar keeps the original path. Read once, from the prerendered page,
+  before React hydrates. That path keeps rendering the variant, including after back and forward.
+*/
+type ServedLp = { path: string; location: RouteLocation }
+let servedLpCache: ServedLp | null | undefined
+
+function servedLp(): ServedLp | null {
+  if (servedLpCache !== undefined) return servedLpCache
+  const variant = typeof window === 'undefined' ? null : servedLpVariant()
+  servedLpCache = variant ? { path: normalizePath(), location: { route: 'lp', slug: variant } } : null
+  return servedLpCache
+}
+
+function locationForPath(path: string): RouteLocation {
+  const served = servedLp()
+  return served && served.path === path ? served.location : readLocation(path)
+}
+
 // pathname is set when prerendering. In the browser the app reads window.location.
 function App({ pathname }: { pathname?: string }) {
-  const [initial] = useState(() => initialLocation(normalizePath(pathname)))
+  const [initial] = useState(() => {
+    const served = pathname === undefined ? servedLp() : null
+    return served ? served.location : initialLocation(normalizePath(pathname))
+  })
   const [route, setRoute] = useState<Route>(initial.route)
   const [routeSlug, setRouteSlug] = useState(initial.slug)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -298,7 +322,7 @@ function App({ pathname }: { pathname?: string }) {
       if (path === 'privacy' && window.location.hash === '#notice') {
         window.history.replaceState({}, '', '/patient-rights#notice-of-privacy-practices')
       }
-      let next = readLocation(normalizePath())
+      let next = locationForPath(normalizePath())
       if (!routeEnabled(next.route)) {
         window.history.replaceState({}, '', '/')
         next = { route: 'home', slug: '' }
@@ -357,19 +381,37 @@ function App({ pathname }: { pathname?: string }) {
       hash = ''
     }
     if (next === 'start' || next === 'evaluation') trackCtaClick(ctaLocation, ctaLabel, routePaths[next])
-    const path = next === 'blogPost' ? `/blog/${slug}` : next === 'landing' ? `/${slug}` : routePaths[next]
+    const path = next === 'blogPost' ? `/blog/${slug}` : next === 'landing' ? `/${slug}` : next === 'lp' ? `/lp/${slug}` : routePaths[next]
     // Keep gclid and utm_* across SPA navigations so Ads can attribute the visit and
     // Typeform can read them on /get-started. Contact and health params stay dropped.
     // An optional hash (for example #book) is added after the params. The hash effect above
     // scrolls to that element once the new page has rendered.
     const nextUrl = `${pathWithAdsParams(path, window.location.search)}${hash ? `#${hash}` : ''}`
     setRoute(next)
-    setRouteSlug(next === 'blogPost' || next === 'landing' ? slug : '')
+    setRouteSlug(next === 'blogPost' || next === 'landing' || next === 'lp' ? slug : '')
     setMenuOpen(false)
     if (`${window.location.pathname}${window.location.search}` !== nextUrl) {
       window.history.pushState({}, '', nextUrl)
     }
     setScrollRequest((count) => count + 1)
+  }
+
+  // Landing page test variants have their own minimal header and footer and no site navigation.
+  if (route === 'lp' && isLpVariant(routeSlug)) {
+    return (
+      <main>
+        <LpPage
+          key={routeSlug}
+          variant={routeSlug}
+          onStart={(target: CtaTarget, ctaLocation, ctaLabel) => navigate(target, '', ctaLocation, ctaLabel)}
+          onTrackCta={trackCtaClick}
+          onOpenPath={(path) => {
+            const next = readLocation(path.replace(/^\/+|\/+$/g, ''))
+            navigate(next.route, next.slug)
+          }}
+        />
+      </main>
+    )
   }
 
   return (
@@ -405,7 +447,7 @@ function App({ pathname }: { pathname?: string }) {
           }}
         />
       )}
-      <Footer onNavigate={navigate} />
+      <Footer route={route} routeSlug={routeSlug} onNavigate={navigate} />
     </main>
   )
 }
@@ -442,8 +484,13 @@ function Header({
   onNavigate: Navigate
 }) {
   const landingPage = route === 'landing' && isLandingSlug(routeSlug) ? landingPages[routeSlug] : null
+  const phone = clinicPhoneForLanding(route === 'landing' ? routeSlug : undefined)
+  // The header button follows the page's funnel destination (src/landing/destinations.ts).
+  const headerTarget = landingPage && resolveDestination(landingDestinations[landingPage.funnel]).kind === 'evaluation'
+    ? ('evaluation' as const)
+    : ('start' as const)
   const headerCta = landingPage?.funnel === 'evaluationForm'
-    ? { target: 'evaluation' as const, label: landingPage.ctaLabel }
+    ? { target: headerTarget, label: landingPage.ctaLabel }
     : { target: 'start' as const, label: headerGetStartedLabel }
   const navItems = enabledLinks<[Route, string]>([
     ['how', 'How it works'],
@@ -481,12 +528,12 @@ function Header({
           )}
         </nav>
         <div className="header-actions">
-          <a className="header-phone" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
+          <a className="header-phone" href={phone.href}>{phone.display}</a>
           <button className="header-cta" type="button" onClick={() => onNavigate(headerCta.target, '', 'header', headerCta.label)}>
             {headerCta.label}
           </button>
         </div>
-        <a className="header-phone-mobile" href={`tel:${headerPhoneHref}`}>{headerPhone}</a>
+        <a className="header-phone-mobile" href={phone.href}>{phone.display}</a>
         <button
           className="menu-button"
           type="button"
@@ -510,8 +557,8 @@ function Header({
               {label}
             </button>
           ))}
-          <a className="mobile-nav-phone" href={`tel:${headerPhoneHref}`}>
-            <span className="mobile-nav-phone-label">Call or text</span> {headerPhone}
+          <a className="mobile-nav-phone" href={phone.href}>
+            <span className="mobile-nav-phone-label">Call or text</span> {phone.display}
           </a>
           <button type="button" onClick={() => onNavigate(headerCta.target, '', 'header', headerCta.label)}>{headerCta.label}</button>
         </nav>
@@ -531,12 +578,12 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
         <div className="hero-content">
           <div className="hero-copy">
             <p className="eyebrow">Virtual Alzheimer's specialty clinic</p>
-            <h1>Treatment that slows down Alzheimer's. <em>Finally. Today.</em></h1>
+            <h1>Treatment that slows down Alzheimer's. <em>Start with a neurologist.</em></h1>
             <p>
-              FDA-approved treatments can slow down the progression of early Alzheimer&apos;s disease. Get evaluated as early as this week by our neurologists who specialize in cognitive impairment and disease-modifying treatments.
+              FDA-approved treatments can slow down the progression of early Alzheimer&apos;s disease. Book a video visit with a board-certified neurologist who specializes in cognitive impairment and disease-modifying treatments.
             </p>
             <div className="hero-actions">
-              <button className="accent" type="button" onClick={() => onNavigate('start', '', 'hero', 'Book a Neurologist today', 'book')}>Book a Neurologist today</button>
+              <button className="accent" type="button" onClick={() => onNavigate('start', '', 'hero', 'Book a video visit', 'book')}>Book a video visit</button>
               {routeEnabled('how') && <button className="secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>}
             </div>
             <div className="trust-note"><span /> Backed by a national infusion network and a focused treatment-readiness pathway.</div>
@@ -547,12 +594,12 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
       <section className="stat-band">
         <Metric value="3.5 years" label="average gap between first symptoms and diagnosis of Alzheimer's" />
         <Metric value="6-9 months" label="typical wait for a new patient visit with a neurologist in most areas" />
-        <Metric tone="light" value="In days" label="See a board-certified neurologist in days from the comfort of your home" />
+        <Metric tone="light" value="From home" label="Video visits with a board-certified neurologist from the comfort of your home" />
         <Metric tone="light" value="1,500+" label="patients treated successfully by our infusion network" />
       </section>
 
       <section className="section ivory compact-section">
-        <SectionIntro eyebrow="Why Local Doctor" title="We're designed around one goal: a fast, credible answer on treatment options." />
+        <SectionIntro eyebrow="Why Local Doctor" title="We're designed around one goal: a clear, credible answer on treatment options." />
         <div className="value-grid">
           {valueProps.map((prop) => {
             const Icon = prop.icon
@@ -575,7 +622,7 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
 
       <section className="section white compact-section">
         <div className="section-row">
-          <SectionIntro eyebrow="How it works" title="Real treatment in 4 easy steps and an answer in days" />
+          <SectionIntro eyebrow="How it works" title="Real treatment in 4 easy steps" />
           {routeEnabled('how') && <button className="text-link" type="button" onClick={() => onNavigate('how')}>See the full process <ArrowRight size={16} /></button>}
         </div>
         <ProcessGrid onNavigate={onNavigate} />
@@ -588,8 +635,8 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
       <ConversionPanel
         onNavigate={onNavigate}
         eyebrow="Ready to make a step towards better memory care?"
-        title="Book a visit with a neurologist today."
-        copy="Our neurologists are on stand-by to help you find the best treatment options and can see you as soon as this week."
+        title="Book a video visit with a board-certified neurologist."
+        copy="Our neurologists specialize in cognitive impairment and can help you understand your treatment options. Insurance accepted, including Medicare."
         ctaLabel="Book now"
       />
       <StickyCta
@@ -639,7 +686,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: Navigate }) {
         </div>
       </section>
       <QualificationSection tone="white" />
-      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to meet with a Neurologist?" copy="Book your appointment today and get seen within days." ctaLabel="Book now" secondaryLabel="See how it works" secondaryRoute="how" compact />
+      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to meet with a Neurologist?" copy="Book a video visit with a board-certified neurologist. Insurance accepted, including Medicare." ctaLabel="Book now" secondaryLabel="See how it works" secondaryRoute="how" compact />
     </>
   )
 }
@@ -649,7 +696,7 @@ function HowPage({ onNavigate }: { onNavigate: Navigate }) {
     <>
       <PageHero
         eyebrow="How it works"
-        title="A fast path you can trust from first concern to treatment."
+        title="A clear path you can trust from first concern to treatment."
         copy="Our trusted team of neurologists and specialists have over 20 years of experience in treating Alzheimer's disease, dementia, and mild cognitive impairment. We can help you understand what you might be facing and your best options going forward."
         icon={<CalendarClock size={38} />}
         aside={{ title: 'Family and loved ones', text: 'Our preference is for loved ones to join the virtual provider visits and be a part of the process.' }}
@@ -704,7 +751,7 @@ function HowPage({ onNavigate }: { onNavigate: Navigate }) {
           ))}
         </div>
       </section>
-      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to meet with a neurologist?" copy="Book your appointment today and get seen within days." ctaLabel="Book now" secondaryLabel="See treatments" secondaryRoute="treatments" compact />
+      <ConversionPanel onNavigate={onNavigate} eyebrow="" title="Ready to meet with a neurologist?" copy="Book a video visit with a board-certified neurologist. Insurance accepted, including Medicare." ctaLabel="Book now" secondaryLabel="See treatments" secondaryRoute="treatments" compact />
     </>
   )
 }
@@ -771,7 +818,7 @@ function StartPage() {
     <div className="start-page">
       <PageHero
         eyebrow="Get started"
-        title="Book a consultation today to find out if treatment is right for you."
+        title="Book a video visit with a board-certified neurologist to find out if treatment is right for you."
         copy="Everyone's situation is unique. Our neurology specialists listen to deeply understand yours and let you know if you're eligible for disease-modifying treatment."
         primaryLabel={`Call or text ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
@@ -1168,7 +1215,7 @@ function StartFaq() {
       {[
         ['How does this work with my existing doctors?', 'Think of our neurology team as an extension of your current doctors. Our providers do not replace any of your existing provider relationships, and will work with them as needed.'],
         ['Can a caregiver be a part of this?', 'Yes! We have even seen maximal results when any loved one is involved in this journey.'],
-        ['What if my insurance is not covered?', 'Not a problem, we provide a transparent and low cost for your visits with our neurology team. Any other costs will be communicated transparently.'],
+        ['What if my insurance is not covered?', 'Not a problem. If we are not in network with your plan, we will tell you the cost of your visit before you book, and you can ask for a Good Faith Estimate. Any other costs will be communicated transparently.'],
         ["What if I'm not eligible?", 'If the honest answer is "not yet" we will let you know why and recommend resources that might still be helpful to address any of your concerns.'],
       ].map(([question, answer]) => (
         <article key={question}>
@@ -1442,7 +1489,17 @@ function Metric({ value, label, tone }: { value: string; label: string; tone?: '
   )
 }
 
-function Footer({ onNavigate }: { onNavigate: Navigate }) {
+function Footer({
+  route,
+  routeSlug,
+  onNavigate,
+}: {
+  route: Route
+  routeSlug: string
+  onNavigate: Navigate
+}) {
+  const phone = clinicPhoneForLanding(route === 'landing' ? routeSlug : undefined)
+
   const exploreLinks = enabledLinks<[Route, string]>([
     ['home', 'Home'],
     ['how', 'How it works'],
@@ -1470,7 +1527,7 @@ function Footer({ onNavigate }: { onNavigate: Navigate }) {
       <div>
         <BrandLink variant="reverse" onNavigate={onNavigate} />
         <p>A virtual Alzheimer&apos;s specialty clinic connecting patients to specialist evaluation and treatment.</p>
-        <p className="footer-identity">Phone: {publicPhone}</p>
+        <p className="footer-identity">Phone: {phone.display}</p>
         <p className="footer-identity">Email: {publicEmail}</p>
       </div>
       <div>
