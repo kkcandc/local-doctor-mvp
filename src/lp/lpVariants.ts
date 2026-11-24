@@ -1,5 +1,5 @@
 /*
-  Landing page test variants for paid search (Evaluation ad groups, Maryland).
+  Landing page test variants for paid search (Evaluation campaigns, Maryland and Virginia).
 
   /lp/a  Current dementia evaluation page, booking first (no evaluation form gate).
   /lp/b  Calendar first: short headline, credential line, the Calendly scheduler right under it.
@@ -9,29 +9,25 @@
   sitemap.xml. Plain data with no React imports so routes, the prerender, and tracking can use it.
 */
 
-export const lpVariants = ['a', 'b', 'c'] as const
+import { isLpVariant, type LpVariant } from './lpLetters'
 
-export type LpVariant = (typeof lpVariants)[number]
-
-export function isLpVariant(value: string): value is LpVariant {
-  return (lpVariants as readonly string[]).includes(value)
-}
+export { isLpVariant, lpVariants, type LpVariant } from './lpLetters'
 
 export const lpMeta: Record<LpVariant, { title: string; description: string }> = {
   a: {
     title: 'Dementia Evaluation by Video | Local Doctor',
     description:
-      'Book a video visit with a board-certified neurologist licensed in Maryland. Insurance accepted. No referral needed.',
+      'Book a video visit with a board-certified neurologist licensed in Maryland and Virginia. Insurance accepted. No referral needed.',
   },
   b: {
     title: 'Pick a Time for a Memory Evaluation by Video | Local Doctor',
     description:
-      'Choose a time for a video visit with a board-certified neurologist licensed in Maryland. Insurance accepted. No referral needed.',
+      'Choose a time for a video visit with a board-certified neurologist licensed in Maryland and Virginia. Insurance accepted. No referral needed.',
   },
   c: {
     title: 'Talk With Us About a Memory Evaluation | Local Doctor',
     description:
-      'Call us or book a video visit with a board-certified neurologist licensed in Maryland. Insurance accepted, including Medicare.',
+      'Call us or book a video visit with a board-certified neurologist licensed in Maryland and Virginia. Insurance accepted, including Medicare.',
   },
 }
 
@@ -65,7 +61,7 @@ export function rememberLpVariant(variant: LpVariant) {
 }
 
 export function currentLpVariant(pathname: string): LpVariant | null {
-  const fromPath = lpVariantFromPathname(pathname)
+  const fromPath = lpVariantFromPathname(pathname) ?? servedLpVariant()
   if (fromPath) return fromPath
   try {
     const stored = window.sessionStorage.getItem(LP_VARIANT_STORAGE_KEY) ?? ''
@@ -73,4 +69,15 @@ export function currentLpVariant(pathname: string): LpVariant | null {
   } catch {
     return null
   }
+}
+
+/*
+  On a split Evaluation URL the middleware serves a variant's prerendered HTML at the original
+  path (for example /dementia-evaluation shows /lp/b). The page root carries data-lp-root, so the
+  app knows which version it is hydrating even though the address bar shows the original path.
+*/
+export function servedLpVariant(): LpVariant | null {
+  if (typeof document === 'undefined') return null
+  const value = document.querySelector('[data-lp-root]')?.getAttribute('data-lp-root') ?? ''
+  return isLpVariant(value) ? value : null
 }

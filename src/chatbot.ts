@@ -1,3 +1,5 @@
+import { servedLpVariant } from './lp/lpVariants'
+
 /*
   Site-wide chatbot (Jotform agent served from forms.mylocalinfusion.com).
 
@@ -26,7 +28,7 @@ export function isChatbotHiddenPath(pathname: string): boolean {
 }
 
 function loadChatbot() {
-  if (loaded || isChatbotHiddenPath(window.location.pathname)) return false
+  if (loaded || isChatbotHiddenPath(window.location.pathname) || servedLpVariant()) return false
   loaded = true
   const script = document.createElement('script')
   script.async = true
@@ -74,7 +76,8 @@ function scheduleLoad() {
 // Called at start-up and on every in-app route change.
 export function syncChatbot(pathname: string) {
   if (typeof window === 'undefined' || typeof document === 'undefined') return
-  const hidden = isChatbotHiddenPath(pathname)
+  // A test variant served at an Evaluation URL (see src/lp/split.ts) keeps the chatbot off too.
+  const hidden = isChatbotHiddenPath(pathname) || servedLpVariant() !== null
   document.documentElement.dataset.chatbotHidden = hidden ? 'true' : 'false'
   if (!hidden) scheduleLoad()
 }

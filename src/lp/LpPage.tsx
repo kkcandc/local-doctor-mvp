@@ -12,7 +12,9 @@ import './lp.css'
 
 /*
   Landing page test variants (see lpVariants.ts). They share a minimal header and footer with no
-  site navigation, so each page has one job. Maryland phone only. Copy rules: no speed claims,
+  site navigation, so each page has one job. The Evaluation campaigns run in Maryland and
+  Virginia on the same URLs, so the copy names both states and uses the shared site phone, like
+  the live pages. Copy rules: no speed claims,
   no prices or "free", no online diagnosis, no drug names, no provider photos or new provider facts.
 */
 
@@ -26,7 +28,7 @@ type LpPageProps = {
 const phone = clinicPhoneForLanding()
 const intakePath = '/get-started'
 const insurancePlans = ['Medicare', 'Medicaid', 'Aetna', 'CareFirst', 'Cigna', 'Kaiser', 'United']
-const credential = 'Board-certified neurologist, licensed in Maryland'
+const credential = 'Board-certified neurologist, licensed in Maryland and Virginia'
 const sharedH1 = 'A memory evaluation with a neurologist, by video.'
 
 function isPlainClick(event: MouseEvent) {
@@ -107,7 +109,7 @@ function VariantB() {
   return (
     <div className="lp-b" data-lp-variant="b">
       <section className="lp-b-hero">
-        <p className="lp-eyebrow">Maryland video visits</p>
+        <p className="lp-eyebrow">Maryland and Virginia video visits</p>
         <h1>{sharedH1}</h1>
         <p className="lp-b-credential">
           {credential}. Insurance accepted. No referral needed.
@@ -208,7 +210,7 @@ export function LpPage({ variant, onStart, onTrackCta, onOpenPath }: LpPageProps
   }, [variant])
 
   return (
-    <div className={`lp-page lp-page-${variant}`}>
+    <div className={`lp-page lp-page-${variant}`} data-lp-root={variant}>
       <LpHeader />
       {variant === 'a' && (
         <LandingPage

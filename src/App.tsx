@@ -45,9 +45,9 @@ import { landingPages } from './landing/landingContent'
 import { isLandingSlug } from './landing/landingMeta'
 import { landingDestinations, resolveDestination } from './landing/destinations'
 import { LpPage } from './lp/LpPage'
-import { isLpVariant } from './lp/lpVariants'
+import { isLpVariant, servedLpVariant } from './lp/lpVariants'
 import { EvaluationPage, PatientRightsPage, PrivacyPage, TermsPage } from './routePages'
-import { initialLocation, readLocation, routeEnabled, routePaths, type Route } from './routes'
+import { initialLocation, readLocation, routeEnabled, routePaths, type Route, type RouteLocation } from './routes'
 import { StickyCta } from './StickyCta'
 import './App.css'
 
@@ -272,9 +272,32 @@ function normalizePath(pathname = window.location.pathname) {
   return pathname.replace(/^\/+|\/+$/g, '')
 }
 
+/*
+  Set when the middleware served a test variant at an Evaluation URL (src/lp/split.ts): the HTML is
+  /lp/<letter> but the address bar keeps the original path. Read once, from the prerendered page,
+  before React hydrates. That path keeps rendering the variant, including after back and forward.
+*/
+type ServedLp = { path: string; location: RouteLocation }
+let servedLpCache: ServedLp | null | undefined
+
+function servedLp(): ServedLp | null {
+  if (servedLpCache !== undefined) return servedLpCache
+  const variant = typeof window === 'undefined' ? null : servedLpVariant()
+  servedLpCache = variant ? { path: normalizePath(), location: { route: 'lp', slug: variant } } : null
+  return servedLpCache
+}
+
+function locationForPath(path: string): RouteLocation {
+  const served = servedLp()
+  return served && served.path === path ? served.location : readLocation(path)
+}
+
 // pathname is set when prerendering. In the browser the app reads window.location.
 function App({ pathname }: { pathname?: string }) {
-  const [initial] = useState(() => initialLocation(normalizePath(pathname)))
+  const [initial] = useState(() => {
+    const served = pathname === undefined ? servedLp() : null
+    return served ? served.location : initialLocation(normalizePath(pathname))
+  })
   const [route, setRoute] = useState<Route>(initial.route)
   const [routeSlug, setRouteSlug] = useState(initial.slug)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -298,7 +321,7 @@ function App({ pathname }: { pathname?: string }) {
       if (path === 'privacy' && window.location.hash === '#notice') {
         window.history.replaceState({}, '', '/patient-rights#notice-of-privacy-practices')
       }
-      let next = readLocation(normalizePath())
+      let next = locationForPath(normalizePath())
       if (!routeEnabled(next.route)) {
         window.history.replaceState({}, '', '/')
         next = { route: 'home', slug: '' }
