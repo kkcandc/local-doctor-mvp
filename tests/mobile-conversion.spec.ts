@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { DEFAULT_GOOGLE_ADS_ID } from '../src/analytics/googleAdsConfig'
 import { CALENDLY_DEFAULT_HEIGHT_PX, calendlyEmbedUrl } from '../src/calendlyUrl'
 import { DEFAULT_GA_MEASUREMENT_ID } from '../src/analytics/googleAnalyticsConfig'
-import { resolveBookingUrl } from '../src/landing/destinations'
+import { landingDestinations, resolveBookingUrl, resolveDestination } from '../src/landing/destinations'
 import { landingPages } from '../src/landing/landingContent'
 import { landingSlugs, type LandingSlug } from '../src/landing/landingMeta'
 
@@ -17,8 +17,10 @@ const CHATBOT_GUTTER = 64
 
 type StickyCase = { path: string; label: string; href: string; stops: string[] }
 
+// Follows the funnel destination. Every funnel, evaluationForm included, now opens the scheduler.
 function landingHref(slug: LandingSlug) {
-  return landingPages[slug].funnel === 'evaluationForm' ? `/evaluation${clickQuery}` : `/get-started${clickQuery}`
+  const destination = resolveDestination(landingDestinations[landingPages[slug].funnel])
+  return destination.kind === 'evaluation' ? `/evaluation${clickQuery}` : `/get-started${clickQuery}`
 }
 
 const stickyCases: StickyCase[] = [
@@ -122,7 +124,7 @@ test.describe('mobile sticky Get Started', () => {
         page_path: `/${slug}`,
         cta_location: 'sticky_mobile',
         cta_label: landingPages[slug].ctaLabel,
-        cta_destination: slug === 'dementia-evaluation' ? '/evaluation' : '/get-started',
+        cta_destination: '/get-started',
       })
       expect(Object.keys(clicks[0].params).sort()).toEqual(['cta_destination', 'cta_label', 'cta_location', 'page_path', 'send_to'])
       expect(events.filter((event) => event.name === 'conversion').map((event) => event.params.send_to)).toEqual([CTA_CLICK_SEND_TO])
@@ -375,7 +377,7 @@ test('evaluation landing CTAs append allow-listed params and drop contact detail
     expect(hrefs.length).toBeGreaterThanOrEqual(2)
     for (const href of hrefs) {
       const url = new URL(href, 'https://trylocaldoctor.com')
-      expect(url.pathname).toBe('/evaluation')
+      expect(url.pathname).toBe('/get-started')
       expect(url.searchParams.get('gclid')).toBe('TEST123')
       expect(url.searchParams.get('gbraid')).toBe('GB1')
       expect(url.searchParams.get('wbraid')).toBe('WB1')

@@ -162,7 +162,7 @@ test('no landing page mentions the request form', () => {
   for (const slug of landingSlugs) {
     const text = JSON.stringify(landingPages[slug])
     expect(text, slug).not.toMatch(/request form|request online|send the request/i)
-    if (!evaluationSlugs.includes(slug)) expect(text, slug).not.toMatch(/short form|the form/i)
+    expect(text, slug).not.toMatch(/short form|the form/i)
   }
 })
 
@@ -266,7 +266,7 @@ test('alzheimers blood test CTAs keep allow-listed params and avoid banned claim
   await expect(hero).toHaveText('Request the blood test')
   await expect(secondary).toHaveText('See open visit times')
   for (const [locator, pathname] of [
-    [hero, '/evaluation'],
+    [hero, '/get-started'],
     [secondary, '/get-started'],
   ] as const) {
     const href = new URL((await locator.getAttribute('href')) ?? '', 'https://trylocaldoctor.com')
@@ -308,13 +308,14 @@ test('the homepage hero CTA reads Book a video visit', async ({ page }) => {
   await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a video visit' })).toBeVisible()
 })
 
-test('evaluation-form pages send their primary CTAs to the on-site evaluation form', () => {
-  expect(landingDestinations.evaluationForm).toEqual({ kind: 'evaluation' })
-  expect(resolveDestination(landingDestinations.evaluationForm)).toEqual({ kind: 'evaluation' })
+test('evaluation-form pages send their primary CTAs to the scheduler, not the /evaluation quiz', () => {
+  expect(landingDestinations.evaluationForm).toEqual({ kind: 'intake' })
+  expect(resolveDestination(landingDestinations.evaluationForm)).toEqual({ kind: 'intake' })
   expect(landingDestinations.evaluation).toEqual({ kind: 'intake' })
   expect(landingDestinations.onlineScreening).toEqual({ kind: 'intake' })
   const formSlugs = landingSlugs.filter((slug) => expectedDestination(slug).kind === 'evaluation')
-  expect(formSlugs).toEqual([...evaluationSlugs, 'alzheimers-blood-test'])
+  expect(formSlugs).toEqual([])
+  expect(landingSlugs.filter((slug) => landingPages[slug].funnel === 'evaluationForm')).toEqual([...evaluationSlugs, 'alzheimers-blood-test'])
   expect(isAllowedExternalHref('https://localdoctor.typeform.com/to/abc123')).toBe(true)
   expect(isAllowedExternalHref('https://form.typeform.com/to/abc123')).toBe(true)
   expect(isAllowedExternalHref('http://form.typeform.com/to/abc123')).toBe(false)
@@ -543,8 +544,8 @@ test.describe('CTA attribution', () => {
     const events = await recordEvents(page)
     await page.goto('/memory-evaluation')
     const cta = page.locator('[data-cta-location="caregiver_path"]')
-    await expect(cta).toHaveAttribute('href', '/evaluation')
-    // Stay on the page so the recorded events are not cut off by leaving for Typeform.
+    await expect(cta).toHaveAttribute('href', '/get-started')
+    // Stay on the page so the recorded events are not cut off by leaving for the scheduler.
     // Navigation itself is covered by the hero CTA test above.
     await page.evaluate(() => document.addEventListener('click', (event) => event.preventDefault(), true))
     await cta.click()

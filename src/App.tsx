@@ -43,6 +43,7 @@ import { CalendlyEmbed } from './CalendlyEmbed'
 import { LandingPage, type CtaTarget } from './landing/LandingPage'
 import { landingPages } from './landing/landingContent'
 import { isLandingSlug } from './landing/landingMeta'
+import { landingDestinations, resolveDestination } from './landing/destinations'
 import { EvaluationPage, PatientRightsPage, PrivacyPage, TermsPage } from './routePages'
 import { initialLocation, readLocation, routeEnabled, routePaths, type Route } from './routes'
 import { StickyCta } from './StickyCta'
@@ -439,8 +440,12 @@ function Header({
 }) {
   const landingPage = route === 'landing' && isLandingSlug(routeSlug) ? landingPages[routeSlug] : null
   const phone = clinicPhoneForLanding(route === 'landing' ? routeSlug : undefined)
+  // The header button follows the page's funnel destination (src/landing/destinations.ts).
+  const headerTarget = landingPage && resolveDestination(landingDestinations[landingPage.funnel]).kind === 'evaluation'
+    ? ('evaluation' as const)
+    : ('start' as const)
   const headerCta = landingPage?.funnel === 'evaluationForm'
-    ? { target: 'evaluation' as const, label: landingPage.ctaLabel }
+    ? { target: headerTarget, label: landingPage.ctaLabel }
     : { target: 'start' as const, label: headerGetStartedLabel }
   const navItems = enabledLinks<[Route, string]>([
     ['how', 'How it works'],
