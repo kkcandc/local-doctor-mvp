@@ -124,11 +124,11 @@ test.describe('CTA destinations keep the allow-listed params', () => {
 
   test('the home hero logs the real button text, not Get Started', async ({ page }) => {
     await page.goto(`/${query}`)
-    await page.locator('.hero-actions').getByRole('button', { name: 'Book a Neurologist today' }).click()
+    await page.locator('.hero-actions').getByRole('button', { name: 'Book a video visit' }).click()
     await expect(page).toHaveURL(/\/get-started\?.*#book$/)
     const click = ga(await events(page), 'cta_click')
     expect(click).toHaveLength(1)
-    expect(click[0].params).toMatchObject({ cta_label: 'Book a Neurologist today', cta_location: 'hero', cta_destination: '/get-started' })
+    expect(click[0].params).toMatchObject({ cta_label: 'Book a video visit', cta_location: 'hero', cta_destination: '/get-started' })
   })
 
   test('the header button on other pages and on /evaluation points at the scheduler', async ({ page }) => {

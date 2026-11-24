@@ -170,7 +170,7 @@ test('homepage hero buttons share one row, 16px apart', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/')
   const actions = page.locator('.hero-actions')
-  const primary = await boxOf(actions.getByRole('button', { name: 'Book a Neurologist today' }))
+  const primary = await boxOf(actions.getByRole('button', { name: 'Book a video visit' }))
   const secondary = await boxOf(actions.getByRole('button', { name: 'Learn more' }))
   expect(sameRow(primary, secondary)).toBe(true)
   expect(horizontalGap(primary, secondary)).toBeCloseTo(16, 0)
@@ -303,9 +303,9 @@ test('the static shell for a landing route carries its own head tags', () => {
   expect(html).not.toContain('content="default"')
 })
 
-test('the homepage hero CTA reads Book a Neurologist today', async ({ page }) => {
+test('the homepage hero CTA reads Book a video visit', async ({ page }) => {
   await page.goto('/')
-  await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a Neurologist today' })).toBeVisible()
+  await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a video visit' })).toBeVisible()
 })
 
 test('evaluation-form pages send their primary CTAs to the scheduler, not the /evaluation quiz', () => {

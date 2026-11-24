@@ -287,7 +287,7 @@ async function stubCalendly(page: Page) {
 test('/get-started embeds the Calendly scheduler and drops the Typeform and Eligibility section', async ({ page }) => {
   await stubCalendly(page)
   await page.goto('/get-started')
-  await expect(page.locator('h1')).toContainText('Book a neurologist today to find out if treatment is right for you.')
+  await expect(page.locator('h1')).toContainText('Book a video visit with a board-certified neurologist to find out if treatment is right for you.')
   await expect(page.locator('#book .expect-heading')).toHaveText('Book a neurologist')
   const widget = page.locator('#book .calendly-inline-widget')
   await expect(widget).toHaveAttribute('data-url', CALENDLY_URL)
@@ -401,7 +401,7 @@ test('leaving /get-started and coming back never adds a second Calendly iframe',
   await page.locator('.brand-link').first().click()
   await expect(page).toHaveURL(/\/$/)
   await expect(page.locator('.calendly-inline-widget')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Book a Neurologist today' }).click()
+  await page.getByRole('button', { name: 'Book a video visit' }).click()
   await expect(page).toHaveURL(/\/get-started#book$/)
   await expect(page.locator('.calendly-inline-widget iframe')).toHaveCount(1)
   await expect(page.locator('script[data-local-doctor-calendly]')).toHaveCount(1)

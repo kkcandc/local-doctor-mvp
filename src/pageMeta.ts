@@ -9,7 +9,7 @@ export const defaultMeta = {
   title: "Local Doctor | Alzheimer's Treatment Eligibility Review",
   description:
     "Local Doctor is a virtual Alzheimer's specialty clinic for treatment eligibility review, records, testing, insurance questions, and local follow-through for people who may qualify.",
-  ogTitle: "Connect with Alzheimer's specialists and advanced treatment today",
+  ogTitle: "Connect with Alzheimer's specialists and advanced treatment options",
 }
 
 export const startMeta: PageShellMeta = {
