@@ -13,7 +13,7 @@ export const physicalAddress = '4900 Centennial Blvd, Suite 300, Box 104, Nashvi
 
 export const publicPhone = '(240) 376-5730'
 
-export const licensedStates = 'Maryland'
+export const licensedStates = 'Maryland and Virginia'
 
 export const providerName = 'Deborah Kathleen Rose'
 

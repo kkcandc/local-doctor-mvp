@@ -1,6 +1,7 @@
 import { blogPosts } from './blogPosts'
 import { isPageEnabled, type PageFlag } from './featureFlags'
 import { isLandingSlug, landingSlugs } from './landing/landingMeta'
+import { lpVariantFromRoutePath, lpVariants } from './lp/lpVariants'
 import { isServicePageSlug, servicePageSlugs } from './services/servicePages'
 
 export type Route =
@@ -22,10 +23,12 @@ export type Route =
   | 'consent'
   | 'contact'
   | 'landing'
+  // Paid search landing page test variants at /lp/a, /lp/b, /lp/c. The slug is the letter.
+  | 'lp'
 
 export type RouteLocation = { route: Route; slug: string }
 
-export const routePaths: Record<Exclude<Route, 'blogPost' | 'landing' | 'service'>, string> = {
+export const routePaths: Record<Exclude<Route, 'blogPost' | 'landing' | 'service' | 'lp'>, string> = {
   home: '/',
   services: '/services',
   treatments: '/treatments',
@@ -63,7 +66,14 @@ const pathRoutes: Record<string, Route> = {
 
 export function routeEnabled(route: Route) {
   // An individual service page follows the Services page's flag.
-  const flag: PageFlag = route === 'blogPost' ? 'blog' : route === 'landing' ? 'landingPages' : route === 'service' ? 'services' : route
+  const flag: PageFlag =
+    route === 'blogPost'
+      ? 'blog'
+      : route === 'landing' || route === 'lp'
+        ? 'landingPages'
+        : route === 'service'
+          ? 'services'
+          : route
   return isPageEnabled(flag)
 }
 
@@ -74,6 +84,8 @@ export function readLocation(path: string): RouteLocation {
     const slug = path.slice('services/'.length)
     if (isServicePageSlug(slug)) return { route: 'service', slug }
   }
+  const lpVariant = lpVariantFromRoutePath(path)
+  if (lpVariant) return { route: 'lp', slug: lpVariant }
   if (path === 'blog') return { route: 'blog', slug: '' }
   if (path.startsWith('blog/')) {
     const slug = decodeURIComponent(path.slice('blog/'.length).split('/')[0] ?? '')
@@ -93,6 +105,7 @@ export function pathFor({ route, slug }: RouteLocation): string {
   if (route === 'blogPost') return `/blog/${slug}`
   if (route === 'landing') return `/${slug}`
   if (route === 'service') return `/services/${slug}`
+  if (route === 'lp') return `/lp/${slug}`
   return routePaths[route]
 }
 
@@ -103,5 +116,6 @@ export function prerenderLocations(): RouteLocation[] {
   const posts = blogPosts.map((post) => ({ route: 'blogPost' as const, slug: post.slug }))
   const landings = landingSlugs.map((slug) => ({ route: 'landing' as const, slug }))
   const services = servicePageSlugs.map((slug) => ({ route: 'service' as const, slug }))
-  return [...pages, ...services, ...posts, ...landings].filter((location) => routeEnabled(location.route))
+  const lpTests = lpVariants.map((slug) => ({ route: 'lp' as const, slug }))
+  return [...pages, ...services, ...posts, ...landings, ...lpTests].filter((location) => routeEnabled(location.route))
 }

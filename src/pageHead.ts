@@ -1,6 +1,7 @@
 import { getBlogPost, type BlogPost } from './blogPosts'
 import { landingHead, type StaticHead } from './landing/landingHtml'
 import { isLandingSlug, siteOrigin } from './landing/landingMeta'
+import { isLpVariant, lpMeta } from './lp/lpVariants'
 import { defaultMeta, routeMeta } from './pageMeta'
 import { pathFor, type RouteLocation } from './routes'
 import { isServicePageSlug, servicePages } from './services/servicePages'
@@ -50,6 +51,9 @@ export function pageHead(location: RouteLocation): PageHead {
     const { meta } = servicePages[slug]
     return { title: meta.title, description: meta.description, og: meta, canonical: `${siteOrigin}${pathFor(location)}` }
   }
+
+  // Test variants stay out of search: noindex and no canonical. They are not in sitemap.xml either.
+  if (route === 'lp' && isLpVariant(slug)) return { ...lpMeta[slug], noindex: true }
 
   const meta = routeMeta[route]
   if (!meta) return { title: defaultMeta.title, description: defaultMeta.description, canonical: `${siteOrigin}${pathFor(location)}` }

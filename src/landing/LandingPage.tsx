@@ -1,17 +1,22 @@
 import { useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
 import { ArrowRight, CheckCircle2, ChevronDown, Info, Phone, ShieldAlert } from 'lucide-react'
-import { publicPhone } from '../compliancePages'
+import { clinicPhoneForLanding } from '../clinicPhones'
 import { isPageEnabled } from '../featureFlags'
 import { hrefWithAdsParams, pathWithAdsParams } from '../analytics/googleAdsConfig'
 import { useLocationSearch } from '../hydration'
 import { StickyCta } from '../StickyCta'
 import { evaluationPath, intakePath, landingDestinations, resolveDestination, type CtaDestination } from './destinations'
-import { landingPages, relatedLabels, type LandingColumn, type LandingFaq as FaqItem, type LandingSection } from './landingContent'
+import {
+  landingPages,
+  relatedLabels,
+  type LandingColumn,
+  type LandingFaq as FaqItem,
+  type LandingPageContent,
+  type LandingSection,
+} from './landingContent'
 import type { LandingSlug } from './landingMeta'
 import './landing.css'
-
-const phoneHref = `tel:+1${publicPhone.replace(/\D/g, '')}`
 
 function destinationHref(destination: CtaDestination, search: string) {
   if (destination.kind === 'evaluation') return pathWithAdsParams(evaluationPath, search)
@@ -35,6 +40,10 @@ type LandingPageProps = {
   // app must not push a /get-started history entry first.
   onTrackCta: (ctaLocation: string, ctaLabel: string) => void
   onOpenPath: (path: string) => void
+  // Optional copy that replaces landingPages[slug], used by the /lp/a test variant.
+  content?: LandingPageContent
+  // The related-pages block links away from the page. Test variants leave it out.
+  showRelated?: boolean
 }
 
 function isPlainClick(event: MouseEvent) {
@@ -107,10 +116,11 @@ function InternalLink({
   )
 }
 
-function PhoneLink() {
+function PhoneLink({ slug }: { slug: LandingSlug }) {
+  const phone = clinicPhoneForLanding(slug)
   return (
-    <a className="secondary landing-phone" href={phoneHref}>
-      <Phone size={18} aria-hidden="true" /> Call {publicPhone}
+    <a className="secondary landing-phone" href={phone.href}>
+      <Phone size={18} aria-hidden="true" /> Call {phone.display}
     </a>
   )
 }
@@ -140,8 +150,8 @@ function sectionTones(sections: LandingSection[]): { tones: Tone[]; next: Tone }
   return { tones, next: current }
 }
 
-export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPageProps) {
-  const page = landingPages[slug]
+export function LandingPage({ slug, onStart, onTrackCta, onOpenPath, content, showRelated = true }: LandingPageProps) {
+  const page = content ?? landingPages[slug]
   const search = useLocationSearch()
   const destination = resolveDestination(landingDestinations[page.funnel])
   const { tones, next: faqTone } = sectionTones(page.sections)
@@ -276,7 +286,7 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
             <div className="landing-hero-actions">
               <div className="landing-hero-buttons">
                 {cta('hero', undefined, `${slug}-reassurance`)}
-                <PhoneLink />
+                <PhoneLink slug={slug} />
               </div>
               <p className="landing-reassurance" id={`${slug}-reassurance`}>
                 {page.reassurance}
@@ -321,11 +331,11 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
         </div>
         <div className="conversion-actions">
           {cta('closing', undefined, `${slug}-closing-title ${slug}-closing-copy`)}
-          <PhoneLink />
+          <PhoneLink slug={slug} />
         </div>
       </section>
 
-      <section className="section white compact-section landing-related" aria-labelledby={`${slug}-related`}>
+      {showRelated && <section className="section white compact-section landing-related" aria-labelledby={`${slug}-related`}>
         <h2 id={`${slug}-related`}>Related pages</h2>
         <div>
           {page.related.map((related) => (
@@ -341,7 +351,7 @@ export function LandingPage({ slug, onStart, onTrackCta, onOpenPath }: LandingPa
             </InternalLink>
           )}
         </div>
-      </section>
+      </section>}
 
       <StickyCta
         label={page.ctaLabel}
