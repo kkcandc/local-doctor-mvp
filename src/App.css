@@ -336,6 +336,18 @@ main {
   background: var(--surface-sunken);
 }
 
+/*
+  On a desktop the hero fills the screen under the header, minus --hero-peek, so the top half of the
+  stat band shows below it (the band is about 200px tall). It is capped so a very tall window does not
+  stretch it. A phone or tablet keeps the hero as tall as its text.
+*/
+@media (min-width: 981px) {
+  .hero {
+    --hero-peek: 100px;
+    min-height: clamp(520px, calc(100svh - var(--header-height) - var(--hero-peek)), 900px);
+  }
+}
+
 .hero-image {
   position: absolute;
   inset: 0;

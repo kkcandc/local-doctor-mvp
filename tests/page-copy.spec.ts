@@ -52,17 +52,32 @@ test.describe('home page', () => {
     await expect(page.locator('.hero-actions .primary')).toHaveCSS('background-color', 'rgb(15, 63, 140)')
   })
 
-  test('the whole hero is on screen on a standard desktop, with no scrolling', async ({ page }) => {
+  test('on a standard desktop the hero fills most of the screen and half the stat band shows below it', async ({ page }) => {
     for (const viewport of [
       { width: 1366, height: 768 },
       { width: 1440, height: 900 },
       { width: 1920, height: 1080 },
     ]) {
+      const label = `${viewport.width}x${viewport.height}`
       await page.setViewportSize(viewport)
       await page.goto('/')
-      const box = await page.locator('.hero').boundingBox()
-      expect(box!.y + box!.height, `${viewport.width}x${viewport.height}`).toBeLessThanOrEqual(viewport.height)
+      const hero = (await page.locator('.hero').boundingBox())!
+      const band = (await page.locator('.stat-band').boundingBox())!
+      // The whole hero is in view, with no scrolling, and it takes the large majority of the screen.
+      expect(hero.y + hero.height, label).toBeLessThanOrEqual(viewport.height)
+      expect(hero.height, label).toBeGreaterThanOrEqual(viewport.height * 0.65)
+      // The band starts about 100px above the bottom edge and runs past it, so about half of it shows.
+      expect(band.y, label).toBeGreaterThanOrEqual(viewport.height - 140)
+      expect(band.y, label).toBeLessThanOrEqual(viewport.height - 60)
+      expect(band.y + band.height, label).toBeGreaterThan(viewport.height)
     }
+  })
+
+  test('on a phone the hero stays as tall as its text', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto('/')
+    const hero = (await page.locator('.hero').boundingBox())!
+    expect(hero.height).toBeLessThan(812 * 0.8)
   })
 
   test('the hero text column is about 25% wider than the old 590px', async ({ page }) => {
