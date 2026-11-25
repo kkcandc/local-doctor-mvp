@@ -48,8 +48,13 @@
   --border-subtle: var(--ink-100);
   --border-on-dark: rgb(255 255 255 / 0.24);
   --divider-on-dark: var(--blue-500);
-  --overlay-hero: linear-gradient(105deg, rgb(10 44 99 / 0.93) 0%, rgb(10 44 99 / 0.84) 42%, rgb(10 44 99 / 0.55) 70%, rgb(10 44 99 / 0.22) 100%);
-  --overlay-hero-compact: linear-gradient(180deg, rgb(10 44 99 / 0.72) 0%, rgb(10 44 99 / 0.87) 38%, rgb(10 44 99 / 0.92) 100%);
+  /*
+    Home hero wash: --blue-100 (228 240 251) over the photo, with dark blue text on top. Worst case is
+    the wash over a black pixel (about rgb(201 211 221) at 0.88): --text-heading on it is about 8.9:1
+    and --text-secondary about 6.4:1. Over lighter parts of the photo it is higher.
+  */
+  --overlay-hero: rgb(228 240 251 / 0.88);
+  --overlay-hero-compact: rgb(228 240 251 / 0.92);
   --focus-light: var(--blue-500);
   --focus-dark: var(--white);
   --focus-color: var(--focus-light);

@@ -1,22 +1,26 @@
 import { expect, test } from '@playwright/test'
+import { landingSlugs } from '../src/landing/landingMeta'
 
 const LIGHT_BLUE = 'rgb(140, 196, 245)'
 const YELLOW = 'rgb(255, 229, 138)'
 const DASHES = /[–—]/
 
 test.describe('home page', () => {
-  test('hero reads Start with a neurologist. and the CTA says Book a video visit', async ({ page }) => {
+  test('hero header is about memory and thinking, and the CTA says Speak with a neurologist', async ({ page }) => {
     await page.goto('/')
-    await expect(page.locator('h1')).toHaveText("Treatment that slows down Alzheimer's. Start with a neurologist.")
-    await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a video visit' })).toBeVisible()
-    await page.locator('.hero-actions').getByRole('button', { name: 'Book a video visit' }).click()
+    await expect(page.locator('.hero h1')).toHaveText('Get specialist care and treatment for changes in memory and thinking')
+    await expect(page.locator('.hero h1 em')).toHaveText('memory and thinking')
+    await expect(page.locator('.hero .eyebrow')).toHaveCount(0)
+    await expect(page.locator('.hero')).not.toContainText("Virtual Alzheimer's specialty clinic")
+    await expect(page.locator('.hero-actions').getByRole('button', { name: 'Speak with a neurologist' })).toBeVisible()
+    await page.locator('.hero-actions').getByRole('button', { name: 'Speak with a neurologist' }).click()
     await expect(page).toHaveURL(/\/get-started#book$/)
   })
 
   test('the hero button lands on the booking section of Get Started, keeping ad click ids', async ({ page }) => {
     await page.setViewportSize({ width: 1366, height: 900 })
     await page.goto('/?gclid=test_gclid_123&utm_source=google')
-    await page.locator('.hero-actions').getByRole('button', { name: 'Book a video visit' }).click()
+    await page.locator('.hero-actions').getByRole('button', { name: 'Speak with a neurologist' }).click()
     await expect(page).toHaveURL(/\/get-started\?gclid=test_gclid_123&utm_source=google#book$/)
     // Wait for the scroll to finish with the section just below the sticky header.
     await expect
@@ -31,11 +35,57 @@ test.describe('home page', () => {
     await expect(page.locator('#book .calendly-inline-widget')).toBeInViewport()
   })
 
-  test('the hero copy offers a video visit with a board-certified neurologist', async ({ page }) => {
+  test('the hero sub-header says the path to better care starts here', async ({ page }) => {
     await page.goto('/')
-    await expect(page.locator('.hero-copy > p').nth(1)).toHaveText(
-      "FDA-approved treatments can slow down the progression of early Alzheimer's disease. Book a video visit with a board-certified neurologist who specializes in cognitive impairment and disease-modifying treatments.",
+    await expect(page.locator('.hero-copy > p').first()).toHaveText(
+      'Your path to better care starts here. With neurologists who care and tailor treatment to your specific needs.',
     )
+  })
+
+  test('the hero is a light blue wash over the family photo, with dark blue text', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.locator('.hero-image')).toHaveAttribute('src', '/assets/hero-home-family.webp')
+    await expect(page.locator('.hero-image')).toHaveJSProperty('complete', true)
+    // The wash is light blue at 0.88 opaque (not the old dark blue), and the text on it is dark blue.
+    await expect(page.locator('.hero-overlay')).toHaveCSS('background-color', 'rgba(228, 240, 251, 0.88)')
+    await expect(page.locator('.hero h1')).toHaveCSS('color', 'rgb(10, 44, 99)')
+    await expect(page.locator('.hero-actions .primary')).toHaveCSS('background-color', 'rgb(15, 63, 140)')
+  })
+
+  test('on a standard desktop the hero fills most of the screen and half the stat band shows below it', async ({ page }) => {
+    for (const viewport of [
+      { width: 1366, height: 768 },
+      { width: 1440, height: 900 },
+      { width: 1920, height: 1080 },
+    ]) {
+      const label = `${viewport.width}x${viewport.height}`
+      await page.setViewportSize(viewport)
+      await page.goto('/')
+      const hero = (await page.locator('.hero').boundingBox())!
+      const band = (await page.locator('.stat-band').boundingBox())!
+      // The whole hero is in view, with no scrolling, and it takes the large majority of the screen.
+      expect(hero.y + hero.height, label).toBeLessThanOrEqual(viewport.height)
+      expect(hero.height, label).toBeGreaterThanOrEqual(viewport.height * 0.65)
+      // The band starts about 100px above the bottom edge and runs past it, so about half of it shows.
+      expect(band.y, label).toBeGreaterThanOrEqual(viewport.height - 140)
+      expect(band.y, label).toBeLessThanOrEqual(viewport.height - 60)
+      expect(band.y + band.height, label).toBeGreaterThan(viewport.height)
+    }
+  })
+
+  test('on a phone the hero stays as tall as its text', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto('/')
+    const hero = (await page.locator('.hero').boundingBox())!
+    expect(hero.height).toBeLessThan(812 * 0.8)
+  })
+
+  test('the hero text column is about 25% wider than the old 590px', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    const width = (await page.locator('.hero-copy').boundingBox())!.width
+    expect(width).toBeGreaterThanOrEqual(720)
+    expect(width).toBeLessThanOrEqual(760)
   })
 
   test('the Dementia specialists card has the new copy', async ({ page }) => {
@@ -92,8 +142,8 @@ test.describe('home page', () => {
     await page.goto('/')
     const text = await page.locator('main').innerText()
     expect(text).not.toContain('Neurologist')
-    await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a video visit' })).toHaveText(
-      'Book a video visit',
+    await expect(page.locator('.hero-actions').getByRole('button', { name: 'Speak with a neurologist' })).toHaveText(
+      'Speak with a neurologist',
     )
   })
 
@@ -135,7 +185,7 @@ for (const [path, title, other] of [
 test.describe('how it works page', () => {
   test('hero header, copy, and Book now button', async ({ page }) => {
     await page.goto('/how-it-works')
-    await expect(page.locator('h1')).toHaveText('A clear path you can trust from first concern to treatment.')
+    await expect(page.locator('h1')).toHaveText('A clear path you can trust from first concern to treatment')
     await expect(page.locator('.page-hero p').last()).toHaveText(
       "Our trusted team of neurologists and specialists have over 20 years of experience in treating Alzheimer's disease, dementia, and mild cognitive impairment. We can help you understand what you might be facing and your best options going forward.",
     )
@@ -336,9 +386,38 @@ test('the How it works FAQ spells out-of-pocket with hyphens', async ({ page }) 
 
 test('the blog hero has the new header and copy, and each post still credits Local Infusion', async ({ page }) => {
   await page.goto('/blog')
-  await expect(page.locator('h1')).toHaveText('Our resources can help guide you along your journey.')
+  await expect(page.locator('h1')).toHaveText('Our resources can help guide you along your journey')
   await expect(page.locator('.page-hero p').last()).toHaveText('We look forward to helping you find the best care possible.')
   await page.locator('.blog-card').first().click()
   await expect(page.getByText('Originally published by')).toBeVisible()
   await expect(page.getByRole('link', { name: 'Local Infusion', exact: true })).toBeVisible()
+})
+
+// A hero header carries no trailing period, unless it is two sentences (two or more periods).
+test.describe('hero headers have no trailing period', () => {
+  const paths = [
+    '/',
+    '/treatments',
+    '/how-it-works',
+    '/about',
+    '/get-started',
+    '/refer-a-patient',
+    '/faq',
+    '/blog',
+    '/services',
+    '/services/memory-evaluation',
+    '/lp/a',
+    '/lp/b',
+    '/lp/c',
+    ...landingSlugs.map((slug) => `/${slug}`),
+  ]
+
+  for (const path of paths) {
+    test(path, async ({ page }) => {
+      await page.goto(path)
+      const text = ((await page.locator('h1').first().textContent()) ?? '').trim()
+      expect(text.length).toBeGreaterThan(0)
+      if (text.endsWith('.')) expect((text.match(/\./g) ?? []).length, text).toBeGreaterThanOrEqual(2)
+    })
+  }
 })

@@ -836,7 +836,7 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
   'alzheimers-blood-test': {
     title: "Alzheimer's blood test",
     eyebrow: 'Blood test',
-    imageAlt: 'Two blood collection tubes with orange caps on a blue surface',
+    imageAlt: 'Two blood collection tubes, one with a red cap and one with a purple cap, on a white background',
     lede: "The pTau217 blood test measures a protein linked to Alzheimer's changes in the brain. It is a standard blood draw, and a neurologist reviews your result with you by video.",
     highlights: [
       'A standard blood draw, with no spinal tap',

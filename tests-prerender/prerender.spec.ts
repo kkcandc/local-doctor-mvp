@@ -132,7 +132,7 @@ test('a path with no prerendered page gets the SPA shell and renders in the brow
   expect(raw).toContain('<div id="root"></div>')
   const errors = watchConsole(page)
   await page.goto('/blog/not-a-real-post')
-  await expect(page.locator('h1')).toHaveText('This article is not on Local Doctor.')
+  await expect(page.locator('h1')).toHaveText('This article is not on Local Doctor')
   expect(errors).toEqual([])
 })
 
@@ -238,7 +238,7 @@ test.describe('before JavaScript runs', () => {
 
   test('/get-started on a phone shows only the photo below the scheduler', async ({ page }) => {
     await page.goto('/get-started')
-    await expect(page.locator('h1')).toHaveText('Book a video visit with a board-certified neurologist to find out if treatment is right for you.')
+    await expect(page.locator('h1')).toHaveText('Book a video visit with a board-certified neurologist to find out if treatment is right for you')
     await expect(page.locator('.page-hero-image')).toBeHidden()
     await expect(page.locator('.start-photo-below')).toBeVisible()
   })

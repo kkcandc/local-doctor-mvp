@@ -585,17 +585,16 @@ function HomePage({ onNavigate }: { onNavigate: Navigate }) {
   return (
     <>
       <section className="hero">
-        <img className="hero-image" src="/assets/hero-patient-caregiver.webp" alt="Older adults walking together outdoors" width={904} height={509} />
+        <img className="hero-image" src="/assets/hero-home-family.webp" alt="Four adults laughing together outdoors in front of a stone house" width={1289} height={855} fetchPriority="high" />
         <div className="hero-overlay" />
         <div className="hero-content">
           <div className="hero-copy">
-            <p className="eyebrow">Virtual Alzheimer's specialty clinic</p>
-            <h1>Treatment that slows down Alzheimer's. <em>Start with a neurologist.</em></h1>
+            <h1>Get specialist care and treatment for changes in <em>memory and thinking</em></h1>
             <p>
-              FDA-approved treatments can slow down the progression of early Alzheimer&apos;s disease. Book a video visit with a board-certified neurologist who specializes in cognitive impairment and disease-modifying treatments.
+              Your path to better care starts here. With neurologists who care and tailor treatment to your specific needs.
             </p>
             <div className="hero-actions">
-              <button className="accent" type="button" onClick={() => onNavigate('start', '', 'hero', 'Book a video visit', 'book')}>Book a video visit</button>
+              <button className="primary" type="button" onClick={() => onNavigate('start', '', 'hero', 'Speak with a neurologist', 'book')}>Speak with a neurologist</button>
               {routeEnabled('how') && <button className="secondary" type="button" onClick={() => onNavigate('how')}>Learn more</button>}
             </div>
             <div className="trust-note"><span /> Backed by a national infusion network and a focused treatment-readiness pathway.</div>
@@ -672,7 +671,7 @@ function TreatmentsPage({ onNavigate }: { onNavigate: Navigate }) {
       <section className="treatment-hero">
         <div>
           <p className="eyebrow">Treatments</p>
-          <h1>FDA-approved treatments for early Alzheimer's disease.</h1>
+          <h1>FDA-approved treatments for early Alzheimer's disease</h1>
           <p>Leqembi and Kisunla are FDA-approved infusion treatments shown to slow the progression of Alzheimer&apos;s disease, not just treat its symptoms. In clinical trials they slowed decline for some patients but they are not a cure, they carry risks, and they are not right for everyone. We help you understand all of it.</p>
           <button className="primary" type="button" onClick={() => onNavigate('start', '', 'hero', 'Get started')}>Get started <ArrowRight size={20} /></button>
         </div>
@@ -708,7 +707,7 @@ function HowPage({ onNavigate }: { onNavigate: Navigate }) {
     <>
       <PageHero
         eyebrow="How it works"
-        title="A clear path you can trust from first concern to treatment."
+        title="A clear path you can trust from first concern to treatment"
         copy="Our trusted team of neurologists and specialists have over 20 years of experience in treating Alzheimer's disease, dementia, and mild cognitive impairment. We can help you understand what you might be facing and your best options going forward."
         icon={<CalendarClock size={38} />}
         aside={{ title: 'Family and loved ones', text: 'Our preference is for loved ones to join the virtual provider visits and be a part of the process.' }}
@@ -773,7 +772,7 @@ function AboutPage({ onNavigate }: { onNavigate: Navigate }) {
     <>
       <PageHero
         eyebrow="Care model"
-        title="A specialist evaluation built around getting you an answer."
+        title="A specialist evaluation built around getting you an answer"
         copy="Local Doctor is a virtual Alzheimer's specialty clinic, supported by navigators, diagnostic partners, prescribing clinicians, and Local Infusion's local treatment network."
         icon={<UsersRound size={38} />}
         onPrimary={() => onNavigate('start', '', 'hero', 'Get Started')}
@@ -830,7 +829,7 @@ function StartPage() {
     <div className="start-page">
       <PageHero
         eyebrow="Get started"
-        title="Book a video visit with a board-certified neurologist to find out if treatment is right for you."
+        title="Book a video visit with a board-certified neurologist to find out if treatment is right for you"
         copy="Everyone's situation is unique. Our neurology specialists listen to deeply understand yours and let you know if you're eligible for disease-modifying treatment."
         primaryLabel={`Call or text ${publicPhone}`}
         href={`tel:+1${publicPhone.replace(/\D/g, '')}`}
@@ -854,7 +853,7 @@ function ReferPage({ onNavigate }: { onNavigate: Navigate }) {
     <>
       <PageHero
         eyebrow="For referring clinicians"
-        title="Refer patients for Alzheimer's treatment-readiness review without ending your relationship."
+        title="Refer patients for Alzheimer's treatment-readiness review without ending your relationship"
         copy="Local Doctor is a focused pathway for patients who may need anti-amyloid treatment eligibility review, diagnostic workup coordination, payer support, and local infusion follow-through."
         icon={<Stethoscope size={38} />}
         onPrimary={() => onNavigate('start', '', 'hero', 'Prepare a referral')}
@@ -924,7 +923,7 @@ function FaqPage({ onNavigate }: { onNavigate: Navigate }) {
 
   return (
     <>
-      <PageHero eyebrow="FAQ" title="Answers to what patients and families ask us most." copy="Straight, specific answers about eligibility, cost, visits, treatment, and safety." showAside={false} onPrimary={() => onNavigate('start', '', 'hero', 'Get Started')} primaryLabel="Get Started" />
+      <PageHero eyebrow="FAQ" title="Answers to what patients and families ask us most" copy="Straight, specific answers about eligibility, cost, visits, treatment, and safety." showAside={false} onPrimary={() => onNavigate('start', '', 'hero', 'Get Started')} primaryLabel="Get Started" />
       <section className="section white faq-section">
         <div className="faq-jump-list">
           {faqCategories.map((category) => (
@@ -974,7 +973,7 @@ function BlogPage({ onNavigate }: { onNavigate: Navigate }) {
     <>
       <PageHero
         eyebrow="Blog"
-        title="Our resources can help guide you along your journey."
+        title="Our resources can help guide you along your journey"
         copy="We look forward to helping you find the best care possible."
         icon={<Sparkles size={38} />}
         onPrimary={() => onNavigate('start', '', 'hero', 'Get Started')}
@@ -1012,7 +1011,7 @@ function BlogPostPage({ slug, onNavigate }: { slug: string; onNavigate: Navigate
       <section className="section white blog-article-section">
         <div className="blog-article">
           <p className="eyebrow">Blog</p>
-          <h1>This article is not on Local Doctor.</h1>
+          <h1>This article is not on Local Doctor</h1>
           <p>The address does not match one of the republished Local Infusion articles.</p>
           <button className="primary" type="button" onClick={() => onNavigate('blog')}>Back to the blog</button>
         </div>

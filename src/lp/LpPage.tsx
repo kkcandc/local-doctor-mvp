@@ -29,7 +29,7 @@ const phone = clinicPhoneForLanding()
 const intakePath = '/get-started'
 const insurancePlans = ['Medicare', 'Medicaid', 'Aetna', 'CareFirst', 'Cigna', 'Kaiser', 'United']
 const credential = 'Board-certified neurologist, licensed in Maryland and Virginia'
-const sharedH1 = 'A memory evaluation with a neurologist, by video.'
+const sharedH1 = 'A memory evaluation with a neurologist, by video'
 
 function isPlainClick(event: MouseEvent) {
   return !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)

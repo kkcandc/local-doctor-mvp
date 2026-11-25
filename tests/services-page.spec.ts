@@ -94,6 +94,15 @@ test.describe('on a desktop screen', () => {
     await expect(blood.locator('img')).toHaveJSProperty('complete', true)
   })
 
+  test('the Alzheimer\'s blood test card shows the two blood tubes, uncropped on white', async ({ page }) => {
+    await page.goto('/services')
+    const blood = cards(page).filter({ hasText: "Alzheimer's blood test" })
+    await expect(blood.locator('img')).toHaveAttribute('src', '/assets/services/blood-test-tubes.jpg')
+    await expect(blood.locator('img')).toHaveJSProperty('complete', true)
+    await expect(blood.locator('.services-card-media')).toHaveAttribute('data-fit', 'contain')
+    await expect(blood.locator('.services-card-media')).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+  })
+
   test('every card, whatever its type, says Book now and opens its own page', async ({ page }) => {
     await page.goto('/services')
     await expect(cards(page)).toHaveCount(12)
@@ -259,6 +268,31 @@ test.describe('on a phone', () => {
     expect(new Set(lefts).size).toBe(1)
     const widths = await cards(page).evaluateAll((nodes) => nodes.map((node) => node.getBoundingClientRect().width))
     for (const width of widths) expect(width).toBeLessThanOrEqual(375)
+  })
+
+  test('each card is a list row: a small picture on the left, the name and price beside it, no Book now', async ({ page }) => {
+    await page.goto('/services')
+    await expect(cards(page)).toHaveCount(12)
+    const rows = await cards(page).evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const media = node.querySelector('.services-card-media')!.getBoundingClientRect()
+        const body = node.querySelector('.services-card-body')!.getBoundingClientRect()
+        return { mediaWidth: media.width, mediaHeight: media.height, mediaRight: media.right, bodyLeft: body.left, mediaTop: media.top, bodyTop: body.top, bodyBottom: body.bottom, mediaBottom: media.bottom }
+      }),
+    )
+    for (const row of rows) {
+      expect(row.mediaWidth).toBeLessThanOrEqual(120)
+      expect(row.mediaHeight).toBeCloseTo(row.mediaWidth, 0)
+      // The text sits to the right of the picture, centered on it (a long name may run taller than the picture).
+      expect(row.mediaRight).toBeLessThanOrEqual(row.bodyLeft)
+      expect(Math.abs((row.bodyTop + row.bodyBottom) / 2 - (row.mediaTop + row.mediaBottom) / 2)).toBeLessThanOrEqual(2)
+    }
+    for (const action of await page.locator('.services-card-action').all()) await expect(action).toBeHidden()
+    const first = cards(page).first()
+    await expect(first.locator('.services-card-type')).toBeVisible()
+    await expect(first.locator('h2')).toBeVisible()
+    await expect(first.locator('.services-card-price strong')).toBeVisible()
+    await expect(first).toContainText('with or without insurance')
   })
 
   test('the search box and chips fit the screen and are easy to tap', async ({ page }) => {
