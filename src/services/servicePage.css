@@ -183,12 +183,6 @@
   font-weight: var(--weight-semibold);
 }
 
-.sp-region {
-  margin: var(--space-4) 0 0;
-  color: var(--text-secondary);
-  font-size: var(--text-control);
-}
-
 /* Options */
 
 .sp-option {

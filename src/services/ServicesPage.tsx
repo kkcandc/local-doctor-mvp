@@ -39,8 +39,8 @@ export function ServicesPage({ onStart, onOpenPath }: ServicesPageProps) {
 
   const results = filterServices(query, type)
   const filtered = type !== null || query.trim() !== ''
-  // A card opens its service's own page once it has one (slug in servicesData.ts). Until then it
-  // opens the booking page.
+  // A card opens its service's own page, which has the booking button (slug in servicesData.ts). A
+  // service without a page would open the booking page itself.
   const bookingHref = pathWithAdsParams(intakePath, search)
 
   function clearAll() {
@@ -136,7 +136,6 @@ export function ServicesPage({ onStart, onOpenPath }: ServicesPageProps) {
                   service={service}
                   eager={index < eagerCards}
                   link={service.slug ? pageLink(`/services/${service.slug}`) : startLink('service_card', 'Book now')}
-                  actionLabel={service.slug ? 'Learn more' : 'Book now'}
                 />
               </li>
             ))}
@@ -165,17 +164,7 @@ export function ServicesPage({ onStart, onOpenPath }: ServicesPageProps) {
   )
 }
 
-function ServiceCard({
-  service,
-  eager,
-  link,
-  actionLabel,
-}: {
-  service: Service
-  eager: boolean
-  link: CardLink
-  actionLabel: string
-}) {
+function ServiceCard({ service, eager, link }: { service: Service; eager: boolean; link: CardLink }) {
   return (
     <a className="services-card" {...link}>
       <div className="services-card-media" data-fit={service.fit} style={service.frame ? { background: service.frame } : undefined}>
@@ -189,7 +178,7 @@ function ServiceCard({
           <strong>{service.price}</strong>
           <span>with or without insurance</span>
         </p>
-        <span className="primary services-card-action">{actionLabel}</span>
+        <span className="primary services-card-action">Book now</span>
       </div>
     </a>
   )

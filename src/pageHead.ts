@@ -49,7 +49,14 @@ export function pageHead(location: RouteLocation): PageHead {
 
   if (route === 'service' && isServicePageSlug(slug)) {
     const { meta } = servicePages[slug]
-    return { title: meta.title, description: meta.description, og: meta, canonical: `${siteOrigin}${pathFor(location)}` }
+    // A page whose topic a landing page owns stays out of search: noindex and no canonical, like /evaluation.
+    return {
+      title: meta.title,
+      description: meta.description,
+      og: { title: meta.title, description: meta.description },
+      canonical: meta.noindex ? undefined : `${siteOrigin}${pathFor(location)}`,
+      noindex: meta.noindex,
+    }
   }
 
   // Test variants stay out of search: noindex and no canonical. They are not in sitemap.xml either.

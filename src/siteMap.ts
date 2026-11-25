@@ -1,17 +1,17 @@
 import { blogPosts } from './blogPosts.ts'
 import { landingSlugs, siteOrigin } from './landing/landingMeta.ts'
-import { servicePageSlugs } from './services/servicePages.ts'
+import { servicePageSlugs, servicePages } from './services/servicePages.ts'
 
 /*
   Public URLs for sitemap.xml. About is off in featureFlags, so it is not listed.
   Intent pages come from landingSlugs, and individual service pages from servicePageSlugs, so a new
-  one is included automatically.
+  one is included automatically. A service page marked meta.noindex is left out.
 */
 
 const contentPaths = [
   '/',
   '/services',
-  ...servicePageSlugs.map((slug) => `/services/${slug}`),
+  ...servicePageSlugs.filter((slug) => !servicePages[slug].meta.noindex).map((slug) => `/services/${slug}`),
   '/treatments',
   '/how-it-works',
   '/get-started',

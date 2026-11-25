@@ -7,7 +7,7 @@ import { useLocationSearch } from '../hydration'
 import { intakePath } from '../landing/destinations'
 import { StickyCta } from '../StickyCta'
 import { serviceByName, serviceBySlug, type ServiceType } from './servicesData'
-import { availabilityLine, bookLabel, priceNote, regionNote, servicePages, type RichText, type ServicePageSlug } from './servicePages'
+import { availabilityLine, bookingHash, bookLabel, priceNote, servicePages, type RichText, type ServicePageSlug } from './servicePages'
 import './servicePage.css'
 
 /*
@@ -27,7 +27,7 @@ type Tone = 'ivory' | 'sunken' | 'deep'
 type ServicePageProps = {
   slug: ServicePageSlug
   // Records the click and moves to /get-started (App.tsx navigate), scrolling to the section whose
-  // id is hash when there is one (the page's bookingHash).
+  // id is hash when there is one (the shared bookingHash, the calendar).
   onStart: (ctaLocation: string, ctaLabel: string, hash?: string) => void
   // Opens another page on this site, such as /services or a sibling service page.
   onOpenPath: (path: string) => void
@@ -62,8 +62,7 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
   const search = useLocationSearch()
   const [openFaq, setOpenFaq] = useState(0)
 
-  // Some pages send their booking buttons straight to a section of /get-started (the calendar).
-  const bookingHash = servicePages[slug].bookingHash
+  // Every booking button goes straight to a section of /get-started (the calendar).
   const bookingHref = `${pathWithAdsParams(intakePath, search)}${bookingHash ? `#${bookingHash}` : ''}`
   const tones = assignTones([
     'options',
@@ -115,6 +114,8 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
 
   const { options, details, safety } = content
   const moreCare = content.moreCare.flatMap((name) => serviceByName(name) ?? [])
+  // The options card wears its service's icon: a camera for a visit, a flask for a test.
+  const OptionIcon = typeIcons[service.type]
 
   return (
     <div className="service-page" data-service={slug}>
@@ -155,7 +156,6 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
             <p className="sp-availability">
               <CheckCircle2 size={18} aria-hidden="true" /> {availabilityLine}
             </p>
-            <p className="sp-region">{regionNote}</p>
           </div>
         </div>
       </section>
@@ -170,7 +170,7 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
           <div className="sp-option">
             <div className="sp-option-main">
               <span className="sp-icon" aria-hidden="true">
-                <Video size={26} />
+                <OptionIcon size={26} />
               </span>
               <div>
                 <h3>{options.name}</h3>
@@ -245,20 +245,26 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
               ))}
             </dl>
             <p className="disclaimer">{details.disclaimer}</p>
-            <div className="sp-links">
-              <a
-                className="text-link"
-                href={details.safetyLink.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${details.safetyLink.label} (opens in a new tab)`}
-              >
-                {details.safetyLink.label} <ExternalLink size={16} aria-hidden="true" />
-              </a>
-              <a className="text-link" {...pageLink(`/services/${details.compare.slug}`)}>
-                {details.compare.label} <ArrowRight size={16} aria-hidden="true" />
-              </a>
-            </div>
+            {(details.safetyLink || details.compare) && (
+              <div className="sp-links">
+                {details.safetyLink && (
+                  <a
+                    className="text-link"
+                    href={details.safetyLink.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${details.safetyLink.label} (opens in a new tab)`}
+                  >
+                    {details.safetyLink.label} <ExternalLink size={16} aria-hidden="true" />
+                  </a>
+                )}
+                {details.compare && (
+                  <a className="text-link" {...pageLink(`/services/${details.compare.slug}`)}>
+                    {details.compare.label} <ArrowRight size={16} aria-hidden="true" />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         </section>
       )}

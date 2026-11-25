@@ -13,7 +13,8 @@ export type ServiceType = 'Visit' | 'Treatment' | 'Test'
 export type Service = {
   name: string
   // Set once the service has its own page at /services/<slug> (content in servicePages.ts). The
-  // card then opens that page, and the page's hero shows the same image as the card.
+  // card then opens that page, and the page's hero shows the same image as the card. Every service
+  // has one today; a card without one books directly instead.
   slug?: ServicePageSlug
   type: ServiceType
   price: string
@@ -44,7 +45,7 @@ export const services: Service[] = [
     slug: 'memory-evaluation',
     type: 'Visit',
     price: 'from $0',
-    image: '/assets/services/memory.jpg',
+    image: '/assets/services/memory.webp',
     fit: 'cover',
     keywords: 'forgetful memory loss video',
   },
@@ -59,6 +60,7 @@ export const services: Service[] = [
   },
   {
     name: "Alzheimer's blood test",
+    slug: 'alzheimers-blood-test',
     type: 'Test',
     price: 'from $25',
     image: '/assets/services/blood-test.jpg',
@@ -67,38 +69,43 @@ export const services: Service[] = [
   },
   {
     name: 'Concentration difficulty',
+    slug: 'concentration-difficulty',
     type: 'Visit',
     price: 'from $0',
-    image: '/assets/services/concentration.jpg',
+    image: '/assets/services/concentration.webp',
     fit: 'cover',
     keywords: 'focus attention adhd',
   },
   {
     name: 'Dementia evaluation',
+    slug: 'dementia-evaluation',
     type: 'Visit',
     price: 'from $0',
-    image: '/assets/services/dementia.jpg',
+    image: '/assets/services/dementia.webp',
     fit: 'cover',
     keywords: 'memory cognitive decline',
   },
   {
     name: 'Visit with a neurologist doctor',
+    slug: 'neurologist-visit',
     type: 'Visit',
     price: 'from $0',
-    image: '/assets/services/neurologist.jpg',
+    image: '/assets/services/neurologist.webp',
     fit: 'cover',
     keywords: 'neurology specialist consult',
   },
   {
     name: 'Brain fog evaluation',
+    slug: 'brain-fog-evaluation',
     type: 'Visit',
     price: 'from $0',
-    image: '/assets/services/brain-fog.jpg',
+    image: '/assets/services/brain-fog.webp',
     fit: 'cover',
     keywords: 'fog fatigue thinking',
   },
   {
     name: "Alzheimer's genetic testing",
+    slug: 'alzheimers-genetic-testing',
     type: 'Test',
     price: 'Price after visit',
     image: '/assets/services/genetic-test.jpg',
@@ -107,9 +114,10 @@ export const services: Service[] = [
   },
   {
     name: 'Cognitive evaluation',
+    slug: 'cognitive-evaluation',
     type: 'Visit',
     price: 'from $0',
-    image: '/assets/services/cognitive.jpg',
+    image: '/assets/services/cognitive.webp',
     fit: 'cover',
     keywords: 'thinking reasoning screen',
   },
@@ -126,14 +134,16 @@ export const services: Service[] = [
   },
   {
     name: "Alzheimer's evaluation",
+    slug: 'alzheimers-evaluation',
     type: 'Visit',
     price: 'from $0',
-    image: '/assets/services/alzheimers.jpg',
+    image: '/assets/services/alzheimers.webp',
     fit: 'cover',
     keywords: 'diagnosis dementia memory',
   },
   {
     name: 'Brain MRI',
+    slug: 'brain-mri',
     type: 'Test',
     price: 'Price after visit',
     image: '/assets/services/mri.jpg',

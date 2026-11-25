@@ -1,19 +1,22 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { DEFAULT_GA_MEASUREMENT_ID } from '../src/analytics/googleAnalyticsConfig'
 import { publicPhone } from '../src/compliancePages'
+import { landingSlugs } from '../src/landing/landingMeta'
 import { publicSitemapPaths } from '../src/siteMap'
 import { serviceBySlug } from '../src/services/servicesData'
-import { availabilityLine, priceNote, regionNote, servicePageSlugs, servicePages, type ServicePageSlug } from '../src/services/servicePages'
+import { availabilityLine, bookingHash, priceNote, servicePageSlugs, servicePages, type ServicePageSlug } from '../src/services/servicePages'
 
 /*
-  The individual service pages (/services/memory-evaluation, /leqembi, /kisunla). They share one
-  layout, so most checks run once per page. The drug pages must also agree with /treatments, which
-  is checked against the live comparison table rather than a copy of its numbers.
+  The twelve individual service pages (/services/<slug>): six visits, three tests, two treatments,
+  and Memory evaluation. They share one layout, so most checks run once per page. The drug pages must
+  also agree with /treatments, which is checked against the live comparison table rather than a copy
+  of its numbers. The test pages carry an "At a glance" table of their own.
 */
 
 const gaId = DEFAULT_GA_MEASUREMENT_ID
 const query = '?gclid=TEST_GCLID&utm_source=google&email=jane@example.com'
 const drugSlugs: ServicePageSlug[] = ['leqembi', 'kisunla']
+const testSlugs: ServicePageSlug[] = ['alzheimers-blood-test', 'alzheimers-genetic-testing', 'brain-mri']
 
 type Entry = { name: string; params: Record<string, unknown> }
 
@@ -47,7 +50,10 @@ test.describe('on a desktop screen', () => {
         await expect(page.getByRole('heading', { level: 1 })).toHaveText(content.title)
         await expect(page).toHaveTitle(content.meta.title)
         await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', content.meta.description)
-        await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://trylocaldoctor.com/services/${slug}`)
+        // A page whose search a landing page owns is noindex and has no canonical (see the test below).
+        if (!content.meta.noindex) {
+          await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://trylocaldoctor.com/services/${slug}`)
+        }
 
         const hero = page.locator(`${root(slug)} .sp-media img`)
         expect(await hero.getAttribute('src')).toBe(cardImage)
@@ -55,7 +61,9 @@ test.describe('on a desktop screen', () => {
         expect(await hero.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0)
         await expect(page.locator(`${root(slug)} .sp-price`)).toContainText(`${cardPrice} ${priceNote}`.replace(/^f/, 'F'))
         await expect(page.locator(`${root(slug)} .sp-availability`)).toHaveText(availabilityLine)
-        await expect(page.locator(`${root(slug)} .sp-region`)).toHaveText(regionNote)
+        // The hero no longer has a region line.
+        await expect(page.locator(`${root(slug)} .sp-region`)).toHaveCount(0)
+        await expect(page.locator(`${root(slug)} .sp-hero`)).not.toContainText('Video visits for patients located in Maryland')
       })
 
       test('keeps Services highlighted in the header and links back to all services', async ({ page }) => {
@@ -80,8 +88,8 @@ test.describe('on a desktop screen', () => {
           const button = page.locator(`${root(slug)} [data-cta-location="${location}"]`)
           await expect(button).toHaveText(label)
           const href = (await button.getAttribute('href')) ?? ''
-          // A page with a bookingHash sends every one of its booking buttons to that section.
-          const hash = content.bookingHash ? `#${content.bookingHash}` : ''
+          // Every booking button goes to the calendar section of /get-started (the shared bookingHash).
+          const hash = bookingHash ? `#${bookingHash}` : ''
           expect(new URL(href, 'https://trylocaldoctor.com').pathname).toBe('/get-started')
           expect(new URL(href, 'https://trylocaldoctor.com').hash).toBe(hash)
           expect(href).toContain('gclid=TEST_GCLID')
@@ -127,10 +135,16 @@ test.describe('on a desktop screen', () => {
         expect(text).not.toMatch(/sample review|replace with verified|clinician name|patient stories/i)
         // The mockups quoted a slowing percentage; only the ARIA rates from /treatments are allowed.
         expect(text).not.toMatch(/\d+\s*%\s*(slowing|slower|reduction)/i)
+        // The site makes no claims about attention disorders or their medicines.
+        expect(text).not.toMatch(/adhd|attention deficit|stimulant/i)
       })
 
       test('the More care row links to a page when one exists and to /get-started otherwise', async ({ page }) => {
         await page.goto(`/services/${slug}${query}`)
+        // Each name has to match a card in servicesData.ts (a name that does not is dropped, so the
+        // count below would come up short), and a page never lists itself.
+        expect(content.moreCare).not.toContain(service.name)
+        expect(content.moreCare.length).toBeGreaterThanOrEqual(3)
         const cards = page.locator(`${root(slug)} .sp-more-card`)
         await expect(cards).toHaveCount(content.moreCare.length)
         for (const card of await cards.all()) {
@@ -145,7 +159,8 @@ test.describe('on a desktop screen', () => {
     })
   }
 
-  test('Memory evaluation Book now opens the calendar section of /get-started and scrolls to it', async ({ page }) => {
+  // Every page's buttons carry the same hash (checked per page above); this follows one all the way.
+  test('Book now opens the calendar section of /get-started and scrolls to it', async ({ page }) => {
     await page.goto(`/services/memory-evaluation${query}`)
     await page.locator('.service-page [data-cta-location="service_hero"]').click()
     await expect(page).toHaveURL(/\/get-started\?.*gclid=TEST_GCLID.*#book$/)
@@ -159,14 +174,6 @@ test.describe('on a desktop screen', () => {
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
     // It is still counted as a booking click on /get-started.
     expect(ga(await events(page), 'cta_click')[0].params).toMatchObject({ cta_location: 'service_hero', cta_destination: '/get-started' })
-  })
-
-  test('the Leqembi and Kisunla booking buttons still open the top of /get-started', async ({ page }) => {
-    for (const slug of drugSlugs) {
-      await page.goto(`/services/${slug}`)
-      const href = (await page.locator(`${root(slug)} [data-cta-location="service_hero"]`).getAttribute('href')) ?? ''
-      expect(new URL(href, 'https://trylocaldoctor.com').hash).toBe('')
-    }
   })
 
   test('the Memory evaluation FAQ links to the Leqembi page', async ({ page }) => {
@@ -187,10 +194,38 @@ test.describe('on a desktop screen', () => {
     await expect(page).toHaveURL(/\/services\/leqembi$/)
   })
 
-  test('the Memory evaluation page has no drug facts or safety section', async ({ page }) => {
-    await page.goto('/services/memory-evaluation')
-    await expect(page.locator('.sp-facts')).toHaveCount(0)
-    await expect(page.getByRole('heading', { name: 'How we monitor for side effects' })).toHaveCount(0)
+  test('a visit page has no facts table or safety section', async ({ page }) => {
+    for (const slug of servicePageSlugs.filter((other) => !drugSlugs.includes(other) && !testSlugs.includes(other))) {
+      await page.goto(`/services/${slug}`)
+      await expect(page.locator('.sp-facts'), slug).toHaveCount(0)
+      await expect(page.getByRole('heading', { name: 'How we monitor for side effects' }), slug).toHaveCount(0)
+    }
+  })
+
+  for (const slug of testSlugs) {
+    test(`the ${slug} page has an "At a glance" table, and none of the drug-only links or safety section`, async ({ page }) => {
+      const details = servicePages[slug].details!
+      await page.goto(`/services/${slug}`)
+      const rows = await page.locator('.sp-facts > div').evaluateAll((nodes) =>
+        nodes.map((node) => ({ label: node.querySelector('dt')?.textContent ?? '', value: node.querySelector('dd')?.textContent ?? '' })),
+      )
+      expect(rows).toEqual(details.rows.map(([label, value]) => ({ label, value })))
+      await expect(page.locator(`${root(slug)} .sp-links`)).toHaveCount(0)
+      await expect(page.getByRole('link', { name: /Important Safety Information/ })).toHaveCount(0)
+      await expect(page.getByRole('heading', { name: 'How we monitor for side effects' })).toHaveCount(0)
+      await expect(page.locator(root(slug))).not.toContainText('24/7 triage line')
+      // A test page uses the flask icon in its options card, not the video camera.
+      await expect(page.locator(`${root(slug)} .sp-option .sp-icon svg`)).toHaveClass(/lucide-flask-conical/)
+    })
+  }
+
+  test('the test pages stay within what the site and its sources say', async ({ page }) => {
+    for (const slug of testSlugs) {
+      await page.goto(`/services/${slug}`)
+      const text = await page.locator(`${root(slug)}`).innerText()
+      // Nothing about how fast results come back, or what the price covers, or which lab runs the test.
+      expect(text, slug).not.toMatch(/within \d+|same[- ]day|next[- ]day|results in \d+|business days?|\bquest\b|labcorp|fda[- ]cleared|lumipulse/i)
+    }
   })
 
   for (const slug of drugSlugs) {
@@ -255,8 +290,34 @@ test.describe('on a desktop screen', () => {
     })
   }
 
-  test('every service page is in the sitemap', () => {
-    for (const slug of servicePageSlugs) expect(publicSitemapPaths).toContain(`/services/${slug}`)
+  // A service page that shares its slug with a landing page (/dementia-evaluation and so on) would
+  // compete with it in search, so it is noindex, has no canonical, and is left out of the sitemap.
+  // Every other service page is indexed and listed.
+  test('a service page is noindex exactly when a landing page has the same name', () => {
+    for (const slug of servicePageSlugs) {
+      expect(Boolean(servicePages[slug].meta.noindex), slug).toBe((landingSlugs as readonly string[]).includes(slug))
+    }
+  })
+
+  test('indexed service pages are in the sitemap and noindex ones are not', () => {
+    for (const slug of servicePageSlugs) {
+      const path = `/services/${slug}`
+      if (servicePages[slug].meta.noindex) expect(publicSitemapPaths, slug).not.toContain(path)
+      else expect(publicSitemapPaths, slug).toContain(path)
+    }
+  })
+
+  test('a noindex service page tells search engines to skip it and has no canonical', async ({ page }) => {
+    for (const slug of servicePageSlugs) {
+      await page.goto(`/services/${slug}`)
+      if (servicePages[slug].meta.noindex) {
+        await expect(page.locator('meta[name="robots"]'), slug).toHaveAttribute('content', /noindex/)
+        await expect(page.locator('link[rel="canonical"]'), slug).toHaveCount(0)
+      } else {
+        await expect(page.locator('meta[name="robots"]'), slug).toHaveCount(0)
+        await expect(page.locator('link[rel="canonical"]'), slug).toHaveAttribute('href', `https://trylocaldoctor.com/services/${slug}`)
+      }
+    }
   })
 
   test('a path under /services that is not a service goes home', async ({ page }) => {
@@ -305,7 +366,6 @@ test.describe('on a phone', () => {
       await expect(bar.getByRole('link', { name: 'Book now' })).toHaveAttribute('href', /gclid=TEST_GCLID/)
       // The bar goes where the page's other booking buttons go, including a section of /get-started.
       const stickyHref = (await bar.getByRole('link', { name: 'Book now' }).getAttribute('href')) ?? ''
-      const bookingHash = servicePages[slug].bookingHash
       expect(new URL(stickyHref, 'https://trylocaldoctor.com').hash).toBe(bookingHash ? `#${bookingHash}` : '')
 
       await page.locator(`${root(slug)} .sp-help`).evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }))
