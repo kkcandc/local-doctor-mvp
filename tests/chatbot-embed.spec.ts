@@ -31,7 +31,7 @@ test.describe('chatbot embed on desktop', () => {
   test('navigating into /get-started in the app hides the chatbot', async ({ page }) => {
     await page.goto('/')
     await expect(page.locator(CHATBOT_SCRIPT)).toHaveCount(1)
-    await page.locator('.hero-actions').getByRole('button', { name: 'Book a video visit' }).click()
+    await page.locator('.hero-actions').getByRole('button', { name: 'Speak with a neurologist' }).click()
     await expect(page).toHaveURL(/\/get-started/)
     await expect(page.locator('html')).toHaveAttribute('data-chatbot-hidden', 'true')
   })

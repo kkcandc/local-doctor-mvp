@@ -297,3 +297,59 @@
   gap: var(--space-12);
   justify-content: center;
 }
+
+/*
+  On a phone the cards become a list: a small picture on the left, then the name and price, with no
+  Book now button (the whole row still opens the service's page). The markup is the same as on a
+  desktop, so only the layout changes here.
+*/
+@media (max-width: 680px) {
+  .services-grid {
+    gap: var(--space-24);
+  }
+
+  .services-card {
+    flex-direction: row;
+    gap: var(--space-16);
+    align-items: center;
+    height: auto;
+    overflow: visible;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .services-card:hover {
+    box-shadow: none;
+    transform: none;
+  }
+
+  .services-card-media {
+    flex: 0 0 104px;
+    width: 104px;
+    aspect-ratio: 1;
+    border-radius: var(--radius-card);
+  }
+
+  .services-card-type {
+    top: auto;
+    bottom: 6px;
+    left: 6px;
+    padding: 2px var(--space-8);
+    font-size: 0.75rem;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .services-card-body {
+    flex: 1;
+    gap: var(--space-4);
+    min-width: 0;
+    padding: 0;
+  }
+
+  /* Two classes, so this wins over .primary's display whichever stylesheet loads last. */
+  .services-card .services-card-action {
+    display: none;
+  }
+}

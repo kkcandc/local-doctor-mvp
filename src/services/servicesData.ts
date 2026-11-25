@@ -63,8 +63,11 @@ export const services: Service[] = [
     slug: 'alzheimers-blood-test',
     type: 'Test',
     price: 'from $25',
-    image: '/assets/services/blood-test.jpg',
-    fit: 'cover',
+    // Two blood tubes on a white background. 'contain' keeps both caps in frame (a 4:3 crop would cut
+    // off the purple one), and the white frame makes the bars beside the picture invisible.
+    image: '/assets/services/blood-test-tubes.jpg',
+    fit: 'contain',
+    frame: '#ffffff',
     keywords: 'amyloid biomarker lab draw blood tube',
   },
   {

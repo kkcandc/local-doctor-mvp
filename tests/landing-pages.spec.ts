@@ -7,7 +7,7 @@ import { landingHtml } from '../src/landing/landingHtml'
 import { landingCanonical, landingMeta, landingSlugs, siteOrigin, type LandingSlug } from '../src/landing/landingMeta'
 import { publicSitemapPaths, siteSitemapXml } from '../src/siteMap'
 
-const HOME_H1 = /Treatment that slows down Alzheimer/
+const HOME_H1 = /Get specialist care and treatment for changes in memory and thinking/
 const MARYLAND_TEL = 'tel:+12403765730'
 const MARYLAND_PHONE = '(240) 376-5730'
 const VIRGINIA_TEL = 'tel:+15716095338'
@@ -170,7 +170,7 @@ test('homepage hero buttons share one row, 16px apart', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/')
   const actions = page.locator('.hero-actions')
-  const primary = await boxOf(actions.getByRole('button', { name: 'Book a video visit' }))
+  const primary = await boxOf(actions.getByRole('button', { name: 'Speak with a neurologist' }))
   const secondary = await boxOf(actions.getByRole('button', { name: 'Learn more' }))
   expect(sameRow(primary, secondary)).toBe(true)
   expect(horizontalGap(primary, secondary)).toBeCloseTo(16, 0)
@@ -205,12 +205,12 @@ for (const width of [1280, 1440]) {
 }
 
 test('alzheimers doctor and second opinion hero copy', () => {
-  expect(landingPages['alzheimers-doctor-maryland'].h1).toBe("Talk to an Alzheimer's doctor in Maryland.")
+  expect(landingPages['alzheimers-doctor-maryland'].h1).toBe("Talk to an Alzheimer's doctor in Maryland")
   expect(landingMeta['alzheimers-doctor-maryland'].title).toBe("See an Alzheimer's Doctor in Maryland | Local Doctor")
-  expect(landingPages['alzheimers-doctor-virginia'].h1).toBe("Talk to an Alzheimer's doctor in Virginia.")
+  expect(landingPages['alzheimers-doctor-virginia'].h1).toBe("Talk to an Alzheimer's doctor in Virginia")
   expect(landingMeta['alzheimers-doctor-virginia'].title).toBe("See an Alzheimer's Doctor in Virginia | Local Doctor")
-  expect(landingPages['memory-specialist-virginia'].h1).toBe('Talk to a memory specialist in Virginia.')
-  expect(landingPages['alzheimers-second-opinion'].h1).toBe('Get a clear second look.')
+  expect(landingPages['memory-specialist-virginia'].h1).toBe('Talk to a memory specialist in Virginia')
+  expect(landingPages['alzheimers-second-opinion'].h1).toBe('Get a clear second look')
   expect(landingPages['alzheimers-second-opinion'].heroNote).toBe(
     'Bring prior notes and results. A neurology specialist reviews them by video.',
   )
@@ -231,7 +231,7 @@ const BLOOD_TEST_BANNED = /next-day|next day|\btoday\b|fast results|turnaround|l
 
 test("alzheimers blood test page states only the confirmed facts", () => {
   const page = landingPages['alzheimers-blood-test']
-  expect(page.h1).toBe("Get an Alzheimer's blood test, reviewed by a neurologist.")
+  expect(page.h1).toBe("Get an Alzheimer's blood test, reviewed by a neurologist")
   expect(page.subhead).toBe(
     'Request the pTau217 blood test before a visit. A board-certified neurologist reviews the results with you.',
   )
@@ -256,7 +256,7 @@ test('alzheimers blood test CTAs keep allow-listed params and avoid banned claim
     '?gclid=test_gclid_123&gbraid=GB1&wbraid=WB1&utm_source=google&utm_medium=cpc&utm_campaign=camp&utm_term=ptau217&utm_content=ad1&email=jane@example.com&phone=2403765730'
   await page.goto(`/alzheimers-blood-test${search}`)
   const landing = page.locator('.landing-page[data-landing="alzheimers-blood-test"]')
-  await expect(landing.locator('h1')).toHaveText("Get an Alzheimer's blood test, reviewed by a neurologist.")
+  await expect(landing.locator('h1')).toHaveText("Get an Alzheimer's blood test, reviewed by a neurologist")
   await expect(landing.locator('.landing-subhead')).toHaveText(landingPages['alzheimers-blood-test'].subhead)
   await expect(page.locator('.header-cta')).toHaveText('Request the blood test')
 
@@ -303,9 +303,9 @@ test('the static shell for a landing route carries its own head tags', () => {
   expect(html).not.toContain('content="default"')
 })
 
-test('the homepage hero CTA reads Book a video visit', async ({ page }) => {
+test('the homepage hero CTA reads Speak with a neurologist', async ({ page }) => {
   await page.goto('/')
-  await expect(page.locator('.hero-actions').getByRole('button', { name: 'Book a video visit' })).toBeVisible()
+  await expect(page.locator('.hero-actions').getByRole('button', { name: 'Speak with a neurologist' })).toBeVisible()
 })
 
 test('evaluation-form pages send their primary CTAs to the scheduler, not the /evaluation quiz', () => {
@@ -487,7 +487,7 @@ test.describe('the online dementia test page', () => {
   test('says plainly that no online screening is offered and does not pose as a test', async ({ page }) => {
     await page.goto('/dementia-test-online')
     const landing = page.locator('.landing-page')
-    await expect(landing.locator('h1')).toHaveText('Skip the online dementia test.')
+    await expect(landing.locator('h1')).toHaveText('Skip the online dementia test')
     await expect(landing.locator('.landing-subhead')).toContainText('video visit with a board-certified neurologist, not a quiz')
     await expect(landing.locator('.landing-facts')).toContainText('Local Doctor does not currently offer an online screening tool')
     await expect(landing.locator('#three-steps')).toContainText('Screening')

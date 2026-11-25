@@ -143,13 +143,13 @@ test('hits carry only the event name, page path, and CTA text and destination', 
 test('the CTA click keeps the real button text and destination path', () => {
   const calls = buildTrackingCalls(
     'cta_click',
-    { pathname: '/', ctaLocation: 'hero', ctaLabel: 'Book a video visit', ctaDestination: '/get-started?gclid=abc' },
+    { pathname: '/', ctaLocation: 'hero', ctaLabel: 'Speak with a neurologist', ctaDestination: '/get-started?gclid=abc' },
     context,
   )
   expect(calls[0]).toEqual([
     'event',
     'cta_click',
-    { page_path: '/', cta_location: 'hero', cta_label: 'Book a video visit', cta_destination: '/get-started', send_to: gaId },
+    { page_path: '/', cta_location: 'hero', cta_label: 'Speak with a neurologist', cta_destination: '/get-started', send_to: gaId },
   ])
 })
 

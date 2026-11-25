@@ -1,6 +1,20 @@
 import { useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
-import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, ExternalLink, FlaskConical, ShieldAlert, Syringe, Video } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowRight,
+  BadgeCheck,
+  CheckCircle2,
+  ChevronDown,
+  CircleDollarSign,
+  ExternalLink,
+  FlaskConical,
+  House,
+  ReceiptText,
+  ShieldAlert,
+  Syringe,
+  Video,
+} from 'lucide-react'
 import { pathWithAdsParams } from '../analytics/googleAdsConfig'
 import { publicPhone } from '../compliancePages'
 import { useLocationSearch } from '../hydration'
@@ -34,6 +48,14 @@ type ServicePageProps = {
 }
 
 const typeIcons: Record<ServiceType, typeof Video> = { Visit: Video, Test: FlaskConical, Treatment: Syringe }
+
+// The green labels at the foot of every service page, in this order, each with a small white icon.
+const trustPills: Array<{ label: string; Icon: typeof Video }> = [
+  { label: 'Low, transparent cost', Icon: CircleDollarSign },
+  { label: 'Board certified clinicians', Icon: BadgeCheck },
+  { label: 'No hidden fees', Icon: ReceiptText },
+  { label: 'Available now, from your home', Icon: House },
+]
 
 function isPlainClick(event: MouseEvent) {
   return !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)
@@ -71,9 +93,9 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
     'band',
     'fit',
     ...(content.safety ? ['safety'] : []),
+    'faq',
     'help',
     'more',
-    'faq',
   ])
 
   function startLink(location: string, label: string) {
@@ -296,6 +318,33 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
         </section>
       )}
 
+      <section className={`section sp-faq sp-${tones.faq}`}>
+        <div className="sp-column">
+          <div className="section-intro">
+            <p className="eyebrow">FAQ</p>
+            <h2>Frequently asked questions</h2>
+          </div>
+          <div className="faq-accordion">
+            {content.faqs.map((faq, index) => {
+              const open = openFaq === index
+              const id = `${slug}-faq-${index}`
+              return (
+                <article className={open ? 'open' : ''} key={faq.question}>
+                  <button type="button" onClick={() => setOpenFaq(open ? -1 : index)} aria-expanded={open} aria-controls={id}>
+                    <span>{faq.question}</span>
+                    <ChevronDown size={18} aria-hidden="true" />
+                  </button>
+                  {open && <p id={id}>{richText(faq.answer)}</p>}
+                </article>
+              )
+            })}
+          </div>
+          <p className="sp-note">
+            More questions? <a {...pageLink('/faq')}>Browse the full FAQ</a>
+          </p>
+        </div>
+      </section>
+
       <section className={`section sp-${tones.help}`}>
         <div className="sp-help">
           <h2>Not sure this care is right for you?</h2>
@@ -346,31 +395,15 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
         </div>
       </section>
 
-      <section className={`section sp-faq sp-${tones.faq}`}>
-        <div className="sp-column">
-          <div className="section-intro">
-            <p className="eyebrow">FAQ</p>
-            <h2>Frequently asked questions</h2>
-          </div>
-          <div className="faq-accordion">
-            {content.faqs.map((faq, index) => {
-              const open = openFaq === index
-              const id = `${slug}-faq-${index}`
-              return (
-                <article className={open ? 'open' : ''} key={faq.question}>
-                  <button type="button" onClick={() => setOpenFaq(open ? -1 : index)} aria-expanded={open} aria-controls={id}>
-                    <span>{faq.question}</span>
-                    <ChevronDown size={18} aria-hidden="true" />
-                  </button>
-                  {open && <p id={id}>{richText(faq.answer)}</p>}
-                </article>
-              )
-            })}
-          </div>
-          <p className="sp-note">
-            More questions? <a {...pageLink('/faq')}>Browse the full FAQ</a>
-          </p>
-        </div>
+      <section className="sp-assurance" aria-label="Why people choose Local Doctor">
+        <ul className="sp-assurance-list">
+          {trustPills.map(({ label, Icon }) => (
+            <li key={label}>
+              <Icon size={20} aria-hidden="true" />
+              <span>{label}</span>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <StickyCta
@@ -381,7 +414,7 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
         // button (such as the "How to get started" link) would never show the bar. The hero is on
         // screen at load, so any scroll past it is seen. The Book now button is inside the hero.
         anchorSelector={`.service-page[data-service="${slug}"] .sp-hero`}
-        stopSelectors={['.sp-band', '.sp-help', '.footer']}
+        stopSelectors={['.sp-band', '.sp-help', '.sp-assurance', '.footer']}
         onClick={(event) => {
           if (!isPlainClick(event)) return
           event.preventDefault()

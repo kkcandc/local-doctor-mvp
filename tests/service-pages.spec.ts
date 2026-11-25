@@ -125,6 +125,26 @@ test.describe('on a desktop screen', () => {
         await expect(page.locator(`${root(slug)} .sp-help`).getByRole('link', { name: `Call ${publicPhone}` })).toHaveAttribute('href', 'tel:+12403765730')
       })
 
+      test('the FAQ comes before the "Not sure" section, and the green trust banner closes the page', async ({ page }) => {
+        await page.goto(`/services/${slug}`)
+        const order = await page.evaluate((selector) => {
+          const after = (first: string, second: string) =>
+            Boolean(document.querySelector(`${selector} ${first}`)!.compareDocumentPosition(document.querySelector(`${selector} ${second}`)!) & Node.DOCUMENT_POSITION_FOLLOWING)
+          return { faqBeforeHelp: after('.sp-faq', '.sp-help'), helpBeforeMore: after('.sp-help', '.sp-more'), moreBeforeBanner: after('.sp-more', '.sp-assurance') }
+        }, root(slug))
+        expect(order).toEqual({ faqBeforeHelp: true, helpBeforeMore: true, moreBeforeBanner: true })
+        await expect(page.locator(`${root(slug)} > section`).last()).toHaveClass(/sp-assurance/)
+
+        const pills = page.locator(`${root(slug)} .sp-assurance li`)
+        await expect(pills).toHaveText(['Low, transparent cost', 'Board certified clinicians', 'No hidden fees', 'Available now, from your home'])
+        for (const pill of await pills.all()) {
+          await expect(pill).toHaveCSS('background-color', 'rgb(22, 101, 52)')
+          await expect(pill).toHaveCSS('color', 'rgb(255, 255, 255)')
+          await expect(pill.locator('svg')).toHaveCount(1)
+          await expect(pill.locator('svg')).toHaveCSS('color', 'rgb(255, 255, 255)')
+        }
+      })
+
       test('the FAQ opens one answer at a time', async ({ page }) => {
         await page.goto(`/services/${slug}`)
         const questions = page.locator(`${root(slug)} .faq-accordion button`)

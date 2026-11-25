@@ -1,7 +1,7 @@
 /*
   Individual service pages (/services/<slug>): one hero with a buy box, then an optional "what to
   expect, honestly" card (treatments), steps, an optional facts table, a dark band, who it is for,
-  an optional safety section, help, more care, and FAQ. Colors, type, and spacing come from
+  an optional safety section, FAQ, help, more care, and a green trust banner. Colors, type, and spacing come from
   tokens.css. Buttons reuse .primary, .secondary, and .accent, links reuse .text-link, the FAQ
   reuses .faq-accordion, and the honest card reuses .honest-card. Class names start with sp-.
 
@@ -501,6 +501,43 @@
 
 .sp-faq .faq-accordion article p {
   margin-bottom: var(--space-24);
+}
+
+/* Trust banner: green pills at the foot of the page, white on --status-success (about 7:1). */
+
+.sp-assurance {
+  padding: clamp(24px, 3vw, 40px) var(--page-inline);
+  background: var(--surface-page);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.sp-assurance-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  justify-content: center;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.sp-assurance-list li {
+  display: inline-flex;
+  gap: var(--space-8);
+  align-items: center;
+  padding: var(--space-8) var(--space-16);
+  color: var(--text-on-dark);
+  background: var(--status-success);
+  border-radius: 999px;
+  font-size: var(--text-control);
+  font-weight: var(--weight-semibold);
+  line-height: 1.25;
+}
+
+.sp-assurance-list svg {
+  flex: 0 0 auto;
+  color: var(--text-on-dark);
 }
 
 @media (max-width: 640px) {
