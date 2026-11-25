@@ -16,8 +16,8 @@ import './servicePage.css'
   can never show different pictures or prices.
 
   Every booking button goes to /get-started (the scheduler), keeps gclid and utm_* in the link, and
-  logs cta_click with its own location: service_hero, service_options, service_band, service_help,
-  service_care_team, service_more_care, and sticky_mobile for the phone bar.
+  logs cta_click with its own location: service_hero, service_band, service_help,
+  service_more_care, and sticky_mobile for the phone bar.
 */
 
 const phoneHref = `tel:+1${publicPhone.replace(/\D/g, '')}`
@@ -65,14 +65,13 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
   // Every booking button goes straight to a section of /get-started (the calendar).
   const bookingHref = `${pathWithAdsParams(intakePath, search)}${bookingHash ? `#${bookingHash}` : ''}`
   const tones = assignTones([
-    'options',
+    ...(content.honest ? ['honest'] : []),
     'steps',
     ...(content.details ? ['details'] : []),
     'band',
     'fit',
     ...(content.safety ? ['safety'] : []),
     'help',
-    'careTeam',
     'more',
     'faq',
   ])
@@ -112,10 +111,8 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
     )
   }
 
-  const { options, details, safety } = content
+  const { honest, details, safety } = content
   const moreCare = content.moreCare.flatMap((name) => serviceByName(name) ?? [])
-  // The options card wears its service's icon: a camera for a visit, a flask for a test.
-  const OptionIcon = typeIcons[service.type]
 
   return (
     <div className="service-page" data-service={slug}>
@@ -145,7 +142,7 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
                 {bookLabel} <ArrowRight size={20} aria-hidden="true" />
               </a>
               {content.heroSecondaryLabel && (
-                <a className="text-link" href="#options">
+                <a className="text-link" href="#steps">
                   {content.heroSecondaryLabel}
                 </a>
               )}
@@ -160,53 +157,21 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
         </div>
       </section>
 
-      <section className={`section sp-${tones.options}`} id="options">
-        <div className="sp-column">
-          <div className="section-intro">
-            <p className="eyebrow">{options.eyebrow}</p>
-            <h2>{options.title}</h2>
-            <p>{options.copy}</p>
-          </div>
-          <div className="sp-option">
-            <div className="sp-option-main">
-              <span className="sp-icon" aria-hidden="true">
-                <OptionIcon size={26} />
-              </span>
-              <div>
-                <h3>{options.name}</h3>
-                <p className="sp-setting">{options.setting}</p>
-                <p>{options.description}</p>
-              </div>
-            </div>
-            <div className="sp-option-side">
-              <p className="sp-cover">{options.coverTitle}</p>
-              <p>{options.coverCopy}</p>
-              <a className="primary sp-options-cta" {...startLink('service_options', bookLabel)}>
-                {bookLabel} <ArrowRight size={20} aria-hidden="true" />
-              </a>
-            </div>
-          </div>
-          <ul className="sp-trust">
-            {options.checks.map((check) => (
-              <li key={check}>
-                <CheckCircle2 size={20} aria-hidden="true" />
-                {check}
-              </li>
-            ))}
-          </ul>
-          {options.honest && (
+      {honest && (
+        <section className={`section sp-${tones.honest}`}>
+          <div className="sp-column">
             <div className="honest-card sp-honest">
               <ShieldAlert size={24} aria-hidden="true" />
               <div>
-                <h2>{options.honest.title}</h2>
-                <p>{options.honest.copy}</p>
+                <h2>{honest.title}</h2>
+                <p>{honest.copy}</p>
               </div>
             </div>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
-      <section className={`section sp-${tones.steps}`}>
+      <section className={`section sp-${tones.steps}`} id="steps">
         <div className="sp-column">
           <div className="section-intro">
             <p className="eyebrow">{content.steps.eyebrow}</p>
@@ -349,17 +314,6 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
         </div>
       </section>
 
-      <section className={`section sp-care-team sp-${tones.careTeam}`}>
-        <div className="sp-center">
-          <p className="eyebrow">Your care team</p>
-          <h2>{content.careTeam.title}</h2>
-          <p>{content.careTeam.copy}</p>
-          <a className="primary" {...startLink('service_care_team', 'Get started')}>
-            Get started <ArrowRight size={20} aria-hidden="true" />
-          </a>
-        </div>
-      </section>
-
       <section className={`section sp-more sp-${tones.more}`}>
         <div className="sp-wide">
           <div className="sp-more-head">
@@ -427,7 +381,7 @@ export function ServicePage({ slug, onStart, onOpenPath }: ServicePageProps) {
         // button (such as the "How to get started" link) would never show the bar. The hero is on
         // screen at load, so any scroll past it is seen. The Book now button is inside the hero.
         anchorSelector={`.service-page[data-service="${slug}"] .sp-hero`}
-        stopSelectors={['.sp-options-cta', '.sp-band', '.sp-help', '.sp-care-team', '.footer']}
+        stopSelectors={['.sp-band', '.sp-help', '.footer']}
         onClick={(event) => {
           if (!isPlainClick(event)) return
           event.preventDefault()

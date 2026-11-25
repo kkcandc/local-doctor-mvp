@@ -78,10 +78,8 @@ test.describe('on a desktop screen', () => {
       test('every booking button opens /get-started with the ad params and logs its own location', async ({ page }) => {
         const buttons = [
           { location: 'service_hero', label: 'Book now' },
-          { location: 'service_options', label: 'Book now' },
           { location: 'service_band', label: 'Book a visit' },
           { location: 'service_help', label: 'Get started' },
-          { location: 'service_care_team', label: 'Get started' },
         ]
         for (const { location, label } of buttons) {
           await page.goto(`/services/${slug}${query}`)
@@ -108,6 +106,18 @@ test.describe('on a desktop screen', () => {
             page_path: `/services/${slug}`,
           })
         }
+      })
+
+      test('has no options or care team section, and no booking buttons beyond hero, band, and help', async ({ page }) => {
+        await page.goto(`/services/${slug}`)
+        const text = await page.locator(root(slug)).innerText()
+        expect(text).not.toMatch(/visit options|test options|getting started|your care team|choose how you start/i)
+        await expect(page.locator(`${root(slug)} .sp-option, ${root(slug)} .sp-trust, ${root(slug)} .sp-care-team`)).toHaveCount(0)
+        const locations = await page.locator(`${root(slug)} [data-cta-location]`).evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-cta-location')))
+        expect(locations).toEqual(['service_hero', 'service_band', 'service_help'])
+        // A treatment page keeps its honest card right under the hero; the others have none.
+        const honest = page.getByRole('heading', { name: 'What to expect, honestly' })
+        await expect(honest).toHaveCount(drugSlugs.includes(slug) ? 1 : 0)
       })
 
       test('the help card also offers the clinic phone number', async ({ page }) => {
@@ -214,8 +224,6 @@ test.describe('on a desktop screen', () => {
       await expect(page.getByRole('link', { name: /Important Safety Information/ })).toHaveCount(0)
       await expect(page.getByRole('heading', { name: 'How we monitor for side effects' })).toHaveCount(0)
       await expect(page.locator(root(slug))).not.toContainText('24/7 triage line')
-      // A test page uses the flask icon in its options card, not the video camera.
-      await expect(page.locator(`${root(slug)} .sp-option .sp-icon svg`)).toHaveClass(/lucide-flask-conical/)
     })
   }
 
@@ -330,11 +338,11 @@ function serviceNameFor(slug: ServicePageSlug) {
   return serviceBySlug(slug).name
 }
 
-// Scrolls so the element's bottom edge sits 40px below the top of the screen. That leaves the hero and the
-// options button above the screen, which scrollIntoView would not (the page's scroll-padding-top for the
-// sticky header pushes the element down).
-function justBelow(locator: Locator) {
-  return locator.evaluate((element) => window.scrollTo({ top: element.getBoundingClientRect().bottom + window.scrollY - 40, behavior: 'instant' }))
+// Scrolls so the hero's bottom edge sits 40px above the top of the screen, which leaves the whole hero (and
+// its Book now button) off screen. scrollIntoView would not, because the page's scroll-padding-top for the
+// sticky header pushes the element down.
+function pastHero(locator: Locator) {
+  return locator.evaluate((element) => window.scrollTo({ top: element.getBoundingClientRect().bottom + window.scrollY + 40, behavior: 'instant' }))
 }
 
 test.describe('on a phone', () => {
@@ -355,13 +363,13 @@ test.describe('on a phone', () => {
     })
 
     test(`/services/${slug} shows the sticky Book now bar after the hero and hides it near the closing buttons`, async ({ page }) => {
-      // A short phone screen, so the dark band (a place the bar hides) is not on screen below the trust list.
+      // A short phone screen, so the dark band (a place the bar hides) is not on screen just below the hero.
       await page.setViewportSize({ width: 375, height: 640 })
       await page.goto(`/services/${slug}${query}`)
       const bar = page.locator('[data-sticky-cta]')
       await expect(bar).toHaveCount(0)
 
-      await justBelow(page.locator(`${root(slug)} .sp-trust`))
+      await pastHero(page.locator(`${root(slug)} .sp-hero`))
       await expect(bar).toBeVisible()
       await expect(bar.getByRole('link', { name: 'Book now' })).toHaveAttribute('href', /gclid=TEST_GCLID/)
       // The bar goes where the page's other booking buttons go, including a section of /get-started.
@@ -371,7 +379,7 @@ test.describe('on a phone', () => {
       await page.locator(`${root(slug)} .sp-help`).evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }))
       await expect(bar).toHaveCount(0)
 
-      await justBelow(page.locator(`${root(slug)} .sp-trust`))
+      await pastHero(page.locator(`${root(slug)} .sp-hero`))
       await bar.getByRole('link', { name: 'Book now' }).click()
       await expect(page).toHaveURL(/\/get-started\?.*gclid=TEST_GCLID/)
       const click = ga(await events(page), 'cta_click')

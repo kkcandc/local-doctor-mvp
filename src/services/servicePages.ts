@@ -48,7 +48,7 @@ export type ServicePageContent = {
   lede: string
   // Three short points beside the hero image.
   highlights: string[]
-  // Optional text link under the hero button. Scrolls to the options section.
+  // Optional text link under the hero button. Scrolls to the "what to expect" steps.
   heroSecondaryLabel?: string
   meta: {
     title: string
@@ -57,19 +57,8 @@ export type ServicePageContent = {
     // whose topic a landing page (src/landing) already owns, so the two do not compete.
     noindex?: boolean
   }
-  options: {
-    eyebrow: string
-    title: string
-    copy: string
-    name: string
-    setting: string
-    description: string
-    coverTitle: string
-    coverCopy: string
-    checks: string[]
-    // Treatments only: the honest "what to expect" card.
-    honest?: { title: string; copy: string }
-  }
+  // Treatments only: the honest "what to expect" card, shown right under the hero.
+  honest?: { title: string; copy: string }
   steps: { eyebrow: string; title: string; items: Array<{ title: string; copy: string }> }
   // A facts table: the drug facts on a treatment page, an "at a glance" table on a test page.
   details?: {
@@ -97,7 +86,6 @@ export type ServicePageContent = {
     watch: string[]
     note: string
   }
-  careTeam: { title: string; copy: string }
   // Names of other services (as listed in servicesData.ts) shown in the "More care" row.
   moreCare: string[]
   faqs: Array<{ question: string; answer: RichText }>
@@ -176,24 +164,11 @@ function treatmentFit(drug: string): ServicePageContent['fit'] {
   }
 }
 
-function honest(drug: string): NonNullable<ServicePageContent['options']['honest']> {
+function honest(drug: string): NonNullable<ServicePageContent['honest']> {
   return {
     title: 'What to expect, honestly',
     copy: `In clinical trials, ${drug} showed a real, moderate slowing of cognitive decline. It is not a cure and it does not reverse symptoms already present. The goal is to weigh the potential benefits and risks clearly with our neurology specialists and decide what works best for you.`,
   }
-}
-
-const treatmentOptions = {
-  eyebrow: 'Getting started',
-  title: 'Treatment begins with an evaluation',
-  copy: 'We verify your insurance in parallel, so coverage is clear before you commit to anything.',
-  name: 'Diagnostic intake visit',
-  setting: 'Virtual · 30-60 min',
-  description:
-    'With your caregiver present: history, a cognitive screen, medication review, and a plan. If you qualify, we order an amyloid test, genetic testing, and a brain MRI.',
-  coverTitle: 'Insurance accepted',
-  coverCopy: 'We walk through your specific coverage before you commit.',
-  checks: ['Most insurance accepted', 'Specialist-led care', 'No hidden fees', 'Virtual where it can be'],
 }
 
 const treatmentDisclaimer =
@@ -215,19 +190,7 @@ const coverageFaq = {
   ],
 } satisfies ServicePageContent['faqs'][number]
 
-// Shared by the video visit pages (memory, concentration, brain fog, cognitive, dementia,
-// Alzheimer's, neurologist). Each page adds its own `description`.
-const visitOptions = {
-  eyebrow: 'Visit options',
-  title: 'Choose how you start',
-  copy: "We'll check any insurance and show you your options before you book.",
-  name: 'Video visit',
-  setting: 'Virtual · from home',
-  coverTitle: 'Insurance accepted',
-  coverCopy: 'We verify coverage and confirm your cost before you book.',
-  checks: ['Most insurance accepted', 'Specialist-led care', 'No hidden fees', 'Virtual, from home'],
-}
-
+// Shared by the video visit and test pages.
 const visitBand: ServicePageContent['band'] = {
   title: "All your care in one place. That's the Local Doctor difference.",
   copy: "We help you understand your options, connect you to the right specialists, coordinate any needed evaluations, and keep an eye on your overall brain health along the way. It's comprehensive care that looks at the full picture (your goals, your history, your lifestyle) and makes it simple to move forward with confidence.",
@@ -286,10 +249,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
       // /memory-evaluation (a landing page) already owns this search.
       noindex: true,
     },
-    options: {
-      ...visitOptions,
-      description: 'A 1:1 visit with a clinician experienced in cognitive health. Family members and caregivers are welcome to join.',
-    },
     steps: {
       eyebrow: 'What to expect',
       title: 'What to expect from a memory evaluation',
@@ -313,10 +272,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
         "You want a plan for further evaluation if it's needed.",
       ],
       note: "Not sure? Book a visit and we'll help you find the right next step.",
-    },
-    careTeam: {
-      title: 'Talk to a clinician about your memory',
-      copy: 'Meet a specialist who listens first, looks at the full picture, and explains what comes next.',
     },
     moreCare: ['Cognitive evaluation', 'Brain fog evaluation', "Alzheimer's blood test", 'Brain MRI', 'Leqembi (lecanemab)'],
     faqs: [
@@ -372,7 +327,7 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
       description:
         'Learn how Leqembi works, who may qualify, and how safety is monitored. Book a video visit with a neurologist to find out if it is right for you.',
     },
-    options: { ...treatmentOptions, honest: honest('Leqembi') },
+    honest: honest('Leqembi'),
     steps: treatmentSteps,
     details: {
       eyebrow: 'At a glance',
@@ -391,10 +346,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
     band: treatmentBand,
     fit: treatmentFit('Leqembi'),
     safety: { ...treatmentSafety, note: treatmentSafetyNote },
-    careTeam: {
-      title: 'Talk to a specialist about Leqembi',
-      copy: "Meet a clinician who will review your history, explain the benefits and risks plainly, and tell you whether you're a candidate.",
-    },
     moreCare: ['Kisunla (donanemab)', ...sharedMoreCare],
     faqs: [
       {
@@ -437,7 +388,7 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
       description:
         'Learn how Kisunla works, who may qualify, and how safety is monitored. Book a video visit with a neurologist to find out if it is right for you.',
     },
-    options: { ...treatmentOptions, honest: honest('Kisunla') },
+    honest: honest('Kisunla'),
     steps: treatmentSteps,
     details: {
       eyebrow: 'At a glance',
@@ -456,10 +407,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
     band: treatmentBand,
     fit: treatmentFit('Kisunla'),
     safety: { ...treatmentSafety, note: treatmentSafetyNote },
-    careTeam: {
-      title: 'Talk to a specialist about Kisunla',
-      copy: "Meet a clinician who will review your history, explain the benefits and risks plainly, and tell you whether you're a candidate.",
-    },
     moreCare: ['Leqembi (lecanemab)', ...sharedMoreCare],
     faqs: [
       {
@@ -508,10 +455,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
       description:
         'Talk through trouble concentrating with a clinician by video visit from home. Review common causes and next steps. Insurance accepted, with coverage checked before you book.',
     },
-    options: {
-      ...visitOptions,
-      description: 'A 1:1 visit with a clinician experienced in cognitive health. Family members and friends are welcome to join.',
-    },
     steps: {
       eyebrow: 'What to expect',
       title: 'What to expect from a concentration visit',
@@ -535,10 +478,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
         'You want to know whether further evaluation makes sense.',
       ],
       note: nextStepNote,
-    },
-    careTeam: {
-      title: 'Talk to a clinician about your focus',
-      copy: 'Meet a specialist who listens first, looks at the full picture, and explains what comes next.',
     },
     moreCare: ['Brain fog evaluation', 'Cognitive evaluation', 'Memory evaluation', 'Visit with a neurologist doctor', 'Brain MRI'],
     faqs: [
@@ -570,10 +509,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
       description:
         'Talk through brain fog with a clinician by video visit from home. Review common causes and next steps. Insurance accepted, with coverage checked before you book.',
     },
-    options: {
-      ...visitOptions,
-      description: 'A 1:1 visit with a clinician experienced in cognitive health. Family members and friends are welcome to join.',
-    },
     steps: {
       eyebrow: 'What to expect',
       title: 'What to expect from a brain fog evaluation',
@@ -597,10 +532,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
         'You want to check whether a medication or health issue could be contributing.',
       ],
       note: nextStepNote,
-    },
-    careTeam: {
-      title: 'Talk to a clinician about brain fog',
-      copy: 'Meet a specialist who listens first, looks at the full picture, and explains what comes next.',
     },
     moreCare: ['Concentration difficulty', 'Cognitive evaluation', 'Memory evaluation', "Alzheimer's blood test", 'Brain MRI'],
     faqs: [
@@ -638,10 +569,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
       description:
         'Have your memory and thinking evaluated by a clinician by video visit from home. A cognitive screen, medication review, and a plan. Insurance accepted, with coverage checked before you book.',
     },
-    options: {
-      ...visitOptions,
-      description: 'A 1:1 visit with a clinician experienced in cognitive health. Family members and caregivers are welcome to join.',
-    },
     steps: {
       eyebrow: 'What to expect',
       title: 'What to expect from a cognitive evaluation',
@@ -665,10 +592,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
         'You want a clear next step, not just a worry.',
       ],
       note: nextStepNote,
-    },
-    careTeam: {
-      title: 'Talk to a clinician about your thinking',
-      copy: 'Meet a specialist who listens first, looks at the full picture, and explains what comes next.',
     },
     moreCare: ['Memory evaluation', "Alzheimer's evaluation", 'Dementia evaluation', "Alzheimer's blood test", 'Brain MRI'],
     faqs: [
@@ -712,10 +635,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
       // /dementia-evaluation (a landing page) already owns this search.
       noindex: true,
     },
-    options: {
-      ...visitOptions,
-      description: 'A video visit where a neurologist reviews symptoms, history, and medications. Family members and caregivers are welcome to join.',
-    },
     steps: {
       eyebrow: 'What to expect',
       title: 'What to expect from a dementia evaluation',
@@ -742,10 +661,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
         "You want a specialist's opinion on what comes next.",
       ],
       note: "An evaluation is not a guaranteed diagnosis or treatment plan. Not sure? Book a visit and we'll help you find the right next step.",
-    },
-    careTeam: {
-      title: 'Talk to a neurologist about memory changes',
-      copy: 'Meet a specialist who listens first, looks at the full picture, and explains what comes next.',
     },
     moreCare: ["Alzheimer's evaluation", 'Memory evaluation', "Alzheimer's blood test", 'Brain MRI', 'Visit with a neurologist doctor'],
     faqs: [
@@ -793,11 +708,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
       // /alzheimers-evaluation (a landing page) already owns this search.
       noindex: true,
     },
-    options: {
-      ...visitOptions,
-      description:
-        'A video visit where a neurologist reviews symptoms, history, and prior results, then explains which tests may help. Family members and caregivers are welcome to join.',
-    },
     steps: {
       eyebrow: 'What to expect',
       title: "What an Alzheimer's evaluation involves",
@@ -827,10 +737,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
         'You want a plan you can share with your family.',
       ],
       note: "An evaluation does not promise eligibility for any medication. Not sure? Book a visit and we'll help you find the right next step.",
-    },
-    careTeam: {
-      title: "Talk to a neurologist about Alzheimer's",
-      copy: 'Meet a specialist who listens first, looks at the full picture, and explains what comes next.',
     },
     moreCare: ["Alzheimer's blood test", 'Brain MRI', "Alzheimer's genetic testing", 'Leqembi (lecanemab)', 'Kisunla (donanemab)'],
     faqs: [
@@ -882,10 +788,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
       description:
         'See a board-certified neurologist by video visit from home. No referral needed. Insurance accepted, with coverage checked before you book.',
     },
-    options: {
-      ...visitOptions,
-      description: 'A 1:1 video visit with a neurology clinician licensed in your state. Family members and caregivers are welcome to join.',
-    },
     steps: {
       eyebrow: 'What to expect',
       title: 'What to expect from your visit',
@@ -912,10 +814,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
         'You prefer to be seen from home.',
       ],
       note: nextStepNote,
-    },
-    careTeam: {
-      title: "Talk to a neurologist about what you've noticed",
-      copy: 'Meet a specialist who listens first, looks at the full picture, and explains what comes next.',
     },
     moreCare: ['Memory evaluation', 'Dementia evaluation', "Alzheimer's evaluation", "Alzheimer's blood test", 'Brain MRI'],
     faqs: [
@@ -951,17 +849,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
         "Learn what the pTau217 blood test measures, what it can and cannot tell you, and how a neurologist reviews your result by video. Book to get started.",
       // /alzheimers-blood-test (a landing page) already owns this search.
       noindex: true,
-    },
-    options: {
-      eyebrow: 'Test options',
-      title: 'How the test works',
-      copy: "A blood test alone does not diagnose Alzheimer's, so your result is reviewed with a neurologist.",
-      name: 'pTau217 blood test',
-      setting: 'Blood draw · local lab',
-      description: 'A standard blood draw at a local lab. A board-certified neurologist reviews the result with you by video.',
-      coverTitle: 'Insurance accepted',
-      coverCopy: 'We verify coverage and confirm your cost before you book.',
-      checks: ['Most insurance accepted', 'Specialist review of your result', 'No hidden fees', 'Reviewed by video'],
     },
     steps: {
       eyebrow: 'What to expect',
@@ -1000,10 +887,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
         "You're considering further evaluation or treatment and want more information first.",
       ],
       note: "A blood test alone does not diagnose Alzheimer's. Not sure? Book a visit and we'll help you find the right next step.",
-    },
-    careTeam: {
-      title: 'Talk to a neurologist about your result',
-      copy: 'Meet a specialist who explains what a result does and does not mean, and what comes next.',
     },
     moreCare: ["Alzheimer's evaluation", 'Brain MRI', "Alzheimer's genetic testing", 'Memory evaluation', 'Leqembi (lecanemab)'],
     faqs: [
@@ -1053,17 +936,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
       description:
         'Learn what APOE genetic testing can and cannot tell you, when it is used, and how a neurologist reviews the result with you by video. Book a visit to get started.',
     },
-    options: {
-      eyebrow: 'Test options',
-      title: 'How the test works',
-      copy: 'Your neurologist decides whether genetic testing would help, so it starts with a visit.',
-      name: 'APOE genetic test',
-      setting: 'Blood draw or cheek swab',
-      description: 'The sample is collected by a healthcare provider, either as a blood draw or a cheek swab, depending on the lab. Your neurologist reviews the result with you.',
-      coverTitle: 'Price after your visit',
-      coverCopy: 'Cost depends on the lab and your coverage. We walk through it with you before you commit.',
-      checks: ['Ordered by a specialist', 'Reviewed with you by video', 'Not a diagnosis on its own', 'No hidden fees'],
-    },
     steps: {
       eyebrow: 'What to expect',
       title: 'How genetic testing works',
@@ -1105,10 +977,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
         'You want a specialist to guide the decision.',
       ],
       note: "It is best decided after a conversation with a specialist. Not sure? Book a visit and we'll help you find the right next step.",
-    },
-    careTeam: {
-      title: 'Talk to a neurologist about genetic testing',
-      copy: 'Meet a specialist who explains what a result does and does not mean, and whether the test fits your situation.',
     },
     moreCare: ["Alzheimer's evaluation", "Alzheimer's blood test", 'Brain MRI', 'Leqembi (lecanemab)', 'Kisunla (donanemab)'],
     faqs: [
@@ -1158,17 +1026,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
       description:
         'Learn what a brain MRI shows in a memory workup, what the appointment is like, and how a neurologist reviews it with you. Book a visit to get started.',
     },
-    options: {
-      eyebrow: 'Test options',
-      title: 'How the scan works',
-      copy: 'Your neurologist orders a brain MRI when it would help your evaluation, so it starts with a visit.',
-      name: 'Brain MRI',
-      setting: 'At a local imaging center',
-      description: 'You lie still in the scanner while it takes pictures of your brain. Your neurologist reviews the images and explains them at your follow-up visit.',
-      coverTitle: 'Price after your visit',
-      coverCopy: 'Cost depends on the imaging center and your coverage. We walk through it with you before you commit.',
-      checks: ['Ordered by a specialist', 'No radiation', 'Reviewed with you', 'No hidden fees'],
-    },
     steps: {
       eyebrow: 'What to expect',
       title: 'How a brain MRI works',
@@ -1207,10 +1064,6 @@ export const servicePages: Record<ServicePageSlug, ServicePageContent> = {
         'You want a specialist to explain the images in plain language.',
       ],
       note: nextStepNote,
-    },
-    careTeam: {
-      title: 'Talk to a neurologist about a brain MRI',
-      copy: 'Meet a specialist who explains what a scan does and does not show, and whether it fits your situation.',
     },
     moreCare: ["Alzheimer's evaluation", "Alzheimer's blood test", "Alzheimer's genetic testing", 'Leqembi (lecanemab)', 'Kisunla (donanemab)'],
     faqs: [

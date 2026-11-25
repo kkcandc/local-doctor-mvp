@@ -1,9 +1,9 @@
 /*
-  Individual service pages (/services/<slug>): one hero with a buy box, then options, steps, an
-  optional drug-facts table, a dark band, who it is for, an optional safety section, help, care
-  team, more care, and FAQ. Colors, type, and spacing come from tokens.css. Buttons reuse .primary,
-  .secondary, and .accent, links reuse .text-link, the FAQ reuses .faq-accordion, and the
-  "what to expect, honestly" card reuses .honest-card. Class names start with sp-.
+  Individual service pages (/services/<slug>): one hero with a buy box, then an optional "what to
+  expect, honestly" card (treatments), steps, an optional facts table, a dark band, who it is for,
+  an optional safety section, help, more care, and FAQ. Colors, type, and spacing come from
+  tokens.css. Buttons reuse .primary, .secondary, and .accent, links reuse .text-link, the FAQ
+  reuses .faq-accordion, and the honest card reuses .honest-card. Class names start with sp-.
 
   Section backgrounds come from three tone classes (sp-ivory, sp-sunken, sp-deep) that
   ServicePage.tsx alternates, so a page with or without the optional sections still reads cleanly.
@@ -38,23 +38,10 @@
   margin: 0 auto;
 }
 
-.sp-center {
-  max-width: 640px;
-  margin: 0 auto;
-  text-align: center;
-}
-
 .service-page .section-intro h2,
-.sp-center h2,
 .sp-help h2 {
   color: var(--text-heading);
   text-wrap: balance;
-}
-
-.sp-center p:not(.eyebrow) {
-  margin: var(--space-16) 0 var(--space-32);
-  color: var(--text-secondary);
-  font-size: var(--text-lead);
 }
 
 /* Hero */
@@ -147,7 +134,6 @@
 }
 
 .sp-points svg,
-.sp-trust svg,
 .sp-fit-card svg {
   flex: 0 0 auto;
   margin-top: 2px;
@@ -183,26 +169,7 @@
   font-weight: var(--weight-semibold);
 }
 
-/* Options */
-
-.sp-option {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-24) var(--space-48);
-  align-items: center;
-  justify-content: space-between;
-  padding: clamp(24px, 3vw, 36px);
-  background: var(--surface-card);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-subtle);
-}
-
-.sp-option-main {
-  display: flex;
-  flex: 1 1 340px;
-  gap: var(--space-16);
-  align-items: flex-start;
-}
+/* Icon tile, used by the More care cards (the small variant is further down). */
 
 .sp-icon {
   display: grid;
@@ -213,69 +180,6 @@
   color: var(--color-primary);
   background: var(--surface-sunken);
   border-radius: var(--radius-lg);
-}
-
-.sp-option h3 {
-  color: var(--text-heading);
-  font-family: var(--font-display);
-}
-
-.sp-option p {
-  margin: var(--space-4) 0 0;
-  color: var(--text-secondary);
-}
-
-.sp-option .sp-setting {
-  color: var(--text-link);
-  font-size: var(--text-control);
-  font-weight: var(--weight-semibold);
-}
-
-.sp-option-main p:last-child {
-  margin-top: var(--space-12);
-}
-
-.sp-option-side {
-  display: grid;
-  flex: 0 1 270px;
-  gap: var(--space-4);
-  justify-items: start;
-}
-
-.sp-option .sp-cover {
-  color: var(--text-heading);
-  font-size: var(--text-h4);
-  font-weight: var(--weight-semibold);
-}
-
-.sp-options-cta {
-  margin-top: var(--space-16);
-}
-
-.sp-trust {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: var(--space-12) var(--space-24);
-  margin: var(--space-32) 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.sp-trust li {
-  display: flex;
-  gap: var(--space-8);
-  align-items: center;
-  color: var(--text-heading);
-  font-size: var(--text-control);
-  font-weight: var(--weight-semibold);
-}
-
-.sp-trust svg {
-  margin-top: 0;
-}
-
-.sp-honest {
-  margin-top: var(--space-48);
 }
 
 /* Steps */
@@ -605,10 +509,6 @@
   }
 
   .sp-hero-actions .primary {
-    width: 100%;
-  }
-
-  .sp-options-cta {
     width: 100%;
   }
 }
