@@ -1,0 +1,514 @@
+/*
+  Individual service pages (/services/<slug>): one hero with a buy box, then an optional "what to
+  expect, honestly" card (treatments), steps, an optional facts table, a dark band, who it is for,
+  an optional safety section, help, more care, and FAQ. Colors, type, and spacing come from
+  tokens.css. Buttons reuse .primary, .secondary, and .accent, links reuse .text-link, the FAQ
+  reuses .faq-accordion, and the honest card reuses .honest-card. Class names start with sp-.
+
+  Section backgrounds come from three tone classes (sp-ivory, sp-sunken, sp-deep) that
+  ServicePage.tsx alternates, so a page with or without the optional sections still reads cleanly.
+*/
+
+.service-page {
+  background: var(--surface-page);
+}
+
+.sp-ivory {
+  background: var(--surface-marketing);
+}
+
+.sp-sunken {
+  background: var(--surface-sunken);
+}
+
+.sp-deep {
+  --focus-color: var(--focus-dark);
+  color: var(--text-on-dark);
+  background: var(--surface-deep);
+}
+
+/* Section titles come from the shared .section-intro. These pages center their text columns. */
+.sp-column {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.sp-wide {
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.service-page .section-intro h2,
+.sp-help h2 {
+  color: var(--text-heading);
+  text-wrap: balance;
+}
+
+/* Hero */
+
+.sp-hero {
+  padding: clamp(20px, 3vw, 40px) var(--page-inline) clamp(40px, 6vw, 72px);
+  background: var(--surface-sunken);
+}
+
+.sp-back {
+  display: inline-flex;
+  gap: var(--space-8);
+  align-items: center;
+  min-height: var(--target-min);
+  margin-bottom: var(--space-16);
+  color: var(--color-primary);
+  font-size: var(--text-control);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+}
+
+.sp-back:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.sp-hero-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: clamp(28px, 5vw, 56px);
+  align-items: center;
+}
+
+.sp-media {
+  aspect-ratio: 5 / 4;
+  overflow: hidden;
+  background: var(--surface-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-overlay);
+}
+
+.sp-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Same frame color as the Services card, sampled from the IV bag photo (a cut-out on pale blue). */
+.sp-media[data-fit='contain'] {
+  background: #e0efff;
+}
+
+.sp-media[data-fit='contain'] img {
+  object-fit: contain;
+}
+
+.sp-hero-copy h1 {
+  color: var(--text-heading);
+  text-wrap: balance;
+}
+
+.sp-generic {
+  margin: var(--space-8) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-h4);
+  font-weight: var(--weight-semibold);
+}
+
+.sp-lede {
+  max-width: 540px;
+  margin: var(--space-16) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-lead);
+}
+
+.sp-points {
+  display: grid;
+  gap: var(--space-12);
+  max-width: 540px;
+  margin: var(--space-24) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sp-points li {
+  display: flex;
+  gap: var(--space-12);
+  align-items: flex-start;
+}
+
+.sp-points svg,
+.sp-fit-card svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--color-primary);
+}
+
+.sp-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8) var(--space-24);
+  align-items: center;
+  margin-top: var(--space-32);
+}
+
+.sp-price {
+  margin: var(--space-16) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-control);
+}
+
+.sp-price strong {
+  color: var(--text-heading);
+  font-size: var(--text-h3);
+}
+
+.sp-availability {
+  display: flex;
+  gap: var(--space-8);
+  align-items: center;
+  margin: var(--space-4) 0 0;
+  color: var(--status-success);
+  font-size: var(--text-control);
+  font-weight: var(--weight-semibold);
+}
+
+/* Icon tile, used by the More care cards (the small variant is further down). */
+
+.sp-icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  color: var(--color-primary);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-lg);
+}
+
+/* Steps */
+
+.sp-steps {
+  display: grid;
+  gap: var(--space-32);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sp-steps li {
+  display: flex;
+  gap: var(--space-16);
+  align-items: flex-start;
+}
+
+.sp-step-number {
+  display: grid;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  color: var(--text-on-dark);
+  background: var(--color-primary);
+  border-radius: 50%;
+  font-family: var(--font-display);
+  font-size: var(--text-h4);
+  font-weight: var(--weight-semibold);
+}
+
+.sp-steps h3 {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--text-h4);
+}
+
+.sp-steps p {
+  max-width: 60ch;
+  margin: var(--space-4) 0 0;
+  color: var(--text-secondary);
+}
+
+/* Drug facts */
+
+.sp-facts {
+  margin: 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.sp-facts > div {
+  display: grid;
+  grid-template-columns: minmax(120px, 200px) minmax(0, 1fr);
+  gap: var(--space-8) var(--space-24);
+  padding: var(--space-16) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sp-facts dt {
+  color: var(--text-heading);
+  font-weight: var(--weight-semibold);
+}
+
+.sp-facts dd {
+  margin: 0;
+}
+
+.sp-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8) var(--space-32);
+  margin-top: var(--space-16);
+}
+
+/* Dark band */
+
+.sp-band-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: var(--space-32) clamp(32px, 6vw, 64px);
+  align-items: center;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.sp-band h2 {
+  color: var(--text-on-dark);
+  text-wrap: balance;
+}
+
+.sp-band p {
+  margin: 0 0 var(--space-32);
+  color: var(--text-on-dark-secondary);
+  font-size: var(--text-lead);
+}
+
+/* Who it is for */
+
+.sp-split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: clamp(28px, 5vw, 64px);
+  align-items: start;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.sp-split .section-intro {
+  margin-bottom: 0;
+}
+
+.sp-fit-card {
+  display: grid;
+  gap: var(--space-16);
+  margin: 0;
+  padding: clamp(24px, 3vw, 32px);
+  list-style: none;
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-subtle);
+}
+
+.sp-fit-card li {
+  display: flex;
+  gap: var(--space-12);
+  align-items: flex-start;
+}
+
+.sp-note {
+  max-width: 65ch;
+  margin: var(--space-16) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-control);
+}
+
+.sp-note a {
+  color: var(--color-primary);
+  font-weight: var(--weight-semibold);
+}
+
+/* Safety */
+
+.sp-subhead {
+  margin: var(--space-48) 0 0;
+  color: var(--text-heading);
+  font-family: var(--font-body);
+  font-size: var(--text-h4);
+}
+
+.sp-subcopy {
+  max-width: 65ch;
+  margin: var(--space-8) 0 0;
+  color: var(--text-secondary);
+}
+
+.sp-screen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--space-24);
+  margin: var(--space-24) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sp-screen li {
+  display: grid;
+  gap: var(--space-12);
+  align-content: start;
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+}
+
+.sp-screen svg {
+  color: var(--color-primary);
+}
+
+.sp-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  margin: var(--space-16) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sp-pills li {
+  padding: var(--space-8) var(--space-16);
+  color: var(--text-heading);
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  font-size: var(--text-control);
+  font-weight: var(--weight-semibold);
+}
+
+/* Help */
+
+.sp-help {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(32px, 5vw, 56px);
+  text-align: center;
+  background: var(--surface-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-subtle);
+}
+
+.sp-help p {
+  max-width: 600px;
+  margin: var(--space-16) auto var(--space-32);
+  color: var(--text-secondary);
+  font-size: var(--text-lead);
+}
+
+.sp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  justify-content: center;
+}
+
+/* More care */
+
+.sp-more-head {
+  display: flex;
+  gap: var(--space-16);
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-24);
+}
+
+.sp-more-head h2 {
+  color: var(--text-heading);
+  font-size: var(--text-h2-compact);
+}
+
+.sp-more-row {
+  display: flex;
+  gap: var(--space-24);
+  margin: calc(var(--space-8) * -1) calc(var(--space-4) * -1) 0;
+  padding: var(--space-8) var(--space-4) var(--space-16);
+  overflow-x: auto;
+  list-style: none;
+  scroll-snap-type: x proximity;
+  scrollbar-color: var(--border-control) transparent;
+}
+
+.sp-more-row li {
+  display: flex;
+  flex: 0 0 min(272px, 78vw);
+  scroll-snap-align: start;
+}
+
+.sp-more-card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-24);
+  color: var(--text-heading);
+  text-decoration: none;
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-subtle);
+  transition:
+    box-shadow var(--duration-panel) var(--ease),
+    transform var(--duration-panel) var(--ease);
+}
+
+.sp-more-card:hover {
+  box-shadow: var(--shadow-overlay);
+  transform: translateY(-2px);
+}
+
+.sp-icon-small {
+  width: 46px;
+  height: 46px;
+  margin-bottom: var(--space-8);
+  border-radius: var(--radius-card);
+}
+
+.sp-icon-small[data-type='Test'] {
+  color: var(--harbor-600);
+}
+
+.sp-icon-small[data-type='Treatment'] {
+  background: var(--yellow-300);
+}
+
+.sp-more-type {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sp-more-name {
+  font-family: var(--font-display);
+  font-size: var(--text-h4);
+  font-weight: var(--weight-semibold);
+  line-height: 1.25;
+}
+
+.sp-more-action {
+  display: inline-flex;
+  gap: var(--space-8);
+  align-items: center;
+  margin-top: auto;
+  padding-top: var(--space-8);
+  color: var(--color-primary);
+  font-size: var(--text-control);
+  font-weight: var(--weight-semibold);
+}
+
+/* FAQ */
+
+.sp-faq .faq-accordion article p {
+  margin-bottom: var(--space-24);
+}
+
+@media (max-width: 640px) {
+  .sp-facts > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sp-hero-actions .primary {
+    width: 100%;
+  }
+}

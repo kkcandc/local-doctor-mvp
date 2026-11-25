@@ -6,15 +6,25 @@
   they need clinical and legal review before paid traffic (see README, Prototype Boundaries).
 */
 
+import type { ServicePageSlug } from './servicePages'
+
 export type ServiceType = 'Visit' | 'Treatment' | 'Test'
 
 export type Service = {
   name: string
+  // Set once the service has its own page at /services/<slug> (content in servicePages.ts). The
+  // card then opens that page, and the page's hero shows the same image as the card. Every service
+  // has one today; a card without one books directly instead.
+  slug?: ServicePageSlug
   type: ServiceType
   price: string
   image: string
   // 'contain' for the IV bag, a cut-out on a plain background. 'cover' for photographs.
   fit: 'cover' | 'contain'
+  // The backdrop color of a 'contain' image, so the bars beside the picture do not show an edge.
+  // The card and the page both use it. Without one, the stylesheet's pale blue (the Leqembi bag's
+  // backdrop) applies.
+  frame?: string
   // Extra words the search matches besides the name and type. Never shown on the page.
   keywords: string
 }
@@ -32,14 +42,16 @@ const ivBag = '/assets/hero-leqembi-iv.webp'
 export const services: Service[] = [
   {
     name: 'Memory evaluation',
+    slug: 'memory-evaluation',
     type: 'Visit',
     price: 'from $0',
-    image: '/assets/services/memory.jpg',
+    image: '/assets/services/memory.webp',
     fit: 'cover',
     keywords: 'forgetful memory loss video',
   },
   {
     name: 'Leqembi (lecanemab)',
+    slug: 'leqembi',
     type: 'Treatment',
     price: 'Price after visit',
     image: ivBag,
@@ -48,6 +60,7 @@ export const services: Service[] = [
   },
   {
     name: "Alzheimer's blood test",
+    slug: 'alzheimers-blood-test',
     type: 'Test',
     price: 'from $25',
     image: '/assets/services/blood-test.jpg',
@@ -56,38 +69,43 @@ export const services: Service[] = [
   },
   {
     name: 'Concentration difficulty',
+    slug: 'concentration-difficulty',
     type: 'Visit',
     price: 'from $0',
-    image: '/assets/services/concentration.jpg',
+    image: '/assets/services/concentration.webp',
     fit: 'cover',
     keywords: 'focus attention adhd',
   },
   {
     name: 'Dementia evaluation',
+    slug: 'dementia-evaluation',
     type: 'Visit',
     price: 'from $0',
-    image: '/assets/services/dementia.jpg',
+    image: '/assets/services/dementia.webp',
     fit: 'cover',
     keywords: 'memory cognitive decline',
   },
   {
     name: 'Visit with a neurologist doctor',
+    slug: 'neurologist-visit',
     type: 'Visit',
     price: 'from $0',
-    image: '/assets/services/neurologist.jpg',
+    image: '/assets/services/neurologist.webp',
     fit: 'cover',
     keywords: 'neurology specialist consult',
   },
   {
     name: 'Brain fog evaluation',
+    slug: 'brain-fog-evaluation',
     type: 'Visit',
     price: 'from $0',
-    image: '/assets/services/brain-fog.jpg',
+    image: '/assets/services/brain-fog.webp',
     fit: 'cover',
     keywords: 'fog fatigue thinking',
   },
   {
     name: "Alzheimer's genetic testing",
+    slug: 'alzheimers-genetic-testing',
     type: 'Test',
     price: 'Price after visit',
     image: '/assets/services/genetic-test.jpg',
@@ -96,30 +114,36 @@ export const services: Service[] = [
   },
   {
     name: 'Cognitive evaluation',
+    slug: 'cognitive-evaluation',
     type: 'Visit',
     price: 'from $0',
-    image: '/assets/services/cognitive.jpg',
+    image: '/assets/services/cognitive.webp',
     fit: 'cover',
     keywords: 'thinking reasoning screen',
   },
   {
     name: 'Kisunla (donanemab)',
+    slug: 'kisunla',
     type: 'Treatment',
     price: 'Price after visit',
-    image: ivBag,
+    // The donanemab IV bag (its backdrop is a uniform #b8d8f2, darker than the Leqembi bag's).
+    image: '/assets/services/kisunla.webp',
     fit: 'contain',
+    frame: '#b8d8f2',
     keywords: 'amyloid infusion anti-amyloid drug',
   },
   {
     name: "Alzheimer's evaluation",
+    slug: 'alzheimers-evaluation',
     type: 'Visit',
     price: 'from $0',
-    image: '/assets/services/alzheimers.jpg',
+    image: '/assets/services/alzheimers.webp',
     fit: 'cover',
     keywords: 'diagnosis dementia memory',
   },
   {
     name: 'Brain MRI',
+    slug: 'brain-mri',
     type: 'Test',
     price: 'Price after visit',
     image: '/assets/services/mri.jpg',
@@ -127,6 +151,16 @@ export const services: Service[] = [
     keywords: 'scan imaging magnetic resonance radiology',
   },
 ]
+
+export function serviceBySlug(slug: ServicePageSlug): Service {
+  const service = services.find((entry) => entry.slug === slug)
+  if (!service) throw new Error(`No service has the page slug "${slug}"`)
+  return service
+}
+
+export function serviceByName(name: string): Service | undefined {
+  return services.find((entry) => entry.name === name)
+}
 
 export function countByType(type: ServiceType): number {
   return services.filter((service) => service.type === type).length

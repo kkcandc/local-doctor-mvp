@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { DEFAULT_GA_MEASUREMENT_ID } from '../src/analytics/googleAnalyticsConfig'
 import { publicPhone } from '../src/compliancePages'
+import { services } from '../src/services/servicesData'
 
 /*
   /services: where it sits in the header, the search and type filters, and where the cards and
@@ -93,21 +94,23 @@ test.describe('on a desktop screen', () => {
     await expect(blood.locator('img')).toHaveJSProperty('complete', true)
   })
 
-  test('every card, whatever its type, has a Book now button and logs it as Book now', async ({ page }) => {
+  test('every card, whatever its type, says Book now and opens its own page', async ({ page }) => {
     await page.goto('/services')
     await expect(cards(page)).toHaveCount(12)
     await expect(page.locator('.services-card-action')).toHaveText(Array(12).fill('Book now'))
+    // Every service has a page, and the booking click is logged there, so no card is a booking link.
+    expect(services.every((service) => service.slug)).toBe(true)
     const locations = await cards(page).evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-cta-location')))
-    expect(locations).toEqual(Array(12).fill('service_card'))
+    expect(locations).toEqual(Array(12).fill(null))
 
-    // Visits, treatments and tests all log the same label.
-    for (const name of ['Memory evaluation', 'Kisunla (donanemab)', 'Brain MRI']) {
+    // A visit, a test, and a treatment all open their own page and log no booking click.
+    for (const name of ['Dementia evaluation', 'Brain MRI', 'Kisunla (donanemab)']) {
+      const slug = services.find((service) => service.name === name)!.slug
       await page.goto('/services')
       await cards(page).filter({ has: page.getByRole('heading', { name }) }).click()
-      await expect(page).toHaveURL(/\/get-started/)
-      const click = ga(await events(page), 'cta_click')
-      expect(click, name).toHaveLength(1)
-      expect(click[0].params, name).toMatchObject({ cta_label: 'Book now', cta_location: 'service_card' })
+      await expect(page, name).toHaveURL(new RegExp(`/services/${slug}$`))
+      await expect(page.locator(`.service-page[data-service="${slug}"]`), name).toBeVisible()
+      expect(ga(await events(page), 'cta_click'), name).toHaveLength(0)
     }
   })
 
@@ -191,22 +194,28 @@ test.describe('on a desktop screen', () => {
     await expect(cards(page)).toHaveCount(12)
   })
 
-  test('cards link to /get-started with the ad params, and a click is logged', async ({ page }) => {
+  test('every card links to its own service page, keeping the ad params', async ({ page }) => {
     await page.goto(`/services${query}`)
-    for (const href of await cards(page).evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href') ?? ''))) {
+    for (const card of await cards(page).all()) {
+      const name = (await card.locator('h2').textContent()) ?? ''
+      const slug = services.find((service) => service.name === name)?.slug
+      expect(slug, name).toBeTruthy()
+      const href = (await card.getAttribute('href')) ?? ''
       const url = new URL(href, 'https://trylocaldoctor.com')
-      expect(url.pathname).toBe('/get-started')
+      expect(url.pathname, name).toBe(`/services/${slug}`)
       expect(url.searchParams.get('gclid')).toBe('TEST_GCLID')
       expect(url.searchParams.get('utm_source')).toBe('google')
       expect(href).not.toContain('jane')
     }
+  })
 
-    await cards(page).first().click()
-    await expect(page).toHaveURL(/\/get-started\?.*gclid=TEST_GCLID/)
+  test('a card opens its page with the ad params and without logging a booking click', async ({ page }) => {
+    await page.goto(`/services${query}`)
+    await cards(page).filter({ hasText: 'Memory evaluation' }).click()
+    await expect(page).toHaveURL(/\/services\/memory-evaluation\?.*gclid=TEST_GCLID/)
     expect(page.url()).not.toContain('jane')
-    const click = ga(await events(page), 'cta_click')
-    expect(click).toHaveLength(1)
-    expect(click[0].params).toMatchObject({ cta_label: 'Book now', cta_location: 'service_card', cta_destination: '/get-started', page_path: '/services' })
+    await expect(page.getByRole('heading', { level: 1, name: 'Memory evaluation' })).toBeVisible()
+    expect(ga(await events(page), 'cta_click')).toHaveLength(0)
   })
 
   test('the closing buttons start the booking flow or call the clinic', async ({ page }) => {

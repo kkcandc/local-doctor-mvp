@@ -4,6 +4,7 @@ import { isLandingSlug, siteOrigin } from './landing/landingMeta'
 import { isLpVariant, lpMeta } from './lp/lpVariants'
 import { defaultMeta, routeMeta } from './pageMeta'
 import { pathFor, type RouteLocation } from './routes'
+import { isServicePageSlug, servicePages } from './services/servicePages'
 
 export type PageHead = StaticHead
 
@@ -45,6 +46,18 @@ export function pageHead(location: RouteLocation): PageHead {
   }
 
   if (route === 'landing' && isLandingSlug(slug)) return landingHead(slug)
+
+  if (route === 'service' && isServicePageSlug(slug)) {
+    const { meta } = servicePages[slug]
+    // A page whose topic a landing page owns stays out of search: noindex and no canonical, like /evaluation.
+    return {
+      title: meta.title,
+      description: meta.description,
+      og: { title: meta.title, description: meta.description },
+      canonical: meta.noindex ? undefined : `${siteOrigin}${pathFor(location)}`,
+      noindex: meta.noindex,
+    }
+  }
 
   // Test variants stay out of search: noindex and no canonical. They are not in sitemap.xml either.
   if (route === 'lp' && isLpVariant(slug)) return { ...lpMeta[slug], noindex: true }
