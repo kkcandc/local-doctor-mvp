@@ -5,6 +5,7 @@ import { lpVariantFromRoutePath, lpVariants } from './lp/lpVariants'
 
 export type Route =
   | 'home'
+  | 'services'
   | 'treatments'
   | 'how'
   | 'about'
@@ -27,6 +28,7 @@ export type RouteLocation = { route: Route; slug: string }
 
 export const routePaths: Record<Exclude<Route, 'blogPost' | 'landing' | 'lp'>, string> = {
   home: '/',
+  services: '/services',
   treatments: '/treatments',
   how: '/how-it-works',
   about: '/about',
@@ -44,6 +46,7 @@ export const routePaths: Record<Exclude<Route, 'blogPost' | 'landing' | 'lp'>, s
 
 const pathRoutes: Record<string, Route> = {
   '': 'home',
+  services: 'services',
   treatments: 'treatments',
   'how-it-works': 'how',
   about: 'about',

@@ -48,6 +48,7 @@ import { LpPage } from './lp/LpPage'
 import { isLpVariant, servedLpVariant } from './lp/lpVariants'
 import { EvaluationPage, PatientRightsPage, PrivacyPage, TermsPage } from './routePages'
 import { initialLocation, readLocation, routeEnabled, routePaths, type Route, type RouteLocation } from './routes'
+import { ServicesPage } from './services/ServicesPage'
 import { StickyCta } from './StickyCta'
 import './App.css'
 
@@ -417,6 +418,7 @@ function App({ pathname }: { pathname?: string }) {
     <main>
       <Header route={route} routeSlug={routeSlug} menuOpen={menuOpen} onToggleMenu={() => setMenuOpen((open) => !open)} onNavigate={navigate} />
       {route === 'home' && <HomePage onNavigate={navigate} />}
+      {route === 'services' && <ServicesPage onStart={(ctaLocation, ctaLabel) => navigate('start', '', ctaLocation, ctaLabel)} />}
       {route === 'treatments' && <TreatmentsPage onNavigate={navigate} />}
       {route === 'how' && <HowPage onNavigate={navigate} />}
       {route === 'about' && <AboutPage onNavigate={navigate} />}
@@ -492,6 +494,7 @@ function Header({
     : { target: 'start' as const, label: headerGetStartedLabel }
   const navItems = enabledLinks<[Route, string]>([
     ['how', 'How it works'],
+    ['services', 'Services'],
     ['treatments', 'Treatments'],
   ])
   const aboutItems = enabledLinks<[Route, string]>([
@@ -1167,7 +1170,7 @@ function usePageMeta(route: Route, slug: string) {
 function BookingSection() {
   return (
     <section className="section white expect-section start-booking-section" id="book">
-      <h2 className="expect-heading">Book a neurologist</h2>
+      <h2 className="expect-heading">Book a consultation</h2>
       <div className="booking-layout">
         <div className="booking-main">
           <p className="booking-trust">
@@ -1500,6 +1503,7 @@ function Footer({
   const exploreLinks = enabledLinks<[Route, string]>([
     ['home', 'Home'],
     ['how', 'How it works'],
+    ['services', 'Services'],
     ['treatments', 'Treatments'],
     ['about', 'Meet the Team'],
     ['blog', 'Blog'],

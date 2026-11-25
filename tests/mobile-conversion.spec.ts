@@ -288,7 +288,7 @@ test('/get-started embeds the Calendly scheduler and drops the Typeform and Elig
   await stubCalendly(page)
   await page.goto('/get-started')
   await expect(page.locator('h1')).toContainText('Book a video visit with a board-certified neurologist to find out if treatment is right for you.')
-  await expect(page.locator('#book .expect-heading')).toHaveText('Book a neurologist')
+  await expect(page.locator('#book .expect-heading')).toHaveText('Book a consultation')
   const widget = page.locator('#book .calendly-inline-widget')
   await expect(widget).toHaveAttribute('data-url', CALENDLY_URL)
   await expect(widget.locator('iframe')).toHaveCount(1)
